@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express";
-import {requireJWTAuthentication, AuthenticatedRequest} from "./middleware/auth"
+//add routes here... 
+import publicRoute from './routes/public';
+import privateRoute from './routes/private';
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -12,24 +14,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Allow requests from anyone to the /public route.
-app.get("/public", (req: Request, res: Response) => {
-  console.log("public");
+app.get("/", (req: Request, res: Response) => {
+  console.log("/");
   // res.set("Access-Control-Allow-Origin", "*");
-  res.json({ hello: "world" });
+  res.json({ BRUH: "IP ADDRESS LOGGED AND REPORTED TO ADMIN" });
 });
 
-// Require authenticated requests to access the /private route.
-app.get("/private", requireJWTAuthentication, (req: AuthenticatedRequest, res: Response) => {
-  // jwtCheck adds a user property with the payload from a valid JWT
-  console.log(req.user);
-  return res.json({
-    secrets: [
-      `You're ${JSON.stringify(req.user)}`,
-      "          ... I'm Batman!",
-    ],
-  });
-});
+//use routes here
+app.use(publicRoute)
+app.use(privateRoute)
 
 // Start the express server.
 app.listen(port, () => {

@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import jwks from "jwks-rsa";
 const port = process.env.PORT || 8080;
 const app = express();
-var { expressjwt: jwt } = require("express-jwt");
+let { expressjwt: jwt } = require("express-jwt");
 
 const jwksCallback = jwks.expressJwtSecret({
   cache: true,
@@ -13,7 +13,7 @@ const jwksCallback = jwks.expressJwtSecret({
 });
 
 // Configure jwt check
-var jwtCheck = jwt({
+let jwtCheck = jwt({
   secret: jwksCallback,
   // The same audience parameter needs to be used by the client to configure their Auth0 SDK
   audience: "roommate",

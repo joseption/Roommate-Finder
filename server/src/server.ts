@@ -1,31 +1,8 @@
 import express, { Request, Response } from "express";
-import jwks from "jwks-rsa";
+import {requireJWTAuthentication, AuthenticatedRequest} from "./middleware/auth"
+
 const port = process.env.PORT || 8080;
 const app = express();
-let { expressjwt: jwt } = require("express-jwt");
-
-const jwksCallback = jwks.expressJwtSecret({
-  cache: true,
-  rateLimit: true,
-  jwksRequestsPerMinute: 5,
-  // JWKS url from the Auth0 Tenant
-  jwksUri: "https://dev-7dz8alw7.us.auth0.com/.well-known/jwks.json",
-});
-
-// Configure jwt check
-let jwtCheck = jwt({
-  secret: jwksCallback,
-  // The same audience parameter needs to be used by the client to configure their Auth0 SDK
-  audience: "roommate",
-  // The Auth0 domain
-  issuer: "https://dev-7dz8alw7.us.auth0.com/",
-  // Has to be RS256 because that's what Auth0 uses to sign it's tokens
-  algorithms: ["RS256"],
-});
-
-interface AuthenticatedRequest extends Request {
-  user: any;
-}
 
 app.use((req, res, next) => {
   // allow calling from different domains
@@ -43,7 +20,7 @@ app.get("/public", (req: Request, res: Response) => {
 });
 
 // Require authenticated requests to access the /private route.
-app.get("/private", jwtCheck, (req: AuthenticatedRequest, res: Response) => {
+app.get("/private", requireJWTAuthentication, (req: AuthenticatedRequest, res: Response) => {
   // jwtCheck adds a user property with the payload from a valid JWT
   console.log(req.user);
   return res.json({

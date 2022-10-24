@@ -11,6 +11,6 @@ router.get("/private", requireJWTAuthentication, (req: AuthenticatedRequest, res
         "          ... I'm Batman!",
       ],
     });
-  });
+});
 
-  export default router;
+export default router;

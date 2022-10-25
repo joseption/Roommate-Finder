@@ -7,14 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Question {
-  id                  Int     @id @default(autoincrement())
-  question_text       String
-  response_type       String
-  question_text_short String
-  is_filter           Boolean
-}
-
 model User {
   id            Int      @id @default(autoincrement())
   email         String
@@ -39,4 +31,46 @@ model User {
   activate_exp  DateTime
   is_setup      Boolean
   setup_step    String
+}
+
+model User_Response {
+  id Int @id @default(autoincrement())
+  user_id Int
+  option_id Int
+  option_response_text String
+  option_response_bool Boolean
+  option_response_int Int
+  question_response_type String
+  question_id Int
+  question_text Int
+}
+
+model Question {
+  question_id         Int     @id @default(autoincrement())
+  question_text       String
+  response_type       String
+  question_text_short String
+  is_filter           Boolean
+}
+
+model Response {
+  option_id Int @id @default(autoincrement())
+  question_id Int
+  response String
+  response_bool Boolean
+  response_integer Int
+  response_type String
+}
+
+model Interests_Activity {
+  option_id Int @id @default(autoincrement())
+  option_text String
+  type String
+}
+
+model User_Interests_Activity {
+  id Int @id @default(autoincrement())
+  option_id Int
+  option_text String
+  type String
 }

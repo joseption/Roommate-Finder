@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
+  user_id       String      @id @default(uuid())
   email         String
   hash_password String
   is_active     Boolean
@@ -34,19 +34,19 @@ model User {
 }
 
 model User_Response {
-  id Int @id @default(autoincrement())
-  user_id Int
-  option_id Int
+  response_id String 
+  user_id String @id @default(uuid())
+  option_id String
   option_response_text String
   option_response_bool Boolean
   option_response_int Int
   question_response_type String
-  question_id Int
+  question_id String
   question_text Int
 }
 
 model Question {
-  question_id         Int     @id @default(autoincrement())
+  question_id         String     @id @default(uuid())
   question_text       String
   response_type       String
   question_text_short String
@@ -54,8 +54,8 @@ model Question {
 }
 
 model Response {
-  option_id Int @id @default(autoincrement())
-  question_id Int
+  option_id String @id @default(uuid())
+  question_id String
   response String
   response_bool Boolean
   response_integer Int
@@ -63,14 +63,14 @@ model Response {
 }
 
 model Interests_Activity {
-  option_id Int @id @default(autoincrement())
+  option_id String @id @default(uuid())
   option_text String
   type String
 }
 
 model User_Interests_Activity {
-  id Int @id @default(autoincrement())
-  option_id Int
+  user_id String @id @default(uuid())
+  option_id String
   option_text String
   type String
 }

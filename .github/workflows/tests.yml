@@ -16,4 +16,7 @@ jobs:
           node-version: 16.x
       - name: Run build
         working-directory: ./server
+        run: npm install
+      - name: Start build
+        working-directory: ./server
         run: npm start

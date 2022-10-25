@@ -1,0 +1,14 @@
+{
+  "name": "script",
+  "scripts": {
+    ":start": "npm run build && cross-env NODE_ENV=production node dist/server.js",
+    "build": "tsc && tsc-alias",
+    "dev": "cross-env NODE_ENV=development nodemon",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "nodemon server/src/server.ts",
+    "client": "cd client && npm run web",
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "setup": "cd client && npm i && cd ../server && npm i",
+    "initSetup": "npm i -g concurrently && npm i -g nodemon && npm i -g ts-node && npm run setup"
+  }
+}

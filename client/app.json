@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "roomfin",
+    "slug": "roomfin",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "roomfin"
+}

@@ -10,5 +10,9 @@
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "setup": "cd client && npm i && cd ../server && npm i",
     "initSetup": "npm i -g concurrently && npm i -g nodemon && npm i -g ts-node && npm run setup"
+  },
+  "dependencies": {
+    "react-native-safe-area-context": "^4.4.1",
+    "react-native-screens": "^3.18.2"
   }
 }

@@ -14,9 +14,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16.x
-      - name: Install dependencies with npm
-        working-directory: ./server
-        run: npm install
-      - name: Run Tests
+      - name: Run build
         working-directory: ./server
         run: npm start

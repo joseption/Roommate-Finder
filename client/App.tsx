@@ -1,9 +1,11 @@
 import React, { FC } from 'react';
+import { Color } from '../client/style'
 import { Button, StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Login from './screens/login';
-import Home from './screens/home';
+import LoginScreen from './screens/login';
+import HomeScreen from './screens/home';
+import { useFonts } from 'expo-font';
 
 const Stack = createNativeStackNavigator();
 const config = {
@@ -19,6 +21,13 @@ const linking = {
 };
 
 const App = () => {
+  const [loaded] = useFonts({
+    'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
+  });
+  
+  if (!loaded) {
+    return null;
+  }
   return (
     <NavigationContainer
     linking={linking}
@@ -28,11 +37,11 @@ const App = () => {
       >
         <Stack.Screen
             name="Home"
-            component={Home}
+            component={HomeScreen}
           />
         <Stack.Screen
             name="Login"
-            component={Login}
+            component={LoginScreen}
           />
       </Stack.Navigator>
     </NavigationContainer>

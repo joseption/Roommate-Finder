@@ -1,24 +1,40 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Color } from '../../style';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Color, Style } from '../../style';
 
 const _Text = (props: any) => {
-  const textStyle = () => {
-    return (!props.style) ? styles.text : props.style;
+  const style = () => {
+    return (!props.style) ? Style.textDefault : props.style;
+  }
+
+  const press = () => {
+    if (props.navigation) {
+        props.navigation.navigate(props.navigateTo);
+    }
+    else if (props.onPress) {
+        props.onPress();
+    }
   }
 
   return (
     <View>
-      <Text style={textStyle()}>{props.children}</Text>
+      {(props.onPress != null) ?
+      <Pressable
+      onPress={() => press()}
+      >
+        <Text
+        onPress={() => press()}
+        style={style()}>
+          {props.children}
+        </Text>
+      </Pressable>
+      :
+      <Text
+        style={style()}>{props.children}
+      </Text>
+      }
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  text: {
-    color: Color.black,
-    fontFamily: 'Inter-Regular'
-  }
-});
 
 export default _Text;

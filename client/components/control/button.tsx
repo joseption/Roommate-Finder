@@ -19,13 +19,27 @@ const _Button = (props: any) => {
         }
     }
 
+    const style = () => {
+        if (!props.style) {
+            return [Style.buttonDefault, Style.button];
+         }
+         else {
+            return [props.style, Style.button];
+         }
+      }
+
     return (
     <View>
         <Pressable
-            style={[props.style, Style.button]}
-            onPress={() => press()}
+        style={style()}
+        onPress={() => press()}
         >
-            <_Text style={textStyle()}>{props.children}</_Text>
+            <_Text
+            style={textStyle()}
+            onPress={() => press()}
+            >
+                {props.children}
+            </_Text>
         </Pressable>
     </View>
     );
@@ -40,6 +54,6 @@ const styles = StyleSheet.create({
         color: Color.textDisabled,
         fontSize: FontSize.default
     }
-  });
+});
 
 export default _Button;

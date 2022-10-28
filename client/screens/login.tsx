@@ -12,7 +12,7 @@ const LoginScreen = ({navigation}:any) => {
     const [left, setLeft] = useState(0);
     const goLeft = (idx: number) => {
         const oldLeft = left;
-        setLeft(((width + 40) * idx) + left);
+        setLeft(((width + 42) * idx) + left);
         Animated.timing(new Animated.Value(oldLeft), {
         toValue: left,
         duration: 150,
@@ -22,7 +22,7 @@ const LoginScreen = ({navigation}:any) => {
       
     const goRight = (idx: number) => {
         const oldLeft = left;
-        setLeft(-(((width + 40) * idx)) + left);
+        setLeft(-(((width + 42) * idx)) + left);
         Animated.timing(new Animated.Value(oldLeft), {
         toValue: left,
         duration: 150,
@@ -41,6 +41,7 @@ const LoginScreen = ({navigation}:any) => {
         style={[styles.content, {transform:[{translateX:left}]}]}>
             <Login
               forgotPasswordPressed={() => goRight(1)}
+              registerPressed={() => goLeft(1)}
               style={styles.panel}
             />
             <ForgotPassword
@@ -69,7 +70,8 @@ export const styles = StyleSheet.create({
       borderRadius:Radius.large,
       margin:'auto',
       overflow:'hidden',
-      border:Color.border,
+      borderColor:Color.border,
+      borderWidth: 1,
       shadowColor: Color.borderSecondary,
       shadowOffset: {width: -3, height: 3},
       shadowOpacity: 1,
@@ -81,7 +83,7 @@ export const styles = StyleSheet.create({
         width:'100%',
         height:'100%',
         transition: 'ease .15s transform',
-        gap: 40
+        gap: 42
     },
     panel: {
         width:'100%'

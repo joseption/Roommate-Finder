@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  user_id          String             @id @default(uuid())
+  id               String             @id @default(uuid())
   email            String
   is_active        Boolean
   is_superuser     Boolean
@@ -31,6 +31,7 @@ model User {
   is_setup         Boolean
   setup_step       String
   ResponsesOnUsers ResponsesOnUsers[]
+  Listings         Listings[]
 }
 
 model Question {
@@ -65,7 +66,7 @@ model User_Interests_Activity {
 }
 
 model ResponsesOnUsers {
-  user       User     @relation(fields: [userId], references: [user_id])
+  user       User     @relation(fields: [userId], references: [id])
   userId     String
   response   Response @relation(fields: [responseId], references: [id])
   responseId String
@@ -73,4 +74,18 @@ model ResponsesOnUsers {
   Question   Question @relation(fields: [questionId], references: [id])
 
   @@unique([userId, responseId, questionId])
+}
+
+model Listings {
+  id           String   @id @default(uuid())
+  name         String
+  images       String[]
+  city         String
+  housing_type String
+  description  String
+  price        Float
+  petsAllowed  Boolean
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  address      String?
 }

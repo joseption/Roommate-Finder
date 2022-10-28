@@ -1,57 +1,198 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, Animated, Dimensions } from 'react-native';
+import { setStatusBarStyle } from 'expo-status-bar';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, View, Animated, Dimensions, Image } from 'react-native';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
+import ActivateEmailSent from '../components/login/activate-email-sent';
 import ForgotPassword from '../components/login/forgot-password';
 import Login from '../components/login/login';
 import PasswordResetSent from '../components/login/password-reset-sent';
+import PasswordUpdated from '../components/login/password-updated';
+import Register from '../components/login/register';
+import UpdatePassword from '../components/login/update-password';
+import { isMobile } from '../service';
 import { Color, Radius, Style } from '../style';
 
 const LoginScreen = ({navigation}:any) => {
-    const [width, setWidth] = useState(0);
-    const [left, setLeft] = useState(0);
-    const goLeft = (idx: number) => {
-        const oldLeft = left;
-        setLeft(((width + 42) * idx) + left);
-        Animated.timing(new Animated.Value(oldLeft), {
-        toValue: left,
-        duration: 150,
-        useNativeDriver: false,
-        }).start();
-    };
-      
-    const goRight = (idx: number) => {
-        const oldLeft = left;
-        setLeft(-(((width + 42) * idx)) + left);
-        Animated.timing(new Animated.Value(oldLeft), {
-        toValue: left,
-        duration: 150,
-        useNativeDriver: false,
-        }).start();
-    };
+  enum screen {
+    activateEmailSent,
+    register,
+    login,
+    forgotPassword,
+    passwordResetSent,
+    updatePassword,
+    passwordUpdated
+  }
 
-    const setLayout = (e: any) => {
-        setWidth(e.nativeEvent.layout.width);
+  const [init, setInit] = useState(false);
+  const [initScreen, setInitScreen] = useState(false);
+  const [width, setWidth] = useState(0);
+  const [left, setLeft] = useState(0);
+  const [opacity, setOpacity] = useState(0);
+  const [style, setStyle] = useState({});
+  const [moved, setMoved] = useState(false);
+  const [activateEmailSent, setActivateEmailSent] = useState(false);
+  const [register, setRegister] = useState(false);
+  const [login, setLogin] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [passwordResetSent, setPasswordResetSent] = useState(false);
+  const [updatePassword, setUpdatePassword] = useState(false);
+  const [passwordUpdated, setPasswordUpdated] = useState(false);
+  const [currentScreen, setCurrentScreen] = useState(screen.login);
+
+  useEffect(() => {
+    if (!init) {
+      getStyle();
+      setup();
     }
+    const subscription = Dimensions.addEventListener(
+      "change",
+      () => {
+        getStyle();
+      }
+    );
+
+    if (!init)
+      setInit(true);
+
+    return () => subscription?.remove();
+  }, [style, left]);
+
+  const setup = () => {
+    const oldOpacity = opacity;
+    setOpacity(1);
+    Animated.timing(new Animated.Value(oldOpacity), {
+      toValue: 1,
+      duration: 150,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const goLeft = (s: screen) => {
+      setMoved(true);
+      updateVisibleScreen(s, true);
+      setLeft(-width - 42);
+      Animated.timing(new Animated.Value(0), {
+        toValue: left,
+        duration: 150,
+        useNativeDriver: false,
+      }).start();
+
+       setTimeout(() => {
+        setMoved(false);
+        updateVisibleScreen(s);
+        setLeft(0);
+        Animated.timing(new Animated.Value(-width - 42), {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: false,
+        }).start();
+       }, 25);
+  };
+    
+  const goRight = (s: screen) => {
+      setMoved(true);
+      updateVisibleScreen(s, true);
+      setLeft(width + 42);
+      Animated.timing(new Animated.Value(0), {
+      toValue: left,
+      duration: 150,
+      useNativeDriver: false,
+      }).start();
+
+       setTimeout(() => {
+        setMoved(false);
+        updateVisibleScreen(s);
+        setLeft(0);
+        Animated.timing(new Animated.Value(width + 42), {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: false,
+        }).start();
+      }, 25);
+  };
+
+  const updateVisibleScreen = (s: screen, delay = false) => {
+    setActivateEmailSent(s == screen.activateEmailSent || delay && currentScreen == screen.activateEmailSent);
+    setRegister(s == screen.register || delay && currentScreen == screen.register);
+    setLogin(s == screen.login || delay && currentScreen == screen.login);
+    setForgotPassword(s == screen.forgotPassword || delay && currentScreen == screen.forgotPassword);
+    setPasswordResetSent(s == screen.passwordResetSent || delay && currentScreen == screen.passwordResetSent);
+    setUpdatePassword(s == screen.updatePassword || delay && currentScreen == screen.updatePassword);
+    setPasswordUpdated(s == screen.passwordUpdated || delay && currentScreen == screen.passwordUpdated);
+    setCurrentScreen(s);
+  }
+
+  const getLeft = () => {
+    if (!initScreen) {
+      // Login
+      updateVisibleScreen(screen.login);
+
+      setInitScreen(true);
+    }
+  }
+
+  const setLayout = (e: any) => {
+      setWidth(e.nativeEvent.layout.width);
+      getLeft();
+  }
+
+  const getStyle = () => {
+    var s = [];
+    s.push(styles.container);
+    if (!isMobile())
+      s.push(styles.dialog);
+    else
+      s.push(styles.full);
+
+    setStyle(s);
+  }
 
   return (
-    <View style={styles.container}> 
+    <View style={style}>
+        {isMobile() ?
+        <Image
+        style={Style.logoLogin}
+        source={require('../assets/images/logo.png')} />
+        : null
+        } 
         <Animated.View
         onLayout={(e) => setLayout(e)}
-        style={[styles.content, {transform:[{translateX:left}]}]}>
+        style={[moved ? null : styles.animateContent, styles.content, {opacity: opacity, transform:[{translateX: left}]}]}>
+            <ActivateEmailSent
+              registerPressed={() => goRight(screen.register)}
+              resendEmailPressed={() => null} // do stuff
+              style={[styles.panel, activateEmailSent ? null : styles.hidden]}
+            />
+            <Register
+              sendEmailPressed={() => goLeft(screen.activateEmailSent)} // update to do stuff and then goLeft(1)
+              loginPressed={() => goRight(screen.login)}
+              style={[styles.panel, register ? null : styles.hidden]}
+            />
             <Login
-              forgotPasswordPressed={() => goRight(1)}
-              registerPressed={() => goLeft(1)}
-              style={styles.panel}
+              loginPressed={() => null} // do login stuff
+              forgotPasswordPressed={() => goRight(screen.forgotPassword)}
+              registerPressed={() => goLeft(screen.register)}
+              style={[styles.panel, login ? null : styles.hidden]}
             />
             <ForgotPassword
-              sendEmailPressed={() => goRight(1)}
-              backToLoginPressed={() => goLeft(1)}
-              style={styles.panel}
+              sendEmailPressed={() => goRight(screen.passwordResetSent)} // update to do stuff and then goRight(1)
+              loginPressed={() => goLeft(screen.login)}
+              style={[styles.panel, forgotPassword ? null : styles.hidden]}
             />
             <PasswordResetSent
-              sendEmailPressed={() => goLeft(2)}
-              style={styles.panel}
+              sendEmailPressed={() => null} // update to do stuff 
+              passwordPressed={() => goLeft(screen.forgotPassword)}
+              style={[styles.panel, passwordResetSent ? null : styles.hidden]}
+            />
+            <UpdatePassword
+              updatePasswordPressed={() => goRight(screen.passwordUpdated)} // update to do stuff and then goRight(1)
+              loginPressed={() => goLeft(screen.login)}
+              style={[styles.panel, updatePassword ? null : styles.hidden]}
+            />
+            <PasswordUpdated
+              loginPressed={() => goLeft(screen.login)}
+              style={[styles.panel, passwordUpdated ? null : styles.hidden]}
             />
         </Animated.View>
     </View>
@@ -61,15 +202,18 @@ const LoginScreen = ({navigation}:any) => {
 export const styles = StyleSheet.create({
     container: {
       backgroundColor: Color.white,
-      opacity:.95,
+      margin:'auto',
+      overflow:'hidden',
       padding:40,
+      height: '100%'
+    },
+    dialog: {
+      opacity:.95,
       minWidth:400,
       minHeight:600,
       maxWidth:400,
       maxHeight:600,
       borderRadius:Radius.large,
-      margin:'auto',
-      overflow:'hidden',
       borderColor:Color.border,
       borderWidth: 1,
       shadowColor: Color.borderSecondary,
@@ -77,16 +221,26 @@ export const styles = StyleSheet.create({
       shadowOpacity: 1,
       shadowRadius: 0,
     },
+    full: {
+      width:'100%',
+      display: 'flex',
+      justifyContent: 'space-between'
+    },
     content: {
         display:'flex',
         flexDirection: 'row',
         width:'100%',
-        height:'100%',
-        transition: 'ease .15s transform',
-        gap: 42
+        gap: 42,
+        flex: 1,
+    },
+    animateContent: {
+      transition: 'transform .15s ease, opacity 2s ease',
     },
     panel: {
         width:'100%'
+    },
+    hidden: {
+      display: 'none'
     }
   });
 

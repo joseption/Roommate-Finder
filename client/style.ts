@@ -90,6 +90,11 @@ export const Style = StyleSheet.create({
     color: Color.danger,
     fontFamily: 'Inter-Regular'
   },
+  textSmallSecondary: {
+    fontSize: FontSize.small,
+    color: Color.text,
+    fontFamily: 'Inter-Regular'
+  },
   buttonSuccess: {
     backgroundColor: Color.success,
     shadowColor: Color.successSecondary,
@@ -132,5 +137,12 @@ export const Style = StyleSheet.create({
     color: Color.text,
     fontFamily: 'Inter-Regular',
     marginBottom: 5
+  },
+  logoLogin: {
+    height: 75,
+    width: 200,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginBottom: 40
   },
 });

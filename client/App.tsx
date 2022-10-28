@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { Color } from '../client/style'
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { Button, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './screens/login';

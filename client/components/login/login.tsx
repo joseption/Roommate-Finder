@@ -1,15 +1,11 @@
-import { useLinkProps } from '@react-navigation/native';
 import React from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { Color, Style } from '../../style';
+import { Style } from '../../style';
 import _TextInput from '../control/textinput';
 
 const Login = (props: any, {navigation}:any) => {
-  const login = () => {
-    // do login stuff with props
-  }
   return (
     <View
     style={props.style}>
@@ -42,7 +38,7 @@ const Login = (props: any, {navigation}:any) => {
       >
         <_Button
         style={[Style.buttonSuccess, styles.submitButton]}
-        onPress={login()}
+        onPress={() => props.loginPressed()}
         >
           Login
         </_Button>
@@ -84,7 +80,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto'
   },
   submitButton: {
-    marginBottom: 20
+    marginBottom: 40
   },
   alignRight: {
     marginRight: 0,

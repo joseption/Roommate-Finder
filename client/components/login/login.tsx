@@ -2,58 +2,44 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
+import { validateEmail } from '../../service';
 import { LoginStyle, Style } from '../../style';
 import _TextInput from '../control/textinput';
 
 const Login = (props: any, {navigation}:any) => {
-  const [emailValue,setEmailValue] = useState('');
-  const [passwordValue,setPasswordValue] = useState('');
-
-  // const checkDisabledBtn = useCallback((type: string, ) => {
-  //     let emailError = !(validateEmail(emailValue));
-  //     let passwordError = loginPassword.value.length === 0;
-  //     if (type === 'email')
-  //         props.setError([{el:email, isError:!emailError ? false : true}]);
-  //     else if (type === 'password')
-  //         props.setError([{el:loginPassword, isError:passwordError}]);
-
-  //     setDisabled(emailError || passwordError);
-  //     return emailError || passwordError;
-  // });
-
+  const [email,setEmail] = useState('');
+  const [password,setPassword] = useState('');
   const [disabled, setDisabled] = useState(true);
   const [message, setMessage] = useState('');
+  const [emailError,setEmailError] = useState(false);
+  const [passwordError,setPasswordError] = useState(false);
 
-  // useEffect(() => {    
-  //     // var mTimeout = searchParams.get("timeout");
-  //     // if (mTimeout !== "yes") {
-  //     //     var info = JSON.parse(localStorage.getItem('user_data'));
-  //     //     if (info && !!info.id) {
-  //     //         window.location.href = '/profile';
-  //     //     }
-  //     //}
+  useEffect(() => {    
+      if (props.url.includes("timeout=yes")) {
+        setMessage("Your session has expired, please login");
+      }
+  }, [props.url]);
 
-  //     checkDisabledBtn(emailValue);
-  //     checkDisabledBtn(passwordValue);
+  const handleChange = (value: string, isEmail: boolean) => {
+    let eValue = isEmail ? value : email;
+    let pValue = !isEmail ? value : password;
+    let emailError = !(validateEmail(eValue));
+    let passwordError = pValue.length == 0;
+    setPassword(pValue);
+    setEmail(eValue);
 
-  //     var timeout = searchParams.get("timeout");
-  //     if (timeout === "yes") {
-  //       setMessage("Your session has expired, please login");
-  //     }
-  // }, [email, loginPassword, checkDisabledBtn, searchParams]);
+    setDisabled(emailError || passwordError);
+  };
 
-  // const handleChange = (type) => {
-  //     checkDisabledBtn(type);
-  // };
-
-  // const showScreen = () => {
-  //     setMessage("");
-  //     email.value = "";
-  //     loginPassword.value = "";
-  //     setDisabled(true);
-  //     props.setError([{el:email, isError:false}, {el:loginPassword, isError:false}]);
-  //     props.setScreen(screen);
-  // };
+  const goRegister = () => {
+    setMessage('');
+    setEmail('');
+    setPassword('');
+    setDisabled(true);
+    setEmailError(false);
+    setPasswordError(false);
+    props.registerPressed();
+};
 
   // const doLogin = async (event: any) => 
   // {
@@ -106,10 +92,16 @@ const Login = (props: any, {navigation}:any) => {
       <_TextInput
       label="Email"
       style={LoginStyle.inputStyle}
+      onChangeText={(e: any) => {handleChange(e, true)}}
+      value={email}
+      error={emailError}
       />
       <_TextInput
       type="password"
       label="Password"
+      onChangeText={(e: any) => {handleChange(e, false)}}
+      value={password}
+      error={passwordError}
       />
       <_Text
       style={[Style.textSmallDefault, LoginStyle.rightTextHint]}
@@ -143,7 +135,7 @@ const Login = (props: any, {navigation}:any) => {
         </_Text>
         <_Text
         style={[Style.textDefaultDefault, Style.boldFont]}
-        onPress={() => props.registerPressed()}
+        onPress={() => goRegister()}
         >Sign up</_Text>
       </View>
     </View>

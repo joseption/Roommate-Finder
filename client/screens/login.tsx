@@ -1,3 +1,4 @@
+import { setDefaultResultOrder } from 'dns';
 import { setStatusBarStyle } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, Animated, Dimensions, Image, Linking } from 'react-native';
@@ -41,6 +42,7 @@ const LoginScreen = ({navigation}:any) => {
   const [currentScreen, setCurrentScreen] = useState(screen.login);
   const [emailValue, setEmailValue] = useState('');
   const [stopInterval,setStopInterval] = useState(-1);
+  const [url,setUrl] = useState('');
 
   useEffect(() => {
     if (!init) {
@@ -140,6 +142,7 @@ const LoginScreen = ({navigation}:any) => {
   const getLeft = () => {
     if (!initScreen) {
       Linking.getInitialURL().then((url: any) => {
+        setUrl(url);
         gotoScreen(url);
       }).catch(() => gotoScreen(''))
     }
@@ -203,8 +206,8 @@ const LoginScreen = ({navigation}:any) => {
               style={[styles.panel, register ? null : styles.hidden]}
             />
             <Login
+              url={url}
               btnStyle={btnStyle}
-              loginPressed={() => null} // do login stuff
               forgotPasswordPressed={() => goRight(screen.forgotPassword)}
               registerPressed={() => goLeft(screen.register)}
               style={[styles.panel, login ? null : styles.hidden]}

@@ -117,13 +117,13 @@ const LoginScreen = ({navigation}:any) => {
   };
 
   const gotoScreen = (url: string) => {
-    if (url.endsWith("/login"))
-      updateVisibleScreen(screen.login);
-    else if (url.includes("activate_id=") ||
+      if (url.includes("activate_id=") ||
             url.includes("reset_id=") ||
             url.includes("update_id=")) {
-      updateVisibleScreen(screen.updatePassword);
-    }
+        updateVisibleScreen(screen.updatePassword);
+      }
+      else
+        updateVisibleScreen(screen.login);
 
     setInitScreen(true);
   }

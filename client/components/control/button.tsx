@@ -31,6 +31,7 @@ const _Button = (props: any) => {
     return (
     <View>
         <Pressable
+        disabled={props.disabled}
         style={style()}
         onPress={() => press()}
         >
@@ -38,7 +39,7 @@ const _Button = (props: any) => {
             style={textStyle()}
             onPress={() => press()}
             >
-                {props.children}
+                {props.value ? props.value : props.children}
             </_Text>
         </Pressable>
     </View>

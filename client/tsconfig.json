@@ -10,7 +10,8 @@
     ],
     "types": [
       "react-native",
-      "jest"
+      "jest",
+      "node"
     ],
     "moduleResolution": "node",
     "noEmit": true,

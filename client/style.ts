@@ -1,3 +1,4 @@
+import { faDirections } from '@fortawesome/free-solid-svg-icons';
 import { Platform, StyleSheet } from 'react-native';
 
 export const Color = {
@@ -16,10 +17,13 @@ export const Color = {
     textTertiary:'#4B4B4B',
     textDisabled:'#A9ABAE',
     border:'#D2D4D9',
-    borderSecondary:'#B3B4B9'
+    borderSecondary:'#B3B4B9',
+    holder:'#F0F2F5',
+    holderSecondary:'#E4E6E9'
 }
 
 export const FontSize = {
+  tiny:12,
   small:14,
   default:16,
   large:20,
@@ -70,6 +74,16 @@ export const Style = StyleSheet.create({
     color: Color.text,
     fontFamily: 'Inter-Regular'
   },
+  textTiny: {
+    fontSize: FontSize.tiny,
+    color: Color.text,
+    fontFamily: 'Inter-Regular'
+  },
+  textTinyTertiary: {
+    fontSize: FontSize.tiny,
+    color: Color.textTertiary,
+    fontFamily: 'Inter-Regular'
+  },
   textSmallDefault: {
     fontSize: FontSize.small,
     color: Color.default,
@@ -109,6 +123,13 @@ export const Style = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 0,
   },
+  buttonDisabled: {
+    backgroundColor: Color.holder,
+    shadowColor: Color.holderSecondary,
+    shadowOffset: {width: -3, height: 3},
+    shadowOpacity: 1,
+    shadowRadius: 0,
+  },
   buttonWarning: {
     backgroundColor: Color.warning,
     shadowColor: Color.warningSecondary,
@@ -138,11 +159,85 @@ export const Style = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     marginBottom: 5
   },
-  logoLogin: {
+  alignRight: {
+    marginRight: 0,
+    marginLeft: 'auto'
+  },
+  alignCenter: {
+    margin: 'auto'
+  },
+});
+
+export const LoginStyle = StyleSheet.create({
+  logo: {
     height: 75,
     width: 200,
     marginLeft: 'auto',
     marginRight: 'auto',
     marginBottom: 40
   },
+  errorMessage: {
+    textAlign: 'center',
+    fontSize: FontSize.small,
+    color: Color.danger,
+    fontFamily: 'Inter-Regular',
+    maxHeight: 150,
+    overflowY: 'auto',
+    margin: 'auto'
+  },
+  previousPageText: {
+    display: 'flex',
+    gap: 5,
+    flexDirection: 'row',
+    marginBottom: 0,
+    marginTop: 'auto',
+    justifyContent: 'center'
+  },
+  actionText: {
+    marginTop: 5,
+    marginBottom: 40
+  },
+  submitButton: {
+    marginBottom: 40
+  },
+  inputStyle: {
+    marginBottom: 15
+  },
+  rightTextHint: {
+    marginTop: 5,
+    marginBottom: 40,
+    marginRight: 0,
+    marginLeft: 'auto'
+  },
+  resendText: {
+    marginBottom: 5,
+    marginRight: 0,
+    marginLeft: 'auto'
+  },
+  timerText: {
+    marginTop: 5,
+    marginBottom: 40,
+    marginRight: 0,
+    marginLeft: 'auto',
+    height: 15
+  },
+  mainContent: {
+    marginTop: 40,
+    marginBottom: 'auto'
+  },
+  sentText: {
+    marginBottom: 0,
+    marginTop: 0,
+    color: Color.textTertiary,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: FontSize.default
+  },
+  reqItem: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    gap: 5,
+    display: 'flex'
+  }
 });

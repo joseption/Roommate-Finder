@@ -1,13 +1,17 @@
-import React, { FC } from 'react';
-import { Color } from '../client/style'
-import { Button, Dimensions, StyleSheet, Text, View } from 'react-native';
+import React, { FC, useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './screens/login';
 import HomeScreen from './screens/home';
 import { useFonts } from 'expo-font';
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { } from '@fortawesome/free-solid-svg-icons/faSquareCheck'
+import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faCheck, faXmark)
 
 const Stack = createNativeStackNavigator();
+
 const config = {
   screens: {
     Home: '/',
@@ -48,18 +52,5 @@ const App = () => {
     </NavigationContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  greeting: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    margin: 16
-  }
-});
 
 export default App;

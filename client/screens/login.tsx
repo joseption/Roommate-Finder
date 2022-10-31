@@ -1,6 +1,6 @@
 import { setStatusBarStyle } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, Animated, Dimensions, Image } from 'react-native';
+import { Pressable, StyleSheet, Text, View, Animated, Dimensions, Image, Linking } from 'react-native';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
 import ActivateEmailSent from '../components/login/activate-email-sent';
@@ -11,7 +11,7 @@ import PasswordUpdated from '../components/login/password-updated';
 import Register from '../components/login/register';
 import UpdatePassword from '../components/login/update-password';
 import { isMobile } from '../service';
-import { Color, Radius, Style } from '../style';
+import { Color, LoginStyle, Radius, Style } from '../style';
 
 const LoginScreen = ({navigation}:any) => {
   enum screen {
@@ -39,6 +39,8 @@ const LoginScreen = ({navigation}:any) => {
   const [updatePassword, setUpdatePassword] = useState(false);
   const [passwordUpdated, setPasswordUpdated] = useState(false);
   const [currentScreen, setCurrentScreen] = useState(screen.login);
+  const [emailValue, setEmailValue] = useState('');
+  const [stopInterval,setStopInterval] = useState(-1);
 
   useEffect(() => {
     if (!init) {
@@ -112,6 +114,18 @@ const LoginScreen = ({navigation}:any) => {
       }, 25);
   };
 
+  const gotoScreen = (url: string) => {
+    if (url.endsWith("/login"))
+      updateVisibleScreen(screen.login);
+    else if (url.includes("activate_id=") ||
+            url.includes("reset_id=") ||
+            url.includes("update_id=")) {
+      updateVisibleScreen(screen.updatePassword);
+    }
+
+    setInitScreen(true);
+  }
+
   const updateVisibleScreen = (s: screen, delay = false) => {
     setActivateEmailSent(s == screen.activateEmailSent || delay && currentScreen == screen.activateEmailSent);
     setRegister(s == screen.register || delay && currentScreen == screen.register);
@@ -125,10 +139,9 @@ const LoginScreen = ({navigation}:any) => {
 
   const getLeft = () => {
     if (!initScreen) {
-      // Login
-      updateVisibleScreen(screen.login);
-
-      setInitScreen(true);
+      Linking.getInitialURL().then((url: any) => {
+        gotoScreen(url);
+      }).catch(() => gotoScreen(''))
     }
   }
 
@@ -148,11 +161,24 @@ const LoginScreen = ({navigation}:any) => {
     setStyle(s);
   }
 
+  const btnStyle = (disabled) => {
+    var style = [];
+    style.push(LoginStyle.submitButton);
+    if (disabled) {
+      style.push(Style.buttonDisabled);
+    }
+    else {
+      style.push(Style.buttonSuccess);
+    }
+
+    return style;
+  }
+
   return (
     <View style={style}>
         {isMobile() ?
         <Image
-        style={Style.logoLogin}
+        style={LoginStyle.logo}
         source={require('../assets/images/logo.png')} />
         : null
         } 
@@ -160,32 +186,46 @@ const LoginScreen = ({navigation}:any) => {
         onLayout={(e) => setLayout(e)}
         style={[moved ? null : styles.animateContent, styles.content, {opacity: opacity, transform:[{translateX: left}]}]}>
             <ActivateEmailSent
+              btnStyle={btnStyle}
+              setStopInterval={setStopInterval}
+              stopInterval={stopInterval}
+              setEmail={setEmailValue}
+              email={emailValue}
               registerPressed={() => goRight(screen.register)}
-              resendEmailPressed={() => null} // do stuff
               style={[styles.panel, activateEmailSent ? null : styles.hidden]}
             />
             <Register
+              btnStyle={btnStyle}
+              setEmail={setEmailValue}
+              email={emailValue}
               sendEmailPressed={() => goLeft(screen.activateEmailSent)} // update to do stuff and then goLeft(1)
               loginPressed={() => goRight(screen.login)}
               style={[styles.panel, register ? null : styles.hidden]}
             />
             <Login
+              btnStyle={btnStyle}
               loginPressed={() => null} // do login stuff
               forgotPasswordPressed={() => goRight(screen.forgotPassword)}
               registerPressed={() => goLeft(screen.register)}
               style={[styles.panel, login ? null : styles.hidden]}
             />
             <ForgotPassword
+              btnStyle={btnStyle}
+              setEmail={setEmailValue}
+              email={emailValue}
               sendEmailPressed={() => goRight(screen.passwordResetSent)} // update to do stuff and then goRight(1)
               loginPressed={() => goLeft(screen.login)}
               style={[styles.panel, forgotPassword ? null : styles.hidden]}
             />
             <PasswordResetSent
-              sendEmailPressed={() => null} // update to do stuff 
+              btnStyle={btnStyle}
+              setStopInterval={setStopInterval}
+              stopInterval={stopInterval}
               passwordPressed={() => goLeft(screen.forgotPassword)}
               style={[styles.panel, passwordResetSent ? null : styles.hidden]}
             />
             <UpdatePassword
+              btnStyle={btnStyle}
               updatePasswordPressed={() => goRight(screen.passwordUpdated)} // update to do stuff and then goRight(1)
               loginPressed={() => goLeft(screen.login)}
               style={[styles.panel, updatePassword ? null : styles.hidden]}

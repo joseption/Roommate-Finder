@@ -1,11 +1,98 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { Style } from '../../style';
+import { config } from '../../service';
+import { LoginStyle, Style } from '../../style';
 import _TextInput from '../control/textinput';
 
 const PasswordResetSent = (props: any, {navigation}:any) => {
+  const [disabled,setDisabled] = useState(false);
+  const [counter,setCounter] = useState('');
+  const [message,setMessage] = useState('');
+
+  const btnTimer = (disabled: boolean, time: number) => {
+    let interval: any;
+    if (disabled) {
+      interval = setInterval(() => {
+            if (Date.now() - time >= 60000) {
+                setDisabled(false);
+                setCounter("");
+                clearInterval(interval);
+            }
+            else {
+                setCounter("Try again in " + Math.abs(Math.round(60 - ((Date.now() - time) / 1000))) + " seconds");
+                setDisabled(true);
+            }
+        }, 1000);
+        props.setStopInterval(interval);
+    }
+    else {
+        if (interval)
+            clearInterval(interval);
+        setCounter("");
+        setDisabled(false);
+    }
+    return interval;
+  }
+
+  const disableBtn = (disable: boolean) => {
+    setDisabled(disable);
+    return btnTimer(disable, disable ? Date.now() : 0);
+  }
+
+  const goBackForgotPwd = () => {
+    clearInterval(props.stopInterval);
+    disableBtn(false);
+    setMessage('');
+    props.passwordPressed();
+  }
+
+  const doResendEmail = async () => 
+  {
+      if (disabled)
+        return;
+
+      let interval = disableBtn(true); 
+      disableBtn(true);
+      setMessage("");
+      if (!props.email) {
+          setMessage("You must use a valid email address");
+          clearInterval(interval);
+          disableBtn(false);
+          return;
+      }
+      
+      let obj = {email:props.email};
+      let js = JSON.stringify(obj);
+
+      try
+      {    
+          await fetch(`${config.URL}/api/send-password-reset`,
+              {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+                  let res = JSON.parse(await ret.text());
+                  if(res.error)
+                  {
+                      if (res.error === "Invalid Email") {
+                          setMessage("You must use a valid email address");
+                          clearInterval(interval);
+                      }
+                      else
+                          setMessage(res.error);
+
+                      disableBtn(false);
+                  }
+              });
+      }
+      catch(e)
+      {
+          disableBtn(false);
+          clearInterval(interval);
+          setMessage("An error occurred while attempting to send a password reset email!");
+          return;
+      }    
+  };
+  
   return (
     <View
     style={props.style}>
@@ -15,33 +102,42 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
         Reset Link Sent
       </_Text>
       <_Text
-      style={[Style.textDefaultTertiary, styles.actionText]}
+      style={[Style.textDefaultTertiary, LoginStyle.actionText]}
       >
         Check your email for reset instructions
       </_Text>
-      <_Text
-      style={[Style.textSmallSecondary, styles.forgotPassword]}
-      onPress={() => props.forgotPasswordPressed()}
-      >
-        Still haven't received an email yet?
-      </_Text>
       <View
-      style={styles.alignRight}
+      style={LoginStyle.mainContent}
       >
-        <_Button
-        style={[Style.buttonSuccess, styles.submitButton]}
-        onPress={() => props.sendEmailPressed()}
+        <_Text
+        style={[Style.textSmallSecondary, LoginStyle.resendText]}
         >
-          Resend Email
-        </_Button>
+          Still haven't received an email yet?
+        </_Text>
+        <View
+        style={Style.alignRight}
+        >
+          <_Button
+          style={props.btnStyle(disabled)}
+          onPress={() => doResendEmail()}
+          value={!disabled ? 'Resend Email' : 'Email Sent'}
+          disabled={disabled}
+          >
+          </_Button>
       </View>
       <_Text
-      style={[Style.textSmallDanger, styles.alignCenter]}
-      >
-        This is temp error text
+        style={[Style.textTinyTertiary, LoginStyle.timerText]}
+        >
+          {counter}
+        </_Text>
+        <_Text
+        style={LoginStyle.errorMessage}
+        >
+            {message}
       </_Text>
+      </View>
         <View
-        style={styles.signupInfo}
+        style={LoginStyle.previousPageText}
         >
         <_Text
         style={Style.textDefaultTertiary}
@@ -50,42 +146,11 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
         </_Text>
         <_Text
         style={[Style.textDefaultDefault, Style.boldFont]}
-        onPress={() => props.passwordPressed()}
+        onPress={() => goBackForgotPwd()}
         >forgot password</_Text>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  actionText: {
-    marginTop: 5,
-    marginBottom: 40
-  },
-  forgotPassword: {
-    marginTop: 5,
-    marginBottom: 40,
-    marginRight: 0,
-    marginLeft: 'auto'
-  },
-  submitButton: {
-    marginBottom: 40
-  },
-  alignRight: {
-    marginRight: 0,
-    marginLeft: 'auto'
-  },
-  alignCenter: {
-    margin: 'auto'
-  },
-  signupInfo: {
-    display: 'flex',
-    gap: 5,
-    flexDirection: 'row',
-    marginBottom: 0,
-    marginTop: 'auto',
-    justifyContent: 'center'
-  }
-});
 
 export default PasswordResetSent;

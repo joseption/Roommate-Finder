@@ -1,11 +1,95 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { Style } from '../../style';
+import { LoginStyle, Style } from '../../style';
 import _TextInput from '../control/textinput';
 
 const Login = (props: any, {navigation}:any) => {
+  const [emailValue,setEmailValue] = useState('');
+  const [passwordValue,setPasswordValue] = useState('');
+
+  // const checkDisabledBtn = useCallback((type: string, ) => {
+  //     let emailError = !(validateEmail(emailValue));
+  //     let passwordError = loginPassword.value.length === 0;
+  //     if (type === 'email')
+  //         props.setError([{el:email, isError:!emailError ? false : true}]);
+  //     else if (type === 'password')
+  //         props.setError([{el:loginPassword, isError:passwordError}]);
+
+  //     setDisabled(emailError || passwordError);
+  //     return emailError || passwordError;
+  // });
+
+  const [disabled, setDisabled] = useState(true);
+  const [message, setMessage] = useState('');
+
+  // useEffect(() => {    
+  //     // var mTimeout = searchParams.get("timeout");
+  //     // if (mTimeout !== "yes") {
+  //     //     var info = JSON.parse(localStorage.getItem('user_data'));
+  //     //     if (info && !!info.id) {
+  //     //         window.location.href = '/profile';
+  //     //     }
+  //     //}
+
+  //     checkDisabledBtn(emailValue);
+  //     checkDisabledBtn(passwordValue);
+
+  //     var timeout = searchParams.get("timeout");
+  //     if (timeout === "yes") {
+  //       setMessage("Your session has expired, please login");
+  //     }
+  // }, [email, loginPassword, checkDisabledBtn, searchParams]);
+
+  // const handleChange = (type) => {
+  //     checkDisabledBtn(type);
+  // };
+
+  // const showScreen = () => {
+  //     setMessage("");
+  //     email.value = "";
+  //     loginPassword.value = "";
+  //     setDisabled(true);
+  //     props.setError([{el:email, isError:false}, {el:loginPassword, isError:false}]);
+  //     props.setScreen(screen);
+  // };
+
+  // const doLogin = async (event: any) => 
+  // {
+  //     event.preventDefault();
+  //     if (checkDisabledBtn())
+  //         return;
+
+  //     let obj = {email:email.value,password:loginPassword.value};
+  //     let js = JSON.stringify(obj);
+
+  //     try
+  //     {   
+  //         await fetch(`${config.URL}/api/login`,
+  //         {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+  //             let res = JSON.parse(await ret.text());
+  //             if (res.error)
+  //             {
+  //                 setMessage(res.error);
+  //             }
+  //             else
+  //             {
+  //                 let user = {id:res.id, user_id:res.user_id, email:res.email, auth: res.token};
+  //                 localStorage.setItem('user_data', JSON.stringify(user));
+
+  //                 setMessage('');
+  //                 window.location.href = "/profile";
+  //             }
+  //         });
+  //     }
+  //     catch(e)
+  //     {
+  //         setMessage('An unknown error occurred');
+  //         return;
+  //     }    
+  // };
+  
   return (
     <View
     style={props.style}>
@@ -15,41 +99,42 @@ const Login = (props: any, {navigation}:any) => {
         Login
       </_Text>
       <_Text
-      style={[Style.textDefaultTertiary, styles.actionText]}
+      style={[Style.textDefaultTertiary, LoginStyle.actionText]}
       >
         Please sign in to continue
       </_Text>
       <_TextInput
       label="Email"
-      style={styles.inputStyle}
+      style={LoginStyle.inputStyle}
       />
       <_TextInput
       type="password"
       label="Password"
       />
       <_Text
-      style={[Style.textSmallDefault, styles.forgotPassword]}
+      style={[Style.textSmallDefault, LoginStyle.rightTextHint]}
       onPress={() => props.forgotPasswordPressed()}
       >
         Forgot Password?
       </_Text>
       <View
-      style={styles.alignRight}
+      style={Style.alignRight}
       >
         <_Button
-        style={[Style.buttonSuccess, styles.submitButton]}
+        style={props.btnStyle(disabled)}
         onPress={() => props.loginPressed()}
+        disabled={disabled}
         >
           Login
         </_Button>
       </View>
       <_Text
-      style={[Style.textSmallDanger, styles.alignCenter]}
+      style={LoginStyle.errorMessage}
       >
-        This is temp error text
+        {message}
       </_Text>
         <View
-        style={styles.signupInfo}
+        style={LoginStyle.previousPageText}
         >
         <_Text
         style={Style.textDefaultTertiary}
@@ -64,39 +149,5 @@ const Login = (props: any, {navigation}:any) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  actionText: {
-    marginTop: 5,
-    marginBottom: 40
-  },
-  inputStyle: {
-    marginBottom: 15
-  },
-  forgotPassword: {
-    marginTop: 5,
-    marginBottom: 40,
-    marginRight: 0,
-    marginLeft: 'auto'
-  },
-  submitButton: {
-    marginBottom: 40
-  },
-  alignRight: {
-    marginRight: 0,
-    marginLeft: 'auto'
-  },
-  alignCenter: {
-    margin: 'auto'
-  },
-  signupInfo: {
-    display: 'flex',
-    gap: 5,
-    flexDirection: 'row',
-    marginBottom: 0,
-    marginTop: 'auto',
-    justifyContent: 'center'
-  }
-});
 
 export default Login;

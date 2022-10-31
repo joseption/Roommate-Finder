@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Color, Style } from '../../style';
 
 const _Text = (props: any) => {
   const style = () => {
-    return (!props.style) ? Style.textDefault : props.style;
+    var style = [];
+    if (!props.style)
+      style.push(Style.textDefault);
+    else
+      style.push(props.style);
+    if (props.error)
+      style.push(styles.error);
+
+    return style;
   }
 
   const press = () => {
@@ -16,25 +24,86 @@ const _Text = (props: any) => {
     }
   }
 
+  const errorMessage = () => {
+    if (!props.errorMessage) {
+      return "is required"
+    }
+    else {
+      return props.errorMessage;
+    }
+  }
+
   return (
     <View>
       {(props.onPress != null) ?
       <Pressable
       onPress={() => press()}
       >
-        <Text
-        onPress={() => press()}
-        style={style()}>
-          {props.children}
-        </Text>
+        <View
+        style={styles.text}
+        >
+          <Text
+          onPress={() => press()}
+          style={style()}>
+            {props.children}
+          </Text>
+          {props.error ?
+          <Text
+          style={style()}
+          >
+            {errorMessage()}
+          </Text>
+          : null
+          }
+          {props.required ?
+          <Text
+          onPress={() => press()}
+          style={style()}>
+            *
+          </Text>
+          : null
+          }
+        </View>
       </Pressable>
       :
-      <Text
-        style={style()}>{props.children}
-      </Text>
+      <View
+      style={styles.text}
+      >
+        <Text
+          style={style()}
+        >
+          {props.children}
+        </Text>
+        {props.error ?
+        <Text
+        style={style()}
+        >
+          {errorMessage()}
+        </Text>
+        : null
+        }
+        {props.required ?
+          <Text
+          style={style()}>
+            *
+          </Text>
+          : null
+          }
+      </View>
       }
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  text: {
+      gap: 5,
+      display: 'flex',
+      flexDirection: 'row'
+  },
+  error: {
+    color: Color.danger
+  }
+});
 
 export default _Text;

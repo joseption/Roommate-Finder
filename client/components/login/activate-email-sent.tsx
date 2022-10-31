@@ -1,11 +1,105 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { Style } from '../../style';
+import { config } from '../../service';
+import { Color, FontSize, LoginStyle, Style } from '../../style';
 import _TextInput from '../control/textinput';
 
 const ActivateEmailSent = (props: any, {navigation}:any) => {
+  const [disabled,setDisabled] = useState(false);
+  const [counter,setCounter] = useState('');
+  const [message,setMessage] = useState('');
+  const [sentMsg,setSentMsg] = useState('');
+
+  useEffect(() => {
+      if (props.resendVerify)
+          setSentMsg("An unverified email address is already associated with this account. Another activation link has been sent to the address. You must activate your account before you can continue.");
+      else
+          setSentMsg("An email with a link to activate your account has been sent to you.");
+  }, [props.resendVerify]);
+
+  const btnTimer = (disabled: boolean, time: number) => {
+    let interval: any;
+    if (disabled) {
+      interval = setInterval(() => {
+            if (Date.now() - time >= 60000) {
+                setDisabled(false);
+                setCounter("");
+                clearInterval(interval);
+            }
+            else {
+                setCounter("Try again in " + Math.abs(Math.round(60 - ((Date.now() - time) / 1000))) + " seconds");
+                setDisabled(true);
+            }
+        }, 1000);
+        props.setStopInterval(interval);
+    }
+    else {
+        if (interval)
+            clearInterval(interval);
+        setCounter("");
+        setDisabled(false);
+    }
+    return interval;
+  }
+
+  const disableBtn = (disable: boolean) => {
+      setDisabled(disable);
+      return btnTimer(disable, disable ? Date.now() : 0);
+  }
+
+  const goBackRegister = () => {
+    clearInterval(props.stopInterval);
+    disableBtn(false);
+    setMessage('');
+    props.registerPressed();
+  }
+
+  const doResendEmail = async () => 
+  {
+      if (disabled)
+        return;
+
+      let interval = disableBtn(true);
+      setMessage("");
+      if (!props.email) {
+          setMessage("You must use a valid email address");
+          clearInterval(interval);
+          disableBtn(false);
+          return;
+      }
+
+      let obj = {email:props.email};
+      let js = JSON.stringify(obj);
+
+      try
+      {    
+          await fetch(`${config.URL}/api/register`,
+              {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+                  let res = JSON.parse(await ret.text());
+                  if(res.error && res.error !== "Account Exists")
+                  {
+                      if (res.error === "Invalid Email") {
+                          setMessage("You must use a valid email address");
+                          clearInterval(interval);
+                      }
+                      else
+                          setMessage(res.error);
+
+                      disableBtn(false);
+                  }
+              });
+      }
+      catch(e)
+      {
+          disableBtn(false);
+          clearInterval(interval);
+          setMessage("An error occurred while attempting to send a password reset email!");
+          return;
+      }    
+  };
+  
   return (
     <View
     style={props.style}>
@@ -15,35 +109,46 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
         Activation Email Sent
       </_Text>
       <_Text
-      style={[Style.textDefaultTertiary, styles.actionText]}
+      style={[Style.textDefaultTertiary, LoginStyle.actionText]}
       >
         Check your email to verify your account
       </_Text>
+      <_Text
+      style={LoginStyle.sentText}
+      >
+        {sentMsg}
+      </_Text>
       <View
-      style={styles.mainContent}>
+      style={LoginStyle.mainContent}>
         <_Text
-        style={[Style.textSmallSecondary, styles.resendText]}
+        style={[Style.textSmallSecondary, LoginStyle.resendText]}
         >
             Still haven't received an email yet?
         </_Text>
         <View
-        style={styles.alignRight}
+        style={Style.alignRight}
         >
             <_Button
-            style={[Style.buttonSuccess, styles.submitButton]}
-            onPress={() => props.resendEmailPressed()}
+            style={props.btnStyle(disabled)}
+            onPress={() => doResendEmail()}
+            disabled={disabled}
             >
             Resend Email
             </_Button>
         </View>
         <_Text
-        style={[Style.textSmallDanger, styles.alignCenter]}
+        style={[Style.textTinyTertiary, LoginStyle.timerText]}
         >
-            This is temp error text
+          {counter}
+        </_Text>
+        <_Text
+        style={LoginStyle.errorMessage}
+        >
+            {message}
         </_Text>
       </View>
         <View
-        style={styles.signupInfo}
+        style={LoginStyle.previousPageText}
         >
         <_Text
         style={Style.textDefaultTertiary}
@@ -52,48 +157,11 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
         </_Text>
         <_Text
         style={[Style.textDefaultDefault, Style.boldFont]}
-        onPress={() => props.registerPressed()}
+        onPress={() => goBackRegister()}
         >register</_Text>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  actionText: {
-    marginTop: 5,
-    marginBottom: 40
-  },
-  inputStyle: {
-    marginBottom: 15
-  },
-  resendText: {
-    marginBottom: 5,
-    marginRight: 0,
-    marginLeft: 'auto'
-  },
-  submitButton: {
-    marginBottom: 40
-  },
-  alignRight: {
-    marginRight: 0,
-    marginLeft: 'auto'
-  },
-  alignCenter: {
-    margin: 'auto'
-  },
-  signupInfo: {
-    display: 'flex',
-    gap: 5,
-    flexDirection: 'row',
-    marginBottom: 0,
-    marginTop: 'auto',
-    justifyContent: 'center'
-  },
-  mainContent: {
-    marginTop: 'auto',
-    marginBottom: 'auto'
-  }
-});
 
 export default ActivateEmailSent;

@@ -34,7 +34,8 @@ const _Text = (props: any) => {
   }
 
   return (
-    <View>
+    <View
+    style={props.containerStyle}>
       {(props.onPress != null) ?
       <Pressable
       onPress={() => press()}

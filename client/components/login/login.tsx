@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { validateEmail } from '../../service';
+import { config, validateEmail } from '../../service';
 import { LoginStyle, Style } from '../../style';
 import _TextInput from '../control/textinput';
 
@@ -41,40 +41,40 @@ const Login = (props: any, {navigation}:any) => {
     props.registerPressed();
 };
 
-  // const doLogin = async (event: any) => 
-  // {
-  //     event.preventDefault();
-  //     if (checkDisabledBtn())
-  //         return;
+  const doLogin = async () => 
+  {
+      if (disabled)
+        return;
 
-  //     let obj = {email:email.value,password:loginPassword.value};
-  //     let js = JSON.stringify(obj);
+      setMessage('');
+      let obj = {email:email,password:password};
+      let js = JSON.stringify(obj);
 
-  //     try
-  //     {   
-  //         await fetch(`${config.URL}/api/login`,
-  //         {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
-  //             let res = JSON.parse(await ret.text());
-  //             if (res.error)
-  //             {
-  //                 setMessage(res.error);
-  //             }
-  //             else
-  //             {
-  //                 let user = {id:res.id, user_id:res.user_id, email:res.email, auth: res.token};
-  //                 localStorage.setItem('user_data', JSON.stringify(user));
+      try
+      {   
+          await fetch(`${config.URL}/api/login`,
+          {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+              let res = JSON.parse(await ret.text());
+              if (res.error)
+              {
+                  setMessage(res.error);
+              }
+              else
+              {
+                  let user = {id:res.id, user_id:res.user_id, email:res.email, auth: res.token};
+                  //localStorage.setItem('user_data', JSON.stringify(user));
 
-  //                 setMessage('');
-  //                 window.location.href = "/profile";
-  //             }
-  //         });
-  //     }
-  //     catch(e)
-  //     {
-  //         setMessage('An unknown error occurred');
-  //         return;
-  //     }    
-  // };
+                  setMessage('');
+                  //window.location.href = "/profile";
+              }
+          });
+      }
+      catch(e)
+      {
+          setMessage('An unknown error occurred');
+          return;
+      }    
+  };
   
   return (
     <View
@@ -114,7 +114,7 @@ const Login = (props: any, {navigation}:any) => {
       >
         <_Button
         style={props.btnStyle(disabled)}
-        onPress={() => props.loginPressed()}
+        onPress={() => doLogin()}
         disabled={disabled}
         >
           Login

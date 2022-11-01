@@ -1,3 +1,4 @@
+import { useLinkProps } from '@react-navigation/native';
 import { setDefaultResultOrder } from 'dns';
 import { setStatusBarStyle } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -14,7 +15,7 @@ import UpdatePassword from '../components/login/update-password';
 import { isMobile } from '../service';
 import { Color, LoginStyle, Radius, Style } from '../style';
 
-const LoginScreen = ({navigation}:any) => {
+const LoginScreen = (props:any, {navigation}:any) => {
   enum screen {
     activateEmailSent,
     register,
@@ -43,24 +44,27 @@ const LoginScreen = ({navigation}:any) => {
   const [emailValue, setEmailValue] = useState('');
   const [stopInterval,setStopInterval] = useState(-1);
   const [url,setUrl] = useState('');
+  const [mobile,setMobile] = useState(false);
 
   useEffect(() => {
+    var mobile = isMobile();
+    setMobile(mobile);
     if (!init) {
-      getStyle();
+      getStyle(mobile, true);
       setup();
+      setInit(true);
     }
+
     const subscription = Dimensions.addEventListener(
       "change",
       () => {
-        getStyle();
+        var mobile = isMobile();
+        setMobile(mobile);
+        getStyle(mobile, true);
       }
     );
-
-    if (!init)
-      setInit(true);
-
     return () => subscription?.remove();
-  }, [style, left]);
+  }, [style, left, mobile]);
 
   const setup = () => {
     const oldOpacity = opacity;
@@ -153,10 +157,11 @@ const LoginScreen = ({navigation}:any) => {
       getLeft();
   }
 
-  const getStyle = () => {
+  const getStyle = (_mobile: boolean, fromUpdate = false) => {
     var s = [];
+    var isMobile = fromUpdate ? _mobile: mobile;
     s.push(styles.container);
-    if (!isMobile())
+    if (!isMobile)
       s.push(styles.dialog);
     else
       s.push(styles.full);
@@ -164,7 +169,7 @@ const LoginScreen = ({navigation}:any) => {
     setStyle(s);
   }
 
-  const btnStyle = (disabled) => {
+  const btnStyle = (disabled: boolean) => {
     var style = [];
     style.push(LoginStyle.submitButton);
     if (disabled) {
@@ -179,7 +184,7 @@ const LoginScreen = ({navigation}:any) => {
 
   return (
     <View style={style}>
-        {isMobile() ?
+        {mobile ?
         <Image
         style={LoginStyle.logo}
         source={require('../assets/images/logo.png')} />
@@ -263,6 +268,7 @@ export const styles = StyleSheet.create({
       shadowOffset: {width: -3, height: 3},
       shadowOpacity: 1,
       shadowRadius: 0,
+      padding: 40
     },
     full: {
       width:'100%',

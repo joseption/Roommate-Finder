@@ -5,10 +5,12 @@ import LoginScreen from './screens/login';
 import HomeScreen from './screens/home';
 import { useFonts } from 'expo-font';
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { } from '@fortawesome/free-solid-svg-icons/faSquareCheck'
-import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble } from '@fortawesome/free-solid-svg-icons'
+import Navigation from './components/navigation';
+import { Dimensions } from 'react-native';
+import { isMobile } from './service';
 
-library.add(faCheck, faXmark)
+library.add(faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble)
 
 const Stack = createNativeStackNavigator();
 
@@ -16,6 +18,7 @@ const config = {
   screens: {
     Home: '/',
     Login: '/login',
+    Account: '/account',
   },
 };
 
@@ -33,12 +36,20 @@ const App = () => {
   if (!loaded) {
     return null;
   }
+
+  const routeName = () => {
+    // need logic to decide route name for now just return login screen
+    return "Login"
+  }
+
   return (
     <NavigationContainer
     linking={linking}
     >
+      <Navigation/>
       <Stack.Navigator
       screenOptions={{headerShown: false}}
+      initialRouteName={routeName()}
       >
         <Stack.Screen
             name="Home"

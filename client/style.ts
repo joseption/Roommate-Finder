@@ -19,7 +19,9 @@ export const Color = {
     border:'#D2D4D9',
     borderSecondary:'#B3B4B9',
     holder:'#F0F2F5',
-    holderSecondary:'#E4E6E9'
+    holderSecondary:'#E4E6E9',
+    imgBackground:'#E4E6EB',
+    icon:'#1D1F23'
 }
 
 export const FontSize = {
@@ -33,7 +35,8 @@ export const FontSize = {
 export const Radius = {
   small:4,
   default:10,
-  large:20
+  large:20,
+  round:9999
 }
 
 export const Style = StyleSheet.create({

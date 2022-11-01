@@ -7,70 +7,89 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  user_id       String      @id @default(uuid())
-  email         String
-  hash_password String
-  is_active     Boolean
-  is_superuser  Boolean
-  is_verified   Boolean
-  image         String
-  gender        String
-  first_name    String
-  last_name     String
-  birthday      DateTime
-  phone_number  Int
-  zip_code      Int
-  city          String
-  state         String
-  reset_id      Int
-  reset_exp     DateTime
-  update_id     Int
-  update_exp    DateTime
-  activate_id   Int
-  activate_exp  DateTime
-  is_setup      Boolean
-  setup_step    String
+generator erd {
+  provider = "prisma-erd-generator"
 }
 
-model User_Response {
-  response_id String 
-  user_id String @id @default(uuid())
-  option_id String
-  option_response_text String
-  option_response_bool Boolean
-  option_response_int Int
-  question_response_type String
-  question_id String
-  question_text Int
+model User {
+  id               String             @id @default(uuid())
+  email            String
+  is_active        Boolean
+  is_superuser     Boolean
+  is_verified      Boolean
+  image            String
+  gender           String
+  first_name       String
+  last_name        String
+  birthday         DateTime
+  phone_number     Int
+  zip_code         Int
+  city             String
+  state            String
+  reset_id         Int
+  reset_exp        DateTime
+  update_id        Int
+  update_exp       DateTime
+  activate_id      Int
+  activate_exp     DateTime
+  is_setup         Boolean
+  setup_step       String
+  ResponsesOnUsers ResponsesOnUsers[]
+  Listings         Listings[]
 }
 
 model Question {
-  question_id         String     @id @default(uuid())
+  id                  String             @id @default(uuid())
   question_text       String
-  response_type       String
+  response_id         String
   question_text_short String
   is_filter           Boolean
+  response            Response[]
+  ResponsesOnUsers    ResponsesOnUsers[]
 }
 
 model Response {
-  option_id String @id @default(uuid())
-  question_id String
-  response String
-  response_bool Boolean
-  response_integer Int
-  response_type String
+  id               String             @id @default(uuid())
+  response         String?
+  question_id      String
+  question         Question           @relation(fields: [question_id], references: [id])
+  ResponsesOnUsers ResponsesOnUsers[]
 }
 
 model Interests_Activity {
-  option_id String @id @default(uuid())
+  option_id   String @id @default(uuid())
   option_text String
-  type String
+  type        String
 }
 
 model User_Interests_Activity {
-  user_id String @id @default(uuid())
-  option_id String
+  user_id     String @id @default(uuid())
+  option_id   String
   option_text String
-  type String
+  type        String
+}
+
+model ResponsesOnUsers {
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  response   Response @relation(fields: [responseId], references: [id])
+  responseId String
+  questionId String
+  Question   Question @relation(fields: [questionId], references: [id])
+
+  @@unique([userId, responseId, questionId])
+}
+
+model Listings {
+  id           String   @id @default(uuid())
+  name         String
+  images       String[]
+  city         String
+  housing_type String
+  description  String
+  price        Float
+  petsAllowed  Boolean
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  address      String?
 }

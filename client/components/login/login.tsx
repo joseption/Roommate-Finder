@@ -5,6 +5,7 @@ import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { config, validateEmail } from '../../service';
 import { LoginStyle, Style } from '../../style';
+import _Checkbox from '../control/checkbox';
 import _TextInput from '../control/text-input';
 
 const Login = (props: any, {navigation}:any) => {

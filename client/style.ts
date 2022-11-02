@@ -174,6 +174,46 @@ export const Style = StyleSheet.create({
   alignCenter: {
     margin: 'auto'
   },
+  checkboxContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 5,
+    alignItems: 'center'
+  },
+  checkbox: {
+    borderColor: Color.border,
+    borderWidth: 1,
+    height: 18,
+    width: 18,
+    borderRadius: Radius.small,
+    position: 'relative',
+  },
+  checkboxMark: {
+    borderRightWidth: 3,
+    borderBottomWidth: 3,
+    borderRightColor: Color.white,
+    borderBottomColor: Color.white,
+    transform: [{rotate: '45deg'}],
+    height: 14,
+    width: 7,
+    position: 'absolute',
+    top: 0,
+    left: 5,
+  },
+  checkboxMarkContainer: {
+    position: 'absolute',
+    top: -1,
+    left: -1,
+    backgroundColor: Color.default,
+    width: 'calc(100% + 2px)',
+    height: 'calc(100% + 2px)',
+    borderRadius: Radius.small
+  },
+  checkboxLabel: {
+    fontFamily: 'Inter-Regular',
+    fontSize: FontSize.default,
+    color: Color.text
+  }
 });
 
 export const LoginStyle = StyleSheet.create({

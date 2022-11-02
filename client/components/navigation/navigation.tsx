@@ -144,7 +144,7 @@ const Navigation = (props: any) => {
                     style={getMenuStyle()}
                     >
                         <NavMenuButton
-                        navigate={NavTo.Login}
+                        navigate={NavTo.Profile}
                         icon="user"
                         value="View Profile"
                         onPress={() => setShowMenu(false)}

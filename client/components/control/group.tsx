@@ -1,6 +1,6 @@
 import { View, _Text } from 'react-native';
 
-const _Dropdown = (props: any, {navigation}:any) => {
+const _Group = (props: any, {navigation}:any) => {
 
     return (
     <View>
@@ -9,4 +9,4 @@ const _Dropdown = (props: any, {navigation}:any) => {
     );
 };
 
-export default _Dropdown;
+export default _Group

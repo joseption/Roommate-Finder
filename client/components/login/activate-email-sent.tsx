@@ -4,7 +4,7 @@ import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { config } from '../../service';
 import { Color, FontSize, LoginStyle, Style } from '../../style';
-import _TextInput from '../control/textinput';
+import _TextInput from '../control/text-input';
 
 const ActivateEmailSent = (props: any, {navigation}:any) => {
   const [disabled,setDisabled] = useState(false);

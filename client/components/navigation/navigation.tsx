@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, Linking, Pressable, StyleSheet, View } from 'react-native';
 import _Button from '../control/button';
-import _TextInput from '../control/textinput';
+import _TextInput from '../control/text-input';
 import _Text from '../control/text';
 import _Image from '../control/image';
 import { Color, Content, FontSize, Radius, Style } from '../../style';

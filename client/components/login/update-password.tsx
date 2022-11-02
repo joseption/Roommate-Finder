@@ -5,7 +5,7 @@ import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { acceptableSymbols, config, includesSymbol, includesUpperContains, isAtLeastEightChars, textMatches } from '../../service';
 import { Color, LoginStyle, Style } from '../../style';
-import _TextInput from '../control/textinput';
+import _TextInput from '../control/text-input';
 
 const UpdatePassword = (props: any, {navigation}:any) => {
   const [message, setMessage] = useState('');

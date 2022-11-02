@@ -1,6 +1,6 @@
 import { View, _Text } from 'react-native';
 import _Button from '../components/control/button';
-import _TextInput from '../components/control/textinput';
+import _TextInput from '../components/control/text-input';
 
 const HomeScreen = (props: any, {navigation}:any) => {
     /*

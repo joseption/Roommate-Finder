@@ -4,7 +4,7 @@ import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { config, validateEmail } from '../../service';
 import { LoginStyle, Style } from '../../style';
-import _TextInput from '../control/textinput';
+import _TextInput from '../control/text-input';
 
 const Register = (props: any, {navigation}:any) => {
   const [disabled, setDisabled] = useState(true);

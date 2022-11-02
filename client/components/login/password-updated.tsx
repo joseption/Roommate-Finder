@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { LoginStyle, Style } from '../../style';
-import _TextInput from '../control/textinput';
+import _TextInput from '../control/text-input';
 
 const PasswordUpdated = (props: any, {navigation}:any) => {
   return (

@@ -1,8 +1,21 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { navProp } from '../../App';
 import { Color, Style } from '../../style';
 
 const _Text = (props: any) => {
+  /* Props:
+  style: Add custom styles
+  error: Set true/false if error text
+  errorMessage: if no error message is provided, the default is "is required" else a custom message is used
+  navigate: Navigate to a location inb the stack using NavTo
+  onPress: Trigger your function
+  children: Uses the value from the nested text as the text value
+  required: Marks the text to end in an * mark
+  containerStyle: Give the outside container a custom style
+  */
+  const navigation = useNavigation<navProp>();
   const style = () => {
     var style = [];
     if (!props.style)
@@ -16,8 +29,8 @@ const _Text = (props: any) => {
   }
 
   const press = () => {
-    if (props.navigation) {
-        props.navigation.navigate(props.navigateTo);
+    if (props.navigate) {
+        navigation.navigate(props.navigate);
     }
     else if (props.onPress) {
         props.onPress();
@@ -36,7 +49,7 @@ const _Text = (props: any) => {
   return (
     <View
     style={props.containerStyle}>
-      {(props.onPress != null) ?
+      {(props.onPress != null || props.navigate) ?
       <Pressable
       onPress={() => press()}
       >

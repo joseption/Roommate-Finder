@@ -1,18 +1,28 @@
-import { useLinkProps } from '@react-navigation/native';
+import { useLinkProps, useNavigation } from '@react-navigation/native';
 import React, { useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { navProp } from '../../App';
 import _Text from '../../components/control/text';
 import { Color, FontSize, Style } from '../../style';
 
 const _Button = (props: any) => {
-    const ref = useRef(null);
+    /* Props
+    disabled: Disables the button
+    navigate: Navigate to a location in the stack using NavTo
+    onPress: Trigger your function
+    style: Give the button custom styling or use one of the predefined button styles
+    value: Give the button text
+    children: If the value is empty, the button will use the nested content
+    */
+    const navigation = useNavigation<navProp>();
+
     const textStyle = () => {
         return (props.disabled) ? styles.textDisabled : styles.text;
     }
 
     const press = () => {
-        if (props.navigation) {
-            props.navigation.navigate(props.navigateTo);
+        if (props.navigate) {
+            navigation.navigate(props.navigate);
         }
         else if (props.onPress) {
             props.onPress();

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { NavTo, Page } from '../../App';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { config, validateEmail } from '../../service';
@@ -104,8 +105,9 @@ const Login = (props: any, {navigation}:any) => {
       error={passwordError}
       />
       <_Text
-      style={[Style.textSmallDefault, LoginStyle.rightTextHint]}
+      style={Style.textSmallDefault}
       onPress={() => props.forgotPasswordPressed()}
+      containerStyle={LoginStyle.rightTextHint}
       >
         Forgot Password?
       </_Text>

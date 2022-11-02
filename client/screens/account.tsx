@@ -1,17 +1,11 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, _Text } from 'react-native';
+import { View, _Text } from 'react-native';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/textinput';
-import { Style } from '../style';
 
-const Account = (props: any, {navigation}:any) => {
-    enum screen {
-        info, about, survey
-    }
-
-    const [showScreen,setShowScreen] = useState();
-
-
+const AccountScreen = (props: any, {navigation}:any) => {
+    /*
+    Joseph: Use "account" components and add them here.
+    */
     return (
     <View>
         
@@ -19,4 +13,4 @@ const Account = (props: any, {navigation}:any) => {
     );
 };
 
-export default Account;
+export default AccountScreen;

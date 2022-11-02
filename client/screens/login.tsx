@@ -4,6 +4,7 @@ import { setStatusBarStyle } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, Animated, Dimensions, Image, Linking } from 'react-native';
 import _Button from '../components/control/button';
+import _Image from '../components/control/image';
 import _Text from '../components/control/text';
 import ActivateEmailSent from '../components/login/activate-email-sent';
 import ForgotPassword from '../components/login/forgot-password';
@@ -185,9 +186,11 @@ const LoginScreen = (props:any, {navigation}:any) => {
   return (
     <View style={style}>
         {mobile ?
-        <Image
+        <_Image
         style={LoginStyle.logo}
-        source={require('../assets/images/logo.png')} />
+        source={require('../assets/images/logo.png')}
+        height={75}
+        />
         : null
         } 
         <Animated.View
@@ -279,14 +282,16 @@ export const styles = StyleSheet.create({
         display:'flex',
         flexDirection: 'row',
         width:'100%',
-        gap: 42,
         flex: 1,
+        marginLeft: -21
     },
     animateContent: {
-      transition: 'transform .15s ease, opacity 2s ease',
+      transition: 'transform .15s ease, opacity 2s ease', // JA this is temporary and needs to be replaced with animation
     },
     panel: {
-        width:'100%'
+        width:'100%',
+        marginLeft: 21,
+        marginRight: 21
     },
     hidden: {
       display: 'none'

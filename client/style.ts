@@ -39,6 +39,10 @@ export const Radius = {
   round:9999
 }
 
+export const Content = {
+  width:1000
+}
+
 export const Style = StyleSheet.create({
   boldFont: {
     fontFamily: 'Inter-Bold',
@@ -55,7 +59,8 @@ export const Style = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
     paddingTop: 5,
-    paddingBottom: 5
+    paddingBottom: 5,
+    outlineStyle: 'none'
   },
   textHuge: {
     fontSize: FontSize.huge,
@@ -173,8 +178,6 @@ export const Style = StyleSheet.create({
 
 export const LoginStyle = StyleSheet.create({
   logo: {
-    height: 75,
-    width: 200,
     marginLeft: 'auto',
     marginRight: 'auto',
     marginBottom: 40

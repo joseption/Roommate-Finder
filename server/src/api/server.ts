@@ -1,7 +1,10 @@
 import express, { Request, Response } from "express";
 //add routes here... 
-import publicRoute from './routes/public';
-import privateRoute from './routes/private';
+import publicRoute from './test/public';
+//import privateRoute from './test/private';
+
+import auth from './auth/routes';
+import users from './users/routes';
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -22,7 +25,9 @@ app.get("/", (req: Request, res: Response) => {
 
 //use routes here
 app.use(publicRoute)
-app.use(privateRoute)
+//app.use(privateRoute)
+app.use('/auth', auth);
+app.use('/users', users);
 
 // Start the express server.
 app.listen(port, () => {

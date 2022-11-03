@@ -1,8 +1,5 @@
-import { useLinkProps } from '@react-navigation/native';
-import { setDefaultResultOrder } from 'dns';
-import { setStatusBarStyle } from 'expo-status-bar';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, Animated, Dimensions, Image, Linking } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Animated, Linking } from 'react-native';
 import _Button from '../components/control/button';
 import _Image from '../components/control/image';
 import _Text from '../components/control/text';
@@ -13,7 +10,6 @@ import PasswordResetSent from '../components/login/password-reset-sent';
 import PasswordUpdated from '../components/login/password-updated';
 import Register from '../components/login/register';
 import UpdatePassword from '../components/login/update-password';
-import { isMobile } from '../service';
 import { Color, LoginStyle, Radius, Style } from '../style';
 
 const LoginScreen = (props:any, {navigation}:any) => {
@@ -32,7 +28,6 @@ const LoginScreen = (props:any, {navigation}:any) => {
   const [width, setWidth] = useState(0);
   const [left, setLeft] = useState(0);
   const [opacity, setOpacity] = useState(0);
-  const [style, setStyle] = useState({});
   const [moved, setMoved] = useState(false);
   const [activateEmailSent, setActivateEmailSent] = useState(false);
   const [register, setRegister] = useState(false);
@@ -45,27 +40,13 @@ const LoginScreen = (props:any, {navigation}:any) => {
   const [emailValue, setEmailValue] = useState('');
   const [stopInterval,setStopInterval] = useState(-1);
   const [url,setUrl] = useState('');
-  const [mobile,setMobile] = useState(false);
 
   useEffect(() => {
-    var mobile = isMobile();
-    setMobile(mobile);
     if (!init) {
-      getStyle(mobile, true);
       setup();
       setInit(true);
     }
-
-    const subscription = Dimensions.addEventListener(
-      "change",
-      () => {
-        var mobile = isMobile();
-        setMobile(mobile);
-        getStyle(mobile, true);
-      }
-    );
-    return () => subscription?.remove();
-  }, [style, left, mobile]);
+  }, [left, init]);
 
   const setup = () => {
     const oldOpacity = opacity;
@@ -145,11 +126,9 @@ const LoginScreen = (props:any, {navigation}:any) => {
   }
 
   const getLeft = () => {
-    if (!initScreen) {
-      Linking.getInitialURL().then((url: any) => {
-        setUrl(url);
-        gotoScreen(url);
-      }).catch(() => gotoScreen(''))
+    if (!initScreen && props.route.path) {
+      setUrl(props.route.path);
+      gotoScreen(props.route.path);
     }
   }
 
@@ -158,16 +137,15 @@ const LoginScreen = (props:any, {navigation}:any) => {
       getLeft();
   }
 
-  const getStyle = (_mobile: boolean, fromUpdate = false) => {
-    var s = [];
-    var isMobile = fromUpdate ? _mobile: mobile;
-    s.push(styles.container);
-    if (!isMobile)
-      s.push(styles.dialog);
+  const style = () => {
+    var style = [];
+    style.push(styles.container);
+    if (!props.mobile)
+      style.push(styles.dialog);
     else
-      s.push(styles.full);
+      style.push(styles.full);
 
-    setStyle(s);
+    return style
   }
 
   const btnStyle = (disabled: boolean) => {
@@ -184,8 +162,8 @@ const LoginScreen = (props:any, {navigation}:any) => {
   }
 
   return (
-    <View style={style}>
-        {mobile ?
+    <View style={style()}>
+        {props.mobile ?
         <_Image
         style={LoginStyle.logo}
         source={require('../assets/images/logo.png')}

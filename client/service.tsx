@@ -1,7 +1,8 @@
 import { Dimensions } from "react-native";
+import { Content } from "./style";
 
 export const isMobile = () => {
-    return Dimensions.get('window').width < 1000;
+    return Dimensions.get('window').width < Content.mobileWidth;
 }
 
 const prod = {

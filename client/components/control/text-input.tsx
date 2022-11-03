@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Context } from '../../App';
 import { Color, Style } from '../../style';
 
 const _TextInput = (props: any) => {
@@ -17,12 +18,14 @@ const _TextInput = (props: any) => {
   type: If the input field is a password field set this value to true
   ref: Give the input field a ref
   */
+  const context = useContext(Context);
   const labelStyle = () => {
     var style = [];
     if (!props.labelStyle)
       style.push(Style.labelDefault)
     else
       style.push(props.labelStyle);
+
     if (props.error == true)
       style.push(styles.error);
 
@@ -50,7 +53,9 @@ const _TextInput = (props: any) => {
   }
 
   return (
-    <View>
+    <View
+    style={[styles.container, props.containerStyle, context.groupStyle]}
+    >
       <View
       style={styles.text}
       >
@@ -97,6 +102,9 @@ const styles = StyleSheet.create({
   error: {
     color: Color.danger,
     fontFamily: 'Inter-Bold'
+  },
+  container: {
+    width: '100%'
   }
 });
 

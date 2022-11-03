@@ -17,27 +17,17 @@ type navProp = StackNavigationProp<Page>;
 const Navigation = (props: any) => {
     const navigation = useNavigation<navProp>();
     const [showMenu,setShowMenu] = useState(false);
-    const [mobile,setMobile] = useState(false);
     const [nav,setNav] = useState('');
 
     useEffect(() => {
-        setMobile(isMobile());
-        const subscription = Dimensions.addEventListener(
-            "change",
-            (e) => {
-                setMobile(isMobile());
-                if (isMobile()) {
-                    setShowMenu(false);
-                }
-            }
-        );
+        if (isMobile()) {
+            setShowMenu(false);
+        }
 
         Linking.getInitialURL().then((url: any) => {
             setNavigation(url);
         }).catch(() => setNavigation(''))
-
-        return () => subscription?.remove();
-    }, [mobile, nav]);
+    }, [props.mobile, nav]);
 
     const setNavigation = (url: string) => {
         if (loc(url, NavTo.Profile))
@@ -89,7 +79,7 @@ const Navigation = (props: any) => {
         onLayout={(e: any) => setNavLayout(e)}
         style={styles.nav}
         >
-            {!mobile ?
+            {!props.mobile ?
             <View
             style={styles.container}>
                 <View
@@ -179,6 +169,12 @@ const Navigation = (props: any) => {
                         value="Room Listings"
                         onPress={() => setShowMenu(false)}
                         />
+                        <NavMenuButton
+                        navigate={NavTo.Logout}
+                        icon="sign-out"
+                        value="Logout"
+                        onPress={() => setShowMenu(false)}
+                        />
                     </View>
                 </View>
                 : null}
@@ -218,7 +214,7 @@ const Navigation = (props: any) => {
         );
     };  
 
-    const styles = StyleSheet.create({
+    const styles = StyleSheet.create({ // JA TODO need to make nav fixed to top 
         nav: {
             position: 'absolute',
             top: 0,
@@ -230,7 +226,8 @@ const Navigation = (props: any) => {
             justifyContent: 'center',
         },
         container: {
-            padding: 5,
+            paddingTop: 5,
+            paddingBottom: 5,
             backgroundColor: Color.white,
             borderBottomColor: Color.border,
             borderBottomWidth: 1,
@@ -238,7 +235,7 @@ const Navigation = (props: any) => {
             flexDirection: 'column-reverse',
         },
         content: {
-            width: 980,
+            width: Content.width ,
             margin: 'auto',
             display: 'flex',
             flexDirection: 'row',

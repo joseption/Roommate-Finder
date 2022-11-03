@@ -21,7 +21,9 @@ export const Color = {
     holder:'#F0F2F5',
     holderSecondary:'#E4E6E9',
     imgBackground:'#E4E6EB',
-    icon:'#1D1F23'
+    icon:'#1D1F23',
+    transparent: 'transparent',
+    none: 'transparent'
 }
 
 export const FontSize = {
@@ -40,12 +42,28 @@ export const Radius = {
 }
 
 export const Content = {
-  width:1000
+  width:1000,
+  mobileWidth: 1000
 }
 
 export const Style = StyleSheet.create({
   boldFont: {
     fontFamily: 'Inter-Bold',
+  },
+  dropdownDefault: {
+    fontSize: FontSize.default,
+    color: Color.text,
+    fontFamily: 'Inter-Regular',
+    backgroundColor: Color.white,
+    borderColor: Color.border,
+    borderRadius: Radius.default,
+    borderWidth: 1,
+    height: 35,
+    paddingLeft: 10,
+    paddingRight: 25,
+    paddingTop: 5,
+    paddingBottom: 5,
+    outlineStyle: 'none'
   },
   inputDefault: {
     fontSize: FontSize.default,
@@ -187,6 +205,7 @@ export const Style = StyleSheet.create({
     width: 18,
     borderRadius: Radius.small,
     position: 'relative',
+    backgroundColor: Color.white
   },
   checkboxMark: {
     borderRightWidth: 3,

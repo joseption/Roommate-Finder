@@ -18,9 +18,8 @@ const _Text = (props: any) => {
   const navigation = useNavigation<navProp>();
   const style = () => {
     var style = [];
-    if (!props.style)
-      style.push(Style.textDefault);
-    else
+    style.push(Style.textDefault);
+    if (props.style)
       style.push(props.style);
     if (props.error)
       style.push(styles.error);

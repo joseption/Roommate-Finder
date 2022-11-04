@@ -28,7 +28,7 @@ router.get('/profile', isAuthenticated, async (req:Request, res:Response, next:N
 
 router.get('/Allprofiles', isAuthenticated, async (req:Request, res:Response, next:NextFunction) => {
   try {
-    return db.user.findMany();
+    return res.json(db.user.findMany());
   } catch (err) {
     next(err);
   }

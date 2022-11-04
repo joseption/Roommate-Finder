@@ -4,12 +4,13 @@ import bcrypt from "bcrypt";
 import jwt  from "jsonwebtoken";
 import {v4} from 'uuid'; 
 import {
+  UpdatePassword,
   findUserByEmail,
   createUserByEmailAndPassword,
   findUserById
 } from '../users/services';
 
-import { generateTokens, hashToken } from "utils/jwt";
+import { generateTokens, hashToken, generateResetToken } from "utils/jwt";
 
 
 import {
@@ -84,6 +85,89 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
     next(err);
   }
 });
+
+router.get('/resetPassword',async (req:Request, res:Response, next:NextFunction) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400);
+      throw new Error('You must provide an email.');
+    }
+    const existingUser = await findUserByEmail(email);
+
+    if (!existingUser) {
+      res.status(403);
+      throw new Error('Invalid login credentials.');
+    }
+    else{
+      const jti = v4(); 
+      const resetToken = generateResetToken(existingUser, jti);
+      //add mail here and send the token in a mail link... 
+      res.status(200).json({
+        resetToken,
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/validateResetToken',async (req:Request, res:Response, next:NextFunction) => {
+  //for frontend you can check if the link has a valid token or not 
+  
+  try {
+
+    const { resetToken } = req.body;
+    if (!resetToken) {
+      res.status(400);
+      throw new Error('You must provide an reset Token.');
+    }
+    const payload = jwt.verify(resetToken, process.env.RESET_PASSWORD_KEY);
+
+    if (!payload) {
+      res.status(403);
+      throw new Error('Invalid Token.');
+    }
+    else{
+      res.status(200).json({
+        Error: false,
+        msg: "Valid Reset Token"
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/updatePassword',async (req:Request, res:Response, next:NextFunction) => {
+  try {
+
+    const { password, resetToken } = req.body;
+      if (!resetToken) {
+        res.status(400);
+        throw new Error('You must provide an reset Token.');
+      }
+      const payload = jwt.verify(resetToken, process.env.RESET_PASSWORD_KEY);
+
+      if (!payload) {
+        res.status(403);
+        throw new Error('Invalid Token.');
+      }
+      else{
+        //update Password
+        const user = await UpdatePassword(password, (<any>payload).userId);
+        await revokeTokens((<any>payload).userId);
+        res.status(200).json({
+          Error: false,
+          message: "Password has been reset and all tokens have been revoked."
+        });
+      }
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 
 router.post('/refreshToken', async (req:Request, res:Response, next:NextFunction) => {
   try {

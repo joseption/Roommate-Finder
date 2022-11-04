@@ -17,6 +17,14 @@ export function generateRefreshToken(user: { id: any; }, jti: any) {
   });
 }
 
+export function generateResetToken(user: { id: any; }, jti: any) {
+  return jwt.sign({
+    userId: user.id,
+    jti
+  }, process.env.RESET_PASSWORD_KEY, {
+    expiresIn: '1h',
+  });
+}
 
 export function generateTokens(user:User, jti: string) {
   const accessToken = generateAccessToken(user);
@@ -25,6 +33,14 @@ export function generateTokens(user:User, jti: string) {
   return {
     accessToken,
     refreshToken,
+  };
+}
+
+export function generateResetTken(user:User, jti: string) {
+  const resetToken = generateResetToken(user, jti);
+
+  return {
+    resetToken
   };
 }
 

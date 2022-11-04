@@ -20,6 +20,18 @@ export function createUserByEmailAndPassword(addy:string, password:string) {
   });
 }
 
+export function UpdatePassword(password:string, id:string) {
+  const hashed = bcrypt.hashSync(password, 12);
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      password: hashed
+    },
+  });
+}
+
 export function findUserById(id: any) {
   return db.user.findUnique({
     where: {

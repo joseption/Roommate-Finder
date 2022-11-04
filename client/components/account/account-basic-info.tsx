@@ -14,7 +14,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
     const [message,setMessage] = useState('this is an error message');
     const containerStyle = () => {
         var padding = 20;
-        var borderRadius = Radius.default;
+        var borderRadius = Radius.large;
         var borderColor = Color.border;
         var borderWidth = 1;
         if (props.mobile) {

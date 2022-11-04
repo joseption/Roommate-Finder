@@ -1,8 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { navProp } from '../../App';
 import _Text from '../../components/control/text';
 import { Color, FontSize, Radius, Style } from '../../style';
 
@@ -12,35 +10,28 @@ const NavMobileButton = (props: any) => {
     icon: Give the icon an icon name (from the available Font Awesome icon library, you may need to implement more icons in app file)
     currentNav: The current page in the stack
     navigate: Navigate to a page in the stack using a NavTo option
-    */
-    const navigation = useNavigation<navProp>();
+    */   
     const iconStyle = (nav: string) => {
-        if (nav != props.currentNav)
+        if (props.navTo != props.currentNav)
             return styles.icon;
         else
             return styles.iconSelected;
     };
 
     const indicateStyle = (nav: string) => {
-        if (nav == props.currentNav)
+        if (props.navTo == props.currentNav)
             return styles.indicator;
         else
             return null;
     };
 
-    const press = () => {
-        if (props.navigate) {
-            navigation.navigate(props.navigate);
-        }
-    }
-
     return (
     <Pressable
-    onPress={() => press()}
+    onPress={() => props.navigate()}
     style={styles.container}
     >
-        <FontAwesomeIcon style={iconStyle(props.navigate)} icon={props.icon} />
-        <View style={indicateStyle(props.navigate)}></View>
+        <FontAwesomeIcon style={iconStyle(props.navTo)} icon={props.icon} />
+        <View style={indicateStyle(props.navTo)}></View>
     </Pressable>
     );
 };

@@ -90,9 +90,10 @@ const _Dropdown = (props: any, {navigation}:any) => {
             else
                 mappedItems(textValue);
         }
-        onFocus(focus);
+
         swapIndex(focus);
         setFocus(focus);
+        onFocus(focus);
     }
 
     const setNavLayout = (e: any) => {
@@ -162,9 +163,10 @@ const _Dropdown = (props: any, {navigation}:any) => {
             setKey("");
             setValue("");
         }
+
         setTimeout(() => {
-            setMenu(false);
-        }, 250);
+            setMenu(false, false);
+        }, 150);
     }
 
     const onfocus = (e: any) => {

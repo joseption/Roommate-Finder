@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Dimensions, Image, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import _Button from '../control/button';
 import _TextInput from '../control/text-input';
 import _Text from '../control/text';
@@ -11,7 +11,7 @@ import NavMenuButton from '../control/nav-menu-button';
 import NavMobileButton from '../control/nav-mobile-button';
 import { useNavigation } from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import { NavTo, Page } from '../../App';
+import { config, NavTo, Page } from '../../App';
 
 type navProp = StackNavigationProp<Page>;
 const Navigation = (props: any) => {
@@ -23,32 +23,38 @@ const Navigation = (props: any) => {
         if (isMobile()) {
             setShowMenu(false);
         }
-
-        Linking.getInitialURL().then((url: any) => {
-            setNavigation(url);
-        }).catch(() => setNavigation(''))
+        var routes = navigation.getState().routes;
+        var route = routes[routes.length - 1].path;
+        setNavigation(route);
     }, [props.mobile, nav]);
 
-    const setNavigation = (url: string) => {
-        if (loc(url, NavTo.Profile))
+    const setNavigation = (route: any) => {
+        if (loc(route, NavTo.Profile))
             setNav(NavTo.Profile);
-        else if (loc(url, NavTo.Survey))
+        else if (loc(route, NavTo.Survey))
             setNav(NavTo.Survey);
-        else if (loc(url, NavTo.Listings))
+        else if (loc(route, NavTo.Listings))
             setNav(NavTo.Listings);
-        else if (loc(url, NavTo.Matches))
+        else if (loc(route, NavTo.Matches))
             setNav(NavTo.Matches);
-        else if (loc(url, NavTo.Messages))
+        else if (loc(route, NavTo.Messages))
             setNav(NavTo.Messages);
         else
             setNav(NavTo.Home);
     };
 
-    const loc = (url: string, param: string) => {
-        return url.toLowerCase().includes(param.toLowerCase());
+    const loc = (route: string, link: string) => {
+        if (route && link) {
+            return route.toLowerCase().includes(link.toLowerCase());
+        }
+        else {
+            return false;
+        }
     }
 
     const navigate = (nav: never) => {
+        setNavigation(nav);
+        setShowMenu(false)
         navigation.navigate(nav);
         // JA TODO Hook up navigate highlighter for mobile view switch
     };
@@ -134,46 +140,46 @@ const Navigation = (props: any) => {
                     style={getMenuStyle()}
                     >
                         <NavMenuButton
-                        navigate={NavTo.Profile}
+                        navigate={() => navigate(NavTo.Profile)}
                         icon="user"
                         value="View Profile"
-                        onPress={() => setShowMenu(false)}
+                        navTo={NavTo.Profile}
                         />
                         <NavMenuButton
-                        navigate={NavTo.Account}
+                        navigate={() => navigate(NavTo.Account)}
                         icon="edit"
                         value="Edit Account"
-                        onPress={() => setShowMenu(false)}
+                        navTo={NavTo.Account}
                         />
                         <NavMenuButton
-                        navigate={NavTo.Survey}
+                        navigate={() => navigate(NavTo.Survey)}
                         icon="poll"
                         value="Take the Survey"
-                        onPress={() => setShowMenu(false)}
+                        navTo={NavTo.Survey}
                         />
                         <NavMenuButton
-                        navigate={NavTo.Matches}
+                        navigate={() => navigate(NavTo.Matches)}
                         icon="check-double"
                         value="See Matches"
-                        onPress={() => setShowMenu(false)}
+                        navTo={NavTo.Matches}
                         />
                         <NavMenuButton
-                        navigate={NavTo.Explore}
+                        navigate={() => navigate(NavTo.Explore)}
                         icon="globe"
                         value="Explore"
-                        onPress={() => setShowMenu(false)}
+                        navTo={NavTo.Explore}
                         />
                         <NavMenuButton
-                        navigate={NavTo.Listings}
+                        navigate={() => navigate(NavTo.Listings)}
                         icon="house-flag"
                         value="Room Listings"
-                        onPress={() => setShowMenu(false)}
+                        navTo={NavTo.Listings}
                         />
                         <NavMenuButton
-                        navigate={NavTo.Logout}
+                        navigate={() => navigate(NavTo.Logout)}
                         icon="sign-out"
                         value="Logout"
-                        onPress={() => setShowMenu(false)}
+                        navTo={NavTo.Logout}
                         />
                     </View>
                 </View>
@@ -184,29 +190,34 @@ const Navigation = (props: any) => {
             style={styles.mobileContainer}
             >
                 <NavMobileButton
-                navigate={NavTo.Profile}
+                navigate={() => navigate(NavTo.Profile)}
                 icon="user"
                 currentNav={nav}
+                navTo={NavTo.Profile}
                 />
                 <NavMobileButton
-                navigate={NavTo.Survey}
+                navigate={() => navigate(NavTo.Survey)}
                 icon="poll"
                 currentNav={nav}
+                navTo={NavTo.Survey}
                 />
                 <NavMobileButton
-                navigate={NavTo.Listings}
+                navigate={() => navigate(NavTo.Listings)}
                 icon="house-flag"
                 currentNav={nav}
+                navTo={NavTo.Listings}
                 />
                 <NavMobileButton
-                navigate={NavTo.Matches}
+                navigate={() => navigate(NavTo.Matches)}
                 icon="check-double"
                 currentNav={nav}
+                navTo={NavTo.Matches}
                 />
                 <NavMobileButton
-                navigate={NavTo.Messages}
+                navigate={() => navigate(NavTo.Messages)}
                 icon="message"
                 currentNav={nav}
+                navTo={NavTo.Messages}
                 />
             </View>
             }   
@@ -250,7 +261,12 @@ const Navigation = (props: any) => {
             justifyContent: 'center',
             alignItems: 'center',
             position: 'relative',
+            marginLeft: 10,
+            ...Platform.select({
+                web: {
             outlineStyle: 'none',
+                }
+            }),
         },
         userIconContainer: {
             height: 40,
@@ -264,7 +280,11 @@ const Navigation = (props: any) => {
             width: 18,
             height: 18,
             color: Color.icon,
-            outlineStyle: 'none'
+            ...Platform.select({
+                web: {
+            outlineStyle: 'none',
+                }
+            }),
         },
         count: {
             backgroundColor: Color.danger,
@@ -287,11 +307,14 @@ const Navigation = (props: any) => {
         iconContainer: {
             display: 'flex',
             flexDirection: 'row',
-            gap: 10
         },
         userIcon: {
             borderRadius: Radius.round,
-            outlineStyle: 'none',
+            ...Platform.select({
+                web: {
+                outlineStyle: 'none',
+                }
+            }),
         },
         menuIcon: {
             position: 'absolute',
@@ -301,7 +324,11 @@ const Navigation = (props: any) => {
             backgroundColor: Color.imgBackground,
             borderRadius: Radius.round,
             color: Color.icon,
-            outlineStyle: 'none'
+            ...Platform.select({
+                web: {
+                outlineStyle: 'none',
+                }
+            }),
         },
         mobileContainer: {
             paddingTop: 10,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Animated, Linking } from 'react-native';
+import { StyleSheet, View, Animated, Linking, Platform } from 'react-native';
 import _Button from '../components/control/button';
 import _Image from '../components/control/image';
 import _Text from '../components/control/text';
@@ -142,8 +142,10 @@ const LoginScreen = (props:any, {navigation}:any) => {
     style.push(styles.container);
     if (!props.mobile)
       style.push(styles.dialog);
-    else
+    else {
       style.push(styles.full);
+      style.push(styles.containerMobile);
+    }
 
     return style
   }
@@ -233,8 +235,14 @@ export const styles = StyleSheet.create({
       backgroundColor: Color.white,
       margin:'auto',
       overflow:'hidden',
-      padding:40,
-      height: '100%'
+      height: '100%',
+      padding: 10
+    },
+    containerMobile: {
+      paddingLeft:10,
+      paddingRight:10,
+      paddingTop: 40,
+      paddingBottom: 40,
     },
     dialog: {
       opacity:.95,
@@ -264,7 +272,11 @@ export const styles = StyleSheet.create({
         marginLeft: -21
     },
     animateContent: {
-      transition: 'transform .15s ease, opacity 2s ease', // JA this is temporary and needs to be replaced with animation
+      ...Platform.select({
+        web: {
+          transition: 'transform .15s ease, opacity 2s ease', // JA this is temporary and needs to be replaced with animation
+        }
+    }),
     },
     panel: {
         width:'100%',

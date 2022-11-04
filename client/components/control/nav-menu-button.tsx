@@ -3,8 +3,6 @@ import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { Color, FontSize, Radius, Style } from '../../style';
-import { useNavigation } from '@react-navigation/native';
-import { navProp } from '../../App';
 
 const NavMenuButton = (props: any) => {
     /* Props
@@ -12,20 +10,10 @@ const NavMenuButton = (props: any) => {
     icon: Give the icon an icon name (from the available Font Awesome icon library, you may need to implement more icons in app file)
     value: The text that appears next to the icon for the button
     */
-
-    const navigation = useNavigation<navProp>();
-    const press = () => {
-        if (props.onPress != null) {
-            props.onPress();
-        }
-        if (props.navigate) {
-            navigation.navigate(props.navigate);
-        }
-    }
     
     return (
     <Pressable
-    onPress={() => press()}
+    onPress={() => props.navigate()}
     style={styles.container}
     >
         <View

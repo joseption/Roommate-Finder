@@ -3,16 +3,45 @@ import _TextInput from '../control/text-input';
 import _Dropdown from '../control/dropdown';
 import _Checkbox from '../control/checkbox';
 import _Text from '../control/text';
-import { Children, cloneElement, isValidElement, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Color, Radius } from '../../style';
 import { Context } from '../../App';
 
 const _Group = (props: any, {navigation}:any) => {
     const [focus,setFocus] = useState(false);
+    const [prepFocus, setPrepFocus] = useState(false);
+    const [canPrepFocus, setCanPrepFocus] = useState(false);
+    const [timerId, setTimerId] = useState(-1);
 
-    const setParentFocus = useCallback((value: any) => {
-        setFocus(value);
+    useEffect(() => {
+        if (canPrepFocus) {
+            let timeout: any;
+            if (timerId < 0) {
+                timeout = setTimeout(() => setFocus(prepFocus), 10);
+                setTimerId(timeout);
+            }
+            else {
+                clearTimeout(timerId);
+                setTimerId(-1);
+            }
+            setCanPrepFocus(false);
+        }
+      }, [prepFocus, timerId]) 
+      
+    const setParentFocus = useCallback((value: any) => { 
+        setPrepFocus(value);
+        setCanPrepFocus(true);
+        //setFocus(value);
       }, []);
+
+    const containerStyle = () => {
+        var style = [];
+        if (focus) {
+            style.push(styles.groupFocus);
+        }
+
+        return style;
+    }
 
     const groupStyle = (focus: boolean) => {
         var style = [];
@@ -39,7 +68,9 @@ const _Group = (props: any, {navigation}:any) => {
     }
 
     return (
-        <View>
+        <View
+        style={containerStyle()}
+        >
             <_Text
             required={props.required}
             style={styles.label}

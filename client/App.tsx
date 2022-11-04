@@ -6,7 +6,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faPaintBrush, faSignOut } from '@fortawesome/free-solid-svg-icons'
 import Navigation from './components/navigation/navigation';
 import React, { createContext, useEffect, useState } from 'react';
-import { Dimensions, Linking, StyleSheet, View } from 'react-native';
+import { Dimensions, Linking, ScrollView, StyleSheet, View } from 'react-native';
 import 'react-native-gesture-handler';
 import {StackNavigationProp} from '@react-navigation/stack';
 import AccountScreen from './screens/account';
@@ -53,7 +53,7 @@ export type Page = {
 
 const Stack = createNativeStackNavigator<Page>();
 
-const config = {
+export const config = {
   screens: {
     Home: '/',
     Login: '/login',
@@ -80,6 +80,7 @@ export const App = () => {
   const [mobile,setMobile] = useState(false);
   const [page,setPage] = useState('');
   const [init,setInit] = useState(false);
+  const [adjustedPos,setAdjustedPos] = useState(0);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
@@ -107,7 +108,7 @@ export const App = () => {
 
     prepareStyle();
     return () => subscription?.remove();
-  }, [navDimensions.height, page, mobile]);
+  }, [navDimensions.height, page, mobile, adjustedPos]);
   
   if (!loaded) {
     return null;
@@ -127,19 +128,30 @@ export const App = () => {
       }
     }
   }
+  const getOffset = (scrollView: number) => {
+    var window = Dimensions.get("window").width;
+      if (scrollView < window) {
+        setAdjustedPos((window - scrollView) / 2);
+      }
+      else {
+        setAdjustedPos(0);
+      }
+  }
+
+  const getScrollDims = (w: number, h: number) => {
+    getOffset(w);
+  }
 
   function prepareStyle() {
-    // var padding = (navDimensions.width - Content.width) / 2;
-    // if (padding < 0)
-    //   padding = 0;
-
     var paddingLeft = 0;
     var paddingRight = 0;
     var backgroundColor = Color.holder;
+    var translate = adjustedPos;
     if (mobile) {
       backgroundColor = Color.white;
       paddingLeft = 10;
       paddingRight = 10;
+      translate = 0;
     }
     var paddingTop = page === NavTo.Login ? 0 : 10;
 
@@ -147,6 +159,7 @@ export const App = () => {
       paddingLeft: paddingLeft,
       paddingRight: paddingRight,
       paddingTop: paddingTop,
+      transform: [{translateX: translate}]
     };
     var container = {
       backgroundColor: backgroundColor,
@@ -156,18 +169,26 @@ export const App = () => {
     setContainerStyle(container);
   }
 
+  const scroll = (e: any) => {
+      getOffset(e.nativeEvent.contentSize.width);
+  }
+
   return (
     <NavigationContainer
     linking={linking}
     >
-      <View
+      <ScrollView
+      contentContainerStyle={styles.scrollParentContainer}
       style={[containerStyle, styles.container]}
+      onScroll={(e) => scroll(e)}
+      scrollEventThrottle={100}
+      onContentSizeChange={(w, h) => getScrollDims(w, h)}
       >
         <View
         style={[style, styles.stack]}
         >
           <Stack.Navigator
-          screenOptions={{headerShown: false}}
+          screenOptions={{headerShown: false, contentStyle: {backgroundColor: mobile ? Color.white : Color.holder}}}
           initialRouteName={routeName()}
           screenListeners={{
             state: (e) => state(e)
@@ -179,7 +200,8 @@ export const App = () => {
             {(props: any) => <HomeScreen {...props} mobile={mobile} />}
             </Stack.Screen>
             <Stack.Screen
-                name={NavTo.Login}>
+                name={NavTo.Login}
+            >
                 {(props: any) => <LoginScreen {...props} mobile={mobile} />}
             </Stack.Screen>
             <Stack.Screen
@@ -224,12 +246,11 @@ export const App = () => {
             </Stack.Screen> 
           </Stack.Navigator>
         </View>
-      </View>
+      </ScrollView>
       <Navigation
       dimensions={navDimensions}
       setDimensions={setNavDimensions}
       mobile={mobile}
-     
       >
       </Navigation>
     </NavigationContainer>
@@ -242,10 +263,15 @@ const styles = StyleSheet.create({
     marginRight: 'auto',
     width: '100%',
     maxWidth: Content.width,
+    height: '100%'
   },
   container: {
     flex: 1,
-  }
+    height: '100%',
+  },
+  scrollParentContainer: {
+    height: '100%',
+  },
 });
 
 export default App;

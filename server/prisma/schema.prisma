@@ -14,27 +14,27 @@ datasource db {
 
 model User {
   email            String             @unique
-  is_active        Boolean
-  is_superuser     Boolean
-  is_verified      Boolean
-  image            String
-  gender           String
-  first_name       String
-  last_name        String
-  birthday         DateTime
-  phone_number     Int
-  zip_code         Int
-  city             String
-  state            String
-  reset_id         Int
-  reset_exp        DateTime
-  update_id        Int
-  update_exp       DateTime
-  activate_id      Int
-  activate_exp     DateTime
-  is_setup         Boolean
-  setup_step       String
-  id               String             @id @default(uuid())
+  is_active        Boolean?
+  is_superuser     Boolean?
+  is_verified      Boolean?
+  image            String?
+  gender           String?
+  first_name       String?
+  last_name        String?
+  birthday         DateTime?
+  phone_number     Int?
+  zip_code         Int?
+  city             String?
+  state            String?
+  reset_id         Int?
+  reset_exp        DateTime?
+  update_id        Int?
+  update_exp       DateTime?
+  activate_id      Int?
+  activate_exp     DateTime?
+  is_setup         Boolean?
+  setup_step       String?
+  id               String            @id @default(uuid())
   createdAt        DateTime           @default(now())
   password         String
   updatedAt        DateTime           @updatedAt

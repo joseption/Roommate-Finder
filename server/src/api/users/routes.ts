@@ -1,10 +1,10 @@
-const express = require('express');
-const { isAuthenticated } = require('../../middleware');
-const { findUserById } = require('./services');
+import express, { Request, Response, NextFunction } from 'express';
+import { isAuthenticated } from '../../middleware';
+import { findUserById } from './services';
 
 const router = express.Router();
 
-router.get('/profile', isAuthenticated, async (req, res, next) => {
+router.get('/profile', isAuthenticated, async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { userId } = req.payload;
     const user = await findUserById(userId);

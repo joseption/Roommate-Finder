@@ -1,7 +1,8 @@
-import express, { Express } from "express";
+import express, { Request, Response, NextFunction } from 'express';
+
 import bcrypt from "bcrypt";
 import jwt  from "jsonwebtoken";
-import { uuid } from 'uuidv4'; 
+import {v4} from 'uuid'; 
 import {
   findUserByEmail,
   createUserByEmailAndPassword,
@@ -21,8 +22,9 @@ import {
 
 const router = express.Router()
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', async (req:Request, res:Response, next:NextFunction) => {
   try {
+    console.log(req.body)
     const { email, password } = req.body;
     if (!email || !password) {
       res.status(400);
@@ -37,7 +39,7 @@ router.post('/register', async (req, res, next) => {
     }
 
     const user = await createUserByEmailAndPassword({ email, password });
-    const jti = uuid();
+    const jti = v4();
     const { accessToken, refreshToken } = generateTokens(user, jti);
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
 
@@ -50,7 +52,7 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
-router.post('/login', async (req, res, next) => {
+router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -71,7 +73,7 @@ router.post('/login', async (req, res, next) => {
       throw new Error('Invalid login credentials.');
     }
 
-    const jti = uuid();
+    const jti = v4();
     const { accessToken, refreshToken } = generateTokens(existingUser, jti);
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: existingUser.id });
 
@@ -84,7 +86,7 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-router.post('/refreshToken', async (req, res, next) => {
+router.post('/refreshToken', async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
@@ -112,7 +114,7 @@ router.post('/refreshToken', async (req, res, next) => {
     }
 
     await deleteRefreshToken(savedRefreshToken.id);
-    const jti = uuid();
+    const jti = v4();
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(user, jti);
     await addRefreshTokenToWhitelist({ jti, refreshToken: newRefreshToken, userId: user.id });
 
@@ -127,7 +129,7 @@ router.post('/refreshToken', async (req, res, next) => {
 
 // This endpoint is only for demo purpose.
 // Move this logic where you need to revoke the tokens( for ex, on password reset)
-router.post('/revokeRefreshTokens', async (req, res, next) => {
+router.post('/revokeRefreshTokens', async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { userId } = req.body;
     await revokeTokens(userId);

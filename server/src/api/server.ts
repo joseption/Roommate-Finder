@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 //add routes here...
 import publicRoute from './test/public';
-//import privateRoute from './test/private';
+import privateRoute from './test/private';
 
 import auth from './auth/routes';
 import users from './users/routes';
@@ -24,9 +24,12 @@ app.get('/', (req: Request, res: Response) => {
   res.json({ BRUH: 'IP ADDRESS LOGGED AND REPORTED TO ADMIN' });
 });
 
+// middleware
+app.use(express.json());
+
 //use routes here
 app.use(publicRoute);
-//app.use(privateRoute)
+app.use(privateRoute)
 app.use('/auth', auth);
 app.use('/users', users);
 app.use('/listings', listings);

@@ -1,13 +1,14 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
+import{ Request, Response, NextFunction } from 'express';
 
-function notFound(req, res, next) {
+export function notFound(req:Request, res:Response, next:NextFunction) {
   res.status(404);
   const error = new Error(`🔍 - Not Found - ${req.originalUrl}`);
   next(error);
 }
 
 /* eslint-disable no-unused-vars */
-function errorHandler(err, req, res, next) {
+export function errorHandler(err: { message: any; stack: any; }, req:Request, res:Response, next:NextFunction) {
   /* eslint-enable no-unused-vars */
   const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
   res.status(statusCode);
@@ -17,8 +18,9 @@ function errorHandler(err, req, res, next) {
   });
 }
 
-function isAuthenticated(req, res, next) {
+export function isAuthenticated(req:Request, res:Response, next:NextFunction) {
   const { authorization } = req.headers;
+  console.log(authorization);
 
   if (!authorization) {
     res.status(401);
@@ -39,9 +41,3 @@ function isAuthenticated(req, res, next) {
 
   return next();
 }
-
-module.exports = {
-  notFound,
-  errorHandler,
-  isAuthenticated
-};

@@ -19,7 +19,6 @@ import {
   revokeTokens
 } from './services';
 
-
 const router = express.Router()
 
 router.post('/register', async (req:Request, res:Response, next:NextFunction) => {
@@ -37,8 +36,8 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
       res.status(400);
       throw new Error('Email already in use.');
     }
-
-    const user = await createUserByEmailAndPassword({ email, password });
+    
+    const user = await createUserByEmailAndPassword(email, password);
     const jti = v4();
     const { accessToken, refreshToken } = generateTokens(user, jti);
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });

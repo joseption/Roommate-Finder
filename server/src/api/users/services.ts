@@ -2,8 +2,6 @@ import bcrypt from "bcrypt";
 
 import db from '../../utils/db';
 
-import { User } from "@prisma/client";
-
 export function findUserByEmail(email: any) {
   return db.user.findUnique({
     where: {
@@ -12,10 +10,13 @@ export function findUserByEmail(email: any) {
   });
 }
 
-export function createUserByEmailAndPassword(user: User) {
-  user.password = bcrypt.hashSync(user.password, 12);
+export function createUserByEmailAndPassword(addy:string, password:string) {
+  const hashed = bcrypt.hashSync(password, 12);
   return db.user.create({
-    data: user,
+    data: {
+      email: addy,
+      password: hashed,
+    },
   });
 }
 

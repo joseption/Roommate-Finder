@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/profile', isAuthenticated, async (req:Request, res:Response, next:NextFunction) => {
   try {
-    const { userId } = req.payload;
+    const { userId } = req.body[0];
     const user = await findUserById(userId);
     delete user.password;
     res.json(user);

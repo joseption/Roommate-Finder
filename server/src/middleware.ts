@@ -30,7 +30,7 @@ export function isAuthenticated(req:Request, res:Response, next:NextFunction) {
   try {
     const token = authorization.split(' ')[1];
     const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-    req.payload = payload;
+    req.body[0] = payload;
   } catch (err) {
     res.status(401);
     if (err.name === 'TokenExpiredError') {

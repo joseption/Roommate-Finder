@@ -94,7 +94,8 @@ router.post('/refreshToken', async (req:Request, res:Response, next:NextFunction
       throw new Error('Missing refresh token.');
     }
     const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const savedRefreshToken = await findRefreshTokenById(payload.jti);
+    console.log(payload);
+    const savedRefreshToken = await findRefreshTokenById((<any>payload).jti);
 
     if (!savedRefreshToken || savedRefreshToken.revoked === true) {
       res.status(401);
@@ -107,7 +108,7 @@ router.post('/refreshToken', async (req:Request, res:Response, next:NextFunction
       throw new Error('Unauthorized');
     }
 
-    const user = await findUserById(payload.userId);
+    const user = await findUserById((<any>payload).userId);
     if (!user) {
       res.status(401);
       throw new Error('Unauthorized');

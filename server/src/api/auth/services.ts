@@ -1,7 +1,7 @@
 import db from '../../utils/db';
 import { hashToken } from 'utils/jwt';
 
-export function addRefreshTokenToWhitelist({ jti, refreshToken, userId }) {
+export function addRefreshTokenToWhitelist({ jti, refreshToken, userId }: { jti:string, refreshToken:string, userId:string }) {
   return db.refreshToken.create({
     data: {
       id: jti,
@@ -11,7 +11,7 @@ export function addRefreshTokenToWhitelist({ jti, refreshToken, userId }) {
   });
 }
 
-export function findRefreshTokenById(id) {
+export function findRefreshTokenById(id:string) {
   return db.refreshToken.findUnique({
     where: {
       id,
@@ -19,7 +19,7 @@ export function findRefreshTokenById(id) {
   });
 }
 
-export function deleteRefreshToken(id) {
+export function deleteRefreshToken(id:string) {
   return db.refreshToken.update({
     where: {
       id,
@@ -30,7 +30,7 @@ export function deleteRefreshToken(id) {
   });
 }
 
-export function revokeTokens(userId) {
+export function revokeTokens(userId:string) {
   return db.refreshToken.updateMany({
     where: {
       userId

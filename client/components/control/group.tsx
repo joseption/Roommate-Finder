@@ -5,7 +5,7 @@ import _Checkbox from '../control/checkbox';
 import _Text from '../control/text';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Color, Radius } from '../../style';
-import { Context } from '../../App';
+import { Context } from '../../service';
 
 const _Group = (props: any, {navigation}:any) => {
     const [focus,setFocus] = useState(false);
@@ -13,25 +13,25 @@ const _Group = (props: any, {navigation}:any) => {
     const [canPrepFocus, setCanPrepFocus] = useState(false);
     const [timerId, setTimerId] = useState(-1);
 
-    useEffect(() => {
-        if (canPrepFocus) {
-            let timeout: any;
-            if (timerId < 0) {
-                timeout = setTimeout(() => setFocus(prepFocus), 10);
-                setTimerId(timeout);
-            }
-            else {
-                clearTimeout(timerId);
-                setTimerId(-1);
-            }
-            setCanPrepFocus(false);
-        }
-      }, [prepFocus, timerId]) 
+    // useEffect(() => {
+    //     if (canPrepFocus) {
+    //         let timeout: any;
+    //         if (timerId < 0) {
+    //             timeout = setTimeout(() => setFocus(prepFocus), 10);
+    //             setTimerId(timeout);
+    //         }
+    //         else {
+    //             clearTimeout(timerId);
+    //             setTimerId(-1);
+    //         }
+    //         setCanPrepFocus(false);
+    //     }
+    //   }, [prepFocus, timerId, focus]) 
       
     const setParentFocus = useCallback((value: any) => { 
-        setPrepFocus(value);
-        setCanPrepFocus(true);
-        //setFocus(value);
+        //setPrepFocus(value);
+        //setCanPrepFocus(true);
+        setFocus(value);
       }, []);
 
     const containerStyle = () => {
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 1,
         shadowRadius: 0,
         marginLeft: 3,
-        width: 'calc(100% - 3px)'
+        //width: 'calc(100% - 3px)'
     },
     groupNoBG: {
         backgroundColor: Color.none,

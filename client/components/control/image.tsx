@@ -3,7 +3,7 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { Color, FontSize } from '../../style';
 import { useNavigation } from '@react-navigation/native';
-import { navProp } from '../../App';
+import { navProp } from '../../service';
 
 const _Image = (props: any) => {
     /* Props
@@ -19,9 +19,9 @@ const _Image = (props: any) => {
     const navigation = useNavigation<navProp>();
     const [style,setStyle] = useState([props.style]);
     useEffect(() => {
-        Image.getSize(props.source, (w, h) => {
-            getStyle(w, h);
-        });
+        // Image.getSize(props.source, (w, h) => {
+        //      getStyle(w, h);
+        // });
     }, [props.source]);
 
     const press = () => {
@@ -33,7 +33,7 @@ const _Image = (props: any) => {
         }
     }
 
-    const getStyle = (width: number, height: number) => {
+    const getStyle = (width: any, height: any) => {
         var _style = [];
         // Set original (default) dimensions
         var dim = {

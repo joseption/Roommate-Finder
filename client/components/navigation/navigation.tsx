@@ -1,4 +1,3 @@
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Image, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import _Button from '../control/button';
@@ -6,26 +5,32 @@ import _TextInput from '../control/text-input';
 import _Text from '../control/text';
 import _Image from '../control/image';
 import { Color, Content, FontSize, Radius, Style } from '../../style';
-import { isMobile } from '../../service';
+import { isMobile, NavTo, Page } from '../../service';
 import NavMenuButton from '../control/nav-menu-button';
 import NavMobileButton from '../control/nav-mobile-button';
 import { useNavigation } from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import { config, NavTo, Page } from '../../App';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 type navProp = StackNavigationProp<Page>;
 const Navigation = (props: any) => {
     const navigation = useNavigation<navProp>();
     const [showMenu,setShowMenu] = useState(false);
+    const [visible,setVisible] = useState(false);
     const [nav,setNav] = useState('');
 
     useEffect(() => {
         if (isMobile()) {
             setShowMenu(false);
         }
-        var routes = navigation.getState().routes;
-        var route = routes[routes.length - 1].path;
-        setNavigation(route);
+        var state = navigation.getState();
+        if (state) {
+            var routes = state.routes;
+            if (route) {
+                var route = routes[routes.length - 1].path;
+                setNavigation(route);
+            }
+        }
     }, [props.mobile, nav]);
 
     const setNavigation = (route: any) => {
@@ -41,6 +46,8 @@ const Navigation = (props: any) => {
             setNav(NavTo.Messages);
         else
             setNav(NavTo.Home);
+
+        setVisible(!loc(route, NavTo.Login));
     };
 
     const loc = (route: string, link: string) => {
@@ -92,7 +99,7 @@ const Navigation = (props: any) => {
                 style={styles.content}
                 >
                     <_Image
-                    source={require('../../assets/images/logo.png')}
+                    //source={require('../../assets/images/logo.png')} //JA failing on android is it because it's a static image? look at image.getsize
                     height={40}
                     onPress={() => navigate(NavTo.Home)}
                     pressStyle={styles.logoContainer}
@@ -121,7 +128,7 @@ const Navigation = (props: any) => {
                             >
                                 <_Image
                                 style={styles.userIcon}
-                                source={require('../../assets/images/logo.png')}
+                                // source={require('../../assets/images/logo.png')} // JA not working android with image.getsize .. is it because it's local??
                                 height={40}
                                 />
                             </View>
@@ -185,40 +192,45 @@ const Navigation = (props: any) => {
                 </View>
                 : null}
             </View>
-            : 
-            <View
-            style={styles.mobileContainer}
-            >
-                <NavMobileButton
-                navigate={() => navigate(NavTo.Profile)}
-                icon="user"
-                currentNav={nav}
-                navTo={NavTo.Profile}
-                />
-                <NavMobileButton
-                navigate={() => navigate(NavTo.Survey)}
-                icon="poll"
-                currentNav={nav}
-                navTo={NavTo.Survey}
-                />
-                <NavMobileButton
-                navigate={() => navigate(NavTo.Listings)}
-                icon="house-flag"
-                currentNav={nav}
-                navTo={NavTo.Listings}
-                />
-                <NavMobileButton
-                navigate={() => navigate(NavTo.Matches)}
-                icon="check-double"
-                currentNav={nav}
-                navTo={NavTo.Matches}
-                />
-                <NavMobileButton
-                navigate={() => navigate(NavTo.Messages)}
-                icon="message"
-                currentNav={nav}
-                navTo={NavTo.Messages}
-                />
+            :
+            <View>
+            {visible ?
+                <View
+                style={styles.mobileContainer}
+                >
+                    <NavMobileButton
+                    navigate={() => navigate(NavTo.Profile)}
+                    icon="user"
+                    currentNav={nav}
+                    navTo={NavTo.Profile}
+                    />
+                    <NavMobileButton
+                    navigate={() => navigate(NavTo.Survey)}
+                    icon="poll"
+                    currentNav={nav}
+                    navTo={NavTo.Survey}
+                    />
+                    <NavMobileButton
+                    navigate={() => navigate(NavTo.Listings)}
+                    icon="house-flag"
+                    currentNav={nav}
+                    navTo={NavTo.Listings}
+                    />
+                    <NavMobileButton
+                    navigate={() => navigate(NavTo.Matches)}
+                    icon="check-double"
+                    currentNav={nav}
+                    navTo={NavTo.Matches}
+                    />
+                    <NavMobileButton
+                    navigate={() => navigate(NavTo.Messages)}
+                    icon="message"
+                    currentNav={nav}
+                    navTo={NavTo.Messages}
+                    />
+                </View>
+                :
+                null }
             </View>
             }   
         </View>

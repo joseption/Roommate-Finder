@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { config } from '../../service';
+import { config, env } from '../../service';
 import { LoginStyle, Style } from '../../style';
 import _TextInput from '../control/text-input';
 
@@ -68,7 +68,7 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
 
       try
       {    
-          await fetch(`${config.URL}/api/send-password-reset`,
+          await fetch(`${env.URL}/api/send-password-reset`,
               {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
                   let res = JSON.parse(await ret.text());
                   if(res.error)

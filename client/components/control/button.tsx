@@ -1,8 +1,8 @@
 import { useLinkProps, useNavigation } from '@react-navigation/native';
 import React, { useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { navProp } from '../../App';
 import _Text from '../../components/control/text';
+import { navProp } from '../../service';
 import { Color, FontSize, Style } from '../../style';
 
 const _Button = (props: any) => {

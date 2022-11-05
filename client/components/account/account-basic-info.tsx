@@ -5,10 +5,7 @@ import _Checkbox from '../control/checkbox';
 import _Group from '../control/group';
 import _Text from '../control/text';
 import { useState } from 'react';
-import { styles } from '../../screens/login';
 import { Color, FontSize, Radius, Style } from '../../style';
-import { isMobile } from '../../service';
-import { title } from 'process';
 
 const AccountInfo = (props: any, {navigation}:any) => {
     const [message,setMessage] = useState('this is an error message');

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { Context } from '../../App';
+import { Context } from '../../service';
 import { Color, Style } from '../../style';
 
 const _TextInput = (props: any) => {

@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { NavTo, Page } from '../../App';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { config, validateEmail } from '../../service';
+import { config, env, validateEmail } from '../../service';
 import { LoginStyle, Style } from '../../style';
 import _Checkbox from '../control/checkbox';
 import _TextInput from '../control/text-input';
@@ -54,7 +53,7 @@ const Login = (props: any, {navigation}:any) => {
 
       try
       {   
-          await fetch(`${config.URL}/api/login`,
+          await fetch(`${env.URL}/api/login`,
           {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
               if (res.error)

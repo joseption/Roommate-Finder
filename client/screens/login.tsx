@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Animated, Linking, Platform } from 'react-native';
+import { StyleSheet, View, Animated, Linking, Platform, SafeAreaView } from 'react-native';
 import _Button from '../components/control/button';
 import _Image from '../components/control/image';
 import _Text from '../components/control/text';
@@ -164,69 +164,69 @@ const LoginScreen = (props:any, {navigation}:any) => {
   }
 
   return (
-    <View style={style()}>
-        {props.mobile ?
-        <_Image
-        style={LoginStyle.logo}
-        source={require('../assets/images/logo.png')}
-        height={75}
-        />
-        : null
-        } 
-        <Animated.View
-        onLayout={(e) => setLayout(e)}
-        style={[moved ? null : styles.animateContent, styles.content, {opacity: opacity, transform:[{translateX: left}]}]}>
-            <ActivateEmailSent
-              btnStyle={btnStyle}
-              setStopInterval={setStopInterval}
-              stopInterval={stopInterval}
-              setEmail={setEmailValue}
-              email={emailValue}
-              registerPressed={() => goRight(screen.register)}
-              style={[styles.panel, activateEmailSent ? null : styles.hidden]}
-            />
-            <Register
-              btnStyle={btnStyle}
-              setEmail={setEmailValue}
-              email={emailValue}
-              sendEmailPressed={() => goLeft(screen.activateEmailSent)} // update to do stuff and then goLeft(1)
-              loginPressed={() => goRight(screen.login)}
-              style={[styles.panel, register ? null : styles.hidden]}
-            />
-            <Login
-              url={url}
-              btnStyle={btnStyle}
-              forgotPasswordPressed={() => goRight(screen.forgotPassword)}
-              registerPressed={() => goLeft(screen.register)}
-              style={[styles.panel, login ? null : styles.hidden]}
-            />
-            <ForgotPassword
-              btnStyle={btnStyle}
-              setEmail={setEmailValue}
-              email={emailValue}
-              sendEmailPressed={() => goRight(screen.passwordResetSent)} // update to do stuff and then goRight(1)
-              loginPressed={() => goLeft(screen.login)}
-              style={[styles.panel, forgotPassword ? null : styles.hidden]}
-            />
-            <PasswordResetSent
-              btnStyle={btnStyle}
-              setStopInterval={setStopInterval}
-              stopInterval={stopInterval}
-              passwordPressed={() => goLeft(screen.forgotPassword)}
-              style={[styles.panel, passwordResetSent ? null : styles.hidden]}
-            />
-            <UpdatePassword
-              btnStyle={btnStyle}
-              updatePasswordPressed={() => goRight(screen.passwordUpdated)} // update to do stuff and then goRight(1)
-              loginPressed={() => goLeft(screen.login)}
-              style={[styles.panel, updatePassword ? null : styles.hidden]}
-            />
-            <PasswordUpdated
-              loginPressed={() => goLeft(screen.login)}
-              style={[styles.panel, passwordUpdated ? null : styles.hidden]}
-            />
-        </Animated.View>
-    </View>
+      <View style={style()}>
+          {props.mobile ?
+          <_Image
+          style={LoginStyle.logo}
+          source={require('../assets/images/logo.png')}
+          height={75}
+          />
+          : null
+          } 
+          <Animated.View
+          onLayout={(e) => setLayout(e)}
+          style={[moved ? null : styles.animateContent, styles.content, {opacity: opacity, transform:[{translateX: left}]}]}>
+              <ActivateEmailSent
+                btnStyle={btnStyle}
+                setStopInterval={setStopInterval}
+                stopInterval={stopInterval}
+                setEmail={setEmailValue}
+                email={emailValue}
+                registerPressed={() => goRight(screen.register)}
+                style={[styles.panel, activateEmailSent ? null : styles.hidden]}
+              />
+              <Register
+                btnStyle={btnStyle}
+                setEmail={setEmailValue}
+                email={emailValue}
+                sendEmailPressed={() => goLeft(screen.activateEmailSent)} // update to do stuff and then goLeft(1)
+                loginPressed={() => goRight(screen.login)}
+                style={[styles.panel, register ? null : styles.hidden]}
+              />
+              <Login
+                url={url}
+                btnStyle={btnStyle}
+                forgotPasswordPressed={() => goRight(screen.forgotPassword)}
+                registerPressed={() => goLeft(screen.register)}
+                style={[styles.panel, login ? null : styles.hidden]}
+              />
+              <ForgotPassword
+                btnStyle={btnStyle}
+                setEmail={setEmailValue}
+                email={emailValue}
+                sendEmailPressed={() => goRight(screen.passwordResetSent)} // update to do stuff and then goRight(1)
+                loginPressed={() => goLeft(screen.login)}
+                style={[styles.panel, forgotPassword ? null : styles.hidden]}
+              />
+              <PasswordResetSent
+                btnStyle={btnStyle}
+                setStopInterval={setStopInterval}
+                stopInterval={stopInterval}
+                passwordPressed={() => goLeft(screen.forgotPassword)}
+                style={[styles.panel, passwordResetSent ? null : styles.hidden]}
+              />
+              <UpdatePassword
+                btnStyle={btnStyle}
+                updatePasswordPressed={() => goRight(screen.passwordUpdated)} // update to do stuff and then goRight(1)
+                loginPressed={() => goLeft(screen.login)}
+                style={[styles.panel, updatePassword ? null : styles.hidden]}
+              />
+              <PasswordUpdated
+                loginPressed={() => goLeft(screen.login)}
+                style={[styles.panel, passwordUpdated ? null : styles.hidden]}
+              />
+          </Animated.View>
+      </View>
   );
 };
 

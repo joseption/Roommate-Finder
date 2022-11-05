@@ -3,10 +3,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './screens/home';
 import { useFonts } from 'expo-font';
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faPaintBrush, faSignOut } from '@fortawesome/free-solid-svg-icons'
 import Navigation from './components/navigation/navigation';
 import React, { createContext, useEffect, useState } from 'react';
-import { Dimensions, Linking, ScrollView, StyleSheet, View } from 'react-native';
+import { Dimensions, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import 'react-native-gesture-handler';
 import {StackNavigationProp} from '@react-navigation/stack';
 import AccountScreen from './screens/account';
@@ -17,61 +16,9 @@ import MessagesScreen from './screens/messages';
 import MatchesScreen from './screens/matches';
 import ExploreScreen from './screens/explore';
 import { Color, Content } from './style';
-import { isMobile } from './service';
+import { config, isMobile, linking, NavTo, Page, Stack } from './service';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
-
-library.add(faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
-
-export const Context = createContext({} as any); 
-export type navProp = StackNavigationProp<Page>;
-export const NavTo = {
-  Home: 'Home' as never,
-  Login: 'Login' as never,
-  Account: 'Account' as never,
-  Profile: 'Profile' as never,
-  Survey: 'Survey' as never,
-  Matches: 'Matches' as never,
-  Explore: 'Explore' as never,
-  Listings: 'Listings' as never,
-  Messages: 'Messages' as never,
-  Logout: 'Logout' as never,
-}
-
-export type Page = {
-  Home: undefined;
-  Login: undefined;
-  Account: undefined;
-  Profile: undefined;
-  Survey: undefined;
-  Matches: undefined;
-  Explore: undefined;
-  Listings: undefined;
-  Messages: undefined;
-  Logout: undefined;
-}
-
-const Stack = createNativeStackNavigator<Page>();
-
-export const config = {
-  screens: {
-    Home: '/',
-    Login: '/login',
-    Account: '/account',
-    Profile: '/profile',
-    Survey: '/survey',
-    Matches: '/matches',
-    Explore: '/explore',
-    Listings: '/listings',
-    Messages: '/messages',
-    Logout: '/logout',
-  },
-};
-
-const linking = {
-  prefixes: ['/'],
-  config,
-};
 
 export const App = () => {
   const [navDimensions,setNavDimensions] = useState({height: 0, width: 0});
@@ -99,7 +46,7 @@ export const App = () => {
 
     if (!init) {
       Linking.getInitialURL().then((url: any) => {
-        if (url.toLowerCase().includes(config.screens.Login)) {
+        if (url && url.toLowerCase().includes(config.screens.Login)) {
           setPage(NavTo.Login);
         }
       });
@@ -116,13 +63,13 @@ export const App = () => {
 
   const routeName = (): keyof Page => {
     // JA TODO need logic to decide route name for now just return home
-    return NavTo.Home;
+    return NavTo.Account;
   }
 
   const state = (e: any) => {
     if (init) {
       var routes = e.data.state.routes;
-      if (routes.length > 0) {
+      if (routes && routes.length > 0) {
         setPage(routes[routes.length - 1].name);
         prepareStyle();
       }
@@ -191,7 +138,7 @@ export const App = () => {
           screenOptions={{headerShown: false, contentStyle: {backgroundColor: mobile ? Color.white : Color.holder}}}
           initialRouteName={routeName()}
           screenListeners={{
-            state: (e) => state(e)
+            state: (e: any) => state(e)
           }}
           >
             <Stack.Screen
@@ -243,7 +190,7 @@ export const App = () => {
                 name={NavTo.Logout}
             >
             {(props: any) => <LogoutScreen {...props} mobile={mobile} />}
-            </Stack.Screen> 
+            </Stack.Screen>
           </Stack.Navigator>
         </View>
       </ScrollView>

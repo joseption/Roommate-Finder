@@ -176,7 +176,6 @@ export const Style = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: Radius.default,
-    width:'fit-content',
     marginLeft:3
   },
   labelDefault: {
@@ -224,8 +223,8 @@ export const Style = StyleSheet.create({
     top: -1,
     left: -1,
     backgroundColor: Color.default,
-    width: 'calc(100% + 2px)',
-    height: 'calc(100% + 2px)',
+    // width: 'calc(100% + 2px)', // ja need to fix can't use calculation
+    // height: 'calc(100% + 2px)',
     borderRadius: Radius.small
   },
   checkboxLabel: {

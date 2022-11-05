@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { setStatusBarTranslucent } from 'expo-status-bar';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, Pressable } from 'react-native';
-import { Context } from '../../App';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { View, TextInput, StyleSheet, Pressable, PanResponder, GestureResponderEvent } from 'react-native';
+import { Context } from '../../service';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Option from './option';
 import Text from './text';
@@ -11,7 +11,6 @@ import _Text from './text';
 const _Dropdown = (props: any, {navigation}:any) => {
     const [focus,setFocus] = useState(false);
     const [height,setHeight] = useState(0);
-    const [zIndex,setZIndex] = useState({});
     const [options,setOptions] = useState([]);
     const [init,setInit] = useState(false);
     const [value,setValue] = useState('');
@@ -60,6 +59,18 @@ const _Dropdown = (props: any, {navigation}:any) => {
         }
     }
 
+    const containerStyle = () => {
+        var style = [];        
+        style.push(styles.container);
+        style.push(props.containerStyle);
+        style.push(context.groupStyle);
+
+        if (focus)
+            style.push(styles.containerFocus);
+        
+        return style;
+    }
+
     const errorMessage = () => {
         if (props.error == true) {
             if (!props.errorMessage) {
@@ -75,14 +86,6 @@ const _Dropdown = (props: any, {navigation}:any) => {
         setMenu(!focus, true);
     }
 
-    const swapIndex = (focus: boolean) => {
-        var zIndex = {
-            zIndex: focus ? 1 : 0,
-            elevation: focus ? 1 :0
-        }
-        setZIndex(zIndex)
-    }
-
     const setMenu = (focus: boolean, fromBtn = false) => {
         if (focus) {
             if (fromBtn)
@@ -91,7 +94,6 @@ const _Dropdown = (props: any, {navigation}:any) => {
                 mappedItems(textValue);
         }
 
-        swapIndex(focus);
         setFocus(focus);
         onFocus(focus);
     }
@@ -138,7 +140,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
         setKey(e.key);
         setValue(e.value);
         setTextValue(e.value);
-        setMenu(false);
+        setMenu(false)
     }
 
     const mappedItems = (value: string) => {
@@ -156,17 +158,20 @@ const _Dropdown = (props: any, {navigation}:any) => {
     }
 
     const onblur = (e: any) => {
-        if (value && textValue)
-            setTextValue(value);
-        else {
-            setTextValue("");
-            setKey("");
-            setValue("");
-        }
+        if (!e.relatedTarget ||
+            e.relatedTarget && !e.relatedTarget.parentElement ||
+            e.relatedTarget && e.relatedTarget.parentElement && 
+            e.relatedTarget.parentElement.id != "menu") {
+            if (value && textValue)
+                setTextValue(value);
+            else {
+                setTextValue("");
+                setKey("");
+                setValue("");
+            }
 
-        setTimeout(() => {
-            setMenu(false, false);
-        }, 150);
+            setMenu(false);
+        }
     }
 
     const onfocus = (e: any) => {
@@ -177,7 +182,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
     return (
     <View
-    style={[styles.container, zIndex, props.containerStyle, context.groupStyle]}
+    style={containerStyle()}
     onLayout={(e: any) => setNavLayout(e)}
     >
         <View
@@ -214,8 +219,8 @@ const _Dropdown = (props: any, {navigation}:any) => {
             placeholder={props.placeholder}
             keyboardType={props.keyboardType}
             ref={inputRef}
-            onBlur={(e: any) => onblur(e)}
             onFocus={(e: any) => onfocus(e)}
+            onBlur={(e: any) => onblur(e)}
             ></TextInput>
             <Pressable
             style={styles.iconContainer}
@@ -227,6 +232,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
         {focus ?
         <View
             style={[styles.menu, menuStyle()]}
+            nativeID="menu"
             >
             {visibleOptionCount === 0 ?
             <_Text
@@ -241,6 +247,11 @@ const _Dropdown = (props: any, {navigation}:any) => {
 };
 
 const styles = StyleSheet.create({
+    menuVoid: {
+        backgroundColor: Color.black,
+        height: '100%',
+        width: '100%'
+    },
     noResults: {
         textAlign: 'center',
         padding: 10,
@@ -259,6 +270,10 @@ const styles = StyleSheet.create({
         overflowY: 'auto',
         overflowX: 'hidden',
         position: 'absolute',
+        shadowColor: Color.black,
+        shadowOffset: {width: -4, height: 4},
+        shadowOpacity: .15,
+        shadowRadius: 15,
     },
     text: {
         display: 'flex',
@@ -291,7 +306,11 @@ const styles = StyleSheet.create({
     },
     container: {
         width: '100%'
-    }
+    },
+    containerFocus: {
+        zIndex: 1,
+        elevation: 1
+    },
   });
   
 

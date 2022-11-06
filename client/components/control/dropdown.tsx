@@ -1,9 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { setStatusBarTranslucent } from 'expo-status-bar';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { View, TextInput, StyleSheet, Pressable, PanResponder, GestureResponderEvent } from 'react-native';
-import { Context } from '../../service';
+import { View, TextInput, StyleSheet, Pressable, PanResponder, GestureResponderEvent, Platform } from 'react-native';
+import { Context, isMobile } from '../../service';
 import { Color, FontSize, Radius, Style } from '../../style';
+import _Group from './group';
 import _Option from './option';
 import Text from './text';
 import _Text from './text';
@@ -21,7 +22,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
     /*Props:
     JA TODO Will be explained later
     */
-
+// JA todo dropdowns need to calculate if they are going to run off the page and open upwards instead
     const context = useContext(Context);
     const onFocus = useCallback((value: any) => {
         context.setParentFocus(value);
@@ -62,12 +63,16 @@ const _Dropdown = (props: any, {navigation}:any) => {
     const containerStyle = () => {
         var style = [];        
         style.push(styles.container);
-        style.push(props.containerStyle);
-        style.push(context.groupStyle);
-
         if (focus)
             style.push(styles.containerFocus);
+        if (context.isGroup) {
+            if (isMobile())
+                style.push(Style.verticalGroup);
+            else
+                style.push(Style.horizontalGroup);
+        }
         
+        style.push(props.containerStyle);
         return style;
     }
 
@@ -305,6 +310,11 @@ const styles = StyleSheet.create({
         position: 'relative'
     },
     container: {
+        ...Platform.select({
+            web: {
+                flex: 1,
+            }
+        }),
         width: '100%'
     },
     containerFocus: {

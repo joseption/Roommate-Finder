@@ -1,11 +1,12 @@
-import { StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import _TextInput from '../control/text-input';
 import _Dropdown from '../control/dropdown';
 import _Checkbox from '../control/checkbox';
 import _Group from '../control/group';
 import _Text from '../control/text';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Color, FontSize, Radius, Style } from '../../style';
+import { styles } from '../../screens/login';
 
 const AccountInfo = (props: any, {navigation}:any) => {
     const [message,setMessage] = useState('this is an error message');
@@ -38,8 +39,18 @@ const AccountInfo = (props: any, {navigation}:any) => {
         return "We need some basic information";
     }
 
+    const subTitleStyle = () => {
+        var style = [];
+        style.push(_styles.subtitle);
+        if (props.mobile) {
+            style.push(_styles.subTitleMobile);
+        }
+        
+        return style;
+    }
+
     return (
-    <View>
+    <ScrollView>
         <View>
             <_Text
             style={_styles.title}
@@ -51,7 +62,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
         style={[containerStyle(), _styles.container]}
         >
             <_Text
-            style={_styles.subtitle}
+            style={subTitleStyle()}
             >
                 {subtitle()}
             </_Text>
@@ -123,7 +134,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
             style={Style.textSmallDanger}
             >{message}</_Text>
         </View>
-    </View>
+    </ScrollView>
     );
 };
 
@@ -140,7 +151,7 @@ const _styles = StyleSheet.create({
     },
     container: {
         backgroundColor: Color.white,
-        marginTop: 10
+        marginTop: 5
     },
     title: {
         fontFamily: 'Inter-SemiBold',
@@ -148,11 +159,22 @@ const _styles = StyleSheet.create({
     },
     subtitle: {
         color: Color.textTertiary,
-        paddingBottom: 20
+        paddingBottom: 20,
+        fontSize: FontSize.large
+    },
+    subTitleMobile: {
+        fontSize: FontSize.default
     },
     formGap: {
         marginBottom: 15
     },
+    checkbox: {
+        ...Platform.select({
+            android: {
+                backgroundColor: Color.black
+            }
+        }),
+    }
 });
 
 export default AccountInfo;

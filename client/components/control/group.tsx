@@ -1,36 +1,16 @@
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import _TextInput from '../control/text-input';
 import _Dropdown from '../control/dropdown';
 import _Checkbox from '../control/checkbox';
 import _Text from '../control/text';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Color, Radius } from '../../style';
-import { Context } from '../../service';
+import { Context, isMobile } from '../../service';
 
 const _Group = (props: any, {navigation}:any) => {
-    const [focus,setFocus] = useState(false);
-    const [prepFocus, setPrepFocus] = useState(false);
-    const [canPrepFocus, setCanPrepFocus] = useState(false);
-    const [timerId, setTimerId] = useState(-1);
-
-    // useEffect(() => {
-    //     if (canPrepFocus) {
-    //         let timeout: any;
-    //         if (timerId < 0) {
-    //             timeout = setTimeout(() => setFocus(prepFocus), 10);
-    //             setTimerId(timeout);
-    //         }
-    //         else {
-    //             clearTimeout(timerId);
-    //             setTimerId(-1);
-    //         }
-    //         setCanPrepFocus(false);
-    //     }
-    //   }, [prepFocus, timerId, focus]) 
-      
+    const [focus,setFocus] = useState(false);  
+    const [isGroup, setIsGroup] = useState(true);
     const setParentFocus = useCallback((value: any) => { 
-        //setPrepFocus(value);
-        //setCanPrepFocus(true);
         setFocus(value);
       }, []);
 
@@ -71,16 +51,18 @@ const _Group = (props: any, {navigation}:any) => {
         <View
         style={containerStyle()}
         >
+            {props.label ?
             <_Text
             required={props.required}
             style={styles.label}
             >
                 {props.label}
             </_Text>
+            : null }
             <View
             style={groupStyle(focus)}
             >
-            <Context.Provider value={{ setParentFocus, groupStyle: {flex: 1} }}>
+            <Context.Provider value={{ setParentFocus, isGroup }}>
             {props.children}
             </Context.Provider>
             </View>
@@ -90,12 +72,11 @@ const _Group = (props: any, {navigation}:any) => {
 
 const styles = StyleSheet.create({
     label: {
-        marginBottom: 5
+        marginBottom: 5,
     },
     group: {
         backgroundColor: Color.holder,
         display: 'flex',
-        gap: 10,
         borderRadius: Radius.default,
     },
     groupAccent: {
@@ -105,7 +86,14 @@ const styles = StyleSheet.create({
         shadowOpacity: 1,
         shadowRadius: 0,
         marginLeft: 3,
-        //width: 'calc(100% - 3px)'
+        ...Platform.select({
+            web: {
+                width: 'calc(100% - 3px)'
+            },
+            android: {
+                marginLeft: 0
+            }
+        })
     },
     groupNoBG: {
         backgroundColor: Color.none,
@@ -117,11 +105,14 @@ const styles = StyleSheet.create({
     horizontal: {
         flexDirection: 'row',
         alignItems: 'center',
+        paddingRight: 0,
     },
     vertical: {
         flexDirection: 'column',
         alignItems: 'flex-start',
-    }
+        //paddingTop: 10,
+        marginTop: 0
+    },
 });
 
 export default _Group;

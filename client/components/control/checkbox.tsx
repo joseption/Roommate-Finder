@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
+import { styles } from '../../screens/login';
+import { Context, isMobile } from '../../service';
 import { Style } from '../../style';
 import _Text from './text';
 
 const _Checkbox = (props: any, {navigation}:any) => {
+    const context = useContext(Context);
     const [checked,setChecked] = useState(false);
     const [init,setInit] = useState(false);
     useEffect(() => {
@@ -13,14 +16,28 @@ const _Checkbox = (props: any, {navigation}:any) => {
         }
     }, [checked]);
 
+    const containerStyle = () => {
+        var style = [];
+        if (context.isGroup) {
+            if (isMobile())
+                style.push(Style.verticalGroup);
+            else
+                style.push(Style.horizontalGroup);
+        }
+
+        return style;
+    }
+
     const press = () => {
         setChecked(!checked);
     }
 
     return (
-    <View>
+    <View
+    style={containerStyle()}
+    >
         <Pressable
-        style={Style.checkboxContainer}
+        style={[Style.checkboxContainer, props.checkbox]}
         onPress={() => press()}
         >
         <View

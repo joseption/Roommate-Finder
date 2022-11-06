@@ -26,7 +26,7 @@ const Navigation = (props: any) => {
         var state = navigation.getState();
         if (state) {
             var routes = state.routes;
-            if (route) {
+            if (routes) {
                 var route = routes[routes.length - 1].path;
                 setNavigation(route);
             }
@@ -194,7 +194,7 @@ const Navigation = (props: any) => {
             </View>
             :
             <View>
-            {visible ?
+            {visible ? // JA figure out how to get this to work on mobile (doesn't like function maybe??)
                 <View
                 style={styles.mobileContainer}
                 >
@@ -276,7 +276,7 @@ const Navigation = (props: any) => {
             marginLeft: 10,
             ...Platform.select({
                 web: {
-            outlineStyle: 'none',
+                    outlineStyle: 'none',
                 }
             }),
         },

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { Context } from '../../service';
+import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Context, isMobile } from '../../service';
 import { Color, Style } from '../../style';
 
 const _TextInput = (props: any) => {
@@ -41,6 +41,19 @@ const _TextInput = (props: any) => {
     }
   }
 
+  const containerStyle = () => {
+    var style = [];
+    style.push(styles.container);
+    if (context.isGroup) {
+      if (isMobile())
+          style.push(Style.verticalGroup);
+      else
+          style.push(Style.horizontalGroup);
+    }
+    style.push(props.containerStyle);
+    return style;
+  }
+
   const errorMessage = () => {
     if (props.error == true) {
       if (!props.errorMessage) {
@@ -54,7 +67,7 @@ const _TextInput = (props: any) => {
 
   return (
     <View
-    style={[styles.container, props.containerStyle, context.groupStyle]}
+    style={containerStyle()}
     >
       <View
       style={styles.text}
@@ -104,7 +117,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold'
   },
   container: {
-    width: '100%'
+    width: '100%',
+    ...Platform.select({
+      web: {
+          flex: 1,
+      },
+  }),
   }
 });
 

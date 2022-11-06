@@ -223,14 +223,26 @@ export const Style = StyleSheet.create({
     top: -1,
     left: -1,
     backgroundColor: Color.default,
-    // width: 'calc(100% + 2px)', // ja need to fix can't use calculation
-    // height: 'calc(100% + 2px)',
+    width: 18,
+    height: 18,
     borderRadius: Radius.small
   },
   checkboxLabel: {
     fontFamily: 'Inter-Regular',
     fontSize: FontSize.default,
-    color: Color.text
+    color: Color.text,
+    marginLeft: 5,
+    ...Platform.select({
+      web: {
+        marginLeft: 0
+      }
+    }),
+  },
+  verticalGroup: {
+    marginTop: 10
+  },
+  horizontalGroup: {
+      marginRight: 10
   }
 });
 

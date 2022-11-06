@@ -2,7 +2,7 @@ import { useLinkProps, useNavigation } from '@react-navigation/native';
 import React, { useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import _Text from '../../components/control/text';
-import { navProp } from '../../service';
+import { navProp } from '../../helper';
 import { Color, FontSize, Style } from '../../style';
 
 const _Button = (props: any) => {
@@ -59,11 +59,13 @@ const _Button = (props: any) => {
 const styles = StyleSheet.create({
     text: {
         color: Color.white,
-        fontSize: FontSize.default
+        fontSize: FontSize.default,
+        margin: 'auto'
     },
     textDisabled: {
         color: Color.textDisabled,
-        fontSize: FontSize.default
+        fontSize: FontSize.default,
+        margin: 'auto'
     }
 });
 

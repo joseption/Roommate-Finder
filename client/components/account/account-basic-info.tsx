@@ -15,17 +15,20 @@ const AccountInfo = (props: any, {navigation}:any) => {
         var borderRadius = Radius.large;
         var borderColor = Color.border;
         var borderWidth = 1;
+        var marginTop = 10;
         if (props.mobile) {
             padding = 0;
             borderRadius = 0;
             borderWidth = 0;
+            marginTop = 0
         }
 
         return {
             padding: padding,
             borderRadius: borderRadius,
             borderColor: borderColor,
-            borderWidth: borderWidth
+            borderWidth: borderWidth,
+            marginTop: marginTop
         }
     }
 
@@ -88,7 +91,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 <_Dropdown
                 label="Month"
                 options={
-                    [{key:1, value:'TestSelect'},{key:2, value:'Another'},{key:2, value:'Select'},{key:3, value:'Testing'},{key:4, value:'LookHere'},{key:5, value:'What is this?'},{key:6, value:'Some Option'},{key:7, value:'No Thank you'},{key:8, value:'Another Test'},{key:9, value:'LookHere'}]
+                    [{key:1, value:'TestSelect'},{key:2, value:'Another'},{key:2, value:'Select'},{key:3, value:'Testing'},{key:4, value:'LookHere'},{key:5, value:'What is this?'},{key:6, value:'Some Option'},{key:7, value:'No Thank you'},{key:8, value:'Another Test'},{key:9, value:'LookHere'},{key:1, value:'TestSelect'},{key:2, value:'Another'},{key:2, value:'Select'},{key:3, value:'Testing'},{key:4, value:'LookHere'},{key:5, value:'What is this?'},{key:6, value:'Some Option'},{key:7, value:'No Thank you'},{key:8, value:'Another Test'},{key:9, value:'LookHere'},{key:1, value:'TestSelect'},{key:2, value:'Another'},{key:2, value:'Select'},{key:3, value:'Testing'},{key:4, value:'LookHere'},{key:5, value:'What is this?'},{key:6, value:'Some Option'},{key:7, value:'No Thank you'},{key:8, value:'Another Test'},{key:9, value:'LookHere'}]
                 }
                 ></_Dropdown>
                 <_Dropdown
@@ -151,7 +154,6 @@ const _styles = StyleSheet.create({
     },
     container: {
         backgroundColor: Color.white,
-        marginTop: 5
     },
     title: {
         fontFamily: 'Inter-SemiBold',

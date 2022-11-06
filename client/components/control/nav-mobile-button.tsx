@@ -30,7 +30,7 @@ const NavMobileButton = (props: any) => {
     onPress={() => props.navigate()}
     style={styles.container}
     >
-        <FontAwesomeIcon style={iconStyle(props.navTo)} icon={props.icon} />
+        <FontAwesomeIcon size={20} style={iconStyle(props.navTo)} icon={props.icon} />
         <View style={indicateStyle(props.navTo)}></View>
     </Pressable>
     );
@@ -46,19 +46,24 @@ const styles = StyleSheet.create({
     },
     icon: {
         height: 20,
+        width: 20,
         color: Color.icon,
-        paddingBottom: 10,
-        outlineStyle: 'none'
+        marginBottom: 10,
+        outlineStyle: 'none',
     },
     iconSelected: {
         color: Color.default,
         height: 20,
-        paddingBottom: 10,
+        width: 20,
+        marginBottom: 10,
     },
     indicator: {
         width: '100%',
         borderBottomColor: Color.default,
-        borderBottomWidth: 2
+        borderBottomWidth: 2,
+        position: 'absolute',
+        bottom: 0,
+        left: 0
     },
 });
 

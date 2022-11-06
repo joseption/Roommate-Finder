@@ -1,13 +1,13 @@
-import { NavigationContainer, StackRouter, useLinkProps, useNavigation } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef, StackRouter, useLinkProps, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './screens/home';
 import { useFonts } from 'expo-font';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import Navigation from './components/navigation/navigation';
 import React, { createContext, useEffect, useState } from 'react';
-import { Dimensions, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import 'react-native-gesture-handler';
-import {StackNavigationProp} from '@react-navigation/stack';
+import {Header, StackNavigationProp} from '@react-navigation/stack';
 import AccountScreen from './screens/account';
 import ProfileScreen from './screens/profile';
 import SurveyScreen from './screens/survey';
@@ -16,17 +16,18 @@ import MessagesScreen from './screens/messages';
 import MatchesScreen from './screens/matches';
 import ExploreScreen from './screens/explore';
 import { Color, Content } from './style';
-import { config, isMobile, linking, NavTo, Page, Stack } from './service';
+import { config, isMobile, linking, NavTo, Page, Stack } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 
-export const App = () => {
+export const App = (props: any) => {
   const [navDimensions,setNavDimensions] = useState({height: 0, width: 0});
   const [style,setStyle] = useState({});
   const [containerStyle,setContainerStyle] = useState({});
   const [mobile,setMobile] = useState(false);
   const [page,setPage] = useState('');
   const [init,setInit] = useState(false);
+  const [route,setRoute] = useState('');
   const [adjustedPos,setAdjustedPos] = useState(0);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
@@ -50,12 +51,14 @@ export const App = () => {
           setPage(NavTo.Login);
         }
       });
+
       setInit(true);
     }
 
     prepareStyle();
+
     return () => subscription?.remove();
-  }, [navDimensions.height, page, mobile, adjustedPos]);
+  }, [navDimensions.height, page, mobile, adjustedPos, route]);
   
   if (!loaded) {
     return null;
@@ -90,29 +93,17 @@ export const App = () => {
   }
 
   function prepareStyle() {
-    var paddingLeft = 0;
-    var paddingRight = 0;
     var backgroundColor = Color.holder;
-    var translate = adjustedPos;
+    var marginTop = Platform.OS === 'web' ? navDimensions.height : 0;
     if (mobile) {
       backgroundColor = Color.white;
-      paddingLeft = 10;
-      paddingRight = 10;
-      translate = 0;
     }
-    var paddingTop = page === NavTo.Login ? 0 : 10;
 
-    var content = {
-      paddingLeft: paddingLeft,
-      paddingRight: paddingRight,
-      paddingTop: paddingTop,
-      transform: [{translateX: translate}]
-    };
     var container = {
       backgroundColor: backgroundColor,
-      marginTop: navDimensions.height,
+      marginTop: marginTop,
     }
-    setStyle(content);
+
     setContainerStyle(container);
   }
 
@@ -120,22 +111,62 @@ export const App = () => {
       getOffset(e.nativeEvent.contentSize.width);
   }
 
+  const header = (e: any) => {
+    if (Platform.OS !== 'web')
+      return <Navigation screen={e.options.title} dimensions={navDimensions} setDimensions={setNavDimensions} mobile={mobile} />
+    else
+      return <View></View>;
+  }
+
+  const contentStyle = () => {
+    var style = [];
+    style.push(styles.contentStyle);
+    var paddingTop = (page === NavTo.Login) ? 0 : 10;
+    var backgroundColor = Color.holder;
+    var paddingLeft = 0;
+    var paddingRight = 0;
+    var translate = !mobile ? adjustedPos : 0;
+
+    if (mobile) {
+      backgroundColor = Color.white;
+      paddingLeft = 10;
+      paddingRight = 10;
+    }
+
+    var content = {
+      backgroundColor: backgroundColor,
+      paddingLeft: paddingLeft,
+      paddingRight: paddingRight,
+      transform: [{translateX: translate}],
+      paddingTop: paddingTop
+    }
+    
+    style.push(content);
+    return style;
+  }
+
+  const scrollParentContainerStyle = () => {
+    var style = [];
+    style.push(styles.scrollParentContainer);
+    return style;
+  }
+
   return (
     <NavigationContainer
     linking={linking}
     >
       <ScrollView
-      contentContainerStyle={styles.scrollParentContainer}
+      contentContainerStyle={scrollParentContainerStyle()}
       style={[containerStyle, styles.container]}
       onScroll={(e) => scroll(e)}
       scrollEventThrottle={100}
       onContentSizeChange={(w, h) => getScrollDims(w, h)}
       >
         <View
-        style={[style, styles.stack]}
+        style={styles.stack}
         >
           <Stack.Navigator
-          screenOptions={{headerShown: false, contentStyle: {backgroundColor: mobile ? Color.white : Color.holder}}}
+          screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle()}}
           initialRouteName={routeName()}
           screenListeners={{
             state: (e: any) => state(e)
@@ -143,73 +174,78 @@ export const App = () => {
           >
             <Stack.Screen
                 name={NavTo.Home}
+                options={{title: NavTo.Home, animation: 'none'}}
             >
             {(props: any) => <HomeScreen {...props} mobile={mobile} />}
             </Stack.Screen>
             <Stack.Screen
                 name={NavTo.Login}
+                options={{title: NavTo.Login, animation: 'none'}}
             >
                 {(props: any) => <LoginScreen {...props} mobile={mobile} />}
             </Stack.Screen>
             <Stack.Screen
                 name={NavTo.Account}
+                options={{title: NavTo.Account, animation: 'none'}}
             >
             {(props: any) => <AccountScreen {...props} mobile={mobile} />}
             </Stack.Screen>
             <Stack.Screen
                 name={NavTo.Profile}
+                options={{title: NavTo.Profile, animation: 'none'}}
             >
             {(props: any) => <ProfileScreen {...props} mobile={mobile} />}
             </Stack.Screen> 
             <Stack.Screen
                 name={NavTo.Survey}
+                options={{title: NavTo.Survey, animation: 'none'}}
             >
             {(props: any) => <SurveyScreen {...props} mobile={mobile} />}
             </Stack.Screen>
             <Stack.Screen
                 name={NavTo.Matches}
+                options={{title: NavTo.Matches, animation: 'none'}}
             > 
             {(props: any) => <MatchesScreen {...props} mobile={mobile} />}
             </Stack.Screen>
             <Stack.Screen
                 name={NavTo.Explore}
+                options={{title: NavTo.Explore, animation: 'none'}}
             > 
             {(props: any) => <ExploreScreen {...props} mobile={mobile} />}
             </Stack.Screen>
             <Stack.Screen
                 name={NavTo.Listings}
+                options={{title: NavTo.Listings, animation: 'none'}}
             >
             {(props: any) => <ListingsScreen {...props} mobile={mobile} />}
             </Stack.Screen>
             <Stack.Screen
                 name={NavTo.Messages}
+                options={{title: NavTo.Messages, animation: 'none'}}
             >
             {(props: any) => <MessagesScreen {...props} mobile={mobile} />}
             </Stack.Screen> 
             <Stack.Screen
                 name={NavTo.Logout}
+                options={{title: NavTo.Logout, animation: 'none'}}
             >
             {(props: any) => <LogoutScreen {...props} mobile={mobile} />}
             </Stack.Screen>
           </Stack.Navigator>
         </View>
       </ScrollView>
-      <Navigation
-      dimensions={navDimensions}
-      setDimensions={setNavDimensions}
-      mobile={mobile}
-      >
-      </Navigation>
+      {Platform.OS === 'web' ?
+      <Navigation dimensions={navDimensions} setDimensions={setNavDimensions} mobile={mobile} />
+      : null}
+
     </NavigationContainer>
   );
 };
 
 const styles = StyleSheet.create({
   stack: {
-    marginLeft: 'auto',
-    marginRight: 'auto',
     width: '100%',
-    maxWidth: Content.width,
     height: '100%'
   },
   container: {
@@ -219,6 +255,13 @@ const styles = StyleSheet.create({
   scrollParentContainer: {
     height: '100%',
   },
+  contentStyle: {
+    maxWidth: Content.width,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '100%',
+    height: '100%',
+  }
 });
 
 export default App;

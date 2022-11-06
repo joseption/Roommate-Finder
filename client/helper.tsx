@@ -5,6 +5,7 @@ import { createContext } from "react";
 import { Dimensions } from "react-native";
 import { Content } from "./style";
 import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faPaintBrush, faSignOut } from '@fortawesome/free-solid-svg-icons'
+import { createNavigationContainerRef } from "@react-navigation/native";
 
 export const isMobile = () => {
     return Dimensions.get('window').width < Content.mobileWidth;
@@ -98,3 +99,4 @@ export const linking = {
   prefixes: ['/'],
   config,
 };
+

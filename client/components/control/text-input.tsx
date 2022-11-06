@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Context, isMobile } from '../../service';
+import { Context, isMobile } from '../../helper';
 import { Color, Style } from '../../style';
 
 const _TextInput = (props: any) => {
@@ -49,6 +49,16 @@ const _TextInput = (props: any) => {
           style.push(Style.verticalGroup);
       else
           style.push(Style.horizontalGroup);
+    }
+    if (context.isGroup) {
+    var container = {
+        ...Platform.select({
+          web: {
+              flex: 1,
+          },
+        }),
+      }
+      style.push(container);
     }
     style.push(props.containerStyle);
     return style;
@@ -118,11 +128,6 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '100%',
-    ...Platform.select({
-      web: {
-          flex: 1,
-      },
-  }),
   }
 });
 

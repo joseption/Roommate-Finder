@@ -4,6 +4,7 @@ import { Platform, StyleSheet } from 'react-native';
 export const Color = {
     white:'#FFFFFF',
     black:'#000000',
+    blackMask: '#00000075',
     success:'#54BE66',
     successSecondary:'#4BAB5B',
     default:'#418DFC',
@@ -176,7 +177,10 @@ export const Style = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: Radius.default,
-    marginLeft:3
+    marginLeft:3,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   labelDefault: {
     fontSize: FontSize.default,

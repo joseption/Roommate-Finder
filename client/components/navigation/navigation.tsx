@@ -1,37 +1,46 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import _Button from '../control/button';
 import _TextInput from '../control/text-input';
 import _Text from '../control/text';
 import _Image from '../control/image';
 import { Color, Content, FontSize, Radius, Style } from '../../style';
-import { isMobile, NavTo, Page } from '../../service';
+import { isMobile, NavTo, Page } from '../../helper';
 import NavMenuButton from '../control/nav-menu-button';
 import NavMobileButton from '../control/nav-mobile-button';
-import { useNavigation } from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
+import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
-type navProp = StackNavigationProp<Page>;
 const Navigation = (props: any) => {
-    const navigation = useNavigation<navProp>();
+    const navigation = useNavigation();
     const [showMenu,setShowMenu] = useState(false);
     const [visible,setVisible] = useState(false);
+    const [init,setInit] = useState(false);
     const [nav,setNav] = useState('');
 
     useEffect(() => {
         if (isMobile()) {
             setShowMenu(false);
         }
-        var state = navigation.getState();
-        if (state) {
-            var routes = state.routes;
-            if (routes) {
-                var route = routes[routes.length - 1].path;
-                setNavigation(route);
+        if (props.screen) {
+            if (!init) {
+                setNavigation(props.screen);
+                if (Platform.OS !== 'web') {
+                    setInit(true);
+                }
             }
         }
-    }, [props.mobile, nav]);
+        else {
+            var state = navigation.getState();
+                if (state) {
+                var routes = state.routes;
+                if (routes) {
+                    var route = routes[routes.length - 1].path;
+                    setNavigation(route);
+                }
+            }
+        }
+    }, [props.mobile, nav, visible, props.route, props.screen]);
 
     const setNavigation = (route: any) => {
         if (loc(route, NavTo.Profile))
@@ -108,10 +117,10 @@ const Navigation = (props: any) => {
                     style={styles.iconContainer}
                     >
                         <Pressable
-                        onPress={() => null} // need to navigate to messages in the stack
+                        onPress={() => null} // JA need to navigate to messages in the stack
                         style={styles.icon}
                         >
-                            <FontAwesomeIcon style={styles.message} icon="message" />
+                            <FontAwesomeIcon size={18} color={Color.icon} style={styles.message} icon="message" />
                             <_Text
                             containerStyle={styles.countContainer}
                             style={styles.count}
@@ -132,7 +141,7 @@ const Navigation = (props: any) => {
                                 height={40}
                                 />
                             </View>
-                            <FontAwesomeIcon style={styles.menuIcon} icon="caret-down" />
+                            <FontAwesomeIcon color={Color.icon} size={14} style={styles.menuIcon} icon="caret-down" />
                         </Pressable>
                     </View>
                 </View>
@@ -194,7 +203,7 @@ const Navigation = (props: any) => {
             </View>
             :
             <View>
-            {visible ? // JA figure out how to get this to work on mobile (doesn't like function maybe??)
+            {visible ?
                 <View
                 style={styles.mobileContainer}
                 >
@@ -237,12 +246,15 @@ const Navigation = (props: any) => {
         );
     };  
 
-    const styles = StyleSheet.create({ // JA TODO need to make nav fixed to top 
+    const styles = StyleSheet.create({
         nav: {
-            position: 'absolute',
-            top: 0,
             backgroundColor: Color.white,
             width: '100%',
+            ...Platform.select({
+                web: {
+                    position: 'fixed', // JA Has error on 'nav' style but works on web
+                }
+            })
         },
         logoContainer: {
             display: 'flex',
@@ -289,12 +301,9 @@ const Navigation = (props: any) => {
             justifyContent: 'center'
         },
         message: {
-            width: 18,
-            height: 18,
-            color: Color.icon,
             ...Platform.select({
                 web: {
-            outlineStyle: 'none',
+                    outlineStyle: 'none', // JA Has error but works fine on web
                 }
             }),
         },
@@ -335,7 +344,6 @@ const Navigation = (props: any) => {
             padding: 1,
             backgroundColor: Color.imgBackground,
             borderRadius: Radius.round,
-            color: Color.icon,
             ...Platform.select({
                 web: {
                 outlineStyle: 'none',

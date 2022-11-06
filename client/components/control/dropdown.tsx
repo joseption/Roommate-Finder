@@ -1,9 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { setStatusBarTranslucent } from 'expo-status-bar';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { View, TextInput, StyleSheet, Pressable, PanResponder, GestureResponderEvent, Platform } from 'react-native';
-import { Context, isMobile } from '../../service';
+import { View, TextInput, StyleSheet, Pressable, PanResponder, GestureResponderEvent, Platform, Alert, NativeSyntheticEvent, TextInputFocusEventData, Modal, ScrollView } from 'react-native';
+import { Context, isMobile } from '../../helper';
 import { Color, FontSize, Radius, Style } from '../../style';
+import _Button from './button';
 import _Group from './group';
 import _Option from './option';
 import Text from './text';
@@ -70,6 +71,17 @@ const _Dropdown = (props: any, {navigation}:any) => {
                 style.push(Style.verticalGroup);
             else
                 style.push(Style.horizontalGroup);
+        }
+
+        if (context.isGroup) {
+            var container = {
+                ...Platform.select({
+                    web: {
+                        flex: 1,
+                    }
+                }),
+            }
+            style.push(container);
         }
         
         style.push(props.containerStyle);
@@ -163,19 +175,20 @@ const _Dropdown = (props: any, {navigation}:any) => {
     }
 
     const onblur = (e: any) => {
-        if (!e.relatedTarget ||
-            e.relatedTarget && !e.relatedTarget.parentElement ||
-            e.relatedTarget && e.relatedTarget.parentElement && 
-            e.relatedTarget.parentElement.id != "menu") {
-            if (value && textValue)
-                setTextValue(value);
-            else {
-                setTextValue("");
-                setKey("");
-                setValue("");
+        if (Platform.OS === 'web') {
+            if (!e.relatedTarget ||
+                e.relatedTarget && !e.relatedTarget.parentElement ||
+                e.relatedTarget && e.relatedTarget.parentElement && 
+                e.relatedTarget.parentElement.id != "menu") {
+                if (value && textValue)
+                    setTextValue(value);
+                else {
+                    setTextValue("");
+                    setKey("");
+                    setValue("");
+                }
+                setMenu(false);
             }
-
-            setMenu(false);
         }
     }
 
@@ -183,6 +196,19 @@ const _Dropdown = (props: any, {navigation}:any) => {
         if (!focus) {
             setMenu(true);
         }
+    }
+
+    const input = () => {
+        return <TextInput
+        style={style()}
+        onChangeText={(e) => onValueChange(e)}
+        value={textValue}
+        placeholder={props.placeholder}
+        keyboardType={props.keyboardType}
+        ref={inputRef}
+        onFocus={(e: any) => onfocus(e)}
+        onBlur={(e: any) => onblur(e)}
+        ></TextInput>
     }
 
     return (
@@ -217,41 +243,78 @@ const _Dropdown = (props: any, {navigation}:any) => {
             : null
             }
             </View>
-            <TextInput
-            style={style()}
-            onChangeText={(e) => onValueChange(e)}
-            value={textValue}
-            placeholder={props.placeholder}
-            keyboardType={props.keyboardType}
-            ref={inputRef}
-            onFocus={(e: any) => onfocus(e)}
-            onBlur={(e: any) => onblur(e)}
-            ></TextInput>
-            <Pressable
-            style={styles.iconContainer}
-            onPress={() => onPress()}
-            >
+                {input()}
+                <Pressable
+                style={styles.iconContainer}
+                onPress={() => onPress()}
+                >
                 <FontAwesomeIcon style={styles.icon} icon="caret-down" />
             </Pressable>
         </View>
         {focus ?
         <View
-            style={[styles.menu, menuStyle()]}
-            nativeID="menu"
+        style={styles.menuContainer}
+        >
+            {Platform.OS === 'web' ?
+            <View
+                style={[styles.menu, menuStyle()]}
+                nativeID="menu"
+                >
+                {visibleOptionCount === 0 ?
+                <_Text
+                style={styles.noResults}
+                >No results</_Text>
+                : null}
+                {options}
+            </View>
+            :
+            <Modal
+            animationType='fade'
+            transparent={true}
+            onRequestClose={() => setFocus(false)}
             >
-            {visibleOptionCount === 0 ?
-            <_Text
-            style={styles.noResults}
-            >No results</_Text>
-            : null}
-            {options}
+                <View
+                style={styles.modalMenuContainer}
+                >
+                    {input()}
+                    <ScrollView
+                        style={[styles.modalMenu]}
+                        >
+                        {visibleOptionCount === 0 ?
+                        <_Text
+                        style={styles.noResults}
+                        >No results</_Text>
+                        : null}
+                        {options}
+                    </ScrollView>
+                    <_Button
+                    onPress={(e: any) => setFocus(false)}
+                    style={[Style.buttonDanger, styles.closeModalButton]}
+                    >
+                        Close
+                    </_Button>
+                </View>
+            </Modal>
+            }
         </View>
         : null}
+
     </View>
     );
 };
 
 const styles = StyleSheet.create({
+    closeModalButton: {
+        marginTop: 10,
+    },
+    menuContainer: {
+        ...Platform.select({
+            web: {
+                position: 'absolute',
+                width: '100%'
+            }
+        })
+    },
     menuVoid: {
         backgroundColor: Color.black,
         height: '100%',
@@ -279,6 +342,18 @@ const styles = StyleSheet.create({
         shadowOffset: {width: -4, height: 4},
         shadowOpacity: .15,
         shadowRadius: 15,
+    },
+    modalMenuContainer: {
+        height: '100%',
+        width: '100%',
+        backgroundColor: Color.blackMask,
+        padding: 20
+    },
+    modalMenu: {
+        backgroundColor: Color.white,
+        borderColor: Color.border,
+        borderWidth: 1,
+        marginTop: 10
     },
     text: {
         display: 'flex',
@@ -310,11 +385,6 @@ const styles = StyleSheet.create({
         position: 'relative'
     },
     container: {
-        ...Platform.select({
-            web: {
-                flex: 1,
-            }
-        }),
         width: '100%'
     },
     containerFocus: {

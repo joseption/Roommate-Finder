@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { acceptableSymbols, config, env, includesSymbol, includesUpperContains, isAtLeastEightChars, textMatches } from '../../service';
+import { acceptableSymbols, config, env, includesSymbol, includesUpperContains, isAtLeastEightChars, textMatches } from '../../helper';
 import { Color, LoginStyle, Style } from '../../style';
 import _TextInput from '../control/text-input';
 

@@ -3,7 +3,7 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { Color, FontSize } from '../../style';
 import { useNavigation } from '@react-navigation/native';
-import { navProp } from '../../service';
+import { navProp } from '../../helper';
 
 const _Image = (props: any) => {
     /* Props

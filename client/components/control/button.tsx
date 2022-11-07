@@ -17,7 +17,16 @@ const _Button = (props: any) => {
     const navigation = useNavigation<navProp>();
 
     const textStyle = () => {
-        return (props.disabled) ? styles.textDisabled : styles.text;
+        var style = [];
+        if (props.disabled)
+            style.push(styles.textDisabled)
+        else
+            style.push(styles.text);
+
+        if (props.textStyle)
+            style.push(props.textStyle);
+
+        return style;
     }
 
     const press = () => {

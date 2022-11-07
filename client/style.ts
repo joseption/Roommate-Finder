@@ -1,5 +1,5 @@
 import { faDirections } from '@fortawesome/free-solid-svg-icons';
-import { Platform, StyleSheet } from 'react-native';
+import { DynamicColorIOS, Platform, StyleSheet } from 'react-native';
 
 export const Color = {
     white:'#FFFFFF',
@@ -149,6 +149,14 @@ export const Style = StyleSheet.create({
     shadowOffset: {width: -3, height: 3},
     shadowOpacity: 1,
     shadowRadius: 0,
+  },
+  buttonDefaultInverted: {
+    backgroundColor: Color.none,
+    borderColor: Color.default,
+    borderWidth: 1,
+  },
+  buttonDefaultInvertedText: {
+    color: Color.default
   },
   buttonDisabled: {
     backgroundColor: Color.holder,

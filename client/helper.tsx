@@ -4,7 +4,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { createContext } from "react";
 import { Dimensions } from "react-native";
 import { Content } from "./style";
-import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faPaintBrush, faSignOut } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faPaintBrush, faSignOut, faUserPlus } from '@fortawesome/free-solid-svg-icons'
 import { createNavigationContainerRef } from "@react-navigation/native";
 
 export const isMobile = () => {
@@ -48,7 +48,7 @@ export const textMatches = (text1: string, text2: string) => {
     return text1 === text2 && text1.length > 0 && text2.length > 0;
 }
 
-library.add(faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
+library.add(faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
 
 export const Context = createContext({} as any); 
 export type navProp = StackNavigationProp<Page>;

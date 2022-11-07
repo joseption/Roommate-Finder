@@ -7,8 +7,12 @@ import _Text from '../control/text';
 import React, { useState } from 'react';
 import { Color, FontSize, Radius, Style } from '../../style';
 import { styles } from '../../screens/login';
+import _Button from '../control/button';
+import _Image from '../control/image';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 const AccountInfo = (props: any, {navigation}:any) => {
+    // JA TODO props.accountIsSetup need to know if the account is setup or not
     const [message,setMessage] = useState('this is an error message');
     const containerStyle = () => {
         var padding = 20;
@@ -55,11 +59,21 @@ const AccountInfo = (props: any, {navigation}:any) => {
     return (
     <ScrollView>
         <View>
-            <_Text
-            style={_styles.title}
+            <View
+            style={_styles.titleContainer}
             >
-                {title()}
-            </_Text>
+                <_Text
+                style={_styles.title}
+                >
+                    {title()}
+                </_Text>
+                <_Button
+                style={Style.buttonDefaultInverted}
+                textStyle={Style.buttonDefaultInvertedText}
+                >
+                    Edit Interests
+                </_Button>
+            </View>
         </View>
         <View
         style={[containerStyle(), _styles.container]}
@@ -70,7 +84,28 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 {subtitle()}
             </_Text>
             <View>
-
+            <_Group
+            vertical={true}
+            style={_styles.imageContainer}
+            >
+                {!props.accountPhoto ?
+                <View
+                style={[_styles.image, _styles.defaultImage]}
+                >
+                    <FontAwesomeIcon size={40} color={Color.border} icon="user-plus"></FontAwesomeIcon>
+                </View>
+                :
+                <_Image
+                style={_styles.image}
+                // source={require(props.accountPhoto)}
+                >
+                </_Image>
+                }
+                {/* // JA todo need to hook up add photo button */}
+                <_Button>
+                    {!props.accountIsSetup ? 'Add Photo' : 'Change Photo'}
+                </_Button>
+            </_Group>
             </View>
             <_TextInput
             label="First Name"
@@ -133,15 +168,71 @@ const AccountInfo = (props: any, {navigation}:any) => {
             <_Dropdown
             label="Gender"
             ></_Dropdown>
-            <_Text
-            style={Style.textSmallDanger}
-            >{message}</_Text>
         </View>
+        <View
+        style={_styles.buttonContainer}
+        >
+            {props.accountIsSetup ?
+            <_Button
+            style={[Style.buttonDefault, _styles.passwordButton]}
+            >
+                Change Password
+            </_Button>
+            : null }
+            <_Button
+            style={Style.buttonSuccess}
+            >
+                {props.accountIsSetup ? 'Save' : 'Next'}
+            </_Button>
+        </View>
+        <_Text
+            style={[errorStyle(), Style.textSmallDanger]} // JA KEEP GOING HERE!
+
+            >{message}
+        </_Text>
+
     </ScrollView>
     );
 };
 
 const _styles = StyleSheet.create({
+    passwordButton: {
+        marginRight: 5,
+    },
+    buttonContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 20,
+        marginBottom: 20
+    },
+    titleContainer: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    defaultImage: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 15,
+        marginBottom: 15,
+    },
+    image: {
+        width: 125,
+        height: 125,
+        backgroundColor: Color.white,
+        borderColor: Color.border,
+        borderWidth: 1,
+        borderRadius: Radius.round,
+        marginBottom: 10
+    },
     error: {
 
     },

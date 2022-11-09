@@ -5,7 +5,6 @@ export async function GetSurveyQuestionsAndResponses(userId: string){
         select: {
             id: true,
             question_text: true,
-            question_text_short: true,
             response: true,
             ResponsesOnUsers: {
                 where: {
@@ -43,4 +42,20 @@ export async function UserAnswer(userId: string, questionId:string, responseId: 
     else{
         return update;
     }
+}
+
+export async function AddQuestion(question_text: string){
+    return await db.question.create({
+        data: {
+            question_text,
+        }
+    });
+}
+
+export async function RemoveQuestion(id: string){
+    return await db.question.delete({
+        where: {
+            id,
+        }
+    });
 }

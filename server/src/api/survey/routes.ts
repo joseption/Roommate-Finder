@@ -2,7 +2,7 @@ import { VerifySudo } from "api/auth/services";
 import express, { Request, Response } from "express";
 const router = express.Router()
 import {isAuthenticated} from '../../middleware';
-import { GetSurveyQuestionsAndResponses, UserAnswer } from "./services";
+import { AddQuestion, GetSurveyQuestionsAndResponses, RemoveQuestion, UserAnswer } from "./services";
 router.use(isAuthenticated);
 
 router.get("/info", async (req: Request, res: Response) => {
@@ -29,7 +29,8 @@ router.post("/response", async (req: Request, res: Response) => {
             return res.status(400).json('Failed to update/create.')
         }
         else{
-            res.status(200).json('updated/created user response.')
+            res.status(200).json({
+                'msg':'Updated/created user response.'});
         }
     } catch (error) {
         res.status(500).json(error);
@@ -39,14 +40,60 @@ router.post("/response", async (req: Request, res: Response) => {
 router.post("/utils/add/question", async (req: Request, res: Response) => {
     try {
         const payload : payload = req.body[0];
+       
         if(!VerifySudo(payload.userId))
         {
             return res.status(400).json({"Error": "Only super users are allowed this function."});
         }
 
+        const { question_text } = req.body;
+        if (!question_text) {
+            return res.status(400).json('missing parameters');
+        }
+        const data = await AddQuestion(question_text);
+        if(!data)
+        {
+            return res.status(400).json('Failed to create question.');
+        }
+        else{
+            res.status(200).json({
+                'id': data.id,
+                'msg':'added new question. Please add its responses as well.'});
+        }
+        
     } catch (error) {
         res.status(500).json(error);
     }
 });
+
+router.post("/utils/remove/question", async (req: Request, res: Response) => {
+    try {
+        const payload : payload = req.body[0];
+       
+        if(!VerifySudo(payload.userId))
+        {
+            return res.status(400).json({"Error": "Only super users are allowed this function."});
+        }
+
+        const { question_text } = req.body;
+        if (!question_text) {
+            return res.status(400).json('missing parameters');
+        }
+        
+        if(!await RemoveQuestion(question_text))
+        {
+            return res.status(400).json('Failed to remove question.');
+        }
+        else{
+            res.status(200).json({
+                'question_text': question_text,
+                'msg':'Removed question and its reponses.'});
+        }
+        
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
 
 export default router;

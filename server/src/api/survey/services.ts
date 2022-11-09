@@ -38,6 +38,7 @@ export async function GetSurveyQuestionsAndResponses(userId: string){
 }
 
 export async function UserAnswer(userId: string, questionId:string, responseId: string){
+    //can't do upsert because something is not unique
     const update = await db.responsesOnUsers.updateMany({
         where: {
             userId,

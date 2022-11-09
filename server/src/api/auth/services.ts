@@ -40,3 +40,14 @@ export function revokeTokens(userId:string) {
     }
   });
 }
+
+export function VerifySudo(userId:string) {
+  return db.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      is_superuser: true,
+    }
+  });
+}

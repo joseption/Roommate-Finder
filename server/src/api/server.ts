@@ -6,6 +6,7 @@ import privateRoute from './test/private';
 import auth from './auth/routes';
 import users from './users/routes';
 import chats from './chats/routes';
+import messages from './messages/routes';
 import listings from './listings/routes';
 
 const port = process.env.PORT || 8080;
@@ -34,6 +35,7 @@ app.use(privateRoute);
 app.use('/auth', auth);
 app.use('/users', users);
 app.use('/chats', chats);
+app.use('/messages', messages);
 app.use('/listings', listings);
 
 // Start the express server.

@@ -4,7 +4,7 @@ generator client {
 
 generator erd {
   provider = "prisma-erd-generator"
-  output = "./ERD.png"
+  output   = "./ERD.png"
 }
 
 datasource db {
@@ -34,13 +34,14 @@ model User {
   activate_exp     DateTime?
   is_setup         Boolean?
   setup_step       String?
-  id               String            @id @default(uuid())
+  id               String             @id @default(uuid())
   createdAt        DateTime           @default(now())
   password         String
   updatedAt        DateTime           @updatedAt
   Listings         Listings[]
   refreshTokens    RefreshToken[]
   ResponsesOnUsers ResponsesOnUsers[]
+  Message          Message[]
 }
 
 model RefreshToken {
@@ -107,4 +108,26 @@ model Listings {
   userId       String
   address      String?
   user         User     @relation(fields: [userId], references: [id])
+}
+
+model Chat {
+  id            String    @id @default(uuid())
+  chatName      String
+  isGroupChat   Boolean
+  users         String[]
+  latestMessage String // type message
+  groupAdmin    String? // type User
+  // add timestamp
+  Message       Message[]
+}
+
+model Message {
+  id              String   @id @default(uuid())
+  sender          User     @relation(fields: [userId], references: [id])
+  userId          String
+  content         String
+  // reference to chat that it belongs to
+  chatItBelongsTo Chat     @relation(fields: [chatId], references: [id])
+  chatId          String
+  dateCreated     DateTime @default(now())
 }

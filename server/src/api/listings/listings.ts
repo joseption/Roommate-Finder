@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { isAuthenticated } from '../../middleware';
+
 const prisma = new PrismaClient();
 
 const router = require('express').Router();
 
 // listings REST API everything is under /listings
 // create listing
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', isAuthenticated, async (req: Request, res: Response) => {
   try {
     // authentication should be added as middleware
 
@@ -31,7 +33,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // * update a listing
-router.put('/:listingId', async (req: Request, res: Response) => {
+router.put('/:listingId', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const updatedListing = await prisma.listings.update({
       where: {

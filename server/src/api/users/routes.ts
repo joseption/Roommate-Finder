@@ -4,9 +4,24 @@ import { findUserById } from './services';
 import db from '../../utils/db';
 const router = express.Router();
 
-router.get('/profile', isAuthenticated, async (req:Request, res:Response, next:NextFunction) => {
+// router.use(isAuthenticated); // ! Do this instead of adding isAuthenticated to every function
+
+// ! Duplicate function? I dont think get requests are supposed to have a body ?
+// router.get('/profile', async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const { userId } = req.body[0];
+//     const user = await findUserById(userId);
+//     delete user.password;
+//     res.json(user);
+//   } catch (err) {
+//     next(err);
+//   }
+// });
+
+// ! changed the duplicate function to work using query params
+router.get('/profile', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.body[0];
+    const { userId } = req.query;
     const user = await findUserById(userId);
     delete user.password;
     res.json(user);
@@ -15,20 +30,27 @@ router.get('/profile', isAuthenticated, async (req:Request, res:Response, next:N
   }
 });
 
-router.get('/profile', isAuthenticated, async (req:Request, res:Response, next:NextFunction) => {
+// * added profile search functionality so people could search on partial text
+router.get('/profileSearch', async (req: Request, res: Response) => {
   try {
-    const { userId } = req.body[0];
-    const user = await findUserById(userId);
-    delete user.password;
-    res.json(user);
+    const { searchText } = req.query;
+    const matches = await db.user.findMany({
+      where: {
+        email: {
+          contains: searchText as string,
+        },
+      },
+    });
+    res.status(200).json(matches);
   } catch (err) {
-    next(err);
+    res.status(500).json(err);
   }
 });
 
-router.get('/Allprofiles', isAuthenticated, async (req:Request, res:Response, next:NextFunction) => {
+router.get('/Allprofiles', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    return res.json(db.user.findMany());
+    const users = await db.user.findMany();
+    return res.json(users);
   } catch (err) {
     next(err);
   }

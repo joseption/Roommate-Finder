@@ -119,6 +119,8 @@ model Chat {
   groupAdmin    String? // type User
   // add timestamp
   Message       Message[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
 }
 
 model Message {
@@ -129,5 +131,5 @@ model Message {
   // reference to chat that it belongs to
   chatItBelongsTo Chat     @relation(fields: [chatId], references: [id])
   chatId          String
-  dateCreated     DateTime @default(now())
+  createdAt       DateTime @default(now())
 }

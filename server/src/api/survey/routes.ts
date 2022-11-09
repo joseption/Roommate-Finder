@@ -2,7 +2,7 @@ import { VerifySudo } from "api/auth/services";
 import express, { Request, Response } from "express";
 const router = express.Router()
 import {isAuthenticated} from '../../middleware';
-import { AddQuestion, GetSurveyQuestionsAndResponses, RemoveQuestion, UserAnswer } from "./services";
+import { AddQuestion, AddResponse, GetSurveyQuestionsAndResponses, RemoveQuestion, RemoveResponse, UserAnswer } from "./services";
 router.use(isAuthenticated);
 
 router.get("/info", async (req: Request, res: Response) => {
@@ -20,7 +20,7 @@ router.post("/response", async (req: Request, res: Response) => {
         const { questionId, responseId } = req.body;
 
         if (!questionId || !responseId) {
-            return res.status(400).json('missing parameters');
+            return res.status(422).json('missing parameters');
         }
         const payload : payload = req.body[0];
 
@@ -48,7 +48,7 @@ router.post("/utils/add/question", async (req: Request, res: Response) => {
 
         const { question_text } = req.body;
         if (!question_text) {
-            return res.status(400).json('missing parameters');
+            return res.status(422).json('missing parameters');
         }
         const data = await AddQuestion(question_text);
         if(!data)
@@ -75,18 +75,18 @@ router.post("/utils/remove/question", async (req: Request, res: Response) => {
             return res.status(400).json({"Error": "Only super users are allowed this function."});
         }
 
-        const { question_text } = req.body;
-        if (!question_text) {
-            return res.status(400).json('missing parameters');
+        const { id } = req.body;
+        if (!id) {
+            return res.status(422).json('missing parameters');
         }
-        
-        if(!await RemoveQuestion(question_text))
+        const data = await RemoveQuestion(id)
+        if(!data)
         {
             return res.status(400).json('Failed to remove question.');
         }
         else{
             res.status(200).json({
-                'question_text': question_text,
+                'question_text': data.question_text,
                 'msg':'Removed question and its reponses.'});
         }
         
@@ -95,5 +95,56 @@ router.post("/utils/remove/question", async (req: Request, res: Response) => {
     }
 });
 
+router.post("/utils/add/response", async (req: Request, res: Response) => {
+    try {
+        const payload : payload = req.body[0];
+       
+        if(!VerifySudo(payload.userId))
+        {
+            return res.status(400).json({"Error": "Only super users are allowed this function."});
+        }
+        const { question_id , response } = req.body;
+        if (!question_id || !response) {
+            return res.status(422).json('Missing parameter');
+        }
+        if(!await AddResponse(response, question_id))
+        {
+            return res.status(400).json('Failed to add response.');
+        }
+        else{
+            res.status(200).json({
+                'msg':'Added reponse.'});
+        }
+        
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+router.post("/utils/remove/response", async (req: Request, res: Response) => {
+    try {
+        const payload : payload = req.body[0];
+       
+        if(!VerifySudo(payload.userId))
+        {
+            return res.status(400).json({"Error": "Only super users are allowed this function."});
+        }
+        const { id } = req.body;
+        if (!id) {
+            return res.status(422).json('Missing parameter');
+        }
+        if(!await RemoveResponse(id))
+        {
+            return res.status(400).json('Failed to remove response.');
+        }
+        else{
+            res.status(200).json({
+                'msg':'Removed reponse.'});
+        }
+        
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
 
 export default router;

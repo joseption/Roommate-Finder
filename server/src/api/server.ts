@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 //add routes here...
 import publicRoute from './test/public';
 import privateRoute from './test/private';
-
+import survey from './survey/routes';
 import auth from './auth/routes';
 import users from './users/routes';
 import chats from './chats/routes';
@@ -37,7 +37,7 @@ app.use('/users', users);
 app.use('/chats', chats);
 app.use('/messages', messages);
 app.use('/listings', listings);
-
+app.use('/survey', survey);
 // Start the express server.
 app.listen(port, () => {
   console.log(`Listening on http://localhost:${port}`);

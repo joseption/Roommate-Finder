@@ -27,10 +27,26 @@ router.post('/', async (req: Request, res: Response) => {
         id: chatId as string,
       },
       data: {
-        latestMessage: newMessage.id as string,
+        latestMessage: newMessage.id as string, // * the content here really doesnt matter I'm just updating it so I can sort by updatedAt later
       },
     });
     res.status(200).json(newMessage);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// given a messageId return whats in that message
+// * didnt really have a use from my original design. Added it in case front end wants to do something with lastMessage column in chat
+router.get('/getMessage', async (req: Request, res: Response) => {
+  try {
+    const { messageId } = req.query;
+    const message = await db.message.findFirst({
+      where: {
+        id: messageId as string,
+      },
+    });
+    res.status(200).json(message);
   } catch (err) {
     res.status(500).json(err);
   }

@@ -167,4 +167,20 @@ router.put('/removeFromGroup', async (req: Request, res: Response) => {
   }
 });
 
+// given a chatId return info on the chat /chats/chatId
+// * honestly didnt need this in my original design but added just incase front end might need it
+router.get('/:chatId', async (req: Request, res: Response) => {
+  try {
+    const { chatId } = req.params;
+    const chatInfo = await db.chat.findFirst({
+      where: {
+        id: chatId as string,
+      },
+    });
+    return res.status(200).json(chatInfo);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
 export default router;

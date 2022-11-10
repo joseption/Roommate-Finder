@@ -10,16 +10,17 @@ import NavMenuButton from '../control/nav-menu-button';
 import NavMobileButton from '../control/nav-mobile-button';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { AccountScreenType } from '../../helper';
 
 const Navigation = (props: any) => {
     const navigation = useNavigation();
     const [showMenu,setShowMenu] = useState(false);
-    const [visible,setVisible] = useState(false);
+    const [visible,setVisible] = useState(true);
     const [init,setInit] = useState(false);
     const [nav,setNav] = useState('');
 
     useEffect(() => {
-        if (isMobile()) {
+        if (props.mobile) {
             setShowMenu(false);
         }
         if (props.screen) {
@@ -95,6 +96,11 @@ const Navigation = (props: any) => {
     const setNavLayout = (e: any) => {
         props.setDimensions({height: e.nativeEvent.layout.height, width: e.nativeEvent.layout.width});
     }
+
+    const setAccount = () => {
+        props.setAccountView(AccountScreenType.info);
+        navigate(NavTo.Account);
+    }
     
     return (
         <View
@@ -108,8 +114,8 @@ const Navigation = (props: any) => {
                 style={styles.content}
                 >
                     <_Image
-                    //source={require('../../assets/images/logo.png')} //JA failing on android is it because it's a static image? look at image.getsize
-                    height={40}
+                    source={require('../../assets/images/logo.svg')} //JA failing on android is it because it's a static image? look at image.getsize
+                    height={30}
                     onPress={() => navigate(NavTo.Home)}
                     pressStyle={styles.logoContainer}
                     />
@@ -162,7 +168,7 @@ const Navigation = (props: any) => {
                         navTo={NavTo.Profile}
                         />
                         <NavMenuButton
-                        navigate={() => navigate(NavTo.Account)}
+                        navigate={() => setAccount()}
                         icon="edit"
                         value="Edit Account"
                         navTo={NavTo.Account}

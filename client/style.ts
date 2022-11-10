@@ -48,6 +48,16 @@ export const Content = {
 }
 
 export const Style = StyleSheet.create({
+  errorText: {
+    textAlign: 'center',
+    width: '100%'
+  },
+  errorMsgMobile: {
+    paddingBottom: 10,
+  },
+  errorMsg: {
+    paddingBottom: 20,
+  },
   boldFont: {
     fontFamily: 'Inter-Bold',
   },
@@ -126,8 +136,18 @@ export const Style = StyleSheet.create({
     color: Color.textTertiary,
     fontFamily: 'Inter-Regular'
   },
+  textDefaultSecondary: {
+    fontSize: FontSize.default,
+    color: Color.textSecondary,
+    fontFamily: 'Inter-Regular'
+  },
   textSmallDanger: {
     fontSize: FontSize.small,
+    color: Color.danger,
+    fontFamily: 'Inter-Regular'
+  },
+  textDanger: {
+    fontSize: FontSize.default,
     color: Color.danger,
     fontFamily: 'Inter-Regular'
   },
@@ -136,19 +156,32 @@ export const Style = StyleSheet.create({
     color: Color.text,
     fontFamily: 'Inter-Regular'
   },
+  textSecondary: {
+    fontSize: FontSize.default,
+    color: Color.text,
+    fontFamily: 'Inter-Regular'
+  },
   buttonSuccess: {
     backgroundColor: Color.success,
-    shadowColor: Color.successSecondary,
-    shadowOffset: {width: -3, height: 3},
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    ...Platform.select({
+      web: {
+        shadowColor: Color.successSecondary,
+        shadowOffset: {width: -3, height: 3},
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      }
+    }),
   },
   buttonDefault: {
     backgroundColor: Color.default,
-    shadowColor: Color.defaultSecondary,
-    shadowOffset: {width: -3, height: 3},
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    ...Platform.select({
+      web: {
+        shadowColor: Color.defaultSecondary,
+        shadowOffset: {width: -3, height: 3},
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      }
+    }),
   },
   buttonDefaultInverted: {
     backgroundColor: Color.none,
@@ -156,28 +189,42 @@ export const Style = StyleSheet.create({
     borderWidth: 1,
   },
   buttonDefaultInvertedText: {
-    color: Color.default
+    color: Color.default,
+    fontSize: FontSize.small,
+    fontFamily: 'Inter-SemiBold'
   },
   buttonDisabled: {
-    backgroundColor: Color.holder,
-    shadowColor: Color.holderSecondary,
-    shadowOffset: {width: -3, height: 3},
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    backgroundColor: Color.holderSecondary,
+    ...Platform.select({
+      web: {
+        shadowColor: Color.border,
+        shadowOffset: {width: -3, height: 3},
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      }
+    }),
   },
   buttonWarning: {
     backgroundColor: Color.warning,
-    shadowColor: Color.warningSecondary,
-    shadowOffset: {width: -3, height: 3},
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    ...Platform.select({
+      web: {
+        shadowColor: Color.warningSecondary,
+        shadowOffset: {width: -3, height: 3},
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      }
+    }),
   },
   buttonDanger: {
     backgroundColor: Color.danger,
-    shadowColor: Color.dangerSecondary,
-    shadowOffset: {width: -3, height: 3},
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    ...Platform.select({
+      web: {
+        shadowColor: Color.dangerSecondary,
+        shadowOffset: {width: -3, height: 3},
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      }
+    }),
   },
   button: {
     paddingLeft: 20,
@@ -262,7 +309,7 @@ export const LoginStyle = StyleSheet.create({
   logo: {
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginBottom: 40
+    marginBottom: 40,
   },
   errorMessage: {
     textAlign: 'center',
@@ -271,15 +318,19 @@ export const LoginStyle = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     maxHeight: 150,
     overflowY: 'auto',
-    margin: 'auto'
+    margin: 'auto',
+    width: '100%'
   },
   previousPageText: {
     display: 'flex',
-    gap: 5,
     flexDirection: 'row',
     marginBottom: 0,
     marginTop: 'auto',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  previousPageAction: {
+    marginLeft: 5
   },
   actionText: {
     marginTop: 5,

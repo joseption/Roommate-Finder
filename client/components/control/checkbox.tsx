@@ -30,6 +30,7 @@ const _Checkbox = (props: any, {navigation}:any) => {
 
     const press = () => {
         setChecked(!checked);
+        props.checked(!checked);
     }
 
     return (

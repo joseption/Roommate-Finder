@@ -92,7 +92,7 @@ const Login = (props: any, {navigation}:any) => {
       </_Text>
       <_TextInput
       label="Email"
-      style={LoginStyle.inputStyle}
+      containerStyle={LoginStyle.inputStyle}
       onChangeText={(e: any) => {handleChange(e, true)}}
       value={email}
       error={emailError}
@@ -130,15 +130,17 @@ const Login = (props: any, {navigation}:any) => {
         <View
         style={LoginStyle.previousPageText}
         >
-        <_Text
-        style={Style.textDefaultTertiary}
-        >
-          Don't have an account?
-        </_Text>
-        <_Text
-        style={[Style.textDefaultDefault, Style.boldFont]}
-        onPress={() => goRegister()}
-        >Sign up</_Text>
+          <_Text
+          style={Style.textDefaultTertiary}
+          >
+            Don't have an account?
+          </_Text>
+          <_Text
+          style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
+          onPress={() => goRegister()}
+          >
+            Sign up
+          </_Text>
       </View>
     </View>
   );

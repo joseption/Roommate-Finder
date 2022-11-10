@@ -91,7 +91,7 @@ const Register = (props: any, {navigation}:any) => {
       </_Text>
       <_TextInput
       label="Email"
-      style={LoginStyle.inputStyle}
+      containerStyle={LoginStyle.inputStyle}
       onChangeText={(e: any) => {handleChange(e)}}
       value={props.email}
       error={emailError}
@@ -121,7 +121,7 @@ const Register = (props: any, {navigation}:any) => {
           Already have an account?
         </_Text>
         <_Text
-        style={[Style.textDefaultDefault, Style.boldFont]}
+        style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
         onPress={() => backToLogin()}
         >Login</_Text>
       </View>

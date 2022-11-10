@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { Color, FontSize } from '../../style';
 import { useNavigation } from '@react-navigation/native';
 import { navProp } from '../../helper';
+
 
 const _Image = (props: any) => {
     /* Props
@@ -19,9 +20,15 @@ const _Image = (props: any) => {
     const navigation = useNavigation<navProp>();
     const [style,setStyle] = useState([props.style]);
     useEffect(() => {
-        // Image.getSize(props.source, (w, h) => {
-        //      getStyle(w, h);
-        // });
+        if (Platform.OS === "web") {
+            Image.getSize(props.source, (w, h) => {
+                getStyle(w, h);
+            });
+        }
+        else {
+            var img = Image.resolveAssetSource(props.source);
+            getStyle(img.width, img.height);
+        }
     }, [props.source]);
 
     const press = () => {
@@ -85,7 +92,9 @@ const _Image = (props: any) => {
     }
 
     return (
-    <View>
+    <View
+    style={styles.imageContainer}
+    >
         {props.onPress ?
         <Pressable
         style={props.pressStyle}
@@ -114,6 +123,9 @@ const styles = StyleSheet.create({
     textDisabled: {
         color: Color.textDisabled,
         fontSize: FontSize.default
+    },
+    imageContainer: {
+        justifyContent: 'center',
     }
 });
 

@@ -5,7 +5,7 @@ import { useFonts } from 'expo-font';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import Navigation from './components/navigation/navigation';
 import React, { createContext, useEffect, useState } from 'react';
-import { Alert, Dimensions, Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, Linking, Platform, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import 'react-native-gesture-handler';
 import {Header, StackNavigationProp} from '@react-navigation/stack';
 import AccountScreen from './screens/account';
@@ -15,10 +15,13 @@ import ListingsScreen from './screens/listings';
 import MessagesScreen from './screens/messages';
 import MatchesScreen from './screens/matches';
 import ExploreScreen from './screens/explore';
-import { Color, Content } from './style';
+import { Color, Content, Style } from './style';
 import { config, isMobile, linking, NavTo, Page, Stack } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
+import _Text from './components/control/text';
+import * as DeepLinking from 'expo-linking';
+import { setDefaultResultOrder } from 'dns/promises';
 
 export const App = (props: any) => {
   const [navDimensions,setNavDimensions] = useState({height: 0, width: 0});
@@ -29,6 +32,8 @@ export const App = (props: any) => {
   const [init,setInit] = useState(false);
   const [route,setRoute] = useState('');
   const [adjustedPos,setAdjustedPos] = useState(0);
+  const [url,setUrl] = useState('');
+  const [accountView,setAccountView] = useState();
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
@@ -45,20 +50,17 @@ export const App = (props: any) => {
       }
     );
 
-    if (!init) {
-      Linking.getInitialURL().then((url: any) => {
-        if (url && url.toLowerCase().includes(config.screens.Login)) {
-          setPage(NavTo.Login);
-        }
-      });
-
-      setInit(true);
-    }
+    DeepLinking.getInitialURL().then((url: any) => {
+      setUrl(url); // JA not working on android. get url returns null
+      if (url && url.toLowerCase().includes(config.screens.Login)) {
+        setPage(NavTo.Login);
+      }
+    });
 
     prepareStyle();
 
     return () => subscription?.remove();
-  }, [navDimensions.height, page, mobile, adjustedPos, route]);
+  }, [navDimensions.height, page, mobile, adjustedPos, route, url]);
   
   if (!loaded) {
     return null;
@@ -66,7 +68,7 @@ export const App = (props: any) => {
 
   const routeName = (): keyof Page => {
     // JA TODO need logic to decide route name for now just return home
-    return NavTo.Account;
+    return NavTo.Login;
   }
 
   const state = (e: any) => {
@@ -113,7 +115,12 @@ export const App = (props: any) => {
 
   const header = (e: any) => {
     if (Platform.OS !== 'web')
-      return <Navigation screen={e.options.title} dimensions={navDimensions} setDimensions={setNavDimensions} mobile={mobile} />
+      return <Navigation
+      screen={e.options.title} 
+      setAccountView={setAccountView}
+      dimensions={navDimensions}
+      setDimensions={setNavDimensions}
+      mobile={mobile} />
     else
       return <View></View>;
   }
@@ -155,90 +162,98 @@ export const App = (props: any) => {
     <NavigationContainer
     linking={linking}
     >
-      <ScrollView
-      contentContainerStyle={scrollParentContainerStyle()}
-      style={[containerStyle, styles.container]}
-      onScroll={(e) => scroll(e)}
-      scrollEventThrottle={100}
-      onContentSizeChange={(w, h) => getScrollDims(w, h)}
-      >
-        <View
-        style={styles.stack}
+        <ScrollView
+        contentContainerStyle={scrollParentContainerStyle()}
+        style={[containerStyle, styles.container]}
+        onScroll={(e) => scroll(e)}
+        scrollEventThrottle={100}
+        onContentSizeChange={(w, h) => getScrollDims(w, h)}
         >
-          <Stack.Navigator
-          screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle()}}
-          initialRouteName={routeName()}
-          screenListeners={{
-            state: (e: any) => state(e)
-          }}
+          <View
+          style={styles.stack}
           >
-            <Stack.Screen
-                name={NavTo.Home}
-                options={{title: NavTo.Home, animation: 'none'}}
+            <StatusBar
+              backgroundColor={Color.white}
+              barStyle="dark-content"
+            />
+            <Stack.Navigator
+            screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle()}}
+            initialRouteName={routeName()}
+            screenListeners={{
+              state: (e: any) => state(e)
+            }}
             >
-            {(props: any) => <HomeScreen {...props} mobile={mobile} />}
-            </Stack.Screen>
-            <Stack.Screen
-                name={NavTo.Login}
-                options={{title: NavTo.Login, animation: 'none'}}
-            >
-                {(props: any) => <LoginScreen {...props} mobile={mobile} />}
-            </Stack.Screen>
-            <Stack.Screen
-                name={NavTo.Account}
-                options={{title: NavTo.Account, animation: 'none'}}
-            >
-            {(props: any) => <AccountScreen {...props} mobile={mobile} />}
-            </Stack.Screen>
-            <Stack.Screen
-                name={NavTo.Profile}
-                options={{title: NavTo.Profile, animation: 'none'}}
-            >
-            {(props: any) => <ProfileScreen {...props} mobile={mobile} />}
-            </Stack.Screen> 
-            <Stack.Screen
-                name={NavTo.Survey}
-                options={{title: NavTo.Survey, animation: 'none'}}
-            >
-            {(props: any) => <SurveyScreen {...props} mobile={mobile} />}
-            </Stack.Screen>
-            <Stack.Screen
-                name={NavTo.Matches}
-                options={{title: NavTo.Matches, animation: 'none'}}
-            > 
-            {(props: any) => <MatchesScreen {...props} mobile={mobile} />}
-            </Stack.Screen>
-            <Stack.Screen
-                name={NavTo.Explore}
-                options={{title: NavTo.Explore, animation: 'none'}}
-            > 
-            {(props: any) => <ExploreScreen {...props} mobile={mobile} />}
-            </Stack.Screen>
-            <Stack.Screen
-                name={NavTo.Listings}
-                options={{title: NavTo.Listings, animation: 'none'}}
-            >
-            {(props: any) => <ListingsScreen {...props} mobile={mobile} />}
-            </Stack.Screen>
-            <Stack.Screen
-                name={NavTo.Messages}
-                options={{title: NavTo.Messages, animation: 'none'}}
-            >
-            {(props: any) => <MessagesScreen {...props} mobile={mobile} />}
-            </Stack.Screen> 
-            <Stack.Screen
-                name={NavTo.Logout}
-                options={{title: NavTo.Logout, animation: 'none'}}
-            >
-            {(props: any) => <LogoutScreen {...props} mobile={mobile} />}
-            </Stack.Screen>
-          </Stack.Navigator>
-        </View>
-      </ScrollView>
-      {Platform.OS === 'web' ?
-      <Navigation dimensions={navDimensions} setDimensions={setNavDimensions} mobile={mobile} />
-      : null}
-
+              <Stack.Screen
+                  name={NavTo.Home}
+                  options={{title: NavTo.Home, animation: 'none'}}
+              >
+              {(props: any) => <HomeScreen {...props} mobile={mobile} url={url} />}
+              </Stack.Screen>
+              <Stack.Screen
+                  name={NavTo.Login}
+                  options={{title: NavTo.Login, animation: 'none'}}
+              >
+                  {(props: any) => <LoginScreen {...props} mobile={mobile} url={url} />}
+              </Stack.Screen>
+              <Stack.Screen
+                  name={NavTo.Account}
+                  options={{title: NavTo.Account, animation: 'none'}}
+              >
+              {(props: any) => <AccountScreen {...props} accountView={accountView} setAccountView={setAccountView} mobile={mobile} url={url} />}
+              </Stack.Screen>
+              <Stack.Screen
+                  name={NavTo.Profile}
+                  options={{title: NavTo.Profile, animation: 'none'}}
+              >
+              {(props: any) => <ProfileScreen {...props} mobile={mobile} url={url} />}
+              </Stack.Screen> 
+              <Stack.Screen
+                  name={NavTo.Survey}
+                  options={{title: NavTo.Survey, animation: 'none'}}
+              >
+              {(props: any) => <SurveyScreen {...props} mobile={mobile} url={url} />}
+              </Stack.Screen>
+              <Stack.Screen
+                  name={NavTo.Matches}
+                  options={{title: NavTo.Matches, animation: 'none'}}
+              > 
+              {(props: any) => <MatchesScreen {...props} mobile={mobile} url={url} />}
+              </Stack.Screen>
+              <Stack.Screen
+                  name={NavTo.Explore}
+                  options={{title: NavTo.Explore, animation: 'none'}}
+              > 
+              {(props: any) => <ExploreScreen {...props} mobile={mobile} url={url} />}
+              </Stack.Screen>
+              <Stack.Screen
+                  name={NavTo.Listings}
+                  options={{title: NavTo.Listings, animation: 'none'}}
+              >
+              {(props: any) => <ListingsScreen {...props} mobile={mobile} url={url} />}
+              </Stack.Screen>
+              <Stack.Screen
+                  name={NavTo.Messages}
+                  options={{title: NavTo.Messages, animation: 'none'}}
+              >
+              {(props: any) => <MessagesScreen {...props} mobile={mobile} url={url} />}
+              </Stack.Screen> 
+              <Stack.Screen
+                  name={NavTo.Logout}
+                  options={{title: NavTo.Logout, animation: 'none'}}
+              >
+              {(props: any) => <LogoutScreen {...props} mobile={mobile} url={url} />}
+              </Stack.Screen>
+            </Stack.Navigator>
+          </View>
+        </ScrollView>
+        {Platform.OS === 'web' ?
+        <Navigation
+        setAccountView={setAccountView}
+        dimensions={navDimensions}
+        screen={page}
+        setDimensions={setNavDimensions}
+        mobile={mobile} />
+        : null}
     </NavigationContainer>
   );
 };
@@ -246,7 +261,7 @@ export const App = (props: any) => {
 const styles = StyleSheet.create({
   stack: {
     width: '100%',
-    height: '100%'
+    height: '100%',
   },
   container: {
     flex: 1,

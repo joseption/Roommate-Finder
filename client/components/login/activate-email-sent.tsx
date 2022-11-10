@@ -156,7 +156,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
           Go back to
         </_Text>
         <_Text
-        style={[Style.textDefaultDefault, Style.boldFont]}
+        style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
         onPress={() => goBackRegister()}
         >register</_Text>
       </View>

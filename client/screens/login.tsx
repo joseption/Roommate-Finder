@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Animated, Linking, Platform, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Animated, Linking, Platform, SafeAreaView, Image, ScrollView } from 'react-native';
 import _Button from '../components/control/button';
 import _Image from '../components/control/image';
 import _Text from '../components/control/text';
@@ -126,9 +126,9 @@ const LoginScreen = (props:any, {navigation}:any) => {
   }
 
   const getLeft = () => {
-    if (!initScreen && props.route.path) {
-      setUrl(props.route.path);
-      gotoScreen(props.route.path);
+    if (!initScreen && props.url) {
+      setUrl(props.url);
+      gotoScreen(props.url);
     }
   }
 
@@ -164,15 +164,21 @@ const LoginScreen = (props:any, {navigation}:any) => {
   }
 
   return (
-      <View style={style()}>
+      <ScrollView
+      contentContainerStyle={styles.outerContainer}
+      >
+        <View
+        style={style()}
+        >
           {props.mobile ?
           <_Image
           style={LoginStyle.logo}
           source={require('../assets/images/logo.png')}
-          height={75}
+          height={30}
           />
           : null
           } 
+          <_Text>Link: {url}</_Text>
           <Animated.View
           onLayout={(e) => setLayout(e)}
           style={[moved ? null : styles.animateContent, styles.content, {opacity: opacity, transform:[{translateX: left}]}]}>
@@ -225,12 +231,19 @@ const LoginScreen = (props:any, {navigation}:any) => {
                 loginPressed={() => goLeft(screen.login)}
                 style={[styles.panel, passwordUpdated ? null : styles.hidden]}
               />
-          </Animated.View>
-      </View>
+            </Animated.View>
+          </View>
+      </ScrollView>
   );
 };
 
 export const styles = StyleSheet.create({
+    outerContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      height: '100%'
+    },
     container: {
       backgroundColor: Color.white,
       margin:'auto',
@@ -262,7 +275,11 @@ export const styles = StyleSheet.create({
     full: {
       width:'100%',
       display: 'flex',
-      justifyContent: 'space-between'
+      ...Platform.select({
+        web: {
+          justifyContent: 'space-between'
+        }
+      }),
     },
     content: {
         display:'flex',
@@ -276,7 +293,7 @@ export const styles = StyleSheet.create({
         web: {
           transition: 'transform .15s ease, opacity 2s ease', // JA this is temporary and needs to be replaced with animation
         }
-    }),
+      }),
     },
     panel: {
         width:'100%',

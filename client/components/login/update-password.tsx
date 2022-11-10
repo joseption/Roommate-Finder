@@ -126,7 +126,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       <_TextInput
       type="password"
       label="Password"
-      style={LoginStyle.inputStyle}
+      containerStyle={LoginStyle.inputStyle}
       onChangeText={(e: any) => {handleChange(e)}}
       value={pValue}
       />
@@ -225,7 +225,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
           Go back to
         </_Text>
         <_Text
-        style={[Style.textDefaultDefault, Style.boldFont]}
+        style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
         onPress={() => backToLogin()}
         >login</_Text>
       </View>

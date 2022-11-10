@@ -6,7 +6,7 @@ import { Context, isMobile } from '../../helper';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from './button';
 import _Group from './group';
-import _Option from './option';
+import _DropdownOption from './dropdown-option';
 import Text from './text';
 import _Text from './text';
 
@@ -101,6 +101,8 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
     const onPress = () => {
         setMenu(!focus, true);
+        if (props.selected)
+            props.selected(key);
     }
 
     const setMenu = (focus: boolean, fromBtn = false) => {
@@ -162,7 +164,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
     const mappedItems = (value: string) => {
         var items = filteredItems(value).map((item: any, key: any) => {
-            return <_Option onPress={(e: any) => select(e)} key={key} item={item} />
+            return <_DropdownOption onPress={(e: any) => select(e)} key={key} item={item} />
         });
         setOptions(items);
     }

@@ -110,7 +110,6 @@ const styles = StyleSheet.create({
     vertical: {
         flexDirection: 'column',
         alignItems: 'flex-start',
-        //paddingTop: 10,
         marginTop: 0
     },
 });

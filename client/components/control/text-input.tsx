@@ -1,7 +1,10 @@
-import React, { useContext } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { setStatusBarStyle } from 'expo-status-bar';
+import React, { useContext, useEffect, useState } from 'react';
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Context, isMobile } from '../../helper';
 import { Color, Style } from '../../style';
+import _Text from './text';
 
 const _TextInput = (props: any) => {
     /* Props:
@@ -19,6 +22,20 @@ const _TextInput = (props: any) => {
   ref: Give the input field a ref
   */
   const context = useContext(Context);
+  const phonePlaceholder = '(999) 999-9999';
+  const [length,setLength] = useState(0);
+  const [value,setValue] = useState('');
+  const [init,setInit] = useState(false);
+
+  useEffect(() => {
+    if (!init) {
+      if (props.value)
+        setValue(props.value);
+
+      setInit(true);
+    }
+  }, [value]);
+
   const labelStyle = () => {
     var style = [];
     if (!props.labelStyle)
@@ -33,12 +50,18 @@ const _TextInput = (props: any) => {
   }
 
   const style = () => {
+    var style = [];
+    style.push(Style.inputDefault);
+    style.push(styles.input);
+    if (props.multiline) {
+      style.push({
+        height: props.height,
+      });
+    }
     if (!props.style) {
-        return Style.inputDefault;
+      style.push(props.style);
     }
-    else {
-      return [Style.inputDefault, props.style];
-    }
+    return style;
   }
 
   const containerStyle = () => {
@@ -60,6 +83,7 @@ const _TextInput = (props: any) => {
       }
       style.push(container);
     }
+
     style.push(props.containerStyle);
     return style;
   }
@@ -75,48 +99,97 @@ const _TextInput = (props: any) => {
     }
   }
 
+  const onChangeText = (e: any) => {
+    setLength(e.length);
+    var value = e;
+    if (props.keyboardType === 'numeric' || props.type === 'phone') {
+      value = e.replace(/[^0-9]/g, '');
+    }
+    setValue(value);
+    
+    if (props.onChangeText)
+      props.onChangeText(value);
+  }
+
+  const placeholder = () => {
+    if (props.placeholder)
+      return props.placeholder;
+    else if (props.type === 'phone')
+      return phonePlaceholder;
+  }
+
+  const keyboardType = () => {
+    if (props.keyboardType)
+      return props.keyboardType;
+    else if (props.type === 'phone')
+      return 'numeric'
+  }
+
   return (
     <View
     style={containerStyle()}
     >
       <View
-      style={styles.text}
+      style={styles.header}
       >
-        <Text
-          style={labelStyle()}
+        <View
+        style={styles.text}
         >
-          {props.label}
-        </Text>
-        {props.error ?
-        <Text
-        style={labelStyle()}
-        >
-          {errorMessage()}
-        </Text>
-        : null
-        }
-        {props.required ?
           <Text
-          style={labelStyle()}>
-            *
+            style={labelStyle()}
+          >
+            {props.label}
+          </Text>
+          {props.error ?
+          <Text
+          style={labelStyle()}
+          >
+            {errorMessage()}
           </Text>
           : null
           }
+          {props.required ?
+            <Text
+            style={labelStyle()}>
+              *
+            </Text>
+            : null
+            }
+        </View>
+        {props.maxLength && props.showMaxLength ?
+        <_Text
+        style={styles.count}
+        >
+          {length}/{props.maxLength}
+        </_Text>
+        : null }
       </View>
       <TextInput
       style={style()}
-      onChangeText={props.onChangeText}
-      value={props.value}
-      placeholder={props.placeholder}
-      keyboardType={props.keyboardType}
+      onChangeText={(e: any) => onChangeText(e)}
+      value={value}
+      placeholder={placeholder()}
+      keyboardType={keyboardType()}
       secureTextEntry={props.type === 'password'}
       ref={props.ref}
+      multiline={props.multiline}
+      maxLength={props.maxLength}
       />
+      
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  count: {
+    color: Color.textSecondary
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexDirection: 'row'
+  },
   text: {
       gap: 5,
       display: 'flex',
@@ -128,6 +201,13 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '100%',
+  },
+  input: {
+    ...Platform.select({
+      android: {
+        textAlignVertical: 'top'
+      }
+    }),
   }
 });
 

@@ -1,6 +1,6 @@
 import { useLinkProps, useNavigation } from '@react-navigation/native';
 import React, { useRef } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { navProp } from '../../helper';
 import { Color, FontSize, Style } from '../../style';
@@ -18,7 +18,7 @@ const _Button = (props: any) => {
 
     const textStyle = () => {
         var style = [];
-        if (props.disabled)
+        if (props.disabled || props.loading)
             style.push(styles.textDisabled)
         else
             style.push(styles.text);
@@ -39,27 +39,48 @@ const _Button = (props: any) => {
     }
 
     const style = () => {
+        var style = [];
+        style.push(Style.button);
         if (!props.style) {
-            return [Style.buttonDefault, Style.button];
+            style.push(Style.buttonDefault);
          }
          else {
-            return [props.style, Style.button];
+            style.push(props.style);
          }
+
+         if (props.disabled || props.loading) {
+            style.push(Style.buttonDisabled);
+         }
+
+         return style;
       }
 
     return (
-    <View>
+    <View
+    style={props.containerStyle}
+    >
         <Pressable
-        disabled={props.disabled}
+        disabled={props.disabled || props.loading}
         style={style()}
         onPress={() => press()}
         >
-            <_Text
-            style={textStyle()}
-            onPress={() => press()}
+            <View
+            style={styles.contentContainer}
             >
-                {props.value ? props.value : props.children}
-            </_Text>
+                {props.loading ?
+                <ActivityIndicator
+                    size="small"
+                    color={Color.textDisabled}
+                    style={styles.loading}
+                />
+                : null}
+                <_Text
+                style={textStyle()}
+                onPress={() => press()}
+                >
+                    {props.value ? props.value : props.children}
+                </_Text>
+            </View>
         </Pressable>
     </View>
     );
@@ -75,6 +96,15 @@ const styles = StyleSheet.create({
         color: Color.textDisabled,
         fontSize: FontSize.default,
         margin: 'auto'
+    },
+    contentContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'row'
+    },
+    loading: {
+        marginRight: 5
     }
 });
 

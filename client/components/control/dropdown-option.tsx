@@ -5,7 +5,7 @@ import { Color, FontSize, Radius, Style } from '../../style';
 import Text from './text';
 import _Text from './text';
 
-const _Option = (props: any, {navigation}:any) => {
+const _DropdownOption = (props: any, {navigation}:any) => {
     return (
     <Pressable
     onPress={() => props.onPress(props.item)}
@@ -36,4 +36,4 @@ const styles = StyleSheet.create({
   });
   
 
-export default _Option;
+export default _DropdownOption;

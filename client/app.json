@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "roomfin",
     "name": "roomfin",
     "slug": "roomfin",
     "version": "1.0.0",

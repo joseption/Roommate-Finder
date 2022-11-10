@@ -6,6 +6,9 @@ import Text from './text';
 import _Text from './text';
 
 const _DropdownOption = (props: any, {navigation}:any) => {
+    /*
+    Props: JA TODO 
+    */
     return (
     <Pressable
     onPress={() => props.onPress(props.item)}

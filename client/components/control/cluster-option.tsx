@@ -7,9 +7,9 @@ import _Button from './button';
 import _Text from './text';
 
 const _ClusterOption = (props: any) => {
-  /* Props:
-  
-  */
+    /*
+    Props: JA TODO 
+    */
     const [selected,setSelected] = useState(false);
 
     useEffect(() => {

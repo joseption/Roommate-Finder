@@ -103,9 +103,9 @@ const LoginScreen = (props:any, {navigation}:any) => {
   };
 
   const gotoScreen = (url: string) => {
-      if (url.includes("activate_id=") ||
+      if (url != null && (url.includes("activate_id=") ||
             url.includes("reset_id=") ||
-            url.includes("update_id=")) {
+            url.includes("update_id="))) {
         updateVisibleScreen(screen.updatePassword);
       }
       else
@@ -126,7 +126,7 @@ const LoginScreen = (props:any, {navigation}:any) => {
   }
 
   const getLeft = () => {
-    if (!initScreen && props.url) {
+    if (!initScreen) {
       setUrl(props.url);
       gotoScreen(props.url);
     }
@@ -177,8 +177,7 @@ const LoginScreen = (props:any, {navigation}:any) => {
           height={30}
           />
           : null
-          } 
-          <_Text>Link: {url}</_Text>
+          }
           <Animated.View
           onLayout={(e) => setLayout(e)}
           style={[moved ? null : styles.animateContent, styles.content, {opacity: opacity, transform:[{translateX: left}]}]}>

@@ -6,6 +6,9 @@ import { Style } from '../../style';
 import _Text from './text';
 
 const _Checkbox = (props: any, {navigation}:any) => {
+    /*
+    Props: JA TODO 
+    */
     const context = useContext(Context);
     const [checked,setChecked] = useState(false);
     const [init,setInit] = useState(false);

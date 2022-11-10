@@ -5,12 +5,11 @@ import _TextInput from '../control/text-input';
 import _Text from '../control/text';
 import _Image from '../control/image';
 import { Color, Content, FontSize, Radius, Style } from '../../style';
-import { isMobile, NavTo, Page } from '../../helper';
 import NavMenuButton from '../control/nav-menu-button';
 import NavMobileButton from '../control/nav-mobile-button';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { AccountScreenType } from '../../helper';
+import { AccountScreenType, NavTo } from '../../helper';
 
 const Navigation = (props: any) => {
     const navigation = useNavigation();
@@ -114,7 +113,7 @@ const Navigation = (props: any) => {
                 style={styles.content}
                 >
                     <_Image
-                    source={require('../../assets/images/logo.svg')} //JA failing on android is it because it's a static image? look at image.getsize
+                    source={require('../../assets/images/logo.png')}
                     height={30}
                     onPress={() => navigate(NavTo.Home)}
                     pressStyle={styles.logoContainer}
@@ -126,7 +125,12 @@ const Navigation = (props: any) => {
                         onPress={() => null} // JA need to navigate to messages in the stack
                         style={styles.icon}
                         >
-                            <FontAwesomeIcon size={18} color={Color.icon} style={styles.message} icon="message" />
+                            <FontAwesomeIcon
+                            size={18}
+                            color={Color.icon}
+                            style={styles.message}
+                            icon="message"
+                            />
                             <_Text
                             containerStyle={styles.countContainer}
                             style={styles.count}
@@ -143,11 +147,15 @@ const Navigation = (props: any) => {
                             >
                                 <_Image
                                 style={styles.userIcon}
-                                // source={require('../../assets/images/logo.png')} // JA not working android with image.getsize .. is it because it's local??
+                                source={require('../../assets/images/logo.png')}
                                 height={40}
                                 />
                             </View>
-                            <FontAwesomeIcon color={Color.icon} size={14} style={styles.menuIcon} icon="caret-down" />
+                            <FontAwesomeIcon
+                            color={Color.icon}
+                            size={14}
+                            style={styles.menuIcon}
+                            icon="caret-down" />
                         </Pressable>
                     </View>
                 </View>
@@ -258,7 +266,7 @@ const Navigation = (props: any) => {
             width: '100%',
             ...Platform.select({
                 web: {
-                    position: 'fixed', // JA Has error on 'nav' style but works on web
+                    position: 'fixed',
                 }
             })
         },
@@ -309,7 +317,7 @@ const Navigation = (props: any) => {
         message: {
             ...Platform.select({
                 web: {
-                    outlineStyle: 'none', // JA Has error but works fine on web
+                    outlineStyle: 'none',
                 }
             }),
         },

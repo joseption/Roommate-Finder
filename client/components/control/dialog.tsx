@@ -8,9 +8,9 @@ import _ClusterOption from './cluster-option';
 import _Text from './text';
 
 const _Dialog = (props: any) => {
-  /* Props:
-  JA TO DO NEED DIALOG PROMPT
-  */
+    /*
+    Props: JA TODO 
+    */
     const [amount,setAmount] = useState(0);
     const [selected,setSelected] = useState([]);
 
@@ -40,7 +40,12 @@ const _Dialog = (props: any) => {
 
     const mappedItems = () => {
         return props.options.map((item: any, key: any) => {
-            return <_ClusterOption selected={selected} onPress={toggle} key={key} item={item} />
+            return <_ClusterOption
+            selected={selected}
+            onPress={toggle}
+            key={key}
+            item={item}
+            />
         });
     }
 

@@ -187,61 +187,103 @@ export const App = (props: any) => {
                   name={NavTo.Home}
                   options={{title: NavTo.Home, animation: 'none'}}
               >
-              {(props: any) => <HomeScreen {...props} mobile={mobile} url={url} />}
+              {(props: any) => <HomeScreen
+              {...props}
+              mobile={mobile}
+              url={url}
+              />}
               </Stack.Screen>
               <Stack.Screen
                   name={NavTo.Login}
                   options={{title: NavTo.Login, animation: 'none'}}
               >
-                  {(props: any) => <LoginScreen {...props} mobile={mobile} url={url} />}
+                  {(props: any) => <LoginScreen
+                  {...props}
+                  mobile={mobile}
+                  url={url}
+                  />}
               </Stack.Screen>
               <Stack.Screen
                   name={NavTo.Account}
                   options={{title: NavTo.Account, animation: 'none'}}
               >
-              {(props: any) => <AccountScreen {...props} accountView={accountView} setAccountView={setAccountView} mobile={mobile} url={url} />}
+              {(props: any) => <AccountScreen
+              {...props}
+              accountView={accountView}
+              setAccountView={setAccountView}
+              mobile={mobile}
+              url={url}
+              />}
               </Stack.Screen>
               <Stack.Screen
                   name={NavTo.Profile}
                   options={{title: NavTo.Profile, animation: 'none'}}
               >
-              {(props: any) => <ProfileScreen {...props} mobile={mobile} url={url} />}
+              {(props: any) => <ProfileScreen
+              {...props}
+              mobile={mobile}
+              url={url}
+              />}
               </Stack.Screen> 
               <Stack.Screen
                   name={NavTo.Survey}
                   options={{title: NavTo.Survey, animation: 'none'}}
               >
-              {(props: any) => <SurveyScreen {...props} mobile={mobile} url={url} />}
+              {(props: any) => <SurveyScreen
+              {...props}
+              mobile={mobile}
+              url={url}
+              />}
               </Stack.Screen>
               <Stack.Screen
                   name={NavTo.Matches}
                   options={{title: NavTo.Matches, animation: 'none'}}
               > 
-              {(props: any) => <MatchesScreen {...props} mobile={mobile} url={url} />}
+              {(props: any) => <MatchesScreen
+              {...props}
+              mobile={mobile}
+              url={url} 
+              />}
               </Stack.Screen>
               <Stack.Screen
                   name={NavTo.Explore}
                   options={{title: NavTo.Explore, animation: 'none'}}
               > 
-              {(props: any) => <ExploreScreen {...props} mobile={mobile} url={url} />}
+              {(props: any) => <ExploreScreen
+              {...props}
+              mobile={mobile}
+              url={url}
+              />}
               </Stack.Screen>
               <Stack.Screen
                   name={NavTo.Listings}
                   options={{title: NavTo.Listings, animation: 'none'}}
               >
-              {(props: any) => <ListingsScreen {...props} mobile={mobile} url={url} />}
+              {(props: any) => <ListingsScreen
+              {...props}
+              mobile={mobile}
+              url={url}
+              />}
               </Stack.Screen>
               <Stack.Screen
                   name={NavTo.Messages}
                   options={{title: NavTo.Messages, animation: 'none'}}
               >
-              {(props: any) => <MessagesScreen {...props} mobile={mobile} url={url} />}
+              {(props: any) => <MessagesScreen
+              {...props}
+              mobile={mobile}
+              url={url}
+              />}
               </Stack.Screen> 
               <Stack.Screen
                   name={NavTo.Logout}
                   options={{title: NavTo.Logout, animation: 'none'}}
               >
-              {(props: any) => <LogoutScreen {...props} mobile={mobile} url={url} />}
+              {(props: any) => <LogoutScreen
+              {...props}
+              mobile={mobile}
+              url={url}
+              />}
               </Stack.Screen>
             </Stack.Navigator>
           </View>

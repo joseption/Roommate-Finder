@@ -1,5 +1,3 @@
-import { setDefaultResultOrder } from 'dns';
-import { url } from 'inspector';
 import { useEffect, useState } from 'react';
 import { View, _Text } from 'react-native';
 import AccountAbout from '../components/account/account-about-you';
@@ -8,21 +6,21 @@ import StartSurvey from '../components/account/start-survey';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
 import { AccountScreenType, NavTo } from '../helper';
-import { Style } from '../style';
 
 const AccountScreen = (props: any, {navigation}:any) => {
-    const [showConfirm, setShowConfirm] = useState(false);
-    /*
-    Joseph: Use "account" components and add them here.
-    */
-
     useEffect(() => {
-        if (props.accountView && props.accountView === AccountScreenType.about ||
-            !props.accountView && props.url && props.url.includes("?view=about")) {
+        if (props.accountView &&
+            props.accountView === AccountScreenType.about ||
+            !props.accountView &&
+            props.url &&
+            props.url.includes("?view=about")) {
             setView(AccountScreenType.about);
         }
-        else if (props.accountView && props.accountView === AccountScreenType.survey ||
-        !props.accountView && props.url && props.url.includes("?view=survey")) {
+        else if (props.accountView &&
+            props.accountView === AccountScreenType.survey ||
+            !props.accountView &&
+            props.url &&
+            props.url.includes("?view=survey")) {
             setView(AccountScreenType.survey);
         }
         else
@@ -43,13 +41,28 @@ const AccountScreen = (props: any, {navigation}:any) => {
     return (
     <View>
         {props.accountView === AccountScreenType.info ?
-        <AccountInfo mobile={props.mobile} error={props.error} setError={props.setError} setView={(e: any) => setView(e)}></AccountInfo>
+        <AccountInfo
+        mobile={props.mobile}
+        error={props.error}
+        setError={props.setError}
+        setView={(e: any) => setView(e)}
+        />
         :
         <View>
             {props.accountView === AccountScreenType.about ?
-            <AccountAbout mobile={props.mobile} error={props.error} setError={props.setError} setView={(e: any) => setView(e)}></AccountAbout>
+            <AccountAbout
+            mobile={props.mobile}
+            error={props.error}
+            setError={props.setError}
+            setView={(e: any) => setView(e)}
+            />
             :
-            <StartSurvey mobile={props.mobile} error={props.error} setError={props.setError} setView={(e: any) => setView(e)}></StartSurvey>
+            <StartSurvey
+            mobile={props.mobile}
+            error={props.error}
+            setError={props.setError}
+            setView={(e: any) => setView(e)}
+            />
             }
         </View>
         }

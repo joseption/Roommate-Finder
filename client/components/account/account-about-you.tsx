@@ -149,7 +149,12 @@ const AccountAbout = (props: any, {navigation}:any) => {
             </_Button>
         </View>
         {props.error ?
-        <_Text containerStyle={errorContainerStyle()} style={errorStyle()}>{error}</_Text>
+        <_Text
+        containerStyle={errorContainerStyle()}
+        style={errorStyle()}
+        >
+            {error}
+        </_Text>
         : null}
     </ScrollView>
     );

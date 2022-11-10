@@ -16,7 +16,7 @@ const Login = (props: any, {navigation}:any) => {
   const [passwordError,setPasswordError] = useState(false);
 
   useEffect(() => {    
-      if (props.url.includes("timeout=yes")) {
+      if (props.url != null && props.url.includes("timeout=yes")) {
         setMessage("Your session has expired, please login");
       }
   }, [props.url]);

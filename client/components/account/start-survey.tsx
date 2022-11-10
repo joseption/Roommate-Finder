@@ -155,7 +155,13 @@ const StartSurvey = (props: any, {navigation}:any) => {
                         <Pressable
                         style={_styles.arrowContainer}
                         >
-                            <FontAwesomeIcon size={20} color={Color.textSecondary} style={_styles.backArrow} icon="arrow-left"></FontAwesomeIcon>
+                            <FontAwesomeIcon 
+                            size={20} 
+                            color={Color.textSecondary} 
+                            style={_styles.backArrow} 
+                            icon="arrow-left"
+                            >
+                            </FontAwesomeIcon>
                             <_Text
                             style={Style.textDefaultSecondary}
                             >
@@ -182,7 +188,12 @@ const StartSurvey = (props: any, {navigation}:any) => {
             </View>
         </View>
         {props.error ?
-        <_Text containerStyle={errorContainerStyle()} style={errorStyle()}>{error}</_Text>
+        <_Text
+        containerStyle={errorContainerStyle()}
+        style={errorStyle()}
+        >
+            {error}
+        </_Text>
         : null}
     </ScrollView>
     );

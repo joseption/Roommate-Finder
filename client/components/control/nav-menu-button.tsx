@@ -19,7 +19,10 @@ const NavMenuButton = (props: any) => {
         <View
         style={styles.content}
         >
-            <FontAwesomeIcon style={styles.icon} icon={props.icon} />
+            <FontAwesomeIcon
+            style={styles.icon}
+            icon={props.icon}
+            />
         </View>
         <_Text
         style={styles.text}

@@ -11,6 +11,9 @@ import Text from './text';
 import _Text from './text';
 
 const _Dropdown = (props: any, {navigation}:any) => {
+        /*
+    Props: JA TODO 
+    */
     const [focus,setFocus] = useState(false);
     const [height,setHeight] = useState(0);
     const [options,setOptions] = useState([]);
@@ -20,10 +23,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
     const [textValue,setTextValue] = useState('');
     const [visibleOptionCount,setVisibleOptionCount] = useState(0);
     const inputRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
-    /*Props:
-    JA TODO Will be explained later
-    */
-// JA todo dropdowns need to calculate if they are going to run off the page and open upwards instead
+    // JA todo dropdowns need to calculate if they are going to run off the page and open upwards instead
     const context = useContext(Context);
     const onFocus = useCallback((value: any) => {
         context.setParentFocus(value);
@@ -164,7 +164,10 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
     const mappedItems = (value: string) => {
         var items = filteredItems(value).map((item: any, key: any) => {
-            return <_DropdownOption onPress={(e: any) => select(e)} key={key} item={item} />
+            return <_DropdownOption
+            onPress={(e: any) => select(e)}
+            key={key}
+            item={item} />
         });
         setOptions(items);
     }
@@ -250,7 +253,9 @@ const _Dropdown = (props: any, {navigation}:any) => {
                 style={styles.iconContainer}
                 onPress={() => onPress()}
                 >
-                <FontAwesomeIcon style={styles.icon} icon="caret-down" />
+                <FontAwesomeIcon
+                style={styles.icon}
+                icon="caret-down" />
             </Pressable>
         </View>
         {focus ?

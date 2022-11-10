@@ -134,7 +134,12 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 <View
                 style={[_styles.image, _styles.defaultImage]}
                 >
-                    <FontAwesomeIcon style={_styles.newUserIcon} size={40} color={Color.border} icon="user-plus"></FontAwesomeIcon>
+                    <FontAwesomeIcon
+                    style={_styles.newUserIcon}
+                    size={40} color={Color.border}
+                    icon="user-plus"
+                    >
+                    </FontAwesomeIcon>
                 </View>
                 :
                 <_Image
@@ -247,7 +252,12 @@ const AccountInfo = (props: any, {navigation}:any) => {
             </_Button>
         </View>
         {props.error ?
-        <_Text containerStyle={errorContainerStyle()} style={errorStyle()}>{error}</_Text>
+        <_Text 
+        containerStyle={errorContainerStyle()} 
+        style={errorStyle()}
+        >
+            {error}
+            </_Text>
         : null}
     </ScrollView>
     );

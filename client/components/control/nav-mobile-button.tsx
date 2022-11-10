@@ -11,14 +11,14 @@ const NavMobileButton = (props: any) => {
     currentNav: The current page in the stack
     navigate: Navigate to a page in the stack using a NavTo option
     */   
-    const iconStyle = (nav: string) => {
+    const iconStyle = () => {
         if (props.navTo != props.currentNav)
             return styles.icon;
         else
             return styles.iconSelected;
     };
 
-    const indicateStyle = (nav: string) => {
+    const indicateStyle = () => {
         if (props.navTo == props.currentNav)
             return styles.indicator;
         else
@@ -30,8 +30,15 @@ const NavMobileButton = (props: any) => {
     onPress={() => props.navigate()}
     style={styles.container}
     >
-        <FontAwesomeIcon size={20} style={iconStyle(props.navTo)} icon={props.icon} />
-        <View style={indicateStyle(props.navTo)}></View>
+        <FontAwesomeIcon
+        size={20}
+        style={iconStyle()}
+        icon={props.icon}
+        />
+        <View
+        style={indicateStyle()}
+        >          
+        </View>
     </Pressable>
     );
 };

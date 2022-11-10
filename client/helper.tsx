@@ -4,8 +4,11 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { createContext } from "react";
 import { Dimensions } from "react-native";
 import { Content } from "./style";
-import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut, faUserPlus, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import * as DeepLinking from 'expo-linking';
+import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut, faUserPlus, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+library.add(faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
+
+export const Stack = createNativeStackNavigator<Page>();
 
 export const isMobile = () => {
     return Dimensions.get('window').width < Content.mobileWidth;
@@ -48,8 +51,6 @@ export const textMatches = (text1: string, text2: string) => {
     return text1 === text2 && text1.length > 0 && text2.length > 0;
 }
 
-library.add(faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
-
 export const Context = createContext({} as any); 
 export type navProp = StackNavigationProp<Page>;
 export const NavTo = {
@@ -77,8 +78,6 @@ export type Page = {
   Messages: undefined;
   Logout: undefined;
 }
-
-export const Stack = createNativeStackNavigator<Page>();
 
 export const config = {
   screens: {

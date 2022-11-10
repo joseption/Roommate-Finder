@@ -7,9 +7,9 @@ import _ClusterOption from './cluster-option';
 import _Text from './text';
 
 const _Cluster = (props: any) => {
-  /* Props:
-  
-  */
+    /*
+    Props: JA TODO 
+    */
     const [amount,setAmount] = useState(0);
     const [selected,setSelected] = useState([]);
 
@@ -39,7 +39,11 @@ const _Cluster = (props: any) => {
 
     const mappedItems = () => {
         return props.options.map((item: any, key: any) => {
-            return <_ClusterOption selected={selected} onPress={toggle} key={key} item={item} />
+            return <_ClusterOption
+            selected={selected}
+            onPress={toggle}
+            key={key}
+            item={item} />
         });
     }
 

@@ -26,7 +26,7 @@ const _TextInput = (props: any) => {
   const [length,setLength] = useState(0);
   const [value,setValue] = useState('');
   const [init,setInit] = useState(false);
-
+  // JA todo: phone masking is not finished
   useEffect(() => {
     if (!init) {
       if (props.value)

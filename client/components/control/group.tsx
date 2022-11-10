@@ -5,9 +5,12 @@ import _Checkbox from '../control/checkbox';
 import _Text from '../control/text';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Color, Radius } from '../../style';
-import { Context, isMobile } from '../../helper';
+import { Context } from '../../helper';
 
 const _Group = (props: any, {navigation}:any) => {
+    /*
+    Props: JA TODO 
+    */
     const [focus,setFocus] = useState(false);  
     const [isGroup, setIsGroup] = useState(true);
     const setParentFocus = useCallback((value: any) => { 

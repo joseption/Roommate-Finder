@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { config, env, validateEmail } from '../../helper';
@@ -53,7 +53,7 @@ const Login = (props: any, {navigation}:any) => {
 
       try
       {   
-          await fetch(`${env.URL}/api/login`,
+          await fetch(`${env.URL}/auth/login`,
           {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
               if (res.error)

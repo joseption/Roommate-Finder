@@ -327,7 +327,7 @@ export const LoginStyle = StyleSheet.create({
     marginBottom: 0,
     marginTop: 'auto',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   previousPageAction: {
     marginLeft: 5

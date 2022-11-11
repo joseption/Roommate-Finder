@@ -27,15 +27,15 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
     console.log(req.body)
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400);
-      throw new Error('You must provide an email and a password.');
+      res.status(400).json({error: 'An email is required to register'});
+      return;
     }
 
     const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
-      res.status(400);
-      throw new Error('Email already in use.');
+      res.status(400).json({error: 'The email address is already in use'});
+      return;
     }
     
     const user = await createUserByEmailAndPassword(email, password);
@@ -56,21 +56,21 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400);
-      throw new Error('You must provide an email and a password.');
+      res.status(400).json({error: 'Email and password are required'});
+      return;
     }
 
     const existingUser = await findUserByEmail(email);
 
     if (!existingUser) {
-      res.status(403);
-      throw new Error('Invalid login credentials.');
+      res.status(403).json({error: 'Invalid email or password'});
+      return;
     }
 
     const validPassword = await bcrypt.compare(password, existingUser.password);
     if (!validPassword) {
-      res.status(403);
-      throw new Error('Invalid login credentials.');
+      res.status(403).json({error: 'Invalid email or password'});
+      return;
     }
 
     const jti = v4();

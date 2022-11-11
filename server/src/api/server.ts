@@ -11,6 +11,8 @@ import listings from './listings/routes';
 
 const port = process.env.PORT || 8080;
 const app = express();
+const cors = require('cors');
+app.use(cors());
 
 app.use((req, res, next) => {
   // allow calling from different domains

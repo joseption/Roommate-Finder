@@ -164,8 +164,8 @@ const LoginScreen = (props:any, {navigation}:any) => {
   }
 
   return (
-      <ScrollView
-      contentContainerStyle={styles.outerContainer}
+      <View
+      style={styles.outerContainer}
       >
         <View
         style={style()}
@@ -232,23 +232,27 @@ const LoginScreen = (props:any, {navigation}:any) => {
               />
             </Animated.View>
           </View>
-      </ScrollView>
+      </View>
   );
 };
 
 export const styles = StyleSheet.create({
     outerContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      height: '100%'
+      ...Platform.select({
+        web: {
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          height: '100%',
+        },
+      }),
     },
     container: {
       backgroundColor: Color.white,
       margin:'auto',
       overflow:'hidden',
       height: '100%',
-      padding: 10
+      padding: 10,
     },
     containerMobile: {
       paddingLeft:10,
@@ -297,7 +301,7 @@ export const styles = StyleSheet.create({
     panel: {
         width:'100%',
         marginLeft: 21,
-        marginRight: 21
+        marginRight: 21,
     },
     hidden: {
       display: 'none'

@@ -47,7 +47,7 @@ const Register = (props: any, {navigation}:any) => {
 
       try
       {    
-          await fetch(`${env.URL}/api/register`,
+          await fetch(`${env.URL}/auth/register`,
           {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
               if (res.error && res.error !== "Account Exists")

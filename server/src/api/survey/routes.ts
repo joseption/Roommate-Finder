@@ -2,7 +2,7 @@ import { VerifySudo } from "api/auth/services";
 import express, { Request, Response } from "express";
 const router = express.Router()
 import {isAuthenticated} from '../../middleware';
-import { AddQuestion, AddResponse, GetSurveyQuestionsAndResponses, RemoveQuestion, RemoveResponse, UserAnswer } from "./services";
+import { AddQuestion, AddResponse, GetSurveyQuestionsAndResponses, RemoveQuestion, RemoveResponse, UserAnswer, VerifyResponse } from "./services";
 router.use(isAuthenticated);
 
 router.get("/info", async (req: Request, res: Response) => {
@@ -18,12 +18,14 @@ router.get("/info", async (req: Request, res: Response) => {
 router.post("/response", async (req: Request, res: Response) => {
     try {
         const { questionId, responseId } = req.body;
-
+        
         if (!questionId || !responseId) {
             return res.status(422).json('missing parameters');
         }
         const payload : payload = req.body[0];
-
+        if(!await VerifyResponse(questionId, responseId)){
+            return res.status(422).json('Response does not belong to question');
+        }
         if(!await UserAnswer(payload.userId, questionId, responseId))
         {
             return res.status(400).json('Failed to update/create.')

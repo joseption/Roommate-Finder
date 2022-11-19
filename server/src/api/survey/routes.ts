@@ -20,15 +20,15 @@ router.post("/response", async (req: Request, res: Response) => {
         const { questionId, responseId } = req.body;
         
         if (!questionId || !responseId) {
-            return res.status(422).json('missing parameters');
+            return res.status(422).json({"Error": "Missing questionId or responseId"});
         }
         const payload : payload = req.body[0];
         if(!await VerifyResponse(questionId, responseId)){
-            return res.status(422).json('Response does not belong to question');
+            return res.status(422).json({"Error": "Invalid responseId for questionId"});
         }
         if(!await UserAnswer(payload.userId, questionId, responseId))
         {
-            return res.status(400).json('Failed to update/create.')
+            return res.status(400).json({"Error": "Failed to update/add user response"});
         }
         else{
             res.status(200).json({
@@ -50,17 +50,17 @@ router.post("/utils/add/question", async (req: Request, res: Response) => {
 
         const { question_text } = req.body;
         if (!question_text) {
-            return res.status(422).json('missing parameters');
+            return res.status(422).json({"Error": "Missing question_text"});
         }
         const data = await AddQuestion(question_text);
         if(!data)
         {
-            return res.status(400).json('Failed to create question.');
+            return res.status(400).json({"Error": "Failed to add question"});
         }
         else{
             res.status(200).json({
                 'id': data.id,
-                'msg':'added new question. Please add its responses as well.'});
+                'msg':'Added question.'});
         }
         
     } catch (error) {
@@ -79,17 +79,17 @@ router.post("/utils/remove/question", async (req: Request, res: Response) => {
 
         const { id } = req.body;
         if (!id) {
-            return res.status(422).json('missing parameters');
+            return res.status(422).json({"Error": "Missing question id"});
         }
         const data = await RemoveQuestion(id)
         if(!data)
         {
-            return res.status(400).json('Failed to remove question.');
+            return res.status(400).json({"Error": "Failed to remove question"});
         }
         else{
             res.status(200).json({
                 'question_text': data.question_text,
-                'msg':'Removed question and its reponses.'});
+                'msg':'Removed question and its responses.'});
         }
         
     } catch (error) {
@@ -107,11 +107,11 @@ router.post("/utils/add/response", async (req: Request, res: Response) => {
         }
         const { question_id , response } = req.body;
         if (!question_id || !response) {
-            return res.status(422).json('Missing parameter');
+            return res.status(422).json({"Error": "Missing question_id or response"});
         }
         if(!await AddResponse(response, question_id))
         {
-            return res.status(400).json('Failed to add response.');
+            return res.status(400).json({"Error": "Failed to add response"});
         }
         else{
             res.status(200).json({
@@ -133,11 +133,11 @@ router.post("/utils/remove/response", async (req: Request, res: Response) => {
         }
         const { id } = req.body;
         if (!id) {
-            return res.status(422).json('Missing parameter');
+            return res.status(422).json({"Error": "Missing response id"});
         }
         if(!await RemoveResponse(id))
         {
-            return res.status(400).json('Failed to remove response.');
+            return res.status(400).json({"Error": "Failed to remove response"});
         }
         else{
             res.status(200).json({

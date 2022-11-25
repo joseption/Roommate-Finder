@@ -123,3 +123,11 @@ model Message {
   chatItBelongsTo Chat     @relation(fields: [chatId], references: [id])
   sender          User     @relation(fields: [userId], references: [id])
 }
+
+model Matches {
+  userOneId       String
+  userTwoId       String
+  matchPercentage Float
+
+  @@unique([userOneId, userTwoId])
+}

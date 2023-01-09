@@ -1,4 +1,4 @@
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import _TextInput from '../control/text-input';
 import _Dropdown from '../control/dropdown';
 import _Checkbox from '../control/checkbox';
@@ -24,6 +24,8 @@ const AccountInfo = (props: any, {navigation}:any) => {
     const [zipCodeForm,setZipCodeForm] = useState('');
     const [publicPhoneForm,setPublicPhoneForm] = useState(false);
     const [photoError,setPhotoError] = useState('');
+    const [dayOptions,setDayOptions] = useState([]);
+    const dayRef = React.useRef<React.ElementRef<typeof _Dropdown> | null>(null);
     const [photoResult, setPhotoResult] = React.useState<Array<DocumentPickerResponse> | DirectoryPickerResponse | undefined | null>()
     // JA TODO props.accountIsSetup need to know if the account is setup or not
     const errorStyle = () => {
@@ -32,6 +34,16 @@ const AccountInfo = (props: any, {navigation}:any) => {
         if (props.mobile)
           style.push(Style.errorText);        
         return style;
+    }
+
+    const setMonth = (e: any) => {
+        setMonthForm(e);
+        getDayOptions(e, yearForm);
+    }
+
+    const setYear = (e: any) => {
+        setYearForm(e);
+        getDayOptions(monthForm, e);
     }
 
     const errorContainerStyle = () => {
@@ -95,6 +107,35 @@ const AccountInfo = (props: any, {navigation}:any) => {
         catch (e: any) {
             var x = e;
         }
+    }
+
+    const getYearOptions = () => {
+        var years = [];
+        var year = new Date().getFullYear();
+        for (var i = 0; i < 100; i++) {
+            years.push({key:year, value:year.toString()});
+            year--;
+        }
+        return years;
+    }
+
+    const getMonthOptions = () => {
+        return [{key:1, value:'January'},{key:2, value:'February'},{key:3, value:'March'},{key:4, value:'April'},{key:5, value:'May'},{key:6, value:'June'},{key:7, value:'July'},{key:8, value:'August'},{key:9, value:'September'},{key:10, value:'October'},{key:11, value:'November'},{key:12, value:'December'}]
+    }
+
+    const getDayOptions = (sMonth: any, sYear: any) => {
+        var days = [];
+        if (sMonth && sYear) {
+            var count = new Date(parseInt(sYear), parseInt(sMonth), 0).getDate();
+            for (var i = 1; i <= count; i++) {
+                days.push({key:i, value:i.toString()});
+            }
+            if (dayForm && parseInt(dayForm) > count) {
+                setDayForm('');
+
+            }
+        }
+        setDayOptions(days as never);
     }
 
     return (
@@ -180,19 +221,22 @@ const AccountInfo = (props: any, {navigation}:any) => {
             label="Birthday"
             >
                 <_Dropdown
+                label="Year"
+                options={getYearOptions()}
+                selected={(e: any) => setYear(e)}
+                placeholder="Select..."
+                ></_Dropdown>
+                <_Dropdown
                 label="Month"
-                options={
-                    [{key:1, value:'TestSelect'},{key:42, value:'Another'},{key:2, value:'Select'},{key:3, value:'Testing'},{key:4, value:'LookHere'},{key:5, value:'What is this?'},{key:6, value:'Some Option'},{key:7, value:'No Thank you'},{key:8, value:'Another Test'},{key:9, value:'LookHere'},{key:10, value:'TestSelect'},{key:12, value:'Another'},{key:13, value:'Select'},{key:14, value:'Testing'},{key:15, value:'LookHere'},{key:16, value:'What is this?'},{key:17, value:'Some Option'},{key:18, value:'No Thank you'},{key:19, value:'Another Test'},{key:20, value:'LookHere'},{key:21, value:'TestSelect'},{key:22, value:'Another'},{key:23, value:'Select'},{key:24, value:'Testing'},{key:425, value:'LookHere'},{key:26, value:'What is this?'},{key:27, value:'Some Option'},{key:28, value:'No Thank you'},{key:29, value:'Another Test'},{key:30, value:'LookHere'}]
-                }
-                selected={(e: any) => setMonthForm(e)}
+                options={getMonthOptions()}
+                selected={(e: any) => setMonth(e)}
+                placeholder="Select..."
                 ></_Dropdown>
                 <_Dropdown
                 label="Day"
+                options={dayOptions}
                 selected={(e: any) => setDayForm(e)}
-                ></_Dropdown>
-                <_Dropdown
-                label="Year"
-                selected={(e: any) => setYearForm(e)}
+                placeholder="Select..."
                 ></_Dropdown>
             </_Group>
             <_Group
@@ -228,11 +272,13 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 <_Dropdown
                 label="State"
                 selected={(e: any) => setStateForm(e)}
+                placeholder="Select..."
                 ></_Dropdown>
             </_Group>
             <_Dropdown
             label="Gender"
             selected={(e: any) => setGenderForm(e)}
+            placeholder="Select..."
             ></_Dropdown>
         </View>
         <View

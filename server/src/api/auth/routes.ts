@@ -27,14 +27,14 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
     console.log(req.body)
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({error: 'An email is required to register'});
+      res.status(400).json({error: 'An account with this email address is already in use'});
       return;
     }
 
     const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
-      res.status(400).json({error: 'The email address is already in use'});
+      res.status(400);
       return;
     }
     
@@ -56,20 +56,20 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({error: 'Email and password are required'});
+      res.status(400).json({ error: 'Email and password are required' });
       return;
     }
 
     const existingUser = await findUserByEmail(email);
 
     if (!existingUser) {
-      res.status(403).json({error: 'Invalid email or password'});
+      res.status(403).json({ error: 'The email or password did not match' });
       return;
     }
 
     const validPassword = await bcrypt.compare(password, existingUser.password);
     if (!validPassword) {
-      res.status(403).json({error: 'Invalid email or password'});
+      res.status(403).json({ error: 'The email or password did not match' });;
       return;
     }
 

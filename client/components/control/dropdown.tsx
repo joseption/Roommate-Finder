@@ -38,7 +38,10 @@ const _Dropdown = (props: any, {navigation}:any) => {
             if (props.value)
                 setTextValue(props.value);
         }
-    }, [options]);
+        else if (!focus && textValue && props.options.filter((x: { value: string; }) => x.value === textValue).length == 0) {
+            clearSelected(false);
+        }
+    }, [options, props.options]);
 
     const labelStyle = () => {
         var style = [];
@@ -160,16 +163,32 @@ const _Dropdown = (props: any, {navigation}:any) => {
         setValue(e.value);
         setTextValue(e.value);
         setMenu(false)
+        if (props.selected)
+            props.selected(e.key);
+    }
+
+    const clearSelected = (reload = true) => {
+        setKey('');
+        setValue('');
+        setTextValue('');
+        if (reload)
+            mappedItems(''); // Try mapping again (old value doesn't exist in list anymore)
     }
 
     const mappedItems = (value: string) => {
-        var items = filteredItems(value).map((item: any, key: any) => {
-            return <_DropdownOption
-            onPress={(e: any) => select(e)}
-            key={key}
-            item={item} />
-        });
-        setOptions(items);
+        var fItems = filteredItems(value);
+        if (!focus && value && fItems.filter((x: { value: string; }) => x.value === value).length == 0) {
+            clearSelected();
+        }
+        else {
+            var items = fItems.map((item: any, key: any) => {
+                return <_DropdownOption
+                onPress={(e: any) => select(e)}
+                key={key}
+                item={item} />
+            });
+            setOptions(items);
+        }
     }
 
     const onValueChange = (e: string) => {
@@ -177,6 +196,8 @@ const _Dropdown = (props: any, {navigation}:any) => {
         mappedItems(e);
         if (!focus)
             setMenu(true);
+        if (props.onChangeText)
+            props.onChangeText(e);
     }
 
     const onblur = (e: any) => {
@@ -203,6 +224,12 @@ const _Dropdown = (props: any, {navigation}:any) => {
         }
     }
 
+    const onKeyPress = (e: any) => {
+        if ((e.keyCode === 13 || e.keyCode === 9) && focus) {
+            // JA: Todo conveniently select top option when enter or tab is pressed on keyboard
+        }
+    }
+
     const input = () => {
         return <TextInput
         style={style()}
@@ -213,7 +240,9 @@ const _Dropdown = (props: any, {navigation}:any) => {
         ref={inputRef}
         onFocus={(e: any) => onfocus(e)}
         onBlur={(e: any) => onblur(e)}
+        onKeyPress={(e: any) => onKeyPress(e)}
         ></TextInput>
+
     }
 
     return (

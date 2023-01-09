@@ -28,8 +28,8 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingLeft: 10,
         paddingRight: 10,
-        paddingTop: 5,
-        paddingBottom: 5,
+        paddingTop: 7,
+        paddingBottom: 7,
         fontSize: FontSize.default,
         color: Color.text
     },

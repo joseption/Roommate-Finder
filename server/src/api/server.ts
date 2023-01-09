@@ -8,6 +8,7 @@ import users from './users/routes';
 import chats from './chats/routes';
 import messages from './messages/routes';
 import listings from './listings/routes';
+import matches from './matches/routes';
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -40,6 +41,7 @@ app.use('/chats', chats);
 app.use('/messages', messages);
 app.use('/listings', listings);
 app.use('/survey', survey);
+app.use('/matches', matches);
 // Start the express server.
 app.listen(port, () => {
   console.log(`Listening on http://localhost:${port}`);

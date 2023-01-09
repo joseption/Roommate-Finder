@@ -2,11 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-  output   = "./ERD.png"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -55,10 +50,10 @@ model RefreshToken {
 }
 
 model Question {
-  id                  String             @id @default(uuid())
-  question_text       String
-  response            Response[]
-  ResponsesOnUsers    ResponsesOnUsers[]
+  id               String             @id @default(uuid())
+  question_text    String
+  response         Response[]
+  ResponsesOnUsers ResponsesOnUsers[]
 }
 
 model Response {
@@ -86,8 +81,8 @@ model ResponsesOnUsers {
   userId     String
   responseId String
   questionId String
-  Question   Question @relation(fields: [questionId], references: [id])
-  response   Response @relation(fields: [responseId], references: [id])
+  Question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
   user       User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, responseId, questionId])
@@ -127,4 +122,12 @@ model Message {
   createdAt       DateTime @default(now())
   chatItBelongsTo Chat     @relation(fields: [chatId], references: [id])
   sender          User     @relation(fields: [userId], references: [id])
+}
+
+model Matches {
+  userOneId       String
+  userTwoId       String
+  matchPercentage Float
+
+  @@unique([userOneId, userTwoId])
 }

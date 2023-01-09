@@ -37,6 +37,23 @@ export async function GetSurveyQuestionsAndResponses(userId: string){
     })
 }
 
+//check if responseID is valid for questionID
+export async function VerifyResponse(question_id:string, responseId: string){
+    const data = await db.response.findMany({
+        where: {
+            question_id,
+            id: responseId
+        }
+    })
+    if(data.length > 0)
+    {
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
 export async function UserAnswer(userId: string, questionId:string, responseId: string){
     //can't do upsert because something is not unique
     const update = await db.responsesOnUsers.updateMany({

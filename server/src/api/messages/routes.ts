@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { isAuthenticated } from '../../middleware';
 import db from '../../utils/db';
 const router = express.Router();
+import payload from '../../global'
 
 // router.use(isAuthenticated);
 

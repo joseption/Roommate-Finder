@@ -5,13 +5,18 @@
     "build": "tsc && tsc-alias",
     "dev": "cross-env NODE_ENV=development nodemon",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "nodemon server/src/server.ts",
+    "server": "cd server && npm run dev",
     "client": "cd client && npm run web",
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "setup": "cd client && npm i && cd ../server && npm i",
-    "initSetup": "npm i -g concurrently && npm i -g nodemon && npm i -g ts-node && npm run setup"
+    "initSetup": "npm i -g concurrently && npm i -g nodemon && npm i -g ts-node && npm run setup && npm i -g node-gyp && npm i -g prisma",
+    "android": "concurrently \"npm run server\" \"cd client && npx react-native run-android\"",
+    "ios": "concurrently \"npm run server\" \"cd client && npx react-native run-ios\"",
+    "android-studio": "concurrently \"npm run server\" \"cd client && npx react-native start\"",
+    "android-vsc": "concurrently \"npm run server\" \"npm run client\" \"cd client && npx react-native run-android\""
   },
   "dependencies": {
+    "react-native-eject": "^0.1.2",
     "react-native-safe-area-context": "^4.4.1",
     "react-native-screens": "^3.18.2"
   }

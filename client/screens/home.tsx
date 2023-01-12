@@ -1,35 +1,18 @@
-import React from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { View, _Text } from 'react-native';
+import _Button from '../components/control/button';
+import _TextInput from '../components/control/text-input';
 
-export type Props = {
-  name: string;
-  baseEnthusiasmLevel?: number;
-};
-
-const Home = ({navigation}) => {
-  return (
-    <View style={styles.container}>
-        <View>
-        <Button
-            title="Login"
-            onPress={() => navigation.navigate('Login')}
-            />
-        </View>
+const HomeScreen = (props: any, {navigation}:any) => {
+    /*
+    Erick: Add all content for the single page view here,
+    If you need to make reusable components, create a folder
+    in the components folder named "home" and add your component files there
+    */
+    return (
+    <View>
+        
     </View>
-  );
+    );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  greeting: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    margin: 16
-  }
-});
-
-export default Home;
+export default HomeScreen;

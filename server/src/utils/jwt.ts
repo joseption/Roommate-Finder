@@ -7,7 +7,6 @@ export function generateAccessToken(user: { id: any; }) {
   });
 }
 
-
 export function generateRefreshToken(user: { id: any; }, jti: any) {
   return jwt.sign({
     userId: user.id,

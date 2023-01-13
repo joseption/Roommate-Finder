@@ -10,7 +10,7 @@ const ProfileScreen = (props: any, {navigation}:any) => {
     */
     return (
     <View>
-        
+    
     </View>
     );
 };

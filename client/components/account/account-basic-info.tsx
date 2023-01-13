@@ -10,7 +10,7 @@ import { styles } from '../../screens/login';
 import _Button from '../control/button';
 import _Image from '../control/image';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import DocumentPicker, {DirectoryPickerResponse, DocumentPickerResponse, isInProgress, types} from 'react-native-document-picker'
+import DocumentPicker, {DirectoryPickerResponse, DocumentPickerResponse, isInProgress} from 'react-native-document-picker'
 import { AccountScreenType } from '../../helper';
 
 const AccountInfo = (props: any, {navigation}:any) => {
@@ -101,7 +101,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
 
     const setPhoto = async () => {
         try { // JA NEED TO SETUP PROPERLY
-            const img = await DocumentPicker.pick({type: types.images});;
+            const img = await DocumentPicker.pickSingle({type: [DocumentPicker.types.images]});
             setPhotoResult(img);
         }
         catch (e: any) {
@@ -121,6 +121,15 @@ const AccountInfo = (props: any, {navigation}:any) => {
 
     const getMonthOptions = () => {
         return [{key:1, value:'January'},{key:2, value:'February'},{key:3, value:'March'},{key:4, value:'April'},{key:5, value:'May'},{key:6, value:'June'},{key:7, value:'July'},{key:8, value:'August'},{key:9, value:'September'},{key:10, value:'October'},{key:11, value:'November'},{key:12, value:'December'}]
+    }
+
+    const getStateOptions = () => {
+        return [{key:'AL', value: 'Alabama'},{key:'AK', value: 'Alaska'},{key:'AZ', value: 'Arizona'},{key:'AR', value: 'Arkansas'},{key:'CA', value: 'California'},{key:'CO', value: 'Colorado'},{key:'CT', value: 'Connecticut'},{key:'DE', value: 'Delaware'},{key:'DC', value: 'District Of Columbia'},{key:'FL', value: 'Florida'},{key:'GA', value: 'Georgia'},
+{key:'HI', value: 'Hawaii'},{key:'ID', value: 'Idaho'},{key:'IL', value: 'Illinois'},{key:'IN', value: 'Indiana'},{key:'IA', value: 'Iowa'},{key:'KS', value: 'Kansas'},{key:'KY', value: 'Kentucky'},{key:'LA', value: 'Louisiana'},{key:'ME', value: 'Maine'},{key:'MD', value: 'Maryland'},{key:'MA', value: 'Massachusetts'},{key:'MI', value: 'Michigan'},{key:'MN', value: 'Minnesota'},{key:'MS', value: 'Mississippi'},{key:'MO', value: 'Missouri'},{key:'MT', value: 'Montana'},{key:'NE', value: 'Nebraska'},{key:'NV', value: 'Nevada'},{key:'NH', value: 'New Hampshire'},{key:'NJ', value: 'New Jersey'},{key:'NM', value: 'New Mexico'},{key:'NY', value: 'New York'},{key:'NC', value: 'North Carolina'},{key:'ND', value: 'North Dakota'},{key:'OH', value: 'Ohio'},{key:'OK', value: 'Oklahoma'},{key:'OR', value: 'Oregon'},{key:'PA', value: 'Pennsylvania'},{key:'RI', value: 'Rhode Island'},{key:'SC', value: 'South Carolina'},{key:'SD', value: 'South Dakota'},{key:'TN', value: 'Tennessee'},{key:'TX', value: 'Texas'},{key:'UT', value: 'Utah'},{key:'VT', value: 'Vermont'},{key:'VA', value: 'Virginia'},{key:'WA', value: 'Washington'},{key:'WV', value: 'West Virginia'},{key:'WI', value: 'Wisconsin'},{key:'WY', value: 'Wyoming'}];
+    }
+
+    const setGenderOptions = () => {
+        return [{key:'Male', value: 'Male'}, {key:'Female', value: 'Female'}, {key:'Non-BInary', value: 'Non-Binary'}];
     }
 
     const getDayOptions = (sMonth: any, sYear: any) => {
@@ -251,7 +260,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 type="phone"
                 ></_TextInput>
                 <_Checkbox
-                label="Public Phone Number"
+                label="Make Phone Public"
                 checked={(e: any) => setPublicPhoneForm(e)}
                 />
             </_Group>
@@ -264,6 +273,8 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 <_TextInput
                 label="Zip Code"
                 onChangeText={(e: any) => setZipCodeForm(e)}
+                maxLength="5"
+                keyboardType="numeric"
                 ></_TextInput>
                 <_TextInput
                 label="City"
@@ -271,40 +282,45 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 ></_TextInput>
                 <_Dropdown
                 label="State"
+                options={getStateOptions()}
                 selected={(e: any) => setStateForm(e)}
                 placeholder="Select..."
+                direction="top"
                 ></_Dropdown>
             </_Group>
             <_Dropdown
             label="Gender"
             selected={(e: any) => setGenderForm(e)}
+            options={setGenderOptions()}
+            direction="top"
             placeholder="Select..."
             ></_Dropdown>
-        </View>
-        <View
-        style={_styles.buttonContainer}
-        >
-            {props.accountIsSetup ?
-            <_Button
-            style={[Style.buttonDefault, _styles.passwordButton]}
+            <View
+            style={_styles.buttonContainer}
             >
-                Change Password
-            </_Button>
-            : null }
-            <_Button
-            style={Style.buttonSuccess}
+                {props.accountIsSetup ?
+                <_Button
+                style={[Style.buttonDefault, _styles.passwordButton]}
+                >
+                    Change Password
+                </_Button>
+                : null }
+                <_Button
+                style={Style.buttonSuccess}
+                >
+                    {props.accountIsSetup ? 'Save' : 'Next'}
+                </_Button>
+            </View>
+            {props.error ?
+            <_Text 
+            containerStyle={errorContainerStyle()}
+            innerContainerStyle={{justifyContent: 'center'}} 
+            style={errorStyle()}
             >
-                {props.accountIsSetup ? 'Save' : 'Next'}
-            </_Button>
+                {error}
+                </_Text>
+            : null}
         </View>
-        {props.error ?
-        <_Text 
-        containerStyle={errorContainerStyle()} 
-        style={errorStyle()}
-        >
-            {error}
-            </_Text>
-        : null}
     </ScrollView>
     );
 };

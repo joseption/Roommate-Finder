@@ -26,7 +26,8 @@ const _Dropdown = (props: any, {navigation}:any) => {
     // JA todo dropdowns need to calculate if they are going to run off the page and open upwards instead
     const context = useContext(Context);
     const onFocus = useCallback((value: any) => {
-        context.setParentFocus(value);
+        if (context.setParentFocus)
+            context.setParentFocus(value);
       }, [props.value, context.setParentFocus]);
 
     useEffect(() => {
@@ -110,8 +111,9 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
     const setMenu = (focus: boolean, fromBtn = false) => {
         if (focus) {
-            if (fromBtn)
+            if (fromBtn) {
                 inputRef.current?.focus();
+            }
             else
                 mappedItems(textValue);
         }
@@ -125,8 +127,15 @@ const _Dropdown = (props: any, {navigation}:any) => {
     }
 
     const menuStyle = () => {
-        return {
-            top: height
+        if (props.direction == "top") {
+            return {
+                bottom: "-25px"
+            }
+        }
+        else {
+            return {
+                top: height
+            }
         }
     }
 
@@ -226,7 +235,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
     const onKeyPress = (e: any) => {
         if ((e.keyCode === 13 || e.keyCode === 9) && focus) {
-            // JA: Todo conveniently select top option when enter or tab is pressed on keyboard
+            // JA: Todo conveniently select top option when enter or tab is pressed on keyboard if time permits
         }
     }
 

@@ -102,6 +102,10 @@ const _TextInput = (props: any) => {
   const onChangeText = (e: any) => {
     setLength(e.length);
     var value = e;
+    // JA Todo add pattern matching (needs to be reverse of this)
+    // if (props.pattern) {
+    //   value = e.replace(/^/ + props.pattern, '');
+    // }
     if (props.keyboardType === 'numeric' || props.type === 'phone') {
       value = e.replace(/[^0-9]/g, '');
     }

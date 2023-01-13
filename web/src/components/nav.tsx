@@ -40,7 +40,7 @@ export default function Nav() {
   //#region Hooks
   //#endregion
   const router = useRouter();
-  if (router.pathname == "/auth") return null;
+  if (router.pathname.includes("/auth")) return null;
   else
     return (
       <div className="min-h-full">

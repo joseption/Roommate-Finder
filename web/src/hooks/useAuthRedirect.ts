@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 import path from "../data/path";
 import { authenticateUser } from "../request/mutate";
 import { ErrorResponse } from "../types/error.type";
-import { clearAuthSession } from "../utils/storage";
+import { clearAuthSession, storeAuthSession } from "../utils/storage";
 
 export default function useAuthRedirect() {
   const router = useRouter();
@@ -14,7 +14,8 @@ export default function useAuthRedirect() {
     queryKey: ["refreshToken", "accessToken", "userId"],
     queryFn: authenticateUser,
     onSuccess: (data) => {
-      console.log(data);
+      //console.log(data);
+      storeAuthSession(data);
       if (router.pathname.startsWith(path.auth)) {
         void router.push(path.explore);
       }

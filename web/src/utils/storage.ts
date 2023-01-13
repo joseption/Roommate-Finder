@@ -3,7 +3,7 @@ import type { AuthSession } from "../types/auth.types";
 export function storeAuthSession(session: AuthSession) {
   localStorage.setItem("accessToken", session.accessToken);
   localStorage.setItem("userId", session.userId);
-  localStorage.setItem("userName", session.userName);
+  localStorage.setItem("userName", session.userName ?? "");
   localStorage.setItem("userAvatar", session.userAvatar ?? "");
   localStorage.setItem("refreshToken", session.refreshToken);
 }

@@ -1,4 +1,7 @@
-import Nav from "../components/nav";
 export default function explore() {
-  return <Nav></Nav>;
+  return (
+    <>
+      <div>this is explore page</div>;
+    </>
+  );
 }

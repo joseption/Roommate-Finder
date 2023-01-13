@@ -7,11 +7,13 @@ const queryClient = new QueryClient();
 import { Toaster } from "react-hot-toast";
 
 import AuthRedirectWrapper from "../components/AuthRedirectWrapper";
+import Nav from "../components/nav";
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <>
       <QueryClientProvider client={queryClient}>
         <AuthRedirectWrapper>
+          <Nav />
           <Component {...pageProps} />
           <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
           <Toaster

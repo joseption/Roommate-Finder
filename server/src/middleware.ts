@@ -23,7 +23,7 @@ export function isAuthenticated(req:Request, res:Response, next:NextFunction) {
   console.log(authorization);
 
   if (!authorization) {
-    res.status(401);
+    res.status(401).json({ Error: 'Un-Authorized' });
     throw new Error('🚫 Un-Authorized 🚫');
   }
 
@@ -32,7 +32,7 @@ export function isAuthenticated(req:Request, res:Response, next:NextFunction) {
     const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
     req.body[0] = payload;
   } catch (err) {
-    res.status(401);
+    res.status(401).json({ Error: 'Un-Authorized' });;
     if (err.name === 'TokenExpiredError') {
       throw new Error(err.name);
     }

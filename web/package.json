@@ -14,6 +14,7 @@
     "@headlessui/react": "^1.7.7",
     "@headlessui/tailwindcss": "^0.1.2",
     "@heroicons/react": "^2.0.13",
+    "@iconify/icons-bi": "^1.2.15",
     "@prisma/client": "^4.8.0",
     "@tailwindcss/line-clamp": "^0.4.2",
     "@tanstack/react-query": "^4.22.0",
@@ -27,6 +28,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hot-toast": "^2.4.0",
+    "react-icons": "^4.7.1",
     "usehooks-ts": "^2.9.1",
     "zod": "^3.20.2"
   },

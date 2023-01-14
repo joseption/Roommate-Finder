@@ -14,9 +14,17 @@ export default function useAuthRedirect() {
     queryKey: ["refreshToken", "accessToken", "userId"],
     queryFn: authenticateUser,
     onSuccess: (data) => {
-      //console.log(data);
       storeAuthSession(data);
-      if (router.pathname.startsWith(path.auth)) {
+      if (!data.user?.is_verified) {
+        if (!router.pathname.startsWith(path.auth)) {
+          void router.push({
+            pathname: "/auth/confirmEmail",
+            query: { email: data.user?.email },
+          });
+        }
+      } else if (!data.user?.is_setup) {
+        void router.push(path.setup);
+      } else if (router.pathname.startsWith(path.auth)) {
         void router.push(path.explore);
       }
     },

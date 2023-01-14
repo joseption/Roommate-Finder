@@ -19,6 +19,38 @@ export function findRefreshTokenById(id:string) {
   });
 }
 
+export function verify(id:string) {
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      is_verified: true
+    }
+  });
+}
+
+//get user
+export function getUser(id:string) {
+  return db.user.findUnique({
+    where: {
+      id,
+    },
+  });
+}
+
+//get user email 
+export function getUserEmail(id:string) {
+  return db.user.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      email: true,
+    }
+  });
+}
+
 export function deleteRefreshToken(id:string) {
   return db.refreshToken.update({
     where: {

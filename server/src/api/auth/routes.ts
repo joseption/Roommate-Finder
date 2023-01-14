@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-
+// to do , jwt.verify in try catch
 import bcrypt from "bcrypt";
 import jwt  from "jsonwebtoken";
 import {v4} from 'uuid'; 
@@ -10,24 +10,28 @@ import {
   findUserById
 } from '../users/services';
 
-import { generateTokens, hashToken, generateResetToken,generateAccessToken } from "utils/jwt";
+import { generateTokens, hashToken, generateResetToken,generateAccessToken, generateEmailToken } from "utils/jwt";
 
 
 import {
+  getUser,
   addRefreshTokenToWhitelist,
   findRefreshTokenById,
   deleteRefreshToken,
-  revokeTokens
+  revokeTokens,
+  verify,
+  getUserEmail,
 } from './services';
+import { sendResetPasswordEmail, sendVerifyEmail } from 'utils/sendEmail';
 
 const router = express.Router()
 
 router.post('/register', async (req:Request, res:Response, next:NextFunction) => {
   try {
-    console.log(req.body)
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(422).json({"Error": "You must provide an email and a password."});
+    //console.log(req.body)
+    const { email, password, name, LastName } = req.body;
+    if (!email || !password || !name || !LastName) {
+      return res.status(422).json({"Error": "You must provide an email, password, name and lastName."});
     }
 
     const existingUser = await findUserByEmail(email);
@@ -36,16 +40,19 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
       return res.status(400).json({"Error": "User with email already exists."});
     }
     
-    const user = await createUserByEmailAndPassword(email, password);
+    const user = await createUserByEmailAndPassword(email, password, name, LastName);
     const userId = user.id;
     const jti = v4();
     const { accessToken, refreshToken } = generateTokens(user, jti);
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
-
+    const ConfrimEmailKey = generateEmailToken(user, jti);
+    sendVerifyEmail(email, ConfrimEmailKey);
+    //console.log(ConfrimEmailKey)
     return res.status(200).json({
       accessToken,
       refreshToken,
-      userId
+      userId,
+      user
     });
   } catch (err) {
     return res.status(500).json({"Error": "Something went wrong."});
@@ -65,7 +72,7 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
       return res.status(401).json({"Error": "Invalid login credentials."});
     }
     const userId = existingUser.id;
-
+    
     const validPassword = await bcrypt.compare(password, existingUser.password);
     if (!validPassword) {
       return res.status(401).json({"Error": "Invalid login credentials."});
@@ -74,11 +81,12 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
     const jti = v4();
     const { accessToken, refreshToken } = generateTokens(existingUser, jti);
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: existingUser.id });
-
+    delete existingUser.password;
     res.json({
       accessToken,
       refreshToken,
-      userId
+      userId,
+      user:existingUser
     });
   } catch (err) {
     return res.status(500).json({"Error": "Something went wrong."});
@@ -99,7 +107,9 @@ router.post('/resetPassword',async (req:Request, res:Response, next:NextFunction
     else{
       const jti = v4(); 
       const resetToken = generateResetToken(existingUser, jti);
-      //add mail here and send the token in a mail link... 
+      //add mail here and send the token in a mail link...
+      sendResetPasswordEmail(email, resetToken);
+      //console.log(resetToken) 
       return res.status(200).json({
         resetToken,
       });
@@ -134,13 +144,13 @@ router.get('/validateResetToken',async (req:Request, res:Response, next:NextFunc
   }
 });
 
-router.get('/updatePassword',async (req:Request, res:Response, next:NextFunction) => {
+router.post('/updatePassword',async (req:Request, res:Response, next:NextFunction) => {
   try {
-
     const { password, resetToken } = req.body;
       if (!resetToken) {
         return res.status(400).json({"Error": "You must provide an reset Token."});
       }
+      //console.log(resetToken)
       const payload = jwt.verify(resetToken, process.env.RESET_PASSWORD_KEY);
 
       if (!payload) {
@@ -152,10 +162,60 @@ router.get('/updatePassword',async (req:Request, res:Response, next:NextFunction
         await revokeTokens((<any>payload).userId);
         return res.status(200).json({
           Error: false,
-          message: "Password has been reset and all tokens have been revoked."
+          message: "Password has been reset."
         });
       }
   } catch (err) {
+    //console.log(err)
+    return res.status(500).json({"Error": "Something went wrong."})
+  }
+});
+
+
+router.post('/confirmEmail',async (req:Request, res:Response, next:NextFunction) => {
+  try {
+
+    const { emailToken } = req.body;
+      if (!emailToken) {
+        return res.status(400).json({"Error": "You must provide an reset Token."});
+      }
+      //console.log(emailToken)
+      const payload = jwt.verify(emailToken, process.env.VERIFY_EMAIL_KEY);
+
+      if (!payload) {
+        return res.status(401).json({"Error": "Invalid Token."});
+      }
+        //update Password
+        await verify((<any>payload).userId);
+        return res.status(200).json({
+          message: "Account verified."
+        });
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({"Error": "Something went wrong."})
+  }
+});
+
+router.post('/sendConfirmationEmail',async (req:Request, res:Response, next:NextFunction) => {
+  try {
+
+    const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({"Error": "You must provide an reset Token."});
+      }
+      //console.log(email)
+      const user = await findUserByEmail(email);
+      if (!user.id) {
+        return res.status(401).json({"Error": "Go through forgot password process."});
+      }
+      const jti = v4();
+      const ConfrimEmailKey = generateEmailToken(user, jti);
+      sendVerifyEmail(email, ConfrimEmailKey);
+      return res.status(200).json({
+        message: "Email sent."
+      });
+  } catch (err) {
+    //console.log(err)
     return res.status(500).json({"Error": "Something went wrong."})
   }
 });
@@ -174,9 +234,10 @@ router.post('/logout', async (req:Request, res:Response, next:NextFunction) => {
 });
 
 router.post('/checkAuth', async (req:Request, res:Response, next:NextFunction) => {
+  //console.log(req.body)
   try {
     const { accessToken, refreshToken } = req.body;
-    if (!accessToken || !refreshToken) {
+    if (!accessToken || !refreshToken || accessToken === "undefined" || refreshToken === "undefined") {
       return res.status(401).json({"Error": "You must provide an accessToken and a refreshToken."});
     }
     const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
@@ -185,9 +246,19 @@ router.post('/checkAuth', async (req:Request, res:Response, next:NextFunction) =
       //should log user out and make them sign in again
       return res.status(401).json({"Error": "Refresh token is not valid."});
     }
-    const CheckAccess = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-    if(!CheckAccess){
-      //genereate new access token
+    const user = await findUserById((<any>payload).userId);
+    delete user.password;
+    try {
+      const CheckAccess = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
+      return res.status(200).json(
+        {
+          accessToken,
+          refreshToken,
+          userId: (<any>payload).userId,
+          user
+        }
+      );
+    } catch (error) {
       const user = await findUserById((<any>payload).userId);
       if (!user) {
         return res.status(401).json({"Error": "Refresh token is not valid."});
@@ -200,18 +271,9 @@ router.post('/checkAuth', async (req:Request, res:Response, next:NextFunction) =
           userId: user.id
         }
       );
-    //verify access token and check if it is valid
-      }
-      else{
-        return res.status(200).json(
-          {
-            accessToken,
-            refreshToken,
-            userId: (<any>payload).userId
-          }
-        );
-      }
+    }
   } catch (err) {
+    console.log(err);
     return res.status(500).json({"Error": "Something went wrong."});
 }});
 

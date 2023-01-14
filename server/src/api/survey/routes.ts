@@ -64,6 +64,7 @@ router.post("/utils/add/question", async (req: Request, res: Response) => {
         }
         
     } catch (error) {
+        
         res.status(500).json(error);
     }
 });

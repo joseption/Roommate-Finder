@@ -18,7 +18,6 @@ export default async function doRequest<R>(
     method: method,
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
       authorization: `Bearer ${getAuthSession().accessToken || "NONE"}`,
     },
     body: body ? JSON.stringify(body) : null,

@@ -38,7 +38,7 @@ export function getPasswordResetEmailTemplate(
 
 export function sendVerifyEmail(to: string, token: string) {
     //not sure what the front end link is going to be.
-    const email = getConfirmEmailTemplate(to, `http://localhost:3000/auth/confirmEmail?token=${token}&email=${to}`);
+    const email = getConfirmEmailTemplate(to, `https://roomfin.xyz/auth/confirmEmail?token=${token}&email=${to}`);
     const msg = {
         to,
         from: 'support@roomfin.xyz', 
@@ -54,7 +54,7 @@ export function sendVerifyEmail(to: string, token: string) {
 }
 
 export function sendResetPasswordEmail(to: string, token: string) {
-    const email = getPasswordResetEmailTemplate(to, `http://localhost:3000/auth/reset?token=${token}`);
+    const email = getPasswordResetEmailTemplate(to, `https://roomfin.xyz/auth/reset?token=${token}`);
     const msg = {
       to,
       from: 'support@roomfin.xyz', 

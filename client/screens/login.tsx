@@ -40,6 +40,8 @@ const LoginScreen = (props:any, {navigation}:any) => {
   const [emailValue, setEmailValue] = useState('');
   const [stopInterval,setStopInterval] = useState(-1);
   const [url,setUrl] = useState('');
+  const [isRegistering,setIsRegistering] = useState(false);
+  
 
   useEffect(() => {
     if (!init) {
@@ -194,9 +196,10 @@ const LoginScreen = (props:any, {navigation}:any) => {
                 btnStyle={btnStyle}
                 setEmail={setEmailValue}
                 email={emailValue}
-                sendEmailPressed={() => goLeft(screen.activateEmailSent)} // update to do stuff and then goLeft(1)
+                sendEmailPressed={() => goLeft(screen.updatePassword)} // update to do stuff and then goLeft(1)
                 loginPressed={() => goRight(screen.login)}
                 style={[styles.panel, register ? null : styles.hidden]}
+                setIsRegistering={setIsRegistering}
               />
               <Login
                 url={url}
@@ -225,6 +228,11 @@ const LoginScreen = (props:any, {navigation}:any) => {
                 updatePasswordPressed={() => goRight(screen.passwordUpdated)} // update to do stuff and then goRight(1)
                 loginPressed={() => goLeft(screen.login)}
                 style={[styles.panel, updatePassword ? null : styles.hidden]}
+                isRegistering={isRegistering}
+                setIsRegistering={setIsRegistering}
+                email={emailValue}
+                setEmail={setEmailValue}
+                registerPressed={() => goLeft(screen.register)}
               />
               <PasswordUpdated
                 loginPressed={() => goLeft(screen.login)}

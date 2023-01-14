@@ -10,11 +10,11 @@ export function findUserByEmail(email: any) {
   });
 }
 
-export function createUserByEmailAndPassword(addy:string, password:string) {
+export function createUserByEmailAndPassword(email:string, password:string) {
   const hashed = bcrypt.hashSync(password, 12);
   return db.user.create({
     data: {
-      email: addy,
+      email: email,
       password: hashed,
     },
   });

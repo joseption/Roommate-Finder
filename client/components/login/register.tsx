@@ -11,24 +11,18 @@ const Register = (props: any, {navigation}:any) => {
   const [message, setMessage] = useState('');
   const [emailError,setEmailError] = useState(false);
 
-  const TEMP = () => {
-    props.setEmail("");
-    setEmailError(false);
-    setDisabled(true);
-    props.sendEmailPressed();
-  }
-
   const backToLogin = () => {
-      setMessage("");
-      props.setEmail("");
+      setMessage('');
+      props.setEmail('');
       setEmailError(false);
       setDisabled(true);
+      props.setIsRegistering(false);
       props.loginPressed();
   }
 
   const handleChange = (value: string) => {
     var error = !validateEmail(value);
-    setDisabled(error);
+    setDisabled(false); //JA TEMP put back "error"
     props.setEmail(value);
   };
 
@@ -42,35 +36,30 @@ const Register = (props: any, {navigation}:any) => {
       props.setEmail(props.email);
       setEmailError(false);
 
-      let obj = {email:props.email};
+      let obj = {query:props.email};
       let js = JSON.stringify(obj);
 
       try
       {    
-          await fetch(`${env.URL}/auth/register`,
-          {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+          await fetch(`${env.URL}/users/profileByEmail?email=${props.email}`,
+          {method:'GET',headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
-              if (res.error && res.error !== "Account Exists")
+              if (res.email)
               {
-                  setMessage(res.error);
-                  setDisabled(false);
+                  setMessage("An account with this email already exists");
               }
               else
               {
-                  if (res.error === "Account Exists") {
-                      props.setResendVerify(true);
-                  }
-
-                  props.setEmail("");
                   setEmailError(false);
                   setDisabled(true);
                   props.sendEmailPressed();
+                  props.setIsRegistering(true);
               }
+              setDisabled(false);
           });
       }
       catch(e)
       {
-          TEMP(); // JA REMOVE
           setMessage('An unknown error occurred');
           setDisabled(false);
           return;
@@ -104,7 +93,7 @@ const Register = (props: any, {navigation}:any) => {
         onPress={() => doRegister()}
         disabled={disabled}
         >
-          Create Account
+          Next
         </_Button>
       </View>
       <_Text

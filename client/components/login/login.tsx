@@ -24,7 +24,7 @@ const Login = (props: any, {navigation}:any) => {
   const handleChange = (value: string, isEmail: boolean) => {
     let eValue = isEmail ? value : email;
     let pValue = !isEmail ? value : password;
-    let emailError = !(validateEmail(eValue));
+    //let emailError = !(validateEmail(eValue)); ja temp
     let passwordError = pValue.length == 0;
     setPassword(pValue);
     setEmail(eValue);
@@ -56,9 +56,9 @@ const Login = (props: any, {navigation}:any) => {
           await fetch(`${env.URL}/auth/login`,
           {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
-              if (res.error)
+              if (res.Error)
               {
-                  setMessage(res.error);
+                  setMessage(res.Error);
               }
               else
               {

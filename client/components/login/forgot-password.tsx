@@ -11,13 +11,6 @@ const ForgotPassword = (props: any, {navigation}:any) => {
     const [disabled,setDisabled] = useState(true);
     const [emailError,setEmailError] = useState(false);
 
-    const TEMP = () => {
-      props.setEmail('');
-      setDisabled(true);
-      setEmailError(false);
-      props.sendEmailPressed();
-    }
-
     const backToLogin = () => {
         setMessage('');
         props.setEmail('');
@@ -28,7 +21,7 @@ const ForgotPassword = (props: any, {navigation}:any) => {
 
     const handleChange = (value: string) => {
         var error = !validateEmail(value);
-        setDisabled(error);
+        setDisabled(false); //JA TEMP put back "error"
         props.setEmail(value);
     };
 
@@ -42,30 +35,20 @@ const ForgotPassword = (props: any, {navigation}:any) => {
         setMessage("");
         setEmailError(false);
 
-        let obj = {email:props.email};
-        let js = JSON.stringify(obj);
-
         try
         {    
-            await fetch(`${env.URL}/api/send-password-reset`,
-                {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+            await fetch(`${env.URL}/auth/resetPassword?email=${props.email}`,
+                {method:'GET',headers:{'Content-Type': 'application/json'}}).then(async ret => {
                     let res = JSON.parse(await ret.text());
-                    if(res.error)
+                    if(res.Error)
                     {
-                        if (res.error === "Invalid Email") {
-                            setMessage("You must enter a valid email address");
-                        }
-                        else
-                            setMessage(res.error);
-
-                        setEmailError(true);
+                        setMessage(res.Error);
                         setDisabled(false);
                     }
                     else
                     {
                         props.setEmail('');
                         setDisabled(true);
-                        setEmailError(false);
                         props.sendEmailPressed();
                     }
 
@@ -74,7 +57,6 @@ const ForgotPassword = (props: any, {navigation}:any) => {
         }
         catch(e)
         {
-            TEMP(); // JA REMOVE
             setDisabled(false);
             setMessage("An unexpected error occurred while sending the password reset email. Please try again.");
             return;

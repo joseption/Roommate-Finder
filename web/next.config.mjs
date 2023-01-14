@@ -7,21 +7,16 @@
 
 /** @type {import("next").NextConfig} */
 const config = {
-  // redirects: () => {
-  //   return Promise.resolve([
-  //     {
-  //       source: "/",
-  //       destination: "/explore",
-  //       permanent: true,
-  //       basePath: false,
-  //     },
-  //   ]);
-  // },
+  redirects: () => {
+    return Promise.resolve([
+      {
+        source: "/",
+        destination: "/explore",
+        permanent: true,
+      },
+    ]);
+  },
   reactStrictMode: true,
   swcMinify: true,
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en",
-  },
 };
 export default config;

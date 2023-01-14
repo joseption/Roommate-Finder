@@ -10,7 +10,7 @@ import {
   findUserById
 } from '../users/services';
 
-import { generateTokens, hashToken, generateResetToken } from "utils/jwt";
+import { generateTokens, hashToken, generateResetToken,generateAccessToken } from "utils/jwt";
 
 
 import {
@@ -27,15 +27,13 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
     console.log(req.body)
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({error: 'An account with this email address is already in use'});
-      return;
+      return res.status(422).json({"Error": "You must provide an email and a password."});
     }
 
     const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
-      res.status(400);
-      return;
+      return res.status(400).json({"Error": "User with email already exists."});
     }
     
     const user = await createUserByEmailAndPassword(email, password);
@@ -43,12 +41,12 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
     const { accessToken, refreshToken } = generateTokens(user, jti);
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
 
-    res.json({
+    return res.status(200).json({
       accessToken,
       refreshToken
     });
   } catch (err) {
-    next(err);
+    return res.status(500).json({"Error": "Something went wrong."});
   }
 });
 
@@ -56,21 +54,18 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({ error: 'Email and password are required' });
-      return;
+      return res.status(422).json({"Error": "You must provide an email and a password."});
     }
 
     const existingUser = await findUserByEmail(email);
 
     if (!existingUser) {
-      res.status(403).json({ error: 'The email or password did not match' });
-      return;
+      return res.status(401).json({"Error": "Invalid login credentials."});
     }
 
     const validPassword = await bcrypt.compare(password, existingUser.password);
     if (!validPassword) {
-      res.status(403).json({ error: 'The email or password did not match' });;
-      return;
+      return res.status(401).json({"Error": "Invalid login credentials."});
     }
 
     const jti = v4();
@@ -82,7 +77,7 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
       refreshToken
     });
   } catch (err) {
-    next(err);
+    return res.status(500).json({"Error": "Something went wrong."});
   }
 });
 
@@ -90,25 +85,23 @@ router.get('/resetPassword',async (req:Request, res:Response, next:NextFunction)
   try {
     const { email } = req.body;
     if (!email) {
-      res.status(400);
-      throw new Error('You must provide an email.');
+      return res.status(400).json({"Error": "You must provide an email."});
     }
     const existingUser = await findUserByEmail(email);
 
     if (!existingUser) {
-      res.status(403);
-      throw new Error('Invalid login credentials.');
+      return res.status(400).json({"Error": "Invalid login credentials."});
     }
     else{
       const jti = v4(); 
       const resetToken = generateResetToken(existingUser, jti);
       //add mail here and send the token in a mail link... 
-      res.status(200).json({
+      return res.status(200).json({
         resetToken,
       });
     }
   } catch (err) {
-    next(err);
+    return res.status(500).json({"Error": "Something went wrong."})
   }
 });
 
@@ -119,23 +112,21 @@ router.get('/validateResetToken',async (req:Request, res:Response, next:NextFunc
 
     const { resetToken } = req.body;
     if (!resetToken) {
-      res.status(400);
-      throw new Error('You must provide an reset Token.');
+      return res.status(422).json({"Error": "You must provide an reset Token."});
     }
     const payload = jwt.verify(resetToken, process.env.RESET_PASSWORD_KEY);
 
     if (!payload) {
-      res.status(403);
-      throw new Error('Invalid Token.');
+      return res.status(401).json({"Error": "Invalid Token."});
     }
     else{
-      res.status(200).json({
+      return res.status(200).json({
         Error: false,
         msg: "Valid Reset Token"
       });
     }
   } catch (err) {
-    next(err);
+    return res.status(500).json({"Error": "Something went wrong."})
   }
 });
 
@@ -144,26 +135,24 @@ router.get('/updatePassword',async (req:Request, res:Response, next:NextFunction
 
     const { password, resetToken } = req.body;
       if (!resetToken) {
-        res.status(400);
-        throw new Error('You must provide an reset Token.');
+        return res.status(400).json({"Error": "You must provide an reset Token."});
       }
       const payload = jwt.verify(resetToken, process.env.RESET_PASSWORD_KEY);
 
       if (!payload) {
-        res.status(403);
-        throw new Error('Invalid Token.');
+        return res.status(401).json({"Error": "Invalid Token."});
       }
       else{
         //update Password
         const user = await UpdatePassword(password, (<any>payload).userId);
         await revokeTokens((<any>payload).userId);
-        res.status(200).json({
+        return res.status(200).json({
           Error: false,
           message: "Password has been reset and all tokens have been revoked."
         });
       }
   } catch (err) {
-    next(err);
+    return res.status(500).json({"Error": "Something went wrong."})
   }
 });
 
@@ -173,53 +162,43 @@ router.post('/refreshToken', async (req:Request, res:Response, next:NextFunction
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
-      res.status(400);
-      throw new Error('Missing refresh token.');
+      return res.status(422).json({"Error": "You must provide a refresh token."});
     }
     const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    console.log(payload);
     const savedRefreshToken = await findRefreshTokenById((<any>payload).jti);
 
     if (!savedRefreshToken || savedRefreshToken.revoked === true) {
-      res.status(401);
-      throw new Error('Unauthorized');
+      //should log user out and make them sign in again
+      return res.status(401).json({"Error": "Refresh token is not valid."});
     }
 
     const hashedToken = hashToken(refreshToken);
     if (hashedToken !== savedRefreshToken.hashedToken) {
-      res.status(401);
-      throw new Error('Unauthorized');
+      //should log user out and make them sign in again
+      return res.status(401).json({"Error": "Refresh token is not valid."});
     }
 
     const user = await findUserById((<any>payload).userId);
     if (!user) {
-      res.status(401);
-      throw new Error('Unauthorized');
+      return res.status(401).json({"Error": "Refresh token is not valid."});
     }
 
-    await deleteRefreshToken(savedRefreshToken.id);
-    const jti = v4();
-    const { accessToken, refreshToken: newRefreshToken } = generateTokens(user, jti);
-    await addRefreshTokenToWhitelist({ jti, refreshToken: newRefreshToken, userId: user.id });
-
-    res.json({
+    const accessToken = generateAccessToken(user);
+    return res.status(200).json({
       accessToken,
-      refreshToken: newRefreshToken
     });
   } catch (err) {
-    next(err);
+    return res.status(500).json({"Error": "Something went wrong."})
   }
 });
 
-// This endpoint is only for demo purpose.
-// Move this logic where you need to revoke the tokens( for ex, on password reset)
 router.post('/revokeRefreshTokens', async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { userId } = req.body;
     await revokeTokens(userId);
-    res.json({ message: `Tokens revoked for user with id #${userId}` });
+    return res.json({ message: `Tokens revoked for user with id #${userId}` });
   } catch (err) {
-    next(err);
+    return res.status(500).json({"Error": "Something went wrong."});  
   }
 });
 

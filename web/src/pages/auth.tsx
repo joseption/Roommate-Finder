@@ -35,7 +35,14 @@ export default function Login() {
     mutationFn: () => login(email, password),
     onSuccess: (data) => {
       storeAuthSession(data);
-      void router.push("/explore");
+      if (!data.user?.is_verified) {
+        void router.push({
+          pathname: "/auth/confirmEmail",
+          query: { email: email },
+        });
+      } else if (!data.user?.is_setup) {
+        void router.push("/quiz");
+      } else void router.push("/explore");
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -46,7 +53,10 @@ export default function Login() {
     mutationFn: () => register(email, password, name, lastName),
     onSuccess: (data) => {
       storeAuthSession(data);
-      void router.push("/explore");
+      void router.push({
+        pathname: "/auth/confirmEmail",
+        query: { email: email },
+      });
     },
     onError: (err: Error) => {
       toast.error(err.message);

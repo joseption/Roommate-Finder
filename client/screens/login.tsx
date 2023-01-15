@@ -11,6 +11,7 @@ import PasswordUpdated from '../components/login/password-updated';
 import Register from '../components/login/register';
 import UpdatePassword from '../components/login/update-password';
 import { Color, LoginStyle, Radius, Style } from '../style';
+import * as DeepLinking from 'expo-linking';
 
 const LoginScreen = (props:any, {navigation}:any) => {
   enum screen {
@@ -40,6 +41,9 @@ const LoginScreen = (props:any, {navigation}:any) => {
   const [emailValue, setEmailValue] = useState('');
   const [stopInterval,setStopInterval] = useState(-1);
   const [url,setUrl] = useState('');
+  const [isRegistering,setIsRegistering] = useState(false);
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [token, setToken] = useState('');
 
   useEffect(() => {
     if (!init) {
@@ -103,9 +107,15 @@ const LoginScreen = (props:any, {navigation}:any) => {
   };
 
   const gotoScreen = (url: string) => {
-      if (url != null && (url.includes("activate_id=") ||
-            url.includes("reset_id=") ||
-            url.includes("update_id="))) {
+      if (url != null && (url.includes("confirmEmail?token=") ||
+            url.includes("reset?token=") ||
+            url.includes("update?token="))) {
+        var params = DeepLinking.parse(url);
+        if (params.queryParams?.token)
+          setToken(params.queryParams.token as string);
+        if (params.queryParams?.token)
+          setRegisterEmail(params.queryParams.email as string);
+
         updateVisibleScreen(screen.updatePassword);
       }
       else
@@ -197,6 +207,7 @@ const LoginScreen = (props:any, {navigation}:any) => {
                 sendEmailPressed={() => goLeft(screen.activateEmailSent)} // update to do stuff and then goLeft(1)
                 loginPressed={() => goRight(screen.login)}
                 style={[styles.panel, register ? null : styles.hidden]}
+                setIsRegistering={setIsRegistering}
               />
               <Login
                 url={url}
@@ -225,6 +236,13 @@ const LoginScreen = (props:any, {navigation}:any) => {
                 updatePasswordPressed={() => goRight(screen.passwordUpdated)} // update to do stuff and then goRight(1)
                 loginPressed={() => goLeft(screen.login)}
                 style={[styles.panel, updatePassword ? null : styles.hidden]}
+                isRegistering={isRegistering}
+                setIsRegistering={setIsRegistering}
+                email={emailValue}
+                setEmail={setEmailValue}
+                registerPressed={() => goLeft(screen.register)}
+                registerEmail={registerEmail}
+                token={token}
               />
               <PasswordUpdated
                 loginPressed={() => goLeft(screen.login)}

@@ -11,24 +11,18 @@ const Register = (props: any, {navigation}:any) => {
   const [message, setMessage] = useState('');
   const [emailError,setEmailError] = useState(false);
 
-  const TEMP = () => {
-    props.setEmail("");
-    setEmailError(false);
-    setDisabled(true);
-    props.sendEmailPressed();
-  }
-
   const backToLogin = () => {
-      setMessage("");
-      props.setEmail("");
+      setMessage('');
+      props.setEmail('');
       setEmailError(false);
       setDisabled(true);
+      props.setIsRegistering(false);
       props.loginPressed();
   }
 
   const handleChange = (value: string) => {
     var error = !validateEmail(value);
-    setDisabled(error);
+    setDisabled(false); //JA TEMP put back "error"
     props.setEmail(value);
   };
 
@@ -47,30 +41,25 @@ const Register = (props: any, {navigation}:any) => {
 
       try
       {    
-          await fetch(`${env.URL}/auth/register`,
+          await fetch(`${env.URL}/auth/registerFast`,
           {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
-              if (res.error && res.error !== "Account Exists")
+              if (res.error)
               {
                   setMessage(res.error);
-                  setDisabled(false);
               }
               else
               {
-                  if (res.error === "Account Exists") {
-                      props.setResendVerify(true);
-                  }
-
-                  props.setEmail("");
                   setEmailError(false);
                   setDisabled(true);
                   props.sendEmailPressed();
+                  //props.setIsRegistering(true);
               }
+              setDisabled(false);
           });
       }
       catch(e)
       {
-          TEMP(); // JA REMOVE
           setMessage('An unknown error occurred');
           setDisabled(false);
           return;
@@ -89,13 +78,13 @@ const Register = (props: any, {navigation}:any) => {
       >
         Create an account with your UCF email
       </_Text>
-      <_TextInput
+      {<_TextInput
       label="Email"
       containerStyle={LoginStyle.inputStyle}
       onChangeText={(e: any) => {handleChange(e)}}
       value={props.email}
       error={emailError}
-      />
+      />}
       <View
       style={Style.alignRight}
       >
@@ -104,7 +93,7 @@ const Register = (props: any, {navigation}:any) => {
         onPress={() => doRegister()}
         disabled={disabled}
         >
-          Create Account
+          Next
         </_Button>
       </View>
       <_Text

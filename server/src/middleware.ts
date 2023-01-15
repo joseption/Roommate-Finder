@@ -1,6 +1,15 @@
 import jwt from 'jsonwebtoken';
 import{ Request, Response, NextFunction } from 'express';
 
+const prod = {
+  URL: "https://roomfin.xyz"
+};
+
+const dev = {
+ URL: "http://localhost:8080"
+};
+export const env = process.env.NODE_ENV === "development" ? dev : prod;
+
 export function notFound(req:Request, res:Response, next:NextFunction) {
   res.status(404);
   const error = new Error(`🔍 - Not Found - ${req.originalUrl}`);

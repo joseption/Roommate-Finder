@@ -138,24 +138,25 @@ const AccountAbout = (props: any, {navigation}:any) => {
             selected={setActivitiesForm}
             >
             </_Cluster>
-        </View>
-        <View
-        style={_styles.buttonContainer}
-        >
-            <_Button
-            style={Style.buttonSuccess}
+            <View
+            style={_styles.buttonContainer}
             >
-                {props.accountIsSetup ? 'Save' : 'Next'}
-            </_Button>
+                <_Button
+                style={Style.buttonSuccess}
+                >
+                    {props.accountIsSetup ? 'Save' : 'Next'}
+                </_Button>
+            </View>
+            {props.error ?
+            <_Text
+            containerStyle={errorContainerStyle()}
+            innerContainerStyle={{justifyContent: 'center'}}
+            style={errorStyle()}
+            >
+                {error}
+            </_Text>
+            : null}
         </View>
-        {props.error ?
-        <_Text
-        containerStyle={errorContainerStyle()}
-        style={errorStyle()}
-        >
-            {error}
-        </_Text>
-        : null}
     </ScrollView>
     );
 };

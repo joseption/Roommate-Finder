@@ -23,6 +23,7 @@ export const Color = {
     holderSecondary:'#E4E6E9',
     imgBackground:'#E4E6EB',
     icon:'#1D1F23',
+    grey: '#CDCFD1',
     transparent: 'transparent',
     none: 'transparent'
 }

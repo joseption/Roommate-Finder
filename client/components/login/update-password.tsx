@@ -19,17 +19,9 @@ const UpdatePassword = (props: any, {navigation}:any) => {
   const [pwdError,setPwdError] = useState(false);
   const [verifyPwdError,setVerifyPwdError] = useState(false);
 
-  const TEMP = () => {
-    setPValue('');
-    setVerifyPValue('');
-    setPwdError(false);
-    setVerifyPwdError(false);
-    props.updatePasswordPressed();
-  }
-
   useEffect(() => {
     checkDisabledBtn();
-  });
+  }, [props.isRegistering, verifyPValue, pValue]);
 
   const checkDisabledBtn = () => {
       setDisabled(!hasSymbol || !hasCharLimit || !hasUpperCase || !isMatching);
@@ -45,7 +37,6 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       setHasCharLimit(isAtLeastEightChars(value));
       setHasUpperCase(includesUpperContains(value))
       setIsMatching(textMatches(value, verifyPValue));
-
       checkDisabledBtn();
   }
 
@@ -55,43 +46,59 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       checkDisabledBtn();
   }
 
+  const resetScreen = () => {
+    setMessage('');
+    setPValue('');
+    setVerifyPValue('');
+    setDisabled(true);
+    setPwdError(false);
+    setVerifyPwdError(false);
+    handleChange(pValue)
+    handleVerifyChange(verifyPValue)
+  }
+
   const backToLogin = () => {
-      setMessage('');
-      setPValue('');
-      setVerifyPValue('');
-      setDisabled(true);
-      setPwdError(false);
-      setVerifyPwdError(false);
-      handleChange(pValue)
-      handleVerifyChange(verifyPValue)
-      props.loginPressed();
+    resetScreen();
+    props.loginPressed();
   };
+
+  const backToRegister = () => {
+    resetScreen();
+    props.registerPressed();
+  }
 
   const doPasswordUpdate = async () => 
   {
       setPwdError(false);
       setVerifyPwdError(false);
-      
-      let obj;
-      if (props.isPasswordReset)
-          obj = {type:'reset', password_id:props.passwordID, password:pValue, passwordVerify:verifyPValue};
-      else
-          obj = {type:'activate', password_id:props.passwordID, password:pValue, passwordVerify:verifyPValue};
-
-      let js = JSON.stringify(obj);
 
       try
       {    
-          const response = await fetch(`${env.URL}/api/update-password`,
-              {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
+          let res;
+          if (!props.registerEmail) {
+            let obj = {password:pValue, resetToken:props.token};
+            let js = JSON.stringify(obj);
 
-          let res = JSON.parse(await response.text());
+            const response = await fetch(`${env.URL}/auth/updatePassword`,
+                {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
-          if(res.error)
+            res = JSON.parse(await response.text());
+          }
+          else {
+            let obj = {emailToken:props.token};
+            let js = JSON.stringify(obj);
+
+            const response = await fetch(`${env.URL}/auth/confirmEmail`,
+            {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
+
+            res = JSON.parse(await response.text());
+          }
+
+          if(res.Error)
           {
               setPwdError(true);
               setVerifyPwdError(true);
-              setMessage(res.error);
+              setMessage(res.Error);
           }
           else
           {
@@ -104,10 +111,47 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       }
       catch(e)
       {
-          TEMP(); // JA REMOVE
           setMessage('An unexpected error occurred while updating your password. Please try again.');
           return;
-      }    
+      } 
+
+      /*if (props.isRegistering) { // Register Account (Not Used)
+        let obj = {email:props.email, password:pValue};
+        let js = JSON.stringify(obj);
+  
+        try
+        {    
+            const response = await fetch(`${env.URL}/auth/register`,
+                {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
+  
+            let res = JSON.parse(await response.text());
+  
+            if(res.Error)
+            {
+                setPwdError(true);
+                setVerifyPwdError(true);
+                setMessage(res.Error);
+            }
+            else
+            {
+                setPValue('');
+                setVerifyPValue('');
+                setPwdError(false);
+                setVerifyPwdError(false);
+                props.setEmail('');
+                props.setIsRegistering(false);
+                props.updatePasswordPressed();
+            }
+        }
+        catch(e)
+        {
+            setMessage('An unexpected error occurred while registering your account. Please try again.');
+            return;
+        }  
+      }
+      else { // Reset/Update Password Only
+        */
+      //}   
   };
   
   return (
@@ -116,7 +160,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       <_Text
       style={[Style.textHuge, Style.boldFont]}
       >
-        Update Password
+        {props.isRegistering ? 'Create Password' : 'Update Password'}
       </_Text>
       <_Text
       style={[Style.textDefaultTertiary, LoginStyle.actionText]}
@@ -208,7 +252,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
         onPress={() => doPasswordUpdate()}
         disabled={disabled}
         >
-          Update Password
+          Set Password
         </_Button>
       </View>
       <_Text
@@ -224,10 +268,17 @@ const UpdatePassword = (props: any, {navigation}:any) => {
         >
           Go back to
         </_Text>
+        {props.registerEmail ?
+        <_Text
+        style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
+        onPress={() => backToRegister()}
+        >register</_Text>
+        :
         <_Text
         style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
         onPress={() => backToLogin()}
         >login</_Text>
+        }
       </View>
     </View>
   );

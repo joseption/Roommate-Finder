@@ -80,7 +80,7 @@ const _Text = (props: any) => {
       </Pressable>
       :
       <View
-      style={styles.text}
+      style={[styles.text, props.innerContainerStyle]}
       >
         <Text
           style={style()}

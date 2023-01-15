@@ -7,7 +7,8 @@ import {
   UpdatePassword,
   findUserByEmail,
   createUserByEmailAndPassword,
-  findUserById
+  findUserById,
+  createUserByEmail
 } from '../users/services';
 
 import { generateTokens, hashToken, generateResetToken,generateAccessToken, generateEmailToken } from "utils/jwt";
@@ -55,7 +56,41 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
       user
     });
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."});
+    console.log(err);
+    return res.status(500).json({"Error": "An unexpected error occurred while registering your account. Please try again."});
+  }
+});
+
+router.post('/registerFast', async (req:Request, res:Response, next:NextFunction) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(422).json({error: "You must provide an email"});
+    }
+
+    const existingUser = await findUserByEmail(email);
+
+    if (existingUser) {
+      return res.status(400).json({error: "A user with that email already exists"});
+    }
+    
+    const user = await createUserByEmail(email);
+    const userId = user.id;
+    const jti = v4();
+    const { accessToken, refreshToken } = generateTokens(user, jti);
+    await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
+    const confirmEmailKey = generateEmailToken(user, jti);
+    sendVerifyEmail(email, confirmEmailKey);
+
+    return res.status(200).json({
+      accessToken,
+      refreshToken,
+      userId,
+      user
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({"Error": "An unexpected error occurred while registering your account. Please try again."});
   }
 });
 
@@ -63,19 +98,19 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(422).json({"Error": "You must provide an email and a password."});
+      return res.status(422).json({"Error": "You must provide an email and password."});
     }
 
     const existingUser = await findUserByEmail(email);
     
     if (!existingUser) {
-      return res.status(401).json({"Error": "Invalid login credentials."});
+      return res.status(401).json({"Error": "An account with the given email and password could not be found."});
     }
     const userId = existingUser.id;
     
     const validPassword = await bcrypt.compare(password, existingUser.password);
     if (!validPassword) {
-      return res.status(401).json({"Error": "Invalid login credentials."});
+      return res.status(401).json({"Error": "An account with the given email and password could not be found."});
     }
 
     const jti = v4();
@@ -89,7 +124,7 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
       user:existingUser
     });
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."});
+    return res.status(500).json({"Error": "An unexpected error occurred. Please try again."});
   }
 });
 
@@ -102,14 +137,12 @@ router.post('/resetPassword',async (req:Request, res:Response, next:NextFunction
     const existingUser = await findUserByEmail(email);
 
     if (!existingUser) {
-      return res.status(200).json({"Error": "Account does not exist."});
+      return res.status(200).json({"Error": "Something went wrong."});
     }
     else{
       const jti = v4(); 
       const resetToken = generateResetToken(existingUser, jti);
-      //add mail here and send the token in a mail link...
-      sendResetPasswordEmail(email, resetToken);
-      //console.log(resetToken) 
+      sendResetPasswordEmail(email as string, resetToken);
       return res.status(200).json({
         resetToken,
       });

@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { isAuthenticated } from '../../middleware';
-import { findUserById } from './services';
+import { findUserById, findUserByEmail } from './services';
 import db from '../../utils/db';
 const router = express.Router();
 
@@ -27,6 +27,31 @@ router.get('/profile', async (req: Request, res: Response, next: NextFunction) =
     res.json(user);
   } catch (err) {
     next(err);
+  }
+});
+
+// * added profile search functionality so people could search on partial text
+router.get('/profileByEmail', async (req: Request, res: Response) => {
+  try {
+    const { email } = req.query;
+    const match = await db.user.findFirst({
+      where: {
+        email: email as string,
+      },
+      select: {
+        email: true
+      }
+    });
+    let info;
+    if (match && match.email) {
+      info = {email: match.email};
+    }
+    else {
+      info = {error: "Does not exist"};
+    }
+    res.status(200).json(info);
+  } catch (err) {
+    res.status(500).json(err);
   }
 });
 

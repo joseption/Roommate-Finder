@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+import { clearAuthSession } from "../utils/storage";
 import LinearProgress from "./Feedback/LinearProgress";
 import Button from "./Inputs/Button";
 import CustomMenu from "./Inputs/CustomMenu";
@@ -32,7 +33,7 @@ const userNavigation = [
   {
     name: "Sign out",
     icon: <ArrowRightOnRectangleIcon className={"h-6 w-6"} />,
-    href: "/auth/logout",
+    href: "/auth",
   },
 ];
 
@@ -68,7 +69,7 @@ export default function Nav() {
                       {navigation.map((item) => (
                         <Link
                           key={item.name}
-                          href={item.href}
+                          href={item.name === "Sign out" ? "#" : item.href}
                           className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition duration-150 ease-in-out ${
                             router.pathname == item.href
                               ? "border-yellow-500 text-slate-900"
@@ -103,6 +104,15 @@ export default function Nav() {
                                 <Button
                                   variant={"text"}
                                   className={"w-full !justify-start"}
+                                  onClick={
+                                    item.name === "Sign out"
+                                      ? () => {
+                                          close();
+                                          clearAuthSession();
+                                          void router.replace("/auth");
+                                        }
+                                      : () => null
+                                  }
                                 >
                                   {item.icon}
                                   {item.name}

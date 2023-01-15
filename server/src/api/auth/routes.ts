@@ -234,12 +234,12 @@ router.post('/sendConfirmationEmail',async (req:Request, res:Response, next:Next
 
     const { email } = req.body;
       if (!email) {
-        return res.status(400).json({"Error": "You must provide an reset Token."});
+        return res.status(400).json({"Error": "Please provide an email"});
       }
       //console.log(email)
       const user = await findUserByEmail(email);
       if (!user.id) {
-        return res.status(401).json({"Error": "Go through forgot password process."});
+        return res.status(401).json({"Error": "An account with the provided email does not exist"});
       }
       const jti = v4();
       const ConfrimEmailKey = generateEmailToken(user, jti);

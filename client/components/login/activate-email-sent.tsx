@@ -75,18 +75,17 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
 
       try
       {    
-          await fetch(`${env.URL}/api/register`,
+          await fetch(`${env.URL}/auth/sendConfirmationEmail`,
               {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
                   let res = JSON.parse(await ret.text());
-                  if(res.error && res.error !== "Account Exists")
+                  if(res.error)
                   {
-                      if (res.error === "Invalid Email") {
-                          setMessage("You must use a valid email address");
-                          clearInterval(interval);
-                      }
-                      else
-                          setMessage(res.error);
-
+                      // if (res.error === "Invalid Email") {
+                      //     setMessage("You must use a valid email address");
+                      //     clearInterval(interval);
+                      // }
+                      // else
+                      setMessage(res.error);
                       disableBtn(false);
                   }
               });
@@ -129,7 +128,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
         style={Style.alignRight}
         >
             <_Button
-            style={props.btnStyle(disabled)}
+            style={[props.btnStyle(disabled), {marginBottom:"5px"}]}
             onPress={() => doResendEmail()}
             disabled={disabled}
             >

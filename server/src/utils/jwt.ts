@@ -16,6 +16,15 @@ export function generateRefreshToken(user: { id: any; }, jti: any) {
   });
 }
 
+export function generateEmailToken(user: { id: any; }, jti: any) {
+  return jwt.sign({
+    userId: user.id,
+    jti
+  }, process.env.VERIFY_EMAIL_KEY, {
+    expiresIn: '30m',
+  });
+}
+
 export function generateResetToken(user: { id: any; }, jti: any) {
   return jwt.sign({
     userId: user.id,

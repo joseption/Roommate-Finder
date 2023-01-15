@@ -137,7 +137,7 @@ router.post('/resetPassword',async (req:Request, res:Response, next:NextFunction
     const existingUser = await findUserByEmail(email);
 
     if (!existingUser) {
-      return res.status(400).json({"Error": "An account with the provided email does not exist."});
+      return res.status(200).json({"Error": "Something went wrong."});
     }
     else{
       const jti = v4(); 

@@ -7,7 +7,8 @@ import {
   UpdatePassword,
   findUserByEmail,
   createUserByEmailAndPassword,
-  findUserById
+  findUserById,
+  createUserByEmail
 } from '../users/services';
 
 import { generateTokens, hashToken, generateResetToken,generateAccessToken, generateEmailToken } from "utils/jwt";
@@ -23,7 +24,6 @@ import {
   getUserEmail,
 } from './services';
 import { sendResetPasswordEmail, sendVerifyEmail } from 'utils/sendEmail';
-
 
 const router = express.Router()
 
@@ -49,6 +49,39 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
     const ConfrimEmailKey = generateEmailToken(user, jti);
     sendVerifyEmail(email, ConfrimEmailKey);
     //console.log(ConfrimEmailKey)
+    return res.status(200).json({
+      accessToken,
+      refreshToken,
+      userId,
+      user
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({"Error": "An unexpected error occurred while registering your account. Please try again."});
+  }
+});
+
+router.post('/registerFast', async (req:Request, res:Response, next:NextFunction) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(422).json({error: "You must provide an email"});
+    }
+
+    const existingUser = await findUserByEmail(email);
+
+    if (existingUser) {
+      return res.status(400).json({error: "A user with that email already exists"});
+    }
+    
+    const user = await createUserByEmail(email);
+    const userId = user.id;
+    const jti = v4();
+    const { accessToken, refreshToken } = generateTokens(user, jti);
+    await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
+    const confirmEmailKey = generateEmailToken(user, jti);
+    sendVerifyEmail(email, confirmEmailKey);
+
     return res.status(200).json({
       accessToken,
       refreshToken,
@@ -97,14 +130,13 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
 
 router.post('/resetPassword',async (req:Request, res:Response, next:NextFunction) => {
   try {
-    const { email } = req.query;
+    const { email } = req.body;
     if (!email) {
       return res.status(400).json({"Error": "You must provide an email."});
     }
     const existingUser = await findUserByEmail(email);
 
     if (!existingUser) {
-
       return res.status(400).json({"Error": "An account with the provided email does not exist."});
     }
     else{

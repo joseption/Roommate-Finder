@@ -16,7 +16,7 @@ import MessagesScreen from './screens/messages';
 import MatchesScreen from './screens/matches';
 import ExploreScreen from './screens/explore';
 import { Color, Content, Style } from './style';
-import { config, isMobile, linking, NavTo, Page, Stack } from './helper';
+import { config, isMobile, linking, navProp, NavTo, Page, Stack } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
@@ -40,6 +40,7 @@ export const App = (props: any) => {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
+  const navigationRef = React.createRef<NavigationContainerRef<Page>>();
 
   useEffect(() => {
     setMobile(isMobile());
@@ -52,8 +53,14 @@ export const App = (props: any) => {
 
     DeepLinking.getInitialURL().then((url: any) => {
       setUrl(url); // JA not working on android. get url returns null
-      if (url && url.toLowerCase().includes(config.screens.Login)) {
-        setPage(NavTo.Login);
+      if (url) {
+        if (url.toLowerCase().includes('/auth')) {
+            var params = DeepLinking.parse(url);
+            navigationRef.current?.navigate(NavTo.Login, params.queryParams as never);
+        }
+        else if (url.toLowerCase().includes(config.screens.Login)) {
+          setPage(NavTo.Login);
+        }
       }
     });
 
@@ -161,6 +168,7 @@ export const App = (props: any) => {
   return (
     <NavigationContainer
     linking={linking}
+    ref={navigationRef}
     >
         <ScrollView
         contentContainerStyle={scrollParentContainerStyle()}

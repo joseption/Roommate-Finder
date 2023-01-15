@@ -36,24 +36,24 @@ const Register = (props: any, {navigation}:any) => {
       props.setEmail(props.email);
       setEmailError(false);
 
-      let obj = {query:props.email};
+      let obj = {email:props.email};
       let js = JSON.stringify(obj);
 
       try
       {    
-          await fetch(`${env.URL}/users/profileByEmail?email=${props.email}`,
-          {method:'GET',headers:{'Content-Type': 'application/json'}}).then(async ret => {
+          await fetch(`${env.URL}/auth/registerFast`,
+          {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
-              if (res.email)
+              if (res.error)
               {
-                  setMessage("An account with this email already exists");
+                  setMessage(res.error);
               }
               else
               {
                   setEmailError(false);
                   setDisabled(true);
                   props.sendEmailPressed();
-                  props.setIsRegistering(true);
+                  //props.setIsRegistering(true);
               }
               setDisabled(false);
           });
@@ -78,13 +78,13 @@ const Register = (props: any, {navigation}:any) => {
       >
         Create an account with your UCF email
       </_Text>
-      <_TextInput
+      {<_TextInput
       label="Email"
       containerStyle={LoginStyle.inputStyle}
       onChangeText={(e: any) => {handleChange(e)}}
       value={props.email}
       error={emailError}
-      />
+      />}
       <View
       style={Style.alignRight}
       >

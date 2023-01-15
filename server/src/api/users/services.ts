@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { uuid } from "uuidv4";
 
 import db from '../../utils/db';
 
@@ -10,8 +11,7 @@ export function findUserByEmail(email: any) {
   });
 }
 
-
-export function createUserByEmailAndPassword(addy:string, password:string, first_name: string, last_name: string) {
+export function createUserByEmailAndPassword(email:string, password:string, first_name: string, last_name: string) {
   const hashed = bcrypt.hashSync(password, 12);
   return db.user.create({
     data: {
@@ -19,6 +19,18 @@ export function createUserByEmailAndPassword(addy:string, password:string, first
       password: hashed,
       first_name,
       last_name,
+    },
+  });
+}
+
+export function createUserByEmail(email:string) {
+  // Generate some random password for now, they will change it later when they activate their account.
+  var password = new Date().getTime() + uuid();
+  const hashed = bcrypt.hashSync(password, 12);
+  return db.user.create({
+    data: {
+      email: email,
+      password: hashed,
     },
   });
 }

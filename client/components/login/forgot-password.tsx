@@ -35,10 +35,13 @@ const ForgotPassword = (props: any, {navigation}:any) => {
         setMessage("");
         setEmailError(false);
 
+        let obj = {email:props.email};
+        let js = JSON.stringify(obj);
+
         try
         {    
-            await fetch(`${env.URL}/auth/resetPassword?email=${props.email}`,
-                {method:'GET',headers:{'Content-Type': 'application/json'}}).then(async ret => {
+            await fetch(`${env.URL}/auth/resetPassword`,
+                {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
                     let res = JSON.parse(await ret.text());
                     if(res.Error)
                     {

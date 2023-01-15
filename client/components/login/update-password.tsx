@@ -72,7 +72,50 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       setPwdError(false);
       setVerifyPwdError(false);
 
-      if (props.isRegistering) { // Register Account
+      try
+      {    
+          let res;
+          if (!props.registerEmail) {
+            let obj = {password:pValue, resetToken:props.token};
+            let js = JSON.stringify(obj);
+
+            const response = await fetch(`${env.URL}/auth/updatePassword`,
+                {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
+
+            res = JSON.parse(await response.text());
+          }
+          else {
+            let obj = {emailToken:props.token};
+            let js = JSON.stringify(obj);
+
+            const response = await fetch(`${env.URL}/auth/confirmEmail`,
+            {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
+
+            res = JSON.parse(await response.text());
+          }
+
+          if(res.Error)
+          {
+              setPwdError(true);
+              setVerifyPwdError(true);
+              setMessage(res.Error);
+          }
+          else
+          {
+              setPValue('');
+              setVerifyPValue('');
+              setPwdError(false);
+              setVerifyPwdError(false);
+              props.updatePasswordPressed();
+          }
+      }
+      catch(e)
+      {
+          setMessage('An unexpected error occurred while updating your password. Please try again.');
+          return;
+      } 
+
+      /*if (props.isRegistering) { // Register Account (Not Used)
         let obj = {email:props.email, password:pValue};
         let js = JSON.stringify(obj);
   
@@ -107,35 +150,8 @@ const UpdatePassword = (props: any, {navigation}:any) => {
         }  
       }
       else { // Reset/Update Password Only
-        try
-        {    
-          // JA TODO need to add reset token to send in query
-            const response = await fetch(`${env.URL}/auth/updatePassword?email=${pValue}&resetToken=${'resetToken'}`,
-                {method:'GET',headers:{'Content-Type': 'application/json'}});
-
-            let res = JSON.parse(await response.text());
-
-            if(res.Error)
-            {
-                setPwdError(true);
-                setVerifyPwdError(true);
-                setMessage(res.Error);
-            }
-            else
-            {
-                setPValue('');
-                setVerifyPValue('');
-                setPwdError(false);
-                setVerifyPwdError(false);
-                props.updatePasswordPressed();
-            }
-        }
-        catch(e)
-        {
-            setMessage('An unexpected error occurred while updating your password. Please try again.');
-            return;
-        } 
-      }   
+        */
+      //}   
   };
   
   return (
@@ -252,7 +268,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
         >
           Go back to
         </_Text>
-        {props.isRegistering ?
+        {props.registerEmail ?
         <_Text
         style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
         onPress={() => backToRegister()}

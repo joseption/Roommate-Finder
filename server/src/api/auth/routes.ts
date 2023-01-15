@@ -24,6 +24,7 @@ import {
 } from './services';
 import { sendResetPasswordEmail, sendVerifyEmail } from 'utils/sendEmail';
 
+
 const router = express.Router()
 
 router.post('/register', async (req:Request, res:Response, next:NextFunction) => {
@@ -103,14 +104,13 @@ router.post('/resetPassword',async (req:Request, res:Response, next:NextFunction
     const existingUser = await findUserByEmail(email);
 
     if (!existingUser) {
-      return res.status(200).json({"Error": "Account does not exist."});
+
+      return res.status(400).json({"Error": "An account with the provided email does not exist."});
     }
     else{
       const jti = v4(); 
       const resetToken = generateResetToken(existingUser, jti);
-      //add mail here and send the token in a mail link...
       sendResetPasswordEmail(email as string, resetToken);
-      //console.log(resetToken)       
       return res.status(200).json({
         resetToken,
       });

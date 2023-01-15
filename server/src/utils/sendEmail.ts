@@ -46,10 +46,11 @@ export function sendVerifyEmail(to: string, token: string) {
     const msg = {
         to,
         from: 'support@roomfin.xyz', 
+
         subject: email.subject,
         text: email.text,
-        html: email.html,      }
-      sgMail.send(msg).then((res) => {
+
+      }      sgMail.send(msg).then((res) => {
         console.log(res[0].statusCode)
         console.log(res[0].headers)
         }).catch((err) => {
@@ -64,9 +65,9 @@ export function sendResetPasswordEmail(to: string, token: string) {
       subject: email.subject,
       text: email.text,
       html: email.html,
-    }      
-    sgMail.send(msg).then((res) => {
-        console.log(res[0].statusCode)
+   }
+
+      sgMail.send(msg).then((res) => {        console.log(res[0].statusCode)
         console.log(res[0].headers)
         }).catch((err) => {
         console.log(err)});

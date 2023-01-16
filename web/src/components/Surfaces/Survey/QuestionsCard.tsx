@@ -99,7 +99,7 @@ export default function QuestionsCard({
               <Button
                 onClick={handleOnClickPrevious}
                 loading={false}
-                disabled={questionNumber === 0 ? true : false}
+                disabled={questionNumber === 0 || isFinshing ? true : false}
               >
                 Previous
               </Button>

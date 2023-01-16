@@ -1,21 +1,27 @@
+import { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
+import MessagePanel from './message-panel';
 
 const MessageTab = () => {
+  const [showPanel, updateShowPanel] = useState(false);
+
   return (
     <>
-      {[...Array(20).keys()].map(() => <TouchableHighlight
+      {[...Array(20).keys()].map((val) => <TouchableHighlight
         style={styles.touchable}
         underlayColor="gainsboro"
-        onPress={() => {}}
+        onPress={() => updateShowPanel(!showPanel)}
+        key={val}
       >
         <View style={styles.content}>
           <Image style={styles.image} source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }} />
           <View style={styles.text}>
-              <Text numberOfLines={1} style={styles.name}>Name</Text>
+              <Text numberOfLines={1} style={styles.name}>{'Name ' + val}</Text>
               <Text numberOfLines={2}>Hello World</Text>
           </View>
         </View>
       </TouchableHighlight>)}
+      <MessagePanel showPanel={showPanel} updateShowPanel={updateShowPanel} />
     </>
   );
 };

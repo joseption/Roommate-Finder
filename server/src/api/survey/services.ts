@@ -117,3 +117,14 @@ export async function RemoveResponse(id: string){
         }
     });
 }
+
+export async function VerifySetup(id:string){
+    return await db.user.update({
+        where: {
+            id,
+        },
+        data: {
+            is_setup: true,
+        }
+    });
+}

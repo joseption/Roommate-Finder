@@ -1,13 +1,13 @@
 import { ReactNode } from "react";
 
-import useAuthRedirect from "../hooks/useAuthRedirect";
+import UseAuthRedirect from "../hooks/useAuthRedirect";
 
 interface Props {
   children: ReactNode;
 }
 
 export default function AuthRedirectWrapper({ children }: Props) {
-  useAuthRedirect();
+  UseAuthRedirect();
 
   return <>{children}</>;
 }

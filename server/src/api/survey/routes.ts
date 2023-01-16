@@ -2,7 +2,7 @@ import { VerifySudo } from "api/auth/services";
 import express, { Request, Response } from "express";
 const router = express.Router()
 import {isAuthenticated} from '../../middleware';
-import { AddQuestion, AddResponse, GetSurveyQuestionsAndResponses, RemoveQuestion, RemoveResponse, UserAnswer, VerifyResponse } from "./services";
+import { AddQuestion, AddResponse, GetSurveyQuestionsAndResponses, RemoveQuestion, RemoveResponse, UserAnswer, VerifyResponse, VerifySetup } from "./services";
 router.use(isAuthenticated);
 
 router.get("/info", async (req: Request, res: Response) => {
@@ -145,6 +145,17 @@ router.post("/utils/remove/response", async (req: Request, res: Response) => {
                 'msg':'Removed reponse.'});
         }
         
+    } catch (error) {
+        res.status(500).json(error);
+    }
+});
+
+router.get("/verify", async (req: Request, res: Response) => {
+    try {
+        const payload : payload = req.body[0];
+        const userId = payload.userId;
+        await VerifySetup(userId);
+        res.status(200).json({"msg":"setup complete"});
     } catch (error) {
         res.status(500).json(error);
     }

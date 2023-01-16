@@ -7,12 +7,14 @@
  *
  * @returns The response from the API
  */
+import UseAuthRedirect from "../hooks/useAuthRedirect";
 import { getAuthSession } from "../utils/storage";
 
 export default async function doRequest<R>(
   url: string,
   body: any,
-  method: "GET" | "POST" | "PUT" | "DELETE" = "GET"
+  method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
+  RefreshAuth: boolean
 ): Promise<R> {
   const res = await fetch(url, {
     method: method,
@@ -28,6 +30,10 @@ export default async function doRequest<R>(
     const data = (await res.json().catch(() => null)) as {
       Error: string;
     } | null;
+    if (res.status === 401 && RefreshAuth) {
+      // call auth hook to refresh token
+      UseAuthRedirect();
+    }
     throw new Error(data?.Error ?? "Unknown server error", {
       cause: { code: res.status },
     });

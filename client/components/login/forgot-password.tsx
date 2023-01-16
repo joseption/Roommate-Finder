@@ -50,7 +50,6 @@ const ForgotPassword = (props: any, {navigation}:any) => {
                     }
                     else
                     {
-                        props.setEmail('');
                         setDisabled(true);
                         props.sendEmailPressed();
                     }

@@ -85,10 +85,11 @@ const UpdatePassword = (props: any, {navigation}:any) => {
             res = JSON.parse(await response.text());
           }
           else {
-            let obj = {emailToken:props.token};
+            let obj = {email:props.registerEmail, password:pValue};
             let js = JSON.stringify(obj);
 
-            const response = await fetch(`${env.URL}/auth/confirmEmail`,
+            // JA TODO FIND OUT WHY PASSWORD NOT UPDATING WHEN CONFIRMING EMAIL!
+            const response = await fetch(`${env.URL}/auth/setPassword`,
             {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
             res = JSON.parse(await response.text());
@@ -106,6 +107,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
               setVerifyPValue('');
               setPwdError(false);
               setVerifyPwdError(false);
+              props.setIsRegistering(false);
               props.updatePasswordPressed();
           }
       }

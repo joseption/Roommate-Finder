@@ -12,6 +12,8 @@ import Register from '../components/login/register';
 import UpdatePassword from '../components/login/update-password';
 import { Color, LoginStyle, Radius, Style } from '../style';
 import * as DeepLinking from 'expo-linking';
+import { env } from '../helper';
+import { verify } from 'crypto';
 
 const LoginScreen = (props:any, {navigation}:any) => {
   enum screen {
@@ -44,6 +46,7 @@ const LoginScreen = (props:any, {navigation}:any) => {
   const [isRegistering,setIsRegistering] = useState(false);
   const [registerEmail, setRegisterEmail] = useState('');
   const [token, setToken] = useState('');
+  const [autoResend, setAutoResend] = useState(false);
 
   useEffect(() => {
     if (!init) {
@@ -106,17 +109,83 @@ const LoginScreen = (props:any, {navigation}:any) => {
       }, 25);
   };
 
-  const gotoScreen = (url: string) => {
+  const hasValidToken = async (token: any, type: any) => 
+  {
+      let isValid = false;
+
+      try
+      {    
+          if (type == "confirm") {
+            let obj = {emailToken:token};
+            let js = JSON.stringify(obj);
+            
+            await fetch(`${env.URL}/auth/confirmEmail`,
+            {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+                let res = JSON.parse(await ret.text());
+                if (!res.Error) {
+                    isValid = true;
+                }
+            });
+          }
+          else if (type == "reset") {
+            let obj = {resetToken:token};
+            let js = JSON.stringify(obj);  
+                  
+            await fetch(`${env.URL}/auth/validateResetToken`,
+            {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+                let res = JSON.parse(await ret.text());
+                if (!res.Error) {
+                    isValid = true;
+                }
+            });
+          }
+      }
+      catch(e)
+      {
+        // Do stuff
+      }    
+      return isValid;
+  };
+
+  const getType = (url: string) => {
+    if (url.includes("confirmEmail"))
+      return "confirm";
+    else if (url.includes("reset"))
+      return "reset";
+    else if (url.includes("update"))
+      return "update";
+  }
+
+  const gotoScreen = async (url: string) => {
       if (url != null && (url.includes("confirmEmail?token=") ||
             url.includes("reset?token=") ||
             url.includes("update?token="))) {
+        let type = getType(url) as string;
+        let uToken;
+        let uEmail;
         var params = DeepLinking.parse(url);
-        if (params.queryParams?.token)
-          setToken(params.queryParams.token as string);
-        if (params.queryParams?.token)
-          setRegisterEmail(params.queryParams.email as string);
-
-        updateVisibleScreen(screen.updatePassword);
+        if (params.queryParams?.token) {
+          uToken = params.queryParams.token as string;
+          setToken(uToken);
+        }
+        if (params.queryParams?.email) {
+          uEmail = params.queryParams.email as string;
+          setRegisterEmail(params.queryParams?.email as string);
+        }
+        if (await hasValidToken(uToken, type)) {
+          updateVisibleScreen(screen.updatePassword);
+        }
+        else {
+          if (type == "confirm") {
+            setEmailValue(uEmail as string);
+            setAutoResend(true);
+            setIsRegistering(true);
+            updateVisibleScreen(screen.activateEmailSent);
+          }
+          else if (type == "reset")
+          // JA TODO NEED TO SETUP FAIL CASE LIKE CONFIRM
+            updateVisibleScreen(screen.passwordResetSent);
+        }
       }
       else
         updateVisibleScreen(screen.login);
@@ -199,6 +268,7 @@ const LoginScreen = (props:any, {navigation}:any) => {
                 email={emailValue}
                 registerPressed={() => goRight(screen.register)}
                 style={[styles.panel, activateEmailSent ? null : styles.hidden]}
+                autoResend={autoResend}
               />
               <Register
                 btnStyle={btnStyle}
@@ -230,6 +300,7 @@ const LoginScreen = (props:any, {navigation}:any) => {
                 stopInterval={stopInterval}
                 passwordPressed={() => goLeft(screen.forgotPassword)}
                 style={[styles.panel, passwordResetSent ? null : styles.hidden]}
+                email={emailValue}
               />
               <UpdatePassword
                 btnStyle={btnStyle}

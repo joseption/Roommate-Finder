@@ -50,17 +50,18 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
 
   const doResendEmail = async () => 
   {
+    let interval: any;
       if (disabled)
         return;
 
-      let interval = disableBtn(true); 
-      disableBtn(true);
-      setMessage("");
       if (!props.email) {
           setMessage("You must use a valid email address");
-          clearInterval(interval);
           disableBtn(false);
           return;
+      }
+      else {
+        interval = disableBtn(true);
+        setMessage("");
       }
       
       let obj = {email:props.email};
@@ -68,17 +69,17 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
 
       try
       {    
-          await fetch(`${env.URL}/api/send-password-reset`,
+          await fetch(`${env.URL}/auth/resetPassword`,
               {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
                   let res = JSON.parse(await ret.text());
-                  if(res.error)
+                  if (res.Error)
                   {
-                      if (res.error === "Invalid Email") {
+                      if (res.Error === "Invalid Email") {
                           setMessage("You must use a valid email address");
                           clearInterval(interval);
                       }
                       else
-                          setMessage(res.error);
+                          setMessage(res.Error);
 
                       disableBtn(false);
                   }
@@ -88,7 +89,7 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
       {
           disableBtn(false);
           clearInterval(interval);
-          setMessage("An error occurred while attempting to send a password reset email!");
+          setMessage("An error occurred while attempting to send a password reset email.");
           return;
       }    
   };
@@ -118,7 +119,7 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
         style={Style.alignRight}
         >
           <_Button
-          style={props.btnStyle(disabled)}
+          style={[props.btnStyle(disabled), styles.btn]}
           onPress={() => doResendEmail()}
           value={!disabled ? 'Resend Email' : 'Email Sent'}
           disabled={disabled}
@@ -152,5 +153,11 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  btn: {
+    marginBottom: 5
+  },
+});
 
 export default PasswordResetSent;

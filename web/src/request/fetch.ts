@@ -32,7 +32,7 @@ export async function SurveyOnComplete() {
   return await doRequest<{ message: string }>(
     `${backend_api}/survey/verify`,
     null,
-    "POST",
+    "GET",
     true
   );
 }

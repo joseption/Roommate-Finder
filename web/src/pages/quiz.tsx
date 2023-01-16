@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 import CircularProgress from "../components/Feedback/CircularProgress";
 import IconButton from "../components/Inputs/IconButton";
-import TitlesCard from "../components/Surfaces/Survey/QuestionsCard";
+import QuestionsCard from "../components/Surfaces/Survey/QuestionsCard";
 import { GetSurveryInfo } from "../request/fetch";
 import { transitionVariants } from "../styles/motion-definitions";
 
@@ -58,7 +58,7 @@ export default function Quiz() {
               className={"mx-auto flex flex-col content-center gap-4 sm:w-3/5"}
             >
               {data ? (
-                <TitlesCard
+                <QuestionsCard
                   isLoading={isLoading}
                   SurveyData={data}
                   className={"bg-slate-50"}

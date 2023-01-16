@@ -1,9 +1,11 @@
 import { RadioGroup } from "@headlessui/react";
 import { Bars4Icon } from "@heroicons/react/24/outline";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { SurveyOnComplete } from "../../../request/fetch";
 import { UpdateResponse } from "../../../request/mutate";
 import { SurveyInfo } from "../../../types/survey.types";
 import CircularProgress from "../../Feedback/CircularProgress";
@@ -28,6 +30,7 @@ export default function QuestionsCard({
   className = "",
 }: Props) {
   //for answer selection
+  const router = useRouter();
   const [selected, setSelected] = useState<response | null>(null);
   const [questionNumber, setQuestionNumber] = useState(0);
 
@@ -37,6 +40,16 @@ export default function QuestionsCard({
       console.log(data);
     },
     onError: (err: Error) => {
+      console.log(err.message);
+    },
+  });
+
+  const { mutate: mutateComplete, isLoading: isFinshing } = useMutation({
+    mutationFn: () => SurveyOnComplete(),
+    onSuccess: (data) => {
+      void router.push("/explore");
+    },
+    onError: (err: Error) => {
       toast.error(err.message);
     },
   });
@@ -44,17 +57,18 @@ export default function QuestionsCard({
   const handleOnClickNext = () => {
     if (questionNumber < SurveyData.length - 1)
       setQuestionNumber(questionNumber + 1);
+    mutateUpdateResponse();
   };
   const handleOnClickPrevious = () => {
     if (questionNumber > 0) setQuestionNumber(questionNumber - 1);
   };
   const handleOnFinish = () => {
     //call api and change is_setup to true
-    console.log("finish");
+    mutateUpdateResponse();
+    mutateComplete();
   };
   const handleStateChange = (newState: response) => {
     setSelected(newState);
-    mutateUpdateResponse();
   };
   return (
     <Card className={`p-4 ${className}`}>
@@ -92,8 +106,8 @@ export default function QuestionsCard({
               {questionNumber === SurveyData.length - 1 ? (
                 <Button
                   onClick={handleOnFinish}
-                  loading={false}
-                  disabled={false}
+                  loading={selected ? false : true}
+                  disabled={isFinshing ? true : false}
                 >
                   Finish
                 </Button>

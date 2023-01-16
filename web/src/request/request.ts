@@ -30,10 +30,10 @@ export default async function doRequest<R>(
     const data = (await res.json().catch(() => null)) as {
       Error: string;
     } | null;
-    if (res.status === 401 && RefreshAuth) {
-      // call auth hook to refresh token
-      UseAuthRedirect();
-    }
+    // if (res.status === 401 && RefreshAuth) {
+    //   // call auth hook to refresh token
+    //   UseAuthRedirect();
+    // }
     throw new Error(data?.Error ?? "Unknown server error", {
       cause: { code: res.status },
     });

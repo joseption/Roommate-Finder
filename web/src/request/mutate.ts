@@ -13,7 +13,8 @@ export async function login(email: string, password: string) {
       email,
       password,
     },
-    "POST"
+    "POST",
+    false
   );
 }
 
@@ -31,7 +32,8 @@ export async function register(
       email,
       password,
     },
-    "POST"
+    "POST",
+    false
   );
 }
 
@@ -41,7 +43,8 @@ export async function reset(email: string) {
     {
       email,
     },
-    "POST"
+    "POST",
+    false
   );
 }
 
@@ -52,7 +55,8 @@ export async function authenticateUser() {
       refreshToken: getAuthSession().refreshToken,
       accessToken: getAuthSession().accessToken,
     },
-    "POST"
+    "POST",
+    false
   );
 }
 
@@ -63,7 +67,8 @@ export async function updatePassword(password: string, resetToken: string) {
       password,
       resetToken,
     },
-    "POST"
+    "POST",
+    false
   );
 }
 //confirmEmail, sendConfirmationEmail
@@ -74,7 +79,8 @@ export async function confirmEmail(emailToken: string) {
     {
       emailToken,
     },
-    "POST"
+    "POST",
+    false
   );
 }
 
@@ -84,6 +90,22 @@ export async function sendConfirmationEmail(email: string) {
     {
       email,
     },
-    "POST"
+    "POST",
+    false
+  );
+}
+
+export async function UpdateResponse(
+  questionId: string | undefined,
+  responseId: string | undefined
+) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/survey/response`,
+    {
+      questionId,
+      responseId,
+    },
+    "POST",
+    true
   );
 }

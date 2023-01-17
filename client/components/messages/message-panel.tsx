@@ -2,6 +2,7 @@ import { useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import { View, StyleSheet, Animated, Easing, Dimensions, Text } from 'react-native';
 import _Button from '../control/button';
 import Messages from './messages';
+import MessageInput from './message-input';
 
 interface Props {
   showPanel: boolean,
@@ -52,6 +53,7 @@ const MessagePanel = ({ showPanel, updateShowPanel, chat }: Props) => {
       >
         <_Button onPress={() => updateShowPanel(!showPanel)}>Back</_Button>
         <Messages chat={chat}/>
+        <MessageInput />
       </Animated.View>
     </>
   );

@@ -1,28 +1,28 @@
-import { useState } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
-import MessagePanel from './message-panel';
 
-const MessageTab = () => {
-  const [showPanel, updateShowPanel] = useState(false);
+interface Props {
+  name: string,
+  lastMessage: string,
+  showPanel: boolean,
+  updateShowPanel: Dispatch<SetStateAction<boolean>>,
+}
 
+const MessageTab = ({name, lastMessage, showPanel, updateShowPanel}: Props) => {
   return (
-    <>
-      {[...Array(20).keys()].map((val) => <TouchableHighlight
-        style={styles.touchable}
-        underlayColor="gainsboro"
-        onPress={() => updateShowPanel(!showPanel)}
-        key={val}
-      >
-        <View style={styles.content}>
-          <Image style={styles.image} source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }} />
-          <View style={styles.text}>
-              <Text numberOfLines={1} style={styles.name}>{'Name ' + val}</Text>
-              <Text numberOfLines={2}>Hello World</Text>
-          </View>
+    <TouchableHighlight
+      style={styles.touchable}
+      underlayColor="gainsboro"
+      onPress={() => updateShowPanel(!showPanel)}
+    >
+      <View style={styles.content}>
+        <Image style={styles.image} source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }} />
+        <View style={styles.text}>
+            <Text numberOfLines={1} style={styles.name}>{name}</Text>
+            <Text numberOfLines={2}>{lastMessage}</Text>
         </View>
-      </TouchableHighlight>)}
-      <MessagePanel showPanel={showPanel} updateShowPanel={updateShowPanel} />
-    </>
+      </View>
+    </TouchableHighlight>
   );
 };
 

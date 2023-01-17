@@ -1,5 +1,5 @@
 import { useRef, useEffect, Dispatch, SetStateAction } from 'react';
-import { View, StyleSheet, Animated, Easing } from 'react-native';
+import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import _Button from '../control/button';
 
 interface Props {
@@ -48,7 +48,7 @@ const MessagePanel = ({ showPanel, updateShowPanel }: Props) => {
           ]}
         ]}
       >
-        <_Button onPress={() => updateShowPanel(!showPanel)}>Go back</_Button>
+        <_Button onPress={() => updateShowPanel(!showPanel)}>Back</_Button>
       </Animated.View>
     </>
   );
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   },
   container: {
     position: 'absolute',
-    width: '100%',
+    width: Dimensions.get('window').width - 20,
     height: '100%',
     backgroundColor: 'white',
   },

@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 // to do , jwt.verify in try catch
 import bcrypt from "bcrypt";
-import jwt  from "jsonwebtoken";
+import jwt, { JwtPayload }  from "jsonwebtoken";
 import {v4} from 'uuid'; 
 import {
   UpdatePassword,
@@ -24,6 +24,7 @@ import {
   getUserEmail,
 } from './services';
 import { sendResetPasswordEmail, sendVerifyEmail } from 'utils/sendEmail';
+import { GetSurveyQuestionsAndResponses } from 'api/survey/services';
 
 const router = express.Router()
 
@@ -118,11 +119,28 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
     const { accessToken, refreshToken } = generateTokens(existingUser, jti);
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: existingUser.id });
     delete existingUser.password;
+    let next_question_id = "";
+    let init_question_count = 0;
+    if (existingUser.is_setup) {
+      var responses = await GetSurveyQuestionsAndResponses(userId);
+      for (let i = 0; i < responses.length; i++) {
+        if (responses[i].ResponsesOnUsers.length == 0) {
+          if (!next_question_id)
+            next_question_id = responses[i].id;
+
+          init_question_count++;
+        }
+      }
+    }
+
     res.json({
       accessToken,
       refreshToken,
       userId,
-      user:existingUser
+      user:existingUser,
+      next_question_id,
+      init_question_count,
+      responses
     });
   } catch (err) {
     return res.status(500).json({"Error": "An unexpected error occurred. Please try again."});
@@ -294,10 +312,15 @@ router.post('/sendConfirmationEmail',async (req:Request, res:Response, next:Next
 router.post('/logout', async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { refreshToken } = req.body;
-    if (!deleteRefreshToken) {
+    if (!refreshToken) {
       return res.status(422).json({"Error": "You must provide a RefreshToken id."});
     }
-    await deleteRefreshToken(refreshToken);
+    let id = "";
+    let token = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    if (token as JwtPayload) {
+      id = (token as JwtPayload).jti;
+    }
+    await deleteRefreshToken(id);
     return res.status(200).json({"OK": "Token have been revoked."});
   } catch (err) {
     return res.status(500).json({"Error": "Something went wrong."});

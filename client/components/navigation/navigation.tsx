@@ -9,7 +9,7 @@ import NavMenuButton from '../control/nav-menu-button';
 import NavMobileButton from '../control/nav-mobile-button';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { AccountScreenType, NavTo } from '../../helper';
+import { AccountScreenType, isLoggedIn, NavTo } from '../../helper';
 
 const Navigation = (props: any) => {
     const navigation = useNavigation();
@@ -69,8 +69,9 @@ const Navigation = (props: any) => {
     }
 
     const navigate = (nav: never) => {
+        props.setPage(nav);
         setNavigation(nav);
-        setShowMenu(false)
+        setShowMenu(false);
         navigation.navigate(nav);
         // JA TODO Hook up navigate highlighter for mobile view switch
     };
@@ -117,7 +118,9 @@ const Navigation = (props: any) => {
                     height={30}
                     onPress={() => navigate(NavTo.Home)}
                     pressStyle={styles.logoContainer}
+                    containerStyle={styles.logoContainerStyle}
                     />
+                    {visible ?
                     <View
                     style={styles.iconContainer}
                     >
@@ -158,6 +161,9 @@ const Navigation = (props: any) => {
                             icon="caret-down" />
                         </Pressable>
                     </View>
+                    :
+                    null
+                    }
                 </View>
                 {showMenu ?
                 <View>
@@ -396,6 +402,10 @@ const Navigation = (props: any) => {
             width: '100vw',
             margin: -5,
             opacity: 0
+        },
+        logoContainerStyle: {
+            paddingTop: 5,
+            paddingBottom: 5
         }
     });
 

@@ -6,6 +6,7 @@ import { Dimensions } from "react-native";
 import { Content } from "./style";
 import * as DeepLinking from 'expo-linking';
 import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut, faUserPlus, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 library.add(faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
 
 export const Stack = createNativeStackNavigator<Page>();
@@ -102,4 +103,41 @@ export const linking = {
 
 export const enum AccountScreenType {
   none, info, about, survey
+}
+
+export const getLocalStorage = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@user_data');
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  }
+  catch {
+    return null;
+  }
+}
+
+export const setLocalStorage = async (data: Object | null) => {
+  try {
+    const jsonValue = !data ? '' : JSON.stringify(data);
+    await AsyncStorage.setItem('@user_data', jsonValue);
+    return true;
+  }
+  catch {
+    return false;
+  }
+}
+
+export const isLoggedIn = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@user_data');
+    const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+    if (data) {
+      return data.refreshToken ? true : false;
+    }
+    else {
+      return false;
+    }
+  }
+  catch {
+    return false;
+  }
 }

@@ -54,7 +54,7 @@ export function getUserEmail(id:string) {
 export function deleteRefreshToken(id:string) {
   return db.refreshToken.update({
     where: {
-      id,
+      id
     },
     data: {
       revoked: true

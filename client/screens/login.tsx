@@ -173,6 +173,8 @@ const LoginScreen = (props:any, {navigation}:any) => {
           setRegisterEmail(params.queryParams?.email as string);
         }
         if (await hasValidToken(uToken, type)) {
+          if (type == "confirm")
+            setIsRegistering(true);
           updateVisibleScreen(screen.updatePassword);
         }
         else {

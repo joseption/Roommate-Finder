@@ -16,12 +16,13 @@ import MessagesScreen from './screens/messages';
 import MatchesScreen from './screens/matches';
 import ExploreScreen from './screens/explore';
 import { Color, Content, Style } from './style';
-import { config, isMobile, linking, navProp, NavTo, Page, Stack } from './helper';
+import { config, env, getLocalStorage, isMobile, linking, navProp, NavTo, Page, setLocalStorage, Stack } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
 import * as DeepLinking from 'expo-linking';
 import { setDefaultResultOrder } from 'dns/promises';
+import { setgroups } from 'process';
 
 export const App = (props: any) => {
   const [navDimensions,setNavDimensions] = useState({height: 0, width: 0});
@@ -30,7 +31,7 @@ export const App = (props: any) => {
   const [mobile,setMobile] = useState(false);
   const [page,setPage] = useState('');
   const [init,setInit] = useState(false);
-  const [route,setRoute] = useState('');
+  const [route,setRoute] = useState();
   const [adjustedPos,setAdjustedPos] = useState(0);
   const [url,setUrl] = useState('');
   const [accountView,setAccountView] = useState();
@@ -40,7 +41,7 @@ export const App = (props: any) => {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
-  const navigationRef = React.createRef<NavigationContainerRef<Page>>();
+  const [ref,setRef] = useState(React.createRef<NavigationContainerRef<Page>>());
 
   useEffect(() => {
     setMobile(isMobile());
@@ -51,26 +52,78 @@ export const App = (props: any) => {
       }
     );
 
-    DeepLinking.getInitialURL().then((url: any) => {
-      setUrl(url); // JA not working on android. get url returns null
-      if (url) {
-        if (url.toLowerCase().includes('/auth')) {
-            var params = DeepLinking.parse(url);
-            navigationRef.current?.navigate(NavTo.Login, params.queryParams as never);
-        }
-        else if (url.toLowerCase().includes(config.screens.Login)) {
-          setPage(NavTo.Login);
-        }
-      }
-    });
-
-    prepareStyle();
+    setup();
 
     return () => subscription?.remove();
-  }, [navDimensions.height, page, mobile, adjustedPos, route, url]);
+  }, [navDimensions.height, page, mobile, adjustedPos, route, url, ref]);
   
   if (!loaded) {
     return null;
+  }
+
+  function setup() {
+    DeepLinking.getInitialURL().then(async (link: any) => {
+      let canCheckLogin = true;
+
+      if (url !== link) {
+        canCheckLogin = false;
+        setUrl(link); // JA not working on android. get url returns null
+        if (link) {
+          if (link.toLowerCase().includes('/auth')) {
+              var params = DeepLinking.parse(link);
+              ref.current?.navigate(NavTo.Login, params.queryParams as never);
+          }
+          else if (link.toLowerCase().includes(config.screens.Login)) {
+            setPage(NavTo.Login);
+          }
+        }
+      }
+      if (link.toLowerCase().includes('/auth') ||
+        link.toLowerCase().includes(config.screens.Login))
+        canCheckLogin = false;
+
+      if (canCheckLogin)
+        checkLoggedIn(link);
+
+      prepareStyle();
+    });
+  }
+
+  async function checkLoggedIn(link: string) {
+    let error = false;
+    let data = await getLocalStorage();
+    if (data) {
+      let obj = {refreshToken:data.refreshToken, accessToken: data.accessToken};
+      let js = JSON.stringify(obj);
+
+      try
+      {   
+          await fetch(`${env.URL}/auth/checkAuth`,
+          {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+            let res = JSON.parse(await ret.text());
+            if (res.Error)
+            {
+              error = true;
+            }
+            else
+            {
+              data.accessToken = res.accessToken;
+              await setLocalStorage(data);
+            }
+          });
+      }
+      catch(e)
+      {
+        error = true;
+      }   
+    }
+    else {
+      error = true;
+    }
+    if (error && ref.current?.getCurrentRoute()?.name !== NavTo.Login) {
+      ref.current?.navigate(NavTo.Login, {timeout: 'yes'} as never);
+      setUrl(link);
+    }
   }
 
   const routeName = (): keyof Page => {
@@ -79,12 +132,10 @@ export const App = (props: any) => {
   }
 
   const state = (e: any) => {
-    if (init) {
-      var routes = e.data.state.routes;
-      if (routes && routes.length > 0) {
-        setPage(routes[routes.length - 1].name);
-        prepareStyle();
-      }
+    var routes = e.data.state.routes;
+    if (routes && routes.length > 0) {
+      setPage(routes[routes.length - 1].name);
+      prepareStyle();
     }
   }
   const getOffset = (scrollView: number) => {
@@ -145,6 +196,13 @@ export const App = (props: any) => {
       backgroundColor = Color.white;
       paddingLeft = 10;
       paddingRight = 10;
+
+      // Don't add padding for message app on mobile
+      if (page == NavTo.Messages) {
+        paddingLeft = 0;
+        paddingRight = 0;
+        paddingTop = 0;
+      }
     }
 
     var content = {
@@ -168,7 +226,7 @@ export const App = (props: any) => {
   return (
     <NavigationContainer
     linking={linking}
-    ref={navigationRef}
+    ref={ref}
     >
         <ScrollView
         contentContainerStyle={scrollParentContainerStyle()}
@@ -300,6 +358,7 @@ export const App = (props: any) => {
         <Navigation
         setAccountView={setAccountView}
         dimensions={navDimensions}
+        setPage={setPage}
         screen={page}
         setDimensions={setNavDimensions}
         mobile={mobile} />

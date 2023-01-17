@@ -9,22 +9,24 @@ import { AccountScreenType, NavTo } from '../helper';
 
 const AccountScreen = (props: any, {navigation}:any) => {
     useEffect(() => {
-        if (props.accountView &&
-            props.accountView === AccountScreenType.about ||
-            !props.accountView &&
-            props.url &&
-            props.url.includes("?view=about")) {
-            setView(AccountScreenType.about);
+        if (props.url && props.url.toLowerCase().includes("/account")) {
+            if (props.accountView &&
+                props.accountView === AccountScreenType.about ||
+                !props.accountView &&
+                props.url &&
+                props.url.toLowerCase().includes("?view=about")) {
+                setView(AccountScreenType.about);
+            }
+            else if (props.accountView &&
+                props.accountView === AccountScreenType.survey ||
+                !props.accountView &&
+                props.url &&
+                props.url.toLowerCase().includes("?view=survey")) {
+                setView(AccountScreenType.survey);
+            }
+            else
+                setView(AccountScreenType.info);
         }
-        else if (props.accountView &&
-            props.accountView === AccountScreenType.survey ||
-            !props.accountView &&
-            props.url &&
-            props.url.includes("?view=survey")) {
-            setView(AccountScreenType.survey);
-        }
-        else
-            setView(AccountScreenType.info);
     }, [props.url, props.accountView]);
 
     const setView = (type: AccountScreenType) => {

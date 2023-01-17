@@ -155,6 +155,10 @@ const UpdatePassword = (props: any, {navigation}:any) => {
         */
       //}   
   };
+
+  const title = () => {
+    return props.isRegistering ? 'Create Password' : 'Update Password';
+  }
   
   return (
     <View
@@ -162,7 +166,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       <_Text
       style={[Style.textHuge, Style.boldFont]}
       >
-        {props.isRegistering ? 'Create Password' : 'Update Password'}
+        {title()}
       </_Text>
       <_Text
       style={[Style.textDefaultTertiary, LoginStyle.actionText]}

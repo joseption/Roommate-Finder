@@ -1,13 +1,15 @@
 import { useRef, useEffect, Dispatch, SetStateAction } from 'react';
-import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
+import { View, StyleSheet, Animated, Easing, Dimensions, Text } from 'react-native';
 import _Button from '../control/button';
+import Messages from './messages';
 
 interface Props {
   showPanel: boolean,
   updateShowPanel: Dispatch<SetStateAction<boolean>>,
+  chat: any,
 }
 
-const MessagePanel = ({ showPanel, updateShowPanel }: Props) => {
+const MessagePanel = ({ showPanel, updateShowPanel, chat }: Props) => {
   // These values are mapped to percentage of screen size.
   const PANEL_OUT_OF_SCREEN = 1.5;
   const PANEL_IN_SCREEN = 0;
@@ -49,6 +51,7 @@ const MessagePanel = ({ showPanel, updateShowPanel }: Props) => {
         ]}
       >
         <_Button onPress={() => updateShowPanel(!showPanel)}>Back</_Button>
+        <Messages chat={chat}/>
       </Animated.View>
     </>
   );

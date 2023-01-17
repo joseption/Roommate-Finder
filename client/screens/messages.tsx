@@ -7,9 +7,31 @@ import _TextInput from '../components/control/text-input';
 
 const MessagesScreen = (props: any, {navigation}:any) => {
   const [showPanel, updateShowPanel] = useState(false);
+  const [currentChat, setCurrentChat] = useState({});
 
   const data = [...Array(20).keys()].map((item) => {
-    return {name: `SD${item}`, lastMessage: `Last Message ${item}`}
+    return {
+      name: `SD${item}`,
+      lastMessage: `Last Message ${item}`,
+      messages: [
+        {
+          sender: 'a',
+          text: `hello ${item}`
+        },
+        {
+          sender: 'a',
+          text: 'world is very fun an full of many things to do. One of those things is being able to work on SD2. Oh so much fun!'
+        },
+        {
+          sender: 'b',
+          text: `hey ${item}`
+        },
+        {
+          sender: 'b',
+          text: 'there is a lot to do, and what best time I could spend than to spend time working on my SD2 project!'
+        },
+      ]
+    }
   });
 
   return (
@@ -20,12 +42,12 @@ const MessagesScreen = (props: any, {navigation}:any) => {
           <MessageTab
             showPanel={showPanel}
             updateShowPanel={updateShowPanel}
-            name={item.name}
-            lastMessage={item.lastMessage}
+            chat={item}
+            setCurrentChat={setCurrentChat}
           />
         }
       />
-      <MessagePanel showPanel={showPanel} updateShowPanel={updateShowPanel} />
+      <MessagePanel showPanel={showPanel} updateShowPanel={updateShowPanel} chat={currentChat}/>
     </>
   );
 };

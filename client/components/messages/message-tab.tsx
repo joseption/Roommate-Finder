@@ -2,24 +2,27 @@ import { Dispatch, SetStateAction } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
 
 interface Props {
-  name: string,
-  lastMessage: string,
+  chat: any,
+  setCurrentChat: any,
   showPanel: boolean,
   updateShowPanel: Dispatch<SetStateAction<boolean>>,
 }
 
-const MessageTab = ({name, lastMessage, showPanel, updateShowPanel}: Props) => {
+const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) => {
   return (
     <TouchableHighlight
       style={styles.touchable}
       underlayColor="gainsboro"
-      onPress={() => updateShowPanel(!showPanel)}
+      onPress={() => {
+        updateShowPanel(!showPanel);
+        setCurrentChat(chat);
+      }}
     >
       <View style={styles.content}>
         <Image style={styles.image} source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }} />
         <View style={styles.text}>
-            <Text numberOfLines={1} style={styles.name}>{name}</Text>
-            <Text numberOfLines={2}>{lastMessage}</Text>
+            <Text numberOfLines={1} style={styles.name}>{chat.name}</Text>
+            <Text numberOfLines={2}>{chat.lastMessage}</Text>
         </View>
       </View>
     </TouchableHighlight>

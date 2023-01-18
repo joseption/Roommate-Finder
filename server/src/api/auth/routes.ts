@@ -71,7 +71,7 @@ router.post('/registerFast', async (req:Request, res:Response, next:NextFunction
 
     const existingUser = await findUserByEmail(email);
 
-    if (existingUser) {
+    if (existingUser && existingUser.is_verified) {
       return res.status(400).json({error: "A user with that email already exists"});
     }
     
@@ -119,28 +119,12 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
     const { accessToken, refreshToken } = generateTokens(existingUser, jti);
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: existingUser.id });
     delete existingUser.password;
-    let next_question_id = "";
-    let init_question_count = 0;
-    if (existingUser.is_setup) {
-      var responses = await GetSurveyQuestionsAndResponses(userId);
-      for (let i = 0; i < responses.length; i++) {
-        if (responses[i].ResponsesOnUsers.length == 0) {
-          if (!next_question_id)
-            next_question_id = responses[i].id;
-
-          init_question_count++;
-        }
-      }
-    }
 
     res.json({
       accessToken,
       refreshToken,
       userId,
       user:existingUser,
-      next_question_id,
-      init_question_count,
-      responses
     });
   } catch (err) {
     return res.status(500).json({"Error": "An unexpected error occurred. Please try again."});

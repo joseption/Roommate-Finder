@@ -1,47 +1,41 @@
 import { NavigationContainer, NavigationContainerRef, StackRouter, useLinkProps, useNavigation } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './screens/home';
 import { useFonts } from 'expo-font';
-import { library } from '@fortawesome/fontawesome-svg-core'
 import Navigation from './components/navigation/navigation';
-import React, { createContext, useEffect, useState } from 'react';
-import { Alert, Dimensions, Linking, Platform, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import 'react-native-gesture-handler';
-import {Header, StackNavigationProp} from '@react-navigation/stack';
 import AccountScreen from './screens/account';
 import ProfileScreen from './screens/profile';
 import SurveyScreen from './screens/survey';
 import ListingsScreen from './screens/listings';
 import MessagesScreen from './screens/messages';
-import MatchesScreen from './screens/matches';
-import ExploreScreen from './screens/explore';
-import { Color, Content, Style } from './style';
-import { config, env, getLocalStorage, isMobile, linking, navProp, NavTo, Page, setLocalStorage, Stack } from './helper';
+import SearchScreen from './screens/search';
+import { Color, Content } from './style';
+import { env, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
 import * as DeepLinking from 'expo-linking';
-import { setDefaultResultOrder } from 'dns/promises';
-import { setgroups } from 'process';
 
 export const App = (props: any) => {
   const [navDimensions,setNavDimensions] = useState({height: 0, width: 0});
-  const [style,setStyle] = useState({});
   const [containerStyle,setContainerStyle] = useState({});
   const [mobile,setMobile] = useState(false);
-  const [page,setPage] = useState('');
-  const [init,setInit] = useState(false);
-  const [route,setRoute] = useState();
   const [adjustedPos,setAdjustedPos] = useState(0);
-  const [url,setUrl] = useState('');
   const [accountView,setAccountView] = useState();
+  const [isMatches,setIsMatches] = useState(false);
+  const [ref,setRef] = useState(React.createRef<NavigationContainerRef<Page>>());
+  const [initURL, setInitURL] = useState('');
+  const [isLoggedIn,setIsLoggedIn] = useState(false);
+  const [currentNav,setCurrentNav] = useState('');
+  const [accountAction,setAccountAction] = useState(false);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
-  const [ref,setRef] = useState(React.createRef<NavigationContainerRef<Page>>());
 
   useEffect(() => {
     setMobile(isMobile());
@@ -51,45 +45,42 @@ export const App = (props: any) => {
           setMobile(isMobile());
       }
     );
-
-    setup();
+    if (!initURL) {
+      DeepLinking.getInitialURL().then(async (link: any) => {
+        if (link)
+          setInitURL(link);
+      });
+    }
+      
+    if (ref.current)
+      setup();
 
     return () => subscription?.remove();
-  }, [navDimensions.height, page, mobile, adjustedPos, route, url, ref]);
+  }, [navDimensions.height, mobile, adjustedPos, ref, isLoggedIn, currentNav]);
   
   if (!loaded) {
     return null;
   }
 
-  function setup() {
-    DeepLinking.getInitialURL().then(async (link: any) => {
-      let canCheckLogin = true;
-
-      if (url !== link) {
-        canCheckLogin = false;
-        setUrl(link); // JA not working on android. get url returns null
-        if (link) {
-          if (link.toLowerCase().includes('/auth')) {
-              var params = DeepLinking.parse(link);
-              ref.current?.navigate(NavTo.Login, params.queryParams as never);
-          }
-          else if (link.toLowerCase().includes(config.screens.Login)) {
-            setPage(NavTo.Login);
-          }
-        }
-      }
-      if (link.toLowerCase().includes('/auth') ||
-        link.toLowerCase().includes(config.screens.Login))
-        canCheckLogin = false;
-
-      if (canCheckLogin)
-        checkLoggedIn(link);
-
-      prepareStyle();
-    });
+  const getRouteName = () => {
+    return ref.current?.getCurrentRoute()?.name;
   }
 
-  async function checkLoggedIn(link: string) {
+  function setup() {
+      if (initURL && initURL.toLowerCase().includes('/auth')) {
+          var route = DeepLinking.parse(initURL);
+          var path = route.path?.substring(route.path?.lastIndexOf('/') + 1);
+          if (route?.queryParams)
+            route.queryParams.path = path;
+          ref.current?.navigate(NavTo.Login, route.queryParams as never);
+          setAccountAction(true);
+          return;
+      }
+      checkLoggedIn();
+      prepareStyle();
+  }
+
+  async function checkLoggedIn() {
     let error = false;
     let data = await getLocalStorage();
     if (data) {
@@ -109,6 +100,7 @@ export const App = (props: any) => {
             {
               data.accessToken = res.accessToken;
               await setLocalStorage(data);
+              setIsLoggedIn(true);
             }
           });
       }
@@ -121,23 +113,12 @@ export const App = (props: any) => {
       error = true;
     }
     if (error && ref.current?.getCurrentRoute()?.name !== NavTo.Login) {
+      await setLocalStorage(null);
       ref.current?.navigate(NavTo.Login, {timeout: 'yes'} as never);
-      setUrl(link);
+      setIsLoggedIn(false);
     }
   }
 
-  const routeName = (): keyof Page => {
-    // JA TODO need logic to decide route name for now just return home
-    return NavTo.Login;
-  }
-
-  const state = (e: any) => {
-    var routes = e.data.state.routes;
-    if (routes && routes.length > 0) {
-      setPage(routes[routes.length - 1].name);
-      prepareStyle();
-    }
-  }
   const getOffset = (scrollView: number) => {
     var window = Dimensions.get("window").width;
       if (scrollView < window) {
@@ -186,7 +167,7 @@ export const App = (props: any) => {
   const contentStyle = () => {
     var style = [];
     style.push(styles.contentStyle);
-    var paddingTop = (page === NavTo.Login) ? 0 : 10;
+    var paddingTop = (getRouteName() === NavTo.Login) ? 0 : 10;
     var backgroundColor = Color.holder;
     var paddingLeft = 0;
     var paddingRight = 0;
@@ -198,7 +179,7 @@ export const App = (props: any) => {
       paddingRight = 10;
 
       // Don't add padding for message app on mobile
-      if (page == NavTo.Messages) {
+      if (getRouteName() == NavTo.Messages) {
         paddingLeft = 0;
         paddingRight = 0;
         paddingTop = 0;
@@ -223,6 +204,10 @@ export const App = (props: any) => {
     return style;
   }
 
+  const nav = () => {
+    return ref.current;
+  }
+
   return (
     <NavigationContainer
     linking={linking}
@@ -244,10 +229,7 @@ export const App = (props: any) => {
             />
             <Stack.Navigator
             screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle()}}
-            initialRouteName={routeName()}
-            screenListeners={{
-              state: (e: any) => state(e)
-            }}
+            initialRouteName={NavTo.Login}
             >
               <Stack.Screen
                   name={NavTo.Home}
@@ -256,7 +238,6 @@ export const App = (props: any) => {
               {(props: any) => <HomeScreen
               {...props}
               mobile={mobile}
-              url={url}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -266,7 +247,9 @@ export const App = (props: any) => {
                   {(props: any) => <LoginScreen
                   {...props}
                   mobile={mobile}
-                  url={url}
+                  setIsLoggedIn={setIsLoggedIn}
+                  accountAction={accountAction}
+                  setAccountAction={setAccountAction}
                   />}
               </Stack.Screen>
               <Stack.Screen
@@ -278,7 +261,6 @@ export const App = (props: any) => {
               accountView={accountView}
               setAccountView={setAccountView}
               mobile={mobile}
-              url={url}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -288,7 +270,6 @@ export const App = (props: any) => {
               {(props: any) => <ProfileScreen
               {...props}
               mobile={mobile}
-              url={url}
               />}
               </Stack.Screen> 
               <Stack.Screen
@@ -298,27 +279,17 @@ export const App = (props: any) => {
               {(props: any) => <SurveyScreen
               {...props}
               mobile={mobile}
-              url={url}
               />}
               </Stack.Screen>
               <Stack.Screen
-                  name={NavTo.Matches}
-                  options={{title: NavTo.Matches, animation: 'none'}}
+                  name={NavTo.Search}
+                  options={{title: NavTo.Search, animation: 'none'}}
               > 
-              {(props: any) => <MatchesScreen
+              {(props: any) => <SearchScreen
               {...props}
               mobile={mobile}
-              url={url} 
-              />}
-              </Stack.Screen>
-              <Stack.Screen
-                  name={NavTo.Explore}
-                  options={{title: NavTo.Explore, animation: 'none'}}
-              > 
-              {(props: any) => <ExploreScreen
-              {...props}
-              mobile={mobile}
-              url={url}
+              isMatches={isMatches}
+              setIsMatches={setIsMatches}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -328,7 +299,6 @@ export const App = (props: any) => {
               {(props: any) => <ListingsScreen
               {...props}
               mobile={mobile}
-              url={url}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -338,7 +308,6 @@ export const App = (props: any) => {
               {(props: any) => <MessagesScreen
               {...props}
               mobile={mobile}
-              url={url}
               />}
               </Stack.Screen> 
               <Stack.Screen
@@ -348,7 +317,7 @@ export const App = (props: any) => {
               {(props: any) => <LogoutScreen
               {...props}
               mobile={mobile}
-              url={url}
+              setIsLoggedIn={setIsLoggedIn}
               />}
               </Stack.Screen>
             </Stack.Navigator>
@@ -356,13 +325,16 @@ export const App = (props: any) => {
         </ScrollView>
         {Platform.OS === 'web' ?
         <Navigation
+        {...props}
         setAccountView={setAccountView}
         dimensions={navDimensions}
-        setPage={setPage}
-        screen={page}
         setDimensions={setNavDimensions}
+        setIsMatches={setIsMatches}
+        navigation={nav()}
+        isLoggedIn={isLoggedIn}
+        setCurrentNav={setCurrentNav}
         mobile={mobile} />
-        : null}
+        : null} 
     </NavigationContainer>
   );
 };

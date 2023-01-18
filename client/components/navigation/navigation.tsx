@@ -7,73 +7,66 @@ import _Image from '../control/image';
 import { Color, Content, FontSize, Radius, Style } from '../../style';
 import NavMenuButton from '../control/nav-menu-button';
 import NavMobileButton from '../control/nav-mobile-button';
-import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { AccountScreenType, isLoggedIn, NavTo } from '../../helper';
+import { AccountScreenType, navProp, NavTo } from '../../helper';
+import { useNavigation } from '@react-navigation/native';
 
 const Navigation = (props: any) => {
-    const navigation = useNavigation();
     const [showMenu,setShowMenu] = useState(false);
-    const [visible,setVisible] = useState(true);
+    const [visible,setVisible] = useState(false);
     const [init,setInit] = useState(false);
-    const [nav,setNav] = useState('');
+    const [navSelector,setNavSelector] = useState('');
+    const navigation = useNavigation<navProp>();
 
     useEffect(() => {
         if (props.mobile) {
             setShowMenu(false);
         }
-        if (props.screen) {
+
+        let rt = route();
+        if (rt && rt.name) {
+            setNavigation(rt.name);
             if (!init) {
-                setNavigation(props.screen);
                 if (Platform.OS !== 'web') {
                     setInit(true);
                 }
             }
         }
-        else {
-            var state = navigation.getState();
-                if (state) {
-                var routes = state.routes;
-                if (routes) {
-                    var route = routes[routes.length - 1].path;
-                    setNavigation(route);
-                }
+        setVisible(true); // JA TEMP -> props.isLoggedIn
+        
+    }, [props.mobile, visible, props.navigation, props.isLoggedIn]);
+
+    const route = () => {
+        if (props.navigation) {
+          let state = props.navigation.getState();
+          if (state) {
+            let idx = state.index;
+            if (!idx) {
+                idx = state.routes ? state.routes.length - 1 : 0;
             }
+            return state.routes[idx];
+          }
         }
-    }, [props.mobile, nav, visible, props.route, props.screen]);
-
-    const setNavigation = (route: any) => {
-        if (loc(route, NavTo.Profile))
-            setNav(NavTo.Profile);
-        else if (loc(route, NavTo.Survey))
-            setNav(NavTo.Survey);
-        else if (loc(route, NavTo.Listings))
-            setNav(NavTo.Listings);
-        else if (loc(route, NavTo.Matches))
-            setNav(NavTo.Matches);
-        else if (loc(route, NavTo.Messages))
-            setNav(NavTo.Messages);
-        else
-            setNav(NavTo.Home);
-
-        setVisible(!loc(route, NavTo.Login));
-    };
-
-    const loc = (route: string, link: string) => {
-        if (route && link) {
-            return route.toLowerCase().includes(link.toLowerCase());
-        }
-        else {
-            return false;
-        }
+    
+        return null;
     }
 
-    const navigate = (nav: never) => {
-        props.setPage(nav);
+    const setNavigation = (nav: any) => {
+        if (props.setCurrentNav)
+            props.setCurrentNav(nav);
+        if (nav == NavTo.Account)
+            nav = NavTo.Profile
+        setNavSelector(nav)
+        setVisible(nav != NavTo.Login);
+    };
+
+    const navigate = (nav: never, params: any = {}) => {
         setNavigation(nav);
         setShowMenu(false);
-        navigation.navigate(nav);
-        // JA TODO Hook up navigate highlighter for mobile view switch
+        if (props.navigation)
+            props.navigation.navigate(nav, params as never);
+        else if (navigation)
+            navigation.navigate(nav, params as never);
     };
 
     const toggleMenu = () => {
@@ -125,7 +118,7 @@ const Navigation = (props: any) => {
                     style={styles.iconContainer}
                     >
                         <Pressable
-                        onPress={() => null} // JA need to navigate to messages in the stack
+                        onPress={() => navigate(NavTo.Messages)}
                         style={styles.icon}
                         >
                             <FontAwesomeIcon
@@ -194,16 +187,22 @@ const Navigation = (props: any) => {
                         navTo={NavTo.Survey}
                         />
                         <NavMenuButton
-                        navigate={() => navigate(NavTo.Matches)}
+                        navigate={() => {
+                            navigate(NavTo.Search, {view: 'matches'});
+                            props.setIsMatches(true)}
+                        }
                         icon="check-double"
                         value="See Matches"
-                        navTo={NavTo.Matches}
+                        navTo={NavTo.Search}
                         />
                         <NavMenuButton
-                        navigate={() => navigate(NavTo.Explore)}
+                    navigate={() => {
+                        navigate(NavTo.Search);
+                        props.setIsMatches(false)}
+                    }
                         icon="globe"
                         value="Explore"
-                        navTo={NavTo.Explore}
+                        navTo={NavTo.Search}
                         />
                         <NavMenuButton
                         navigate={() => navigate(NavTo.Listings)}
@@ -230,31 +229,37 @@ const Navigation = (props: any) => {
                     <NavMobileButton
                     navigate={() => navigate(NavTo.Profile)}
                     icon="user"
-                    currentNav={nav}
+                    currentNav={navSelector}
                     navTo={NavTo.Profile}
                     />
                     <NavMobileButton
                     navigate={() => navigate(NavTo.Survey)}
                     icon="poll"
-                    currentNav={nav}
+                    currentNav={navSelector}
                     navTo={NavTo.Survey}
                     />
                     <NavMobileButton
                     navigate={() => navigate(NavTo.Listings)}
                     icon="house-flag"
-                    currentNav={nav}
+                    currentNav={navSelector}
                     navTo={NavTo.Listings}
                     />
                     <NavMobileButton
-                    navigate={() => navigate(NavTo.Matches)}
+                    navigate={
+                        () => {
+                            navigate(NavTo.Search, {view: 'matches'});
+                            if (props.setIsMatches)
+                                props.setIsMatches(true);
+                        }
+                    }
                     icon="check-double"
-                    currentNav={nav}
-                    navTo={NavTo.Matches}
+                    currentNav={navSelector}
+                    navTo={NavTo.Search}
                     />
                     <NavMobileButton
                     navigate={() => navigate(NavTo.Messages)}
                     icon="message"
-                    currentNav={nav}
+                    currentNav={navSelector}
                     navTo={NavTo.Messages}
                     />
                 </View>

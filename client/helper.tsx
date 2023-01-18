@@ -57,11 +57,11 @@ export type navProp = StackNavigationProp<Page>;
 export const NavTo = {
   Home: 'Home' as never,
   Login: 'Login' as never,
+  ConfirmEmail: 'Login' as never,
   Account: 'Account' as never,
   Profile: 'Profile' as never,
   Survey: 'Survey' as never,
-  Matches: 'Matches' as never,
-  Explore: 'Explore' as never,
+  Search: 'Search' as never,
   Listings: 'Listings' as never,
   Messages: 'Messages' as never,
   Logout: 'Logout' as never,
@@ -73,8 +73,7 @@ export type Page = {
   Account: undefined;
   Profile: undefined;
   Survey: undefined;
-  Matches: undefined;
-  Explore: undefined;
+  Search: undefined;
   Listings: undefined;
   Messages: undefined;
   Logout: undefined;
@@ -88,7 +87,7 @@ export const config = {
     Profile: '/profile',
     Survey: '/survey',
     Matches: '/matches',
-    Explore: '/explore',
+    Search: '/search',
     Listings: '/listings',
     Messages: '/messages',
     Logout: '/logout',

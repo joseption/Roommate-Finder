@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Animated, Linking, Platform, SafeAreaView, Image, ScrollView } from 'react-native';
+import { StyleSheet, View, Animated, Platform } from 'react-native';
 import _Button from '../components/control/button';
 import _Image from '../components/control/image';
 import _Text from '../components/control/text';
@@ -11,11 +11,10 @@ import PasswordUpdated from '../components/login/password-updated';
 import Register from '../components/login/register';
 import UpdatePassword from '../components/login/update-password';
 import { Color, LoginStyle, Radius, Style } from '../style';
-import * as DeepLinking from 'expo-linking';
-import { env } from '../helper';
-import { verify } from 'crypto';
+import { env, navProp, NavTo } from '../helper';
+import { useNavigation } from '@react-navigation/native';
 
-const LoginScreen = (props:any, {navigation}:any) => {
+const LoginScreen = (props:any) => {
   enum screen {
     activateEmailSent,
     register,
@@ -47,13 +46,19 @@ const LoginScreen = (props:any, {navigation}:any) => {
   const [registerEmail, setRegisterEmail] = useState('');
   const [token, setToken] = useState('');
   const [autoResend, setAutoResend] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  const navigation = useNavigation<navProp>();
 
   useEffect(() => {
     if (!init) {
       setup();
       setInit(true);
     }
-  }, [left, init]);
+    else if (props.accountAction) {
+      gotoScreen();
+      props.setAccountAction(false);
+    }
+  }, [left, init, navigation, props.accountAction]);
 
   const setup = () => {
     const oldOpacity = opacity;
@@ -112,10 +117,9 @@ const LoginScreen = (props:any, {navigation}:any) => {
   const hasValidToken = async (token: any, type: any) => 
   {
       let isValid = false;
-
       try
       {    
-          if (type == "confirm") {
+          if (type == "confirmEmail") {
             let obj = {emailToken:token};
             let js = JSON.stringify(obj);
             
@@ -140,57 +144,64 @@ const LoginScreen = (props:any, {navigation}:any) => {
             });
           }
       }
-      catch(e)
-      {
-        // Do stuff
-      }    
+      catch(e) {}    
+
       return isValid;
   };
 
-  const getType = (url: string) => {
-    if (url.includes("confirmEmail"))
-      return "confirm";
-    else if (url.includes("reset"))
-      return "reset";
-    else if (url.includes("update"))
-      return "update";
+  const route = () => {
+    if (navigation) {
+      let state = navigation.getState();
+      if (state) {
+        let idx = state.index;
+        if (!idx) {
+            idx = state.routes ? state.routes.length - 1 : 0;
+        }
+        return state.routes[idx];
+      }
+    }
+    return null;
   }
 
-  const gotoScreen = async (url: string) => {
-      if (url != null && (url.includes("confirmEmail?token=") ||
-            url.includes("reset?token=") ||
-            url.includes("update?token="))) {
-        let type = getType(url) as string;
-        let uToken;
-        let uEmail;
-        var params = DeepLinking.parse(url);
-        if (params.queryParams?.token) {
-          uToken = params.queryParams.token as string;
+  const gotoScreen = async () => {
+    let rt = route();
+    let timeout;
+    if (rt && rt.name == NavTo.Login && rt.params) {
+      if (rt.params['timeout'])
+        timeout = rt.params['timeout'];
+      if (!timeout) {
+        let uToken = rt.params['token'];
+        let uEmail = rt.params['email'];
+        let uPath = rt.params['path'];
+        if (uToken) {
           setToken(uToken);
-        }
-        if (params.queryParams?.email) {
-          uEmail = params.queryParams.email as string;
-          setRegisterEmail(params.queryParams?.email as string);
-        }
-        if (await hasValidToken(uToken, type)) {
-          if (type == "confirm")
-            setIsRegistering(true);
-          updateVisibleScreen(screen.updatePassword);
-        }
-        else {
-          if (type == "confirm") {
-            setEmailValue(uEmail as string);
-            setAutoResend(true);
-            setIsRegistering(true);
-            updateVisibleScreen(screen.activateEmailSent);
+          if (uEmail) {
+            uEmail = rt.params['email'];
+            setRegisterEmail(uEmail);
           }
-          else if (type == "reset")
-          // JA TODO NEED TO SETUP FAIL CASE LIKE CONFIRM
-            updateVisibleScreen(screen.passwordResetSent);
+          if (await hasValidToken(uToken, uPath)) {
+            if (uPath == "confirmEmail")
+              setIsRegistering(true);
+            updateVisibleScreen(screen.updatePassword);
+          }
+          else {
+            if (uPath == "confirmEmail") {
+              setEmailValue(uEmail as string);
+              setAutoResend(true);
+              setIsRegistering(true);
+              updateVisibleScreen(screen.activateEmailSent);
+            }
+            else if (uPath == "reset")
+              updateVisibleScreen(screen.forgotPassword);
+              setForgotError("Password reset failed, please enter your email and try again.");
+          }
         }
       }
       else
         updateVisibleScreen(screen.login);
+    }
+    else
+      updateVisibleScreen(screen.login);
 
     setInitScreen(true);
   }
@@ -208,8 +219,7 @@ const LoginScreen = (props:any, {navigation}:any) => {
 
   const getLeft = () => {
     if (!initScreen) {
-      setUrl(props.url);
-      gotoScreen(props.url);
+      gotoScreen();
     }
   }
 
@@ -287,6 +297,7 @@ const LoginScreen = (props:any, {navigation}:any) => {
                 forgotPasswordPressed={() => goRight(screen.forgotPassword)}
                 registerPressed={() => goLeft(screen.register)}
                 style={[styles.panel, login ? null : styles.hidden]}
+                setIsLoggedIn={props.setIsLoggedIn}
               />
               <ForgotPassword
                 btnStyle={btnStyle}
@@ -295,6 +306,7 @@ const LoginScreen = (props:any, {navigation}:any) => {
                 sendEmailPressed={() => goRight(screen.passwordResetSent)} // update to do stuff and then goRight(1)
                 loginPressed={() => goLeft(screen.login)}
                 style={[styles.panel, forgotPassword ? null : styles.hidden]}
+                forgotError={forgotError}
               />
               <PasswordResetSent
                 btnStyle={btnStyle}
@@ -316,6 +328,7 @@ const LoginScreen = (props:any, {navigation}:any) => {
                 registerPressed={() => goLeft(screen.register)}
                 registerEmail={registerEmail}
                 token={token}
+                setAccountAction={props.setAccountAction}
               />
               <PasswordUpdated
                 loginPressed={() => goLeft(screen.login)}

@@ -14,7 +14,7 @@ import DocumentPicker, {DirectoryPickerResponse, DocumentPickerResponse, isInPro
 
 const StartSurvey = (props: any, {navigation}:any) => {
     const [error,setError] = useState('');
-    const [explore,setIsExplore] = useState(false);
+    const [search,setIsSearch] = useState(false);
     // JA TODO props.accountIsSetup need to know if the account is setup or not
     const errorStyle = () => {
         var style = [];
@@ -103,7 +103,7 @@ const StartSurvey = (props: any, {navigation}:any) => {
                     <View
                     style={_styles.group}
                     >
-                        {!explore ?
+                        {!search ?
                         <View
                         style={_styles.innerContainer}
                         >
@@ -168,17 +168,17 @@ const StartSurvey = (props: any, {navigation}:any) => {
                                 Go Back
                             </_Text>
                         </Pressable>
-                        {!explore ?
+                        {!search ?
                         <_Text
-                        onPress={(e: any) => setIsExplore(true)}
-                        style={_styles.exploreToggle}
+                        onPress={(e: any) => setIsSearch(true)}
+                        style={_styles.searchToggle}
                         >
                             Let me find my own roommates
                         </_Text>
                         :
                         <_Text
-                        onPress={(e: any) => setIsExplore(false)}
-                        style={_styles.exploreToggle}
+                        onPress={(e: any) => setIsSearch(false)}
+                        style={_styles.searchToggle}
                         >
                             Take the survey instead
                         </_Text>
@@ -210,7 +210,7 @@ const _styles = StyleSheet.create({
             }
         })
     },
-    exploreToggle: {
+    searchToggle: {
         color: Color.default,
         fontFamily: 'Inter-SemiBold'
     },

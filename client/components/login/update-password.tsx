@@ -88,7 +88,6 @@ const UpdatePassword = (props: any, {navigation}:any) => {
             let obj = {email:props.registerEmail, password:pValue};
             let js = JSON.stringify(obj);
 
-            // JA TODO FIND OUT WHY PASSWORD NOT UPDATING WHEN CONFIRMING EMAIL!
             const response = await fetch(`${env.URL}/auth/setPassword`,
             {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
@@ -108,6 +107,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
               setPwdError(false);
               setVerifyPwdError(false);
               props.setIsRegistering(false);
+              props.setAccountAction(false);
               props.updatePasswordPressed();
           }
       }
@@ -115,45 +115,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       {
           setMessage('An unexpected error occurred while updating your password. Please try again.');
           return;
-      } 
-
-      /*if (props.isRegistering) { // Register Account (Not Used)
-        let obj = {email:props.email, password:pValue};
-        let js = JSON.stringify(obj);
-  
-        try
-        {    
-            const response = await fetch(`${env.URL}/auth/register`,
-                {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
-  
-            let res = JSON.parse(await response.text());
-  
-            if(res.Error)
-            {
-                setPwdError(true);
-                setVerifyPwdError(true);
-                setMessage(res.Error);
-            }
-            else
-            {
-                setPValue('');
-                setVerifyPValue('');
-                setPwdError(false);
-                setVerifyPwdError(false);
-                props.setEmail('');
-                props.setIsRegistering(false);
-                props.updatePasswordPressed();
-            }
-        }
-        catch(e)
-        {
-            setMessage('An unexpected error occurred while registering your account. Please try again.');
-            return;
-        }  
-      }
-      else { // Reset/Update Password Only
-        */
-      //}   
+      }  
   };
 
   const title = () => {

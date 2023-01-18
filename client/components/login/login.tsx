@@ -24,7 +24,7 @@ const Login = (props: any) => {
       verifyLogin();
       setInit(true);
     }
-  }, [props.url, message]);
+  }, [navigation, message]);
 
   const verifyLogin = async () => {
     let user = await getLocalStorage();
@@ -33,8 +33,29 @@ const Login = (props: any) => {
     }
   }
 
+  const route = () => {
+    if (navigation) {
+      let state = navigation.getState();
+      if (state) {
+        let idx = state.index;
+        if (!idx) {
+            idx = state.routes ? state.routes.length - 1 : 0;
+        }
+        return state.routes[idx];
+      }
+    }
+
+    return null;
+  }
+
   const expired = () => {
-    return props.url && props.url.toLowerCase().endsWith("/login?timeout=yes")
+    let rt = route();
+    if (rt) {
+      let expired = rt && rt.params && rt.params['timeout'] && (rt.params['timeout'] as string).toLowerCase().endsWith("yes");
+      return expired;
+    }
+
+    return false;
   }
 
   const handleChange = (value: string, isEmail: boolean) => {
@@ -61,18 +82,18 @@ const Login = (props: any) => {
   // ja needs to be properly tested that all routes lead where they should
   const navigateToLast = (data: any) => {
     if (data.user.is_setup) {
-      if (data.next_question_id) {
-        if (data.user.setup_step == "skip_survey" && data.init_question_count == 0)
-          navigation.navigate(NavTo.Explore);
-        else
-          navigation.navigate(NavTo.Survey, {question: data.next_question_id} as never);
-      }
-      else {
-        navigation.navigate(NavTo.Matches);
-      }
+      if (data.user.setup_step == NavTo.Search)
+        navigation.navigate(NavTo.Search);
+      else if (data.user.setup_step == NavTo.Survey)
+        navigation.navigate(NavTo.Survey);
+      else
+        navigation.navigate(NavTo.Search, {view: 'matches'} as never);
     }
     else {
-      navigation.navigate(NavTo.Account, {view: data.user.setup_step} as never);
+      let step = data.user.setup_step;
+      if (!step)
+        step = "info";
+      navigation.navigate(NavTo.Account, {view: step} as never);
     }
   };
 
@@ -99,6 +120,7 @@ const Login = (props: any) => {
                 await setLocalStorage(res);
                 setMessage('');
                 navigateToLast(res);
+                props.setIsLoggedIn(true);
               }
           });
       }

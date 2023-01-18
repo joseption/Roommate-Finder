@@ -23,7 +23,6 @@ const _Dropdown = (props: any, {navigation}:any) => {
     const [textValue,setTextValue] = useState('');
     const [visibleOptionCount,setVisibleOptionCount] = useState(0);
     const inputRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
-    // JA todo dropdowns need to calculate if they are going to run off the page and open upwards instead
     const context = useContext(Context);
     const onFocus = useCallback((value: any) => {
         if (context.setParentFocus)

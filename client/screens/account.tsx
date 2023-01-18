@@ -1,41 +1,65 @@
+import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { View, _Text } from 'react-native';
+import { View } from 'react-native';
 import AccountAbout from '../components/account/account-about-you';
 import AccountInfo from '../components/account/account-basic-info';
 import StartSurvey from '../components/account/start-survey';
 import _Button from '../components/control/button';
+import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
-import { AccountScreenType, NavTo } from '../helper';
+import { AccountScreenType, getLocalStorage, navProp, NavTo } from '../helper';
 
-const AccountScreen = (props: any, {navigation}:any) => {
+const AccountScreen = (props: any) => {
+    const navigation = useNavigation<navProp>();
+    const [temp, setTemp] = useState('nothing yet');
+
     useEffect(() => {
-        if (props.url && props.url.toLowerCase().includes("/account")) {
-            if (props.accountView &&
-                props.accountView === AccountScreenType.about ||
-                !props.accountView &&
-                props.url &&
-                props.url.toLowerCase().includes("?view=about")) {
-                setView(AccountScreenType.about);
-            }
-            else if (props.accountView &&
-                props.accountView === AccountScreenType.survey ||
-                !props.accountView &&
-                props.url &&
-                props.url.toLowerCase().includes("?view=survey")) {
-                setView(AccountScreenType.survey);
+        let rt = route();
+        if (rt && rt.params && rt.name && rt.name == NavTo.Account) {
+            if (rt.params['view']) {
+                let view = (rt.params['view'] as string).toLowerCase();
+                if (props.accountView &&
+                    props.accountView === AccountScreenType.about ||
+                    !props.accountView &&
+                    view.includes("about")) {
+                    setView(AccountScreenType.about);
+                }
+                else if (props.accountView &&
+                    props.accountView === AccountScreenType.survey ||
+                    !props.accountView &&
+                    view.includes("survey")) {
+                    setView(AccountScreenType.survey);
+                }
+                else
+                    setView(AccountScreenType.info);
             }
             else
                 setView(AccountScreenType.info);
         }
-    }, [props.url, props.accountView]);
+        else
+            setView(AccountScreenType.info);
+    }, [navigation, props.accountView, props.isLoggedIn]);
 
-    const setView = (type: AccountScreenType) => {
+    const route = () => {
+        if (navigation) {
+            let state = navigation.getState();
+            if (state) {
+                return state.routes[state.index];
+                }
+            }
+        return null;
+    }
+
+    const setView = async (type: AccountScreenType) => {
+        let data = await getLocalStorage();
+        if (!data?.user?.is_setup && data.user.setup_step !== "survey" && type == AccountScreenType.survey)
+            type = AccountScreenType.info;
         // JA TODO need to auto save if user is switching views
         var view = 'info';
         if (type == AccountScreenType.about)
             view = 'about'
         else if (type == AccountScreenType.survey)
-            view = 'survey' // JA todo nav back to info if someone tries to manually nav here
+            view = 'survey'
         props.navigation.navigate(NavTo.Account, {view: view});
         props.setAccountView(type);
     }

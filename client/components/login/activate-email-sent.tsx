@@ -11,15 +11,22 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
   const [counter,setCounter] = useState('');
   const [message,setMessage] = useState('');
   const [sentMsg,setSentMsg] = useState('');
+  const [autoResent,setAutoResent] = useState(false);
 
   useEffect(() => {
-      if (props.resendVerify)
-          setSentMsg("An unverified email address is already associated with this account. Another activation link has been sent to the address. You must activate your account before you can continue.");
+      if (props.autoResend)
+          setSentMsg("The verification link either doesn't exist or is expired. An email with a link to activate your account has been sent to you.");
       else
           setSentMsg("An email with a link to activate your account has been sent to you.");
-  }, [props.resendVerify]);
 
-  const btnTimer = (disabled: boolean, time: number) => {
+      if (!autoResent && props.autoResend) {
+        setAutoResent(true);
+        doResendEmail(true);
+        disableBtn(false);
+      }
+  }, [props.autoResend]);
+
+  const btnTimer = (disabled: boolean, time: number, force: boolean = false) => {
     let interval: any;
     if (disabled) {
       interval = setInterval(() => {
@@ -28,7 +35,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
                 setCounter("");
                 clearInterval(interval);
             }
-            else {
+            else if (!force) {
                 setCounter("Try again in " + Math.abs(Math.round(60 - ((Date.now() - time) / 1000))) + " seconds");
                 setDisabled(true);
             }
@@ -44,9 +51,10 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
     return interval;
   }
 
-  const disableBtn = (disable: boolean) => {
-      setDisabled(disable);
-      return btnTimer(disable, disable ? Date.now() : 0);
+  const disableBtn = (disable: boolean, force: boolean = false) => {
+      if (!force)
+        setDisabled(disable);
+      return btnTimer(disable, disable ? Date.now() : 0, force);
   }
 
   const goBackRegister = () => {
@@ -56,12 +64,12 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
     props.registerPressed();
   }
 
-  const doResendEmail = async () => 
+  const doResendEmail = async (force: boolean = false) => 
   {
       if (disabled)
         return;
 
-      let interval = disableBtn(true);
+      let interval = disableBtn(true, force);
       setMessage("");
       if (!props.email) {
           setMessage("You must use a valid email address");
@@ -105,7 +113,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
       <_Text
       style={[Style.textHuge, Style.boldFont]}
       >
-        Activation Email Sent
+        {props.autoResend ? "Activation Email Sent" : "Activation Email Resent"}
       </_Text>
       <_Text
       style={[Style.textDefaultTertiary, LoginStyle.actionText]}
@@ -128,7 +136,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
         style={Style.alignRight}
         >
             <_Button
-            style={[props.btnStyle(disabled), {marginBottom:"5px"}]}
+            style={[props.btnStyle(disabled), styles.btn]}
             onPress={() => doResendEmail()}
             disabled={disabled}
             >
@@ -162,5 +170,11 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  btn: {
+    marginBottom: 5
+  },
+});
 
 export default ActivateEmailSent;

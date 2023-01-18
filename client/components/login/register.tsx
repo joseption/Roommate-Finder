@@ -1,3 +1,4 @@
+import { userInfo } from 'os';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
@@ -22,7 +23,7 @@ const Register = (props: any, {navigation}:any) => {
 
   const handleChange = (value: string) => {
     var error = !validateEmail(value);
-    setDisabled(false); //JA TEMP put back "error"
+    setDisabled(false); // JA TEMP put back "error"
     props.setEmail(value);
   };
 
@@ -46,14 +47,13 @@ const Register = (props: any, {navigation}:any) => {
               let res = JSON.parse(await ret.text());
               if (res.error)
               {
-                  setMessage(res.error);
+                    setMessage(res.error);
               }
               else
               {
                   setEmailError(false);
                   setDisabled(true);
                   props.sendEmailPressed();
-                  //props.setIsRegistering(true);
               }
               setDisabled(false);
           });

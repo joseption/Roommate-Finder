@@ -1,16 +1,11 @@
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { error } from 'console';
-import { title } from 'process';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import _Button from '../components/control/button';
 import _Progress from '../components/control/progress';
 import _SurveyOption from '../components/control/survey-option';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
 import { Style, Color, FontSize, Radius } from '../style';
-import explore from './explore';
-import { styles } from './login';
 
 const SurveyScreen = (props: any, {navigation}:any) => {
     /*
@@ -20,9 +15,9 @@ const SurveyScreen = (props: any, {navigation}:any) => {
     */
     const [error,setError] = useState('');
     const [selected,setSelected] = useState('');
-    const updateSelectedOption = useCallback((value: any) => { 
-        //setFocus(value);
-      }, []);
+    // const updateSelectedOption = useCallback((value: any) => { 
+    //     //setFocus(value);
+    //   }, []);
     // JA TODO props.accountIsSetup need to know if the account is setup or not
     const errorStyle = () => {
         var style = [];

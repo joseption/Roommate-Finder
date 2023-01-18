@@ -21,7 +21,7 @@ const ForgotPassword = (props: any, {navigation}:any) => {
 
     const handleChange = (value: string) => {
         var error = !validateEmail(value);
-        setDisabled(false); //JA TEMP put back "error"
+        setDisabled(false); // JA TEMP put back "error"
         props.setEmail(value);
     };
 
@@ -50,7 +50,6 @@ const ForgotPassword = (props: any, {navigation}:any) => {
                     }
                     else
                     {
-                        props.setEmail('');
                         setDisabled(true);
                         props.sendEmailPressed();
                     }
@@ -100,7 +99,7 @@ const ForgotPassword = (props: any, {navigation}:any) => {
       <_Text
       style={LoginStyle.errorMessage}
       >
-        {message}
+        {(!message && props.forgotError) ? props.forgotError : message}
       </_Text>
         <View
         style={LoginStyle.previousPageText}

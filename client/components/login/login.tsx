@@ -1,25 +1,62 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { perPlatformTypes } from 'react-native-document-picker/lib/typescript/fileTypes';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { config, env, validateEmail } from '../../helper';
+import { config, env, getLocalStorage, navProp, NavTo, setLocalStorage, validateEmail } from '../../helper';
 import { LoginStyle, Style } from '../../style';
 import _Checkbox from '../control/checkbox';
 import _TextInput from '../control/text-input';
 
-const Login = (props: any, {navigation}:any) => {
+const Login = (props: any) => {
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
   const [disabled, setDisabled] = useState(true);
   const [message, setMessage] = useState('');
   const [emailError,setEmailError] = useState(false);
   const [passwordError,setPasswordError] = useState(false);
+  const [init,setInit] = useState(false);
+  const navigation = useNavigation<navProp>();
 
-  useEffect(() => {    
-      if (props.url != null && props.url.includes("timeout=yes")) {
-        setMessage("Your session has expired, please login");
+  useEffect(() => { 
+    if (!init) {
+      verifyLogin();
+      setInit(true);
+    }
+  }, [navigation, message]);
+
+  const verifyLogin = async () => {
+    let user = await getLocalStorage();
+    if (user && user.refreshToken) {
+      navigateToLast(user);
+    }
+  }
+
+  const route = () => {
+    if (navigation) {
+      let state = navigation.getState();
+      if (state) {
+        let idx = state.index;
+        if (!idx) {
+            idx = state.routes ? state.routes.length - 1 : 0;
+        }
+        return state.routes[idx];
       }
-  }, [props.url]);
+    }
+
+    return null;
+  }
+
+  const expired = () => {
+    let rt = route();
+    if (rt) {
+      let expired = rt && rt.params && rt.params['timeout'] && (rt.params['timeout'] as string).toLowerCase().endsWith("yes");
+      return expired;
+    }
+
+    return false;
+  }
 
   const handleChange = (value: string, isEmail: boolean) => {
     let eValue = isEmail ? value : email;
@@ -40,7 +77,25 @@ const Login = (props: any, {navigation}:any) => {
     setEmailError(false);
     setPasswordError(false);
     props.registerPressed();
-};
+  };
+
+  // ja needs to be properly tested that all routes lead where they should
+  const navigateToLast = (data: any) => {
+    if (data.user.is_setup) {
+      if (data.user.setup_step == NavTo.Search)
+        navigation.navigate(NavTo.Search);
+      else if (data.user.setup_step == NavTo.Survey)
+        navigation.navigate(NavTo.Survey);
+      else
+        navigation.navigate(NavTo.Search, {view: 'matches'} as never);
+    }
+    else {
+      let step = data.user.setup_step;
+      if (!step)
+        step = "info";
+      navigation.navigate(NavTo.Account, {view: step} as never);
+    }
+  };
 
   const doLogin = async () => 
   {
@@ -58,19 +113,18 @@ const Login = (props: any, {navigation}:any) => {
               let res = JSON.parse(await ret.text());
               if (res.Error)
               {
-                  setMessage(res.Error);
+                setMessage(res.Error);
               }
               else
               {
-                  let user = {id:res.id, user_id:res.user_id, email:res.email, auth: res.token};
-                  //localStorage.setItem('user_data', JSON.stringify(user));
-
-                  setMessage('');
-                  //window.location.href = "/profile";
+                await setLocalStorage(res);
+                setMessage('');
+                navigateToLast(res);
+                props.setIsLoggedIn(true);
               }
           });
       }
-      catch(e)
+      catch(e: any)
       {
           setMessage('An unknown error occurred');
           return;
@@ -125,7 +179,7 @@ const Login = (props: any, {navigation}:any) => {
       <_Text
       style={LoginStyle.errorMessage}
       >
-        {message}
+        {!message && expired() ? "Your session has expired, please login" : message}
       </_Text>
         <View
         style={LoginStyle.previousPageText}

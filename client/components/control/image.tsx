@@ -93,7 +93,7 @@ const _Image = (props: any) => {
 
     return (
     <View
-    style={styles.imageContainer}
+    style={[styles.imageContainer, props.containerStyle]}
     >
         {props.onPress ?
         <Pressable

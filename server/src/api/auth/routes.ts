@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 // to do , jwt.verify in try catch
 import bcrypt from "bcrypt";
-import jwt  from "jsonwebtoken";
+import jwt, { JwtPayload }  from "jsonwebtoken";
 import {v4} from 'uuid'; 
 import {
   UpdatePassword,
@@ -24,6 +24,7 @@ import {
   getUserEmail,
 } from './services';
 import { sendResetPasswordEmail, sendVerifyEmail } from 'utils/sendEmail';
+import { GetSurveyQuestionsAndResponses } from 'api/survey/services';
 
 const router = express.Router()
 
@@ -70,7 +71,7 @@ router.post('/registerFast', async (req:Request, res:Response, next:NextFunction
 
     const existingUser = await findUserByEmail(email);
 
-    if (existingUser) {
+    if (existingUser && existingUser.is_verified) {
       return res.status(400).json({error: "A user with that email already exists"});
     }
     
@@ -109,6 +110,7 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
     const userId = existingUser.id;
     
     const validPassword = await bcrypt.compare(password, existingUser.password);
+    console.log(existingUser.password);
     if (!validPassword) {
       return res.status(401).json({"Error": "An account with the given email and password could not be found."});
     }
@@ -117,11 +119,12 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
     const { accessToken, refreshToken } = generateTokens(existingUser, jti);
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: existingUser.id });
     delete existingUser.password;
+
     res.json({
       accessToken,
       refreshToken,
       userId,
-      user:existingUser
+      user:existingUser,
     });
   } catch (err) {
     return res.status(500).json({"Error": "An unexpected error occurred. Please try again."});
@@ -152,7 +155,43 @@ router.post('/resetPassword',async (req:Request, res:Response, next:NextFunction
   }
 });
 
-router.get('/validateResetToken',async (req:Request, res:Response, next:NextFunction) => {
+// Used for mobile since email is already verified, skip password email and just return the token to reset
+router.post('/setPassword',async (req:Request, res:Response, next:NextFunction) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({"Error": "You must provide an email and password"});
+    }
+    const existingUser = await findUserByEmail(email);
+
+    if (!existingUser) {
+      return res.status(200).json({"Error": "Something went wrong."});
+    }
+    else {
+      const jti = v4(); 
+      const resetToken = generateResetToken(existingUser, jti);
+
+      const payload = jwt.verify(resetToken, process.env.RESET_PASSWORD_KEY);
+
+      if (!payload) {
+        return res.status(401).json({"Error": "Invalid Token."});
+      }
+      else{
+        //update Password
+        const user = await UpdatePassword(password, (<any>payload).userId);
+        await revokeTokens((<any>payload).userId);
+        return res.status(200).json({
+          Error: false,
+          message: "Password has been set."
+        });
+      }
+    }
+  } catch (err) {
+    return res.status(500).json({"Error": "Something went wrong."})
+  }
+});
+
+router.post('/validateResetToken',async (req:Request, res:Response, next:NextFunction) => {
   //for frontend you can check if the link has a valid token or not 
   
   try {
@@ -161,7 +200,7 @@ router.get('/validateResetToken',async (req:Request, res:Response, next:NextFunc
     if (!resetToken) {
       return res.status(422).json({"Error": "You must provide an reset Token."});
     }
-    const payload = jwt.verify(resetToken, process.env.RESET_PASSWORD_KEY);
+    const payload = jwt.verify(resetToken as string, process.env.RESET_PASSWORD_KEY);
 
     if (!payload) {
       return res.status(401).json({"Error": "Invalid Token."});
@@ -218,6 +257,7 @@ router.post('/confirmEmail',async (req:Request, res:Response, next:NextFunction)
       if (!payload) {
         return res.status(401).json({"Error": "Invalid Token."});
       }
+      console.log((<any>payload).userId);
         //update Password
         await verify((<any>payload).userId);
         return res.status(200).json({
@@ -256,10 +296,15 @@ router.post('/sendConfirmationEmail',async (req:Request, res:Response, next:Next
 router.post('/logout', async (req:Request, res:Response, next:NextFunction) => {
   try {
     const { refreshToken } = req.body;
-    if (!deleteRefreshToken) {
+    if (!refreshToken) {
       return res.status(422).json({"Error": "You must provide a RefreshToken id."});
     }
-    await deleteRefreshToken(refreshToken);
+    let id = "";
+    let token = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    if (token as JwtPayload) {
+      id = (token as JwtPayload).jti;
+    }
+    await deleteRefreshToken(id);
     return res.status(200).json({"OK": "Token have been revoked."});
   } catch (err) {
     return res.status(500).json({"Error": "Something went wrong."});
@@ -340,7 +385,7 @@ router.post('/refreshToken', async (req:Request, res:Response, next:NextFunction
       accessToken,
     });
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."})
+    return res.status(500).json({"Error": err})
   }
 });
 

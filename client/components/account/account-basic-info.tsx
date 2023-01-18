@@ -273,7 +273,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 <_TextInput
                 label="Zip Code"
                 onChangeText={(e: any) => setZipCodeForm(e)}
-                maxLength="5"
+                maxLength={5}
                 keyboardType="numeric"
                 ></_TextInput>
                 <_TextInput

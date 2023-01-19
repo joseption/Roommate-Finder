@@ -12,9 +12,9 @@ interface Props {
 
 const MessagePanel = ({ showPanel, updateShowPanel, chat }: Props) => {
   // These values are mapped to percentage of screen size.
-  const PANEL_OUT_OF_SCREEN = 1.5;
+  const PANEL_OUT_OF_SCREEN = Dimensions.get('window').width * 1.5;
   const PANEL_IN_SCREEN = 0;
-
+  
   const slideAnimation = useRef(new Animated.Value(PANEL_OUT_OF_SCREEN)).current;
   
   let animationConfig = {
@@ -44,10 +44,7 @@ const MessagePanel = ({ showPanel, updateShowPanel, chat }: Props) => {
           styles.container,
           {transform: [
             // interpolate maps integer value to string percentage.
-            {translateX: slideAnimation.interpolate({
-              inputRange: [0, 1],
-              outputRange: ['0%', '100%']
-            })},
+            {translateX: slideAnimation},
           ]}
         ]}
       >
@@ -68,8 +65,9 @@ const styles = StyleSheet.create({
   },
   container: {
     position: 'absolute',
-    width: Dimensions.get('window').width - 20,
+    width: '100%',
     height: '100%',
+
     backgroundColor: 'white',
   },
 });

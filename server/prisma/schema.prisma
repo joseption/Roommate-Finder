@@ -99,6 +99,9 @@ model Listings {
   petsAllowed  Boolean
   userId       String
   address      String?
+  rooms        Int?
+  bathrooms    Int?
+  size         Int?
   user         User     @relation(fields: [userId], references: [id])
 }
 

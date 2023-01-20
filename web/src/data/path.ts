@@ -3,7 +3,7 @@ const paths = {
   explore: "/explore",
   profile: "/profile",
   auth: "/auth",
-  setup: "/quiz",
+  setup: "/setup/profile",
 };
 
 export default paths;

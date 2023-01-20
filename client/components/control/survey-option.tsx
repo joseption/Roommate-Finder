@@ -115,10 +115,10 @@ const styles = StyleSheet.create({
         }),
     },
     surveyOptionSelected: {
-        backgroundColor: Color.success,
+        backgroundColor: Color.gold,
         ...Platform.select({
             web: {
-                shadowColor: Color.successSecondary,
+                shadowColor: Color.goldSecondary,
                 shadowOffset: {width: -3, height: 3},
                 shadowOpacity: 1,
                 shadowRadius: 0,

@@ -140,3 +140,11 @@ export const isLoggedIn = async () => {
     return false;
   }
 }
+
+export const authTokenHeader = async () => {
+  let data = await getLocalStorage();
+  if (data) {
+    return `token ${data.accessToken}`;
+  }
+  return '';
+}

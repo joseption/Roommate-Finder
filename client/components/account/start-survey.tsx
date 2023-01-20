@@ -135,7 +135,7 @@ const StartSurvey = (props: any, {navigation}:any) => {
                                 If you decide to answer questions later, you can access the survey from the navigation menu.
                             </_Text>
                             <_Button
-                            style={[Style.buttonSuccess, _styles.surveyButton, _styles.innerGap]}
+                            style={[Style.buttonGold, _styles.surveyButton, _styles.innerGap]}
                             textStyle={ _styles.surveyButtonText}
                             containerStyle={_styles.surveyButtonContainer}
                             >

@@ -1,21 +1,72 @@
 import _TextInput from '../control/text-input';
 import _Dropdown from '../control/dropdown';
 import _Text from '../control/text';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
 import _Image from '../control/image';
 import _Cluster from '../control/cluster';
 import _ClusterOption from '../control/cluster-option';
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { AccountScreenType } from '../../helper';
+import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { AccountScreenType, authTokenHeader, env, getLocalStorage, navProp, NavTo } from '../../helper';
+import { useNavigation } from '@react-navigation/native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
-const AccountAbout = (props: any, {navigation}:any) => {
+const AccountAbout = (props: any) => {
+    const navigation = useNavigation<navProp>();
     const [error,setError] = useState('');
     const [bioForm,setBioForm] = useState('');
-    const [interestsForm,setInterestsForm] = useState('');
-    const [activitiesForm,setActivitiesForm] = useState('');
-    // JA TODO props.accountIsSetup need to know if the account is setup or not
+    const [tagForm,setTagForm] = useState([]);
+    const [init,setInit] = useState(false);
+    const [isSaved,setIsSaved] = useState(false);
+    const [isLoading,setIsLoading] = useState(false);
+    const [tagsAmount,setTagsAmount] = useState(0);
+    const tags = [
+        "Travel",
+        "Photography",
+        "Fitness",
+        "Wellness",
+        "Food",
+        "Reading",
+        "Music",
+        "Arts",
+        "Technology",
+        "Sports",
+        "Pets",
+        "Environmentalism",
+        "Cars",
+        "Finance",
+        "Business",
+        "Film",
+        "Gaming",
+        "Science",
+        "History",
+        "Anime",
+        "Shopping",
+        "Alcohol",
+        "Politics",
+        "Nature",
+      ];
+
+    useEffect(() => {
+        if (!init) {
+            onLoad();
+            setInit(true);
+        }
+    }, [bioForm, tagForm, props.isSetup])
+
+    const setupPage = (data: any) => {
+        setBio(data.bio);
+        if (data.tags) {
+            let tags = [] as never[];
+            data.tags.forEach((x: any) => {
+                tags.push(x.tag as never);
+            });
+            setTagForm(tags);
+        }
+        setIsSaved(true);
+    }
+
     const errorStyle = () => {
         var style = [];
         style.push(Style.textDanger);
@@ -58,13 +109,11 @@ const AccountAbout = (props: any, {navigation}:any) => {
     }
 
     const title = () => {
-        // JA TODO Switch text based on account setup or not
-        return "Setup your profile";
+        return !props.isSetup ? "Setup your profile" : "Profile settings";
     }
 
     const subtitle = () => {
-        // JA TODO Switch text based on account setup or not
-        return "Tell us more about yourself";
+        return !props.isSetup ? "Tell us more about yourself" : "Update information about yourself";
     }
 
     const subTitleStyle = () => {
@@ -75,6 +124,106 @@ const AccountAbout = (props: any, {navigation}:any) => {
         }
         
         return style;
+    }
+
+    const checkNextDisabled = () => {
+        return isSaved || !bioForm || tagForm.length != 5
+    }
+
+    const completeSave = (loc :string) => {
+        setIsLoading(false);
+        setIsSaved(true);
+        if (!props.isSetup) {
+            if (loc == 'back') {
+                navigation.navigate(NavTo.Account, {view: 'info'} as never);
+                props.setView(AccountScreenType.info);
+            }
+            else {
+                navigation.navigate(NavTo.Account, {view: 'survey'} as never);
+                props.setView(AccountScreenType.survey);
+            }
+        }
+        else if (loc == 'info') {
+            props.setView(AccountScreenType.info)
+        }
+    }
+
+    const onSave = async (loc: string = '') => {
+        if (!isSaved) {
+            setError('');
+            setIsLoading(true);
+            let hasError = false;
+            let setup_step = props.isSetup ? '' : 'survey';
+            let obj = {bio:bioForm, tags:tagForm, setup_step:setup_step};
+            let js = JSON.stringify(obj);
+
+            try
+            {   
+                let tokenHeader = await authTokenHeader();
+                await fetch(`${env.URL}/users/setupProfile`,
+                {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
+                    let res = JSON.parse(await ret.text());
+                    if (res.Error)
+                    {
+                        if (res.Error == "Un-Authorized") {
+                            navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                            return;
+                        }
+                        hasError = true;
+                    }
+                    else {
+                        completeSave(loc);
+                    }
+                });
+            }
+            catch(e)
+            {
+                hasError = true;
+            } 
+            if (hasError) {
+                setIsSaved(false);
+                setError('A problem occurred while saving account information, please try again.');
+            }
+
+            setIsLoading(false);
+        }
+        else
+            completeSave(loc);
+    }
+
+    const setBio = (e: any) => {
+        setIsSaved(false);
+        setBioForm(e)
+    }
+
+    const onLoad = async () => {
+        setError('');
+        let hasError = false;
+        try
+        {   
+            let tokenHeader = await authTokenHeader();
+            await fetch(`${env.URL}/users/getBioAndTags`,
+            {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
+                let res = JSON.parse(await ret.text());
+                if (res.Error)
+                {
+                    if (res.Error == "Un-Authorized") {
+                        navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                        return;
+                    }
+                    hasError = true;
+                }
+                else {
+                    setupPage(res);
+                }
+            });
+        }
+        catch(e)
+        {
+            hasError = true;
+        } 
+        if (hasError)
+            setError('A problem occurred while retrieving account information, please reload the page and try again.');
     }
 
     return (
@@ -88,13 +237,15 @@ const AccountAbout = (props: any, {navigation}:any) => {
                 >
                     {title()}
                 </_Text>
+                {props.isSetup ?
                 <_Button
                 style={Style.buttonInverted}
                 textStyle={Style.buttonInvertedText}
-                onPress={(e: any) => props.setView(AccountScreenType.info)}
+                onPress={(e: any) => onSave('info')}
                 >
                     Edit Account
                 </_Button>
+                : null }
             </View>
         </View>
         <View
@@ -113,41 +264,63 @@ const AccountAbout = (props: any, {navigation}:any) => {
             containerStyle={_styles.formGap}
             showMaxLength={true}
             maxLength={1000}
-            onChangeText={(e: any) => setBioForm(e)}
+            onChangeText={(e: any) => setBio(e)}
+            value={bioForm}
             >
 
             </_TextInput>
             <_Cluster
-            label="Life Interests"
+            label="Activities and Interests"
             required={true}
-            minAmount={10}
-            options={
-                [{key:1, value:'TestSelect'},{key:42, value:'Another'},{key:2, value:'Select'},{key:3, value:'Testing'},{key:4, value:'LookHere'},{key:5, value:'What is this?'},{key:6, value:'Some Option'},{key:7, value:'No Thank you'},{key:8, value:'Another Test'},{key:9, value:'LookHere'},{key:10, value:'TestSelect'},{key:12, value:'Another'},{key:13, value:'Select'},{key:14, value:'Testing'},{key:15, value:'LookHere'},{key:16, value:'What is this?'},{key:17, value:'Some Option'},{key:18, value:'No Thank you'},{key:19, value:'Another Test'},{key:20, value:'LookHere'},{key:21, value:'TestSelect'},{key:22, value:'Another'},{key:23, value:'Select'},{key:24, value:'Testing'},{key:425, value:'LookHere'},{key:26, value:'What is this?'},{key:27, value:'Some Option'},{key:28, value:'No Thank you'},{key:29, value:'Another Test'},{key:30, value:'LookHere'}]
-            }
+            minAmount={5}
+            amount={tagsAmount}
+            setAmount={setTagsAmount}
+            options={tags}
             containerStyle={_styles.formGap}
-            selected={setInterestsForm}
-            >
-            </_Cluster>
-            <_Cluster
-            label="Activities"
-            required={true}
-            minAmount={10}
-            options={
-                [{key:1, value:'TestSelect'},{key:42, value:'Another'},{key:2, value:'Select'},{key:3, value:'Testing'},{key:4, value:'LookHere'},{key:5, value:'What is this?'},{key:6, value:'Some Option'},{key:7, value:'No Thank you'},{key:8, value:'Another Test'},{key:9, value:'LookHere'},{key:10, value:'TestSelect'},{key:12, value:'Another'},{key:13, value:'Select'},{key:14, value:'Testing'},{key:15, value:'LookHere'},{key:16, value:'What is this?'},{key:17, value:'Some Option'},{key:18, value:'No Thank you'},{key:19, value:'Another Test'},{key:20, value:'LookHere'},{key:21, value:'TestSelect'},{key:22, value:'Another'},{key:23, value:'Select'},{key:24, value:'Testing'},{key:425, value:'LookHere'},{key:26, value:'What is this?'},{key:27, value:'Some Option'},{key:28, value:'No Thank you'},{key:29, value:'Another Test'},{key:30, value:'LookHere'}]
-            }
-            selected={setActivitiesForm}
+            selected={tagForm}
+            select={setTagForm}
+            updated={setIsSaved}
             >
             </_Cluster>
             <View
-            style={_styles.buttonContainer}
+            style={_styles.options}
             >
-                <_Button
-                style={Style.buttonGold}
+                {!props.isSetup ?
+                <Pressable
+                style={_styles.arrowContainer}
+                onPress={(e: any) => onSave('back')}
                 >
-                    {props.accountIsSetup ? 'Save' : 'Next'}
-                </_Button>
+                    <FontAwesomeIcon 
+                    size={20} 
+                    color={Color.textSecondary} 
+                    style={_styles.backArrow} 
+                    icon="arrow-left"
+                    >
+                    </FontAwesomeIcon>
+                    <_Text
+                    style={Style.textDefaultSecondary}
+                    >
+                        Go Back
+                    </_Text>
+                </Pressable>
+                :
+                <View>
+                </View>
+                }
+                <View
+                style={_styles.buttonContainer}
+                >
+                    <_Button
+                    loading={isLoading}
+                    style={Style.buttonGold}
+                    disabled={checkNextDisabled()}
+                    onPress={(e: any) => onSave('next')}
+                    >
+                        {isSaved ? 'Changes Saved' : !props.isSetup ? 'Next' : 'Save'}
+                    </_Button>
+                </View>
             </View>
-            {props.error ?
+            {error || props.error ?
             <_Text
             containerStyle={errorContainerStyle()}
             innerContainerStyle={{justifyContent: 'center'}}
@@ -192,6 +365,27 @@ const _styles = StyleSheet.create({
     },
     subTitleMobile: {
         fontSize: FontSize.default
+    },
+    arrowContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        flexDirection: 'row'
+    },
+    backArrow: {
+        marginRight: 5,
+        ...Platform.select({
+            web: {
+                outlineStyle: 'none'
+            }
+        })
+    },
+    options: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        margin: 'auto',
+        alignItems: 'center',
+        width: '100%',
     },
 });
 

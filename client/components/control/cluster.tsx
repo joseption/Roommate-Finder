@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Context, navProp } from '../../helper';
 import { Color, Radius, Style } from '../../style';
@@ -10,37 +10,41 @@ const _Cluster = (props: any) => {
     /*
     Props: JA TODO 
     */
-    const [amount,setAmount] = useState(0);
-    const [selected,setSelected] = useState([]);
+    const [init,setInit] = useState(false);
+    useEffect(() => {
+
+    }, []);
 
     const toggle = (e: any) => {
         var options = [] as never[];
         var hasItem = false;
-        for (var i = 0; i < selected.length; i++) {
-            if (selected[i] === e)
+        for (var i = 0; i < props.selected.length; i++) {
+            if (props.selected[i] === e)
                 hasItem = true;
             else
-                options.push(selected[i]);
+                options.push(props.selected[i] as never);
         }
         
         if (!hasItem) {
-            if (selected.length + 1 <= props.minAmount) {
+            if (props.selected.length + 1 <= props.minAmount) {
                 options.push(e as never);
-                setAmount(selected.length + 1);
+                props.setAmount(props.selected.length + 1);
             }
         }
         else {
-            setAmount(selected.length - 1)
+            props.setAmount(props.selected.length - 1)
         }
 
-        setSelected(options);
-        props.selected(options);
+        if (props.updated)
+            props.updated(false);
+
+        props.select(options);
     }
 
     const mappedItems = () => {
         return props.options.map((item: any, key: any) => {
             return <_ClusterOption
-            selected={selected}
+            selected={props.selected}
             onPress={toggle}
             key={key}
             item={item} />
@@ -65,7 +69,7 @@ const _Cluster = (props: any) => {
             <_Text
             style={styles.count}
             >
-                {amount}/{props.minAmount}
+                {props.amount}/{props.minAmount}
             </_Text>
             : null }
         </View>

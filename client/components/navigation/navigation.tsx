@@ -32,17 +32,17 @@ const Navigation = (props: any) => {
                 }
             }
         }
-        setVisible(props.isLoggedIn); // JA TEMP -> props.isLoggedIn
+        setVisible(props.isLoggedIn);
         
-    }, [props.mobile, visible, props.navigation, props.isLoggedIn]);
+    }, [props.mobile, visible, props.navigation, props.isLoggedIn, props.isSetup]);
 
     const route = () => {
         if (props.navigation) {
           let state = props.navigation.getState();
-          if (state) {
+          if (state && state.routes) {
             let idx = state.index;
             if (!idx) {
-                idx = state.routes ? state.routes.length - 1 : 0;
+                idx = state.routes.length;
             }
             return state.routes[idx];
           }
@@ -222,7 +222,7 @@ const Navigation = (props: any) => {
             </View>
             :
             <View>
-            {visible ?
+            {props.isSetup && visible ?
                 <View
                 style={styles.mobileContainer}
                 >

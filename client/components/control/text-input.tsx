@@ -24,17 +24,9 @@ const _TextInput = (props: any) => {
   const context = useContext(Context);
   const phonePlaceholder = '(999) 999-9999';
   const [length,setLength] = useState(0);
-  const [value,setValue] = useState('');
-  const [init,setInit] = useState(false);
   // JA todo: phone masking is not finished
   useEffect(() => {
-    if (!init) {
-      if (props.value)
-        setValue(props.value);
-
-      setInit(true);
-    }
-  }, [value]);
+  }, []);
 
   const labelStyle = () => {
     var style = [];
@@ -109,7 +101,6 @@ const _TextInput = (props: any) => {
     if (props.keyboardType === 'numeric' || props.type === 'phone') {
       value = e.replace(/[^0-9]/g, '');
     }
-    setValue(value);
     
     if (props.onChangeText)
       props.onChangeText(value);
@@ -171,7 +162,7 @@ const _TextInput = (props: any) => {
       <TextInput
       style={style()}
       onChangeText={(e: any) => onChangeText(e)}
-      value={value}
+      value={props.value}
       placeholder={placeholder()}
       keyboardType={keyboardType()}
       secureTextEntry={props.type === 'password'}

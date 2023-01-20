@@ -4,14 +4,15 @@ import _Dropdown from '../control/dropdown';
 import _Checkbox from '../control/checkbox';
 import _Group from '../control/group';
 import _Text from '../control/text';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Color, FontSize, Radius, Style } from '../../style';
 import { styles } from '../../screens/login';
 import _Button from '../control/button';
 import _Image from '../control/image';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import DocumentPicker, {DirectoryPickerResponse, DocumentPickerResponse, isInProgress} from 'react-native-document-picker'
-import { AccountScreenType } from '../../helper';
+import { AccountScreenType, isMobile } from '../../helper';
+import { color } from 'react-native-reanimated';
 
 const AccountInfo = (props: any, {navigation}:any) => {
     const [error,setError] = useState('');
@@ -22,12 +23,19 @@ const AccountInfo = (props: any, {navigation}:any) => {
     const [cityForm,setCityForm] = useState('');
     const [stateForm,setStateForm] = useState('');
     const [zipCodeForm,setZipCodeForm] = useState('');
-    const [publicPhoneForm,setPublicPhoneForm] = useState(false);
     const [photoError,setPhotoError] = useState('');
     const [dayOptions,setDayOptions] = useState([]);
+    const [isLoading,setIsLoading] = useState(false);
+    const [isPasswordLoading,setIsPasswordLoading] = useState(false);
+    const [promptPassword,setPromptPassword] = useState(false);
+    const [passwordEmailSent,setPasswordEmailSent] = useState(false);
+    const [passwordEmailError,setPasswordEmailError] = useState(false);
     const dayRef = React.useRef<React.ElementRef<typeof _Dropdown> | null>(null);
     const [photoResult, setPhotoResult] = React.useState<Array<DocumentPickerResponse> | DirectoryPickerResponse | undefined | null>()
-    // JA TODO props.accountIsSetup need to know if the account is setup or not
+    useEffect(() => {
+
+    }, []);
+    
     const errorStyle = () => {
         var style = [];
         style.push(Style.textDanger);
@@ -80,13 +88,11 @@ const AccountInfo = (props: any, {navigation}:any) => {
     }
 
     const title = () => {
-        // JA TODO Switch text based on account setup or not
-        return "Setup your profile";
+        return props.isSetup ? "Profile settings" : "Setup your profile";
     }
 
     const subtitle = () => {
-        // JA TODO Switch text based on account setup or not
-        return "We need some basic information";
+        return props.isSetup ? "Your basic personal information" : "We need some basic information";
     }
 
     const subTitleStyle = () => {
@@ -147,186 +153,356 @@ const AccountInfo = (props: any, {navigation}:any) => {
         setDayOptions(days as never);
     }
 
+    const triggerPrompt = () => {
+        props.setPrompt(true);
+        setPromptPassword(true);
+    }
+
+    const closePasswordPrompt = () => {
+        setPromptPassword(false);
+        setPasswordEmailSent(false);
+        setPasswordEmailError(false);
+        props.setPrompt(false);
+    }
+
+    const passwordContainerStyle = () => {
+        let style = [];
+        style.push(_styles.passwordPromptContainer);
+        if (props.mobile) {
+            style.push(_styles.passwordPromptContainerMobile);
+        }
+        return style;
+    }
+
+    const passwordContentStyle = () => {
+        let style = [];
+        style.push(_styles.passwordContainerContent);
+        let top = props.scrollY ? props.scrollY : 0;
+        style.push({
+            top: top
+        });
+        return style;
+    }
+
+    const confirmPassword = async () => {
+        //send update password
+        setIsPasswordLoading(true);
+        setPasswordEmailSent(true);
+        setIsPasswordLoading(false);
+    }
+
+    const submit = async () => {
+        // save all info
+        setIsLoading(true);
+    }
+
     return (
-    <ScrollView>
-        <View>
-            <View
-            style={_styles.titleContainer}
-            >
-                <_Text
-                style={_styles.title}
-                >
-                    {title()}
-                </_Text>
-                <_Button
-                style={Style.buttonInverted}
-                textStyle={Style.buttonInvertedText}
-                onPress={(e: any) => props.setView(AccountScreenType.about)}
-                >
-                    Edit Interests
-                </_Button>
-            </View>
-        </View>
+    <View>
+        {promptPassword ?
         <View
-        style={[containerStyle(), _styles.container]}
+        style={passwordContainerStyle()}
         >
-            <_Text
-            style={subTitleStyle()}
-            >
-                {subtitle()}
-            </_Text>
-            <View>
-            <_Group
-            vertical={true}
-            style={_styles.imageContainer}
-            >
-                {!props.accountPhoto ?
-                <View
-                style={[_styles.image, _styles.defaultImage]}
-                >
-                    <FontAwesomeIcon
-                    style={_styles.newUserIcon}
-                    size={40} color={Color.border}
-                    icon="user-plus"
-                    >
-                    </FontAwesomeIcon>
-                </View>
-                :
-                <_Image
-                style={_styles.image}
-                // source={require(props.accountPhoto)}
-                >
-                </_Image>
-                }
-                {/* // JA todo need to hook up add photo button */}
-                <_Text
-                style={[Style.textSmallDanger, _styles.photoError]}
-                >
-                    {photoError}
-                </_Text>
-                <_Button
-                onPress={(e: any) => setPhoto()}
-                >
-                    Upload Photo
-                </_Button>
-            </_Group>
-            </View>
-            <_TextInput
-            label="First Name"
-            required={true}
-            containerStyle={_styles.formGap}
-            maxLength={50}
-            ></_TextInput>
-            <_TextInput
-            label="Last Name"
-            required={true}
-            containerStyle={_styles.formGap}
-            maxLength={50}
-            ></_TextInput>
-            <_Group
-            required={true}
-            style={_styles.formGap}
-            mobile={props.mobile}
-            label="Birthday"
-            >
-                <_Dropdown
-                label="Year"
-                options={getYearOptions()}
-                selected={(e: any) => setYear(e)}
-                placeholder="Select..."
-                ></_Dropdown>
-                <_Dropdown
-                label="Month"
-                options={getMonthOptions()}
-                selected={(e: any) => setMonth(e)}
-                placeholder="Select..."
-                ></_Dropdown>
-                <_Dropdown
-                label="Day"
-                options={dayOptions}
-                selected={(e: any) => setDayForm(e)}
-                placeholder="Select..."
-                ></_Dropdown>
-            </_Group>
-            <_Group
-            mobile={props.mobile}
-            style={_styles.formGap}
-            noBackground={true}
-            >
-                <_TextInput
-                label="Phone Number"
-                required={true}
-                maxLength={10}
-                type="phone"
-                ></_TextInput>
-                {/* <_Checkbox
-                visible={false}
-                label="Make Phone Public"
-                checked={(e: any) => setPublicPhoneForm(e)}
-                /> */}
-            </_Group>
-            <_Group
-            label="Location"
-            mobile={props.mobile}
-            required={true}
-            style={_styles.formGap}
-            >
-                <_TextInput
-                label="Zip Code"
-                onChangeText={(e: any) => setZipCodeForm(e)}
-                maxLength={5}
-                keyboardType="numeric"
-                ></_TextInput>
-                <_TextInput
-                label="City"
-                onChangeText={(e: any) => setCityForm(e)}
-                ></_TextInput>
-                <_Dropdown
-                label="State"
-                options={getStateOptions()}
-                selected={(e: any) => setStateForm(e)}
-                placeholder="Select..."
-                direction="top"
-                ></_Dropdown>
-            </_Group>
-            <_Dropdown
-            label="Gender"
-            selected={(e: any) => setGenderForm(e)}
-            options={setGenderOptions()}
-            direction="top"
-            placeholder="Select..."
-            ></_Dropdown>
             <View
-            style={_styles.buttonContainer}
+            style={passwordContentStyle()}
             >
-                {props.accountIsSetup ?
-                <_Button
-                style={[Style.buttonDefault, _styles.passwordButton]}
+                <View
+                style={_styles.passwordDialog}
                 >
-                    Change Password
-                </_Button>
-                : null }
-                <_Button
-                style={Style.buttonGold}
-                >
-                    {props.accountIsSetup ? 'Save' : 'Next'}
-                </_Button>
+                    {!passwordEmailError ?
+                    <View>
+                        {!passwordEmailSent ?
+                        <View>
+                            <_Text
+                            style={_styles.passwordResetText}
+                            >Would you like to update your password? We will attempt to send a password update link to the email on file.</_Text>
+                            <View
+                            style={_styles.passwordButtonContainer}
+                            >
+                                <_Button
+                                style={Style.buttonDanger}
+                                onPress={(e: any) => closePasswordPrompt()}
+                                >
+                                    Cancel
+                                </_Button>
+                                <_Button
+                                style={[Style.buttonDefault, _styles.spacingLeft]}
+                                onPress={(e: any) => confirmPassword()}
+                                loading={isPasswordLoading}
+                                >
+                                Continue
+                                </_Button>
+                            </View>
+                        </View>
+                        :
+                        <View>
+                            <_Text
+                            style={_styles.passwordResetText}
+                            >A password update request has been sent, please check your inbox to complete the process.</_Text>
+                            <View
+                            style={_styles.passwordButtonContainer}
+                            >
+                                <_Button
+                                style={Style.buttonDanger}
+                                onPress={(e: any) => closePasswordPrompt()}
+                                >
+                                Close
+                                </_Button>
+                            </View>
+                        </View>
+                    }
+                    </View>
+                    :
+                    <View>
+                    <_Text
+                    style={_styles.passwordResetText}
+                    >An error occurred while attempting to send a password update email request. Would you like to try again?</_Text>
+                    <View
+                    style={_styles.passwordButtonContainer}
+                    >
+                        <_Button
+                        style={Style.buttonDanger}
+                        onPress={(e: any) => closePasswordPrompt()}
+                        >
+                            Cancel
+                        </_Button>
+                        <_Button
+                        style={[Style.buttonDefault, _styles.spacingLeft]}
+                        onPress={(e: any) => confirmPassword()}
+                        loading={isPasswordLoading}
+                        >
+                        Try Again
+                        </_Button>
+                    </View>
+                </View>
+                }
+
+                </View>
             </View>
-            {props.error ?
-            <_Text 
-            containerStyle={errorContainerStyle()}
-            innerContainerStyle={{justifyContent: 'center'}} 
-            style={errorStyle()}
-            >
-                {error}
-                </_Text>
-            : null}
         </View>
-    </ScrollView>
+        : null}
+        <ScrollView>
+            <View>
+                <View
+                style={_styles.titleContainer}
+                >
+                    <_Text
+                    style={_styles.title}
+                    >
+                        {title()}
+                    </_Text>
+                    {props.isSetup ?
+                    <_Button
+                    style={Style.buttonInverted}
+                    textStyle={Style.buttonInvertedText}
+                    onPress={(e: any) => props.setView(AccountScreenType.about)}
+                    >
+                        Edit Interests
+                    </_Button>
+                    : null}
+                </View>
+            </View>
+            <View
+            style={[containerStyle(), _styles.container]}
+            >
+                <_Text
+                style={subTitleStyle()}
+                >
+                    {subtitle()}
+                </_Text>
+                <View>
+                <_Group
+                vertical={true}
+                style={_styles.imageContainer}
+                >
+                    {!props.accountPhoto ?
+                    <View
+                    style={[_styles.image, _styles.defaultImage]}
+                    >
+                        <FontAwesomeIcon
+                        style={_styles.newUserIcon}
+                        size={40} color={Color.border}
+                        icon="user-plus"
+                        >
+                        </FontAwesomeIcon>
+                    </View>
+                    :
+                    <_Image
+                    style={_styles.image}
+                    // source={require(props.accountPhoto)}
+                    >
+                    </_Image>
+                    }
+                    {/* // JA todo need to hook up add photo button */}
+                    <_Text
+                    style={[Style.textSmallDanger, _styles.photoError]}
+                    >
+                        {photoError}
+                    </_Text>
+                    <_Button
+                    onPress={(e: any) => setPhoto()}
+                    >
+                        {props.isSetup ? "Change Photo" : "Add Photo"}
+                    </_Button>
+                </_Group>
+                </View>
+                <_TextInput
+                label="First Name"
+                required={true}
+                containerStyle={_styles.formGap}
+                maxLength={50}
+                ></_TextInput>
+                <_TextInput
+                label="Last Name"
+                required={true}
+                containerStyle={_styles.formGap}
+                maxLength={50}
+                ></_TextInput>
+                <_Group
+                required={true}
+                style={_styles.formGap}
+                mobile={props.mobile}
+                label="Birthday"
+                >
+                    <_Dropdown
+                    label="Year"
+                    options={getYearOptions()}
+                    selected={(e: any) => setYear(e)}
+                    placeholder="Select..."
+                    ></_Dropdown>
+                    <_Dropdown
+                    label="Month"
+                    options={getMonthOptions()}
+                    selected={(e: any) => setMonth(e)}
+                    placeholder="Select..."
+                    ></_Dropdown>
+                    <_Dropdown
+                    label="Day"
+                    options={dayOptions}
+                    selected={(e: any) => setDayForm(e)}
+                    placeholder="Select..."
+                    ></_Dropdown>
+                </_Group>
+                <_Group
+                mobile={props.mobile}
+                style={_styles.formGap}
+                noBackground={true}
+                >
+                    <_TextInput
+                    label="Phone Number"
+                    required={true}
+                    maxLength={10}
+                    type="phone"
+                    ></_TextInput>
+                    {/* <_Checkbox
+                    visible={false}
+                    label="Make Phone Public"
+                    checked={(e: any) => setPublicPhoneForm(e)}
+                    /> */}
+                </_Group>
+                <_Group
+                label="Location"
+                mobile={props.mobile}
+                required={true}
+                style={_styles.formGap}
+                >
+                    <_TextInput
+                    label="Zip Code"
+                    onChangeText={(e: any) => setZipCodeForm(e)}
+                    maxLength={5}
+                    keyboardType="numeric"
+                    ></_TextInput>
+                    <_TextInput
+                    label="City"
+                    onChangeText={(e: any) => setCityForm(e)}
+                    ></_TextInput>
+                    <_Dropdown
+                    label="State"
+                    options={getStateOptions()}
+                    selected={(e: any) => setStateForm(e)}
+                    placeholder="Select..."
+                    direction="top"
+                    ></_Dropdown>
+                </_Group>
+                <_Dropdown
+                label="Gender"
+                selected={(e: any) => setGenderForm(e)}
+                options={setGenderOptions()}
+                direction="top"
+                placeholder="Select..."
+                ></_Dropdown>
+                <View
+                style={_styles.buttonContainer}
+                >
+                    {props.isSetup ?
+                    <_Button
+                    style={[Style.buttonDefault, _styles.passwordButton]}
+                    onPress={(e: any) => triggerPrompt()}
+                    >
+                        Update Password
+                    </_Button>
+                    : null }
+                    <_Button
+                    style={Style.buttonGold}
+                    loading={isLoading}
+                    onPress={(e: any) => submit()}
+                    >
+                        {props.isSetup ? 'Save' : 'Next'}
+                    </_Button>
+                </View>
+                {error || props.error ?
+                <_Text 
+                containerStyle={errorContainerStyle()}
+                innerContainerStyle={{justifyContent: 'center'}} 
+                style={errorStyle()}
+                >
+                    {error}
+                    </_Text>
+                : null}
+            </View>
+        </ScrollView>
+    </View>
     );
 };
 
 const _styles = StyleSheet.create({
+    passwordResetText: {
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    spacingLeft: {
+        marginLeft: 8,
+    },
+    passwordPromptContainer: {
+        backgroundColor: Color.holderMask,
+        height: '100%',
+        width: '100%',
+        position: 'absolute',
+        top:0,
+        left:0,
+        zIndex:99
+
+    },
+    passwordContainerContent: {
+        height: '100vh'
+    },
+    passwordPromptContainerMobile: {
+        backgroundColor: Color.whiteMask
+    },
+    passwordButtonContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+    },
+    passwordDialog: {
+        margin: 'auto',
+        backgroundColor: Color.white,
+        padding: 20,
+        borderWidth: 1,
+        borderStyle: 'solid',
+        borderColor: Color.border,
+        borderRadius: 20,
+        maxWidth: 400
+    },
     photoError: {
         marginBottom: 5,
         height: 17

@@ -152,10 +152,10 @@ const LoginScreen = (props:any) => {
   const route = () => {
     if (navigation) {
       let state = navigation.getState();
-      if (state) {
+      if (state && state.routes) {
         let idx = state.index;
         if (!idx) {
-            idx = state.routes ? state.routes.length - 1 : 0;
+            idx = state.routes.length;
         }
         return state.routes[idx];
       }

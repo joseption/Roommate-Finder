@@ -242,9 +242,7 @@ const SurveyScreen = (props: any, {navigation}:any) => {
     }
 
     const submit = async (goto: number) => {
-        if (goto == 1) {
-            setLoading(true);
-        }
+        setLoading(true);
         let hasError = false;
         let obj = {questionId:questionId, responseId:responseId};
         let js = JSON.stringify(obj);

@@ -36,10 +36,10 @@ const Login = (props: any) => {
   const route = () => {
     if (navigation) {
       let state = navigation.getState();
-      if (state) {
+      if (state && state.routes) {
         let idx = state.index;
         if (!idx) {
-            idx = state.routes ? state.routes.length - 1 : 0;
+            idx = state.routes.length;
         }
         return state.routes[idx];
       }
@@ -79,21 +79,22 @@ const Login = (props: any) => {
     props.registerPressed();
   };
 
-  // ja needs to be properly tested that all routes lead where they should
   const navigateToLast = (data: any) => {
-    if (data.user.is_setup) {
-      if (data.user.setup_step == NavTo.Search)
-        navigation.navigate(NavTo.Search);
-      else if (data.user.setup_step == NavTo.Survey)
-        navigation.navigate(NavTo.Survey);
-      else
-        navigation.navigate(NavTo.Search, {view: 'matches'} as never);
-    }
-    else {
-      let step = data.user.setup_step;
-      if (!step)
-        step = "info";
-      navigation.navigate(NavTo.Account, {view: step} as never);
+    if (data && data.user) {
+      if (data.user.is_setup) {
+        if (data.user.setup_step == NavTo.Search)
+          navigation.navigate(NavTo.Search);
+        else if (data.user.setup_step == NavTo.Survey)
+          navigation.navigate(NavTo.Survey);
+        else
+          navigation.navigate(NavTo.Search, {view: 'matches'} as never);
+      }
+      else {
+        let step = data.user.setup_step;
+        if (!step)
+          step = "info";
+        navigation.navigate(NavTo.Account, {view: step} as never);
+      }
     }
   };
 

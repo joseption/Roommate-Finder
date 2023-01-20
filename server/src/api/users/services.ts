@@ -179,7 +179,6 @@ export async function UpdateTagsandBio(tags:string[], user_id:string, bio:string
         user_id,
       }
     });
-  
     // add new tags
     for (let i = 0; i < tags.length; i++) {
       await db.tags.create({
@@ -211,5 +210,28 @@ export function GetTagsandBio(id:string){
         }
       },
     }
+  });
+}
+
+export function updateSetupStep(id:string, setup_step:string){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      setup_step,
+    },
+  });
+}
+
+export function completeSetupAndSetStep(id:string, setup_step:string){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      is_setup: true,
+      setup_step
+    },
   });
 }

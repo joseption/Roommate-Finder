@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { isAuthenticated } from '../../middleware';
-import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio } from './services';
+import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep } from './services';
 import db from '../../utils/db';
 const router = express.Router();
 
@@ -300,7 +300,7 @@ router.put('/updateProfilePicture', async (req: Request, res: Response, next: Ne
 
 router.post('/setupProfile', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { bio, tags } = req.body;
+    const { bio, tags, setup_step } = req.body;
     //get payload from body[0]
     const payload : payload = req.body[0];
     const userId = payload.userId;
@@ -322,6 +322,9 @@ router.post('/setupProfile', async (req: Request, res: Response, next: NextFunct
     if(!update) {
       return res.status(400).json({ Error: 'Error adding Bio and tags' });
     }
+    if (setup_step) { // JA Only required in account setup process
+      await updateSetupStep(userId, setup_step);
+    }
     return res.status(200).json({ message: 'Bio and tags added successfully' });
   } catch (err) {
     console.log(err);
@@ -342,6 +345,27 @@ router.get('/getBioAndTags', async (req: Request, res: Response) => {
     const data = await GetTagsandBio(userId);
     //console.log(data[0])
     return res.status(200).json(data[0]);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ Error: 'Server error' });
+  }
+});
+
+router.post('/completeSetup', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { setup_step } = req.body;
+    //get payload from body[0]
+    const payload : payload = req.body[0];
+    const userId = payload.userId;
+    //validate setup step
+    if(!setup_step) {
+      return res.status(400).json({ Error: 'Setup step is required!' });
+    }
+    const complete = await completeSetupAndSetStep(userId, setup_step);
+    if(!complete) {
+      return res.status(400).json({ Error: 'Error finishing account setup' });
+    }
+    return res.status(200).json({ message: 'Account setup successfully' });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ Error: 'Server error' });

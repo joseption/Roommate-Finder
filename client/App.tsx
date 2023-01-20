@@ -26,10 +26,11 @@ export const App = (props: any) => {
   const [accountView,setAccountView] = useState();
   const [isMatches,setIsMatches] = useState(false);
   const [ref,setRef] = useState(React.createRef<NavigationContainerRef<Page>>());
-  const [initURL, setInitURL] = useState('');
   const [isLoggedIn,setIsLoggedIn] = useState(false);
   const [currentNav,setCurrentNav] = useState('');
   const [accountAction,setAccountAction] = useState(false);
+  const [init,setInit] = useState(false);
+  const [initLink,setInitLink] = useState('');
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
@@ -45,14 +46,18 @@ export const App = (props: any) => {
           setMobile(isMobile());
       }
     );
-    if (!initURL) {
+    if (!initLink) {
       DeepLinking.getInitialURL().then(async (link: any) => {
-        if (link)
-          setInitURL(link);
+        if (link) {
+          setInitLink(link);
+        }
       });
     }
-      
-    if (ref.current)
+    else if (!init) {
+      setInit(true);
+      setup(initLink);
+    }
+    else
       setup();
 
     return () => subscription?.remove();
@@ -66,13 +71,13 @@ export const App = (props: any) => {
     return ref.current?.getCurrentRoute()?.name;
   }
 
-  function setup() {
-      if (initURL && initURL.toLowerCase().includes('/auth')) {
-          var route = DeepLinking.parse(initURL);
-          var path = route.path?.substring(route.path?.lastIndexOf('/') + 1);
-          if (route?.queryParams)
-            route.queryParams.path = path;
-          ref.current?.navigate(NavTo.Login, route.queryParams as never);
+  function setup(link: string = '') {
+      if (ref && ref.current && link && link.toLowerCase().includes('/auth')) {
+          var cRoute = DeepLinking.parse(link);
+          var path = cRoute.path?.substring(cRoute.path?.lastIndexOf('/') + 1);
+          if (cRoute?.queryParams)
+            cRoute.queryParams.path = path;
+          ref.current?.navigate(NavTo.Login, cRoute.queryParams as never);
           setAccountAction(true);
           return;
       }
@@ -115,6 +120,7 @@ export const App = (props: any) => {
     if (error && ref.current?.getCurrentRoute()?.name !== NavTo.Login) {
       await setLocalStorage(null);
       ref.current?.navigate(NavTo.Login, {timeout: 'yes'} as never);
+      ref.current?.resetRoot();
       setIsLoggedIn(false);
     }
   }

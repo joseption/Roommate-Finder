@@ -9,7 +9,7 @@ const _Progress = (props: any) => {
     const navigation = useNavigation<navProp>();
     const totalWidth = 100;
     useEffect(() => {
-    }, []);
+    }, [props.progress]);
 
     const textStyle = () => {
         var style = [];
@@ -30,6 +30,12 @@ const _Progress = (props: any) => {
     const indicatorStyle = () => {
         var style = [];
         style.push(styles.progressIndicator);
+        if (props.progress >= 100) {
+            style.push(styles.progressComplete);
+        }
+        else {
+            style.push(styles.progressInComplete);
+        }
         if (props.progress && props.progress >= 0)
             style.push({
                 width:  props.progress + "%"
@@ -44,7 +50,7 @@ const _Progress = (props: any) => {
             <_Text
             style={textStyle()}
             >
-                25%{props.value ? props.value : props.children}
+                {props.progress}%
             </_Text>
             <View
             style={styles.progressBar}
@@ -86,9 +92,14 @@ const styles = StyleSheet.create({
         height: "100%"
     },
     progressIndicator: {
-        backgroundColor: Color.default,
+        backgroundColor: Color.gold,
         height: "100%",
         position: "absolute",
+    },
+    progressComplete: {
+        borderRadius: Radius.large
+    },
+    progressInComplete: {
         borderTopLeftRadius: Radius.large,
         borderBottomLeftRadius: Radius.large
     }

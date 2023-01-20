@@ -32,7 +32,7 @@ const Navigation = (props: any) => {
                 }
             }
         }
-        setVisible(true); // JA TEMP -> props.isLoggedIn
+        setVisible(props.isLoggedIn); // JA TEMP -> props.isLoggedIn
         
     }, [props.mobile, visible, props.navigation, props.isLoggedIn]);
 
@@ -196,10 +196,10 @@ const Navigation = (props: any) => {
                         navTo={NavTo.Search}
                         />
                         <NavMenuButton
-                    navigate={() => {
-                        navigate(NavTo.Search);
-                        props.setIsMatches(false)}
-                    }
+                        navigate={() => {
+                            navigate(NavTo.Search);
+                            props.setIsMatches(false)}
+                        }
                         icon="globe"
                         value="Explore"
                         navTo={NavTo.Search}

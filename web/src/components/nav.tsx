@@ -1,10 +1,12 @@
 import { Disclosure, Menu } from "@headlessui/react";
 import {
+  AcademicCapIcon,
   ArrowPathRoundedSquareIcon,
   ArrowRightOnRectangleIcon,
   Cog8ToothIcon,
-  CurrencyDollarIcon,
   ServerIcon,
+  UserIcon,
+  WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 import { AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -19,16 +21,25 @@ import IconButton from "./Inputs/IconButton";
 
 const navigation = [
   { name: "Explore", href: "/explore" },
-  { name: "Matches", href: "/matches" },
   { name: "Listings", href: "/listings" },
   { name: "Messages", href: "/messages" },
 ];
 
 const userNavigation = [
   {
-    name: "Profile",
-    icon: <ServerIcon className={"h-6 w-6"} />,
+    name: "My Profile",
+    icon: <UserIcon className={"h-6 w-6"} />,
     href: "#",
+  },
+  {
+    name: "Quiz",
+    icon: <AcademicCapIcon className={"h-6 w-6"} />,
+    href: "/setup/quiz",
+  },
+  {
+    name: "Settings",
+    icon: <WrenchScrewdriverIcon className={"h-6 w-6"} />,
+    href: "/settings/profile",
   },
   {
     name: "Sign out",

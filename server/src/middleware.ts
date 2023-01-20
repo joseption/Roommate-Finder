@@ -29,7 +29,7 @@ export function errorHandler(err: { message: any; stack: any; }, req:Request, re
 
 export function isAuthenticated(req:Request, res:Response, next:NextFunction) {
   const { authorization } = req.headers;
-  console.log(authorization);
+  //console.log(authorization);
 
   if (!authorization) {
     res.status(401).json({ Error: 'Un-Authorized' });

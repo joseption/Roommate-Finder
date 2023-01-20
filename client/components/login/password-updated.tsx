@@ -1,11 +1,19 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
+import { navProp, NavTo } from '../../helper';
 import { LoginStyle, Style } from '../../style';
 import _TextInput from '../control/text-input';
 
-const PasswordUpdated = (props: any, {navigation}:any) => {
+const PasswordUpdated = (props: any) => {
+  const navigation = useNavigation<navProp>();
+  const loginPressed = () => {
+    navigation.navigate(NavTo.Login);
+    props.loginPressed()
+  }
+
   return (
     <View
     style={props.style}>
@@ -24,7 +32,7 @@ const PasswordUpdated = (props: any, {navigation}:any) => {
         >
             <_Button
             style={[Style.buttonDefault, LoginStyle.submitButton]}
-            onPress={() => props.loginPressed()}
+            onPress={() => loginPressed()}
             >
             Back to Login
             </_Button>

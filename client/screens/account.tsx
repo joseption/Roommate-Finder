@@ -11,7 +11,6 @@ import { AccountScreenType, getLocalStorage, navProp, NavTo } from '../helper';
 
 const AccountScreen = (props: any) => {
     const navigation = useNavigation<navProp>();
-    const [temp, setTemp] = useState('nothing yet');
 
     useEffect(() => {
         let rt = route();
@@ -52,8 +51,8 @@ const AccountScreen = (props: any) => {
 
     const setView = async (type: AccountScreenType) => {
         let data = await getLocalStorage();
-        if (!data?.user?.is_setup && data.user.setup_step !== "survey" && type == AccountScreenType.survey)
-            type = AccountScreenType.info;
+        //if (!data?.user?.is_setup && data.user.setup_step !== "survey" && type == AccountScreenType.survey)
+           // type = AccountScreenType.info;
         // JA TODO need to auto save if user is switching views
         var view = 'info';
         if (type == AccountScreenType.about)
@@ -83,12 +82,16 @@ const AccountScreen = (props: any) => {
             setView={(e: any) => setView(e)}
             />
             :
-            <StartSurvey
-            mobile={props.mobile}
-            error={props.error}
-            setError={props.setError}
-            setView={(e: any) => setView(e)}
-            />
+            <View>
+                {props.accountView === AccountScreenType.survey ?
+                <StartSurvey
+                mobile={props.mobile}
+                error={props.error}
+                setError={props.setError}
+                setView={(e: any) => setView(e)}
+                />
+                : null }
+            </View>
             }
         </View>
         }

@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { Color, FontSize, Radius, Style } from '../../style';
 
@@ -59,14 +59,14 @@ const styles = StyleSheet.create({
         outlineStyle: 'none',
     },
     iconSelected: {
-        color: Color.default,
+        color: Color.gold,
         height: 20,
         width: 20,
         marginBottom: 10,
     },
     indicator: {
         width: '100%',
-        borderBottomColor: Color.default,
+        borderBottomColor: Color.gold,
         borderBottomWidth: 2,
         position: 'absolute',
         bottom: 0,

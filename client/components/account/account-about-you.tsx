@@ -89,8 +89,8 @@ const AccountAbout = (props: any, {navigation}:any) => {
                     {title()}
                 </_Text>
                 <_Button
-                style={Style.buttonDefaultInverted}
-                textStyle={Style.buttonDefaultInvertedText}
+                style={Style.buttonInverted}
+                textStyle={Style.buttonInvertedText}
                 onPress={(e: any) => props.setView(AccountScreenType.info)}
                 >
                     Edit Account
@@ -142,7 +142,7 @@ const AccountAbout = (props: any, {navigation}:any) => {
             style={_styles.buttonContainer}
             >
                 <_Button
-                style={Style.buttonSuccess}
+                style={Style.buttonGold}
                 >
                     {props.accountIsSetup ? 'Save' : 'Next'}
                 </_Button>

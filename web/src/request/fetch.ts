@@ -3,6 +3,7 @@
  */
 
 import { SurveyInfo } from "../types/survey.types";
+import { BioAndTags } from "../types/tags.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 const backend_api = "https://api.roomfin.xyz";
@@ -31,6 +32,15 @@ export async function GetSurveryInfo() {
 export async function SurveyOnComplete() {
   return await doRequest<{ message: string }>(
     `${backend_api}/survey/verify`,
+    null,
+    "GET",
+    true
+  );
+}
+
+export async function GetBioAndTags() {
+  return await doRequest<BioAndTags>(
+    `${backend_api}/users/getBioAndTags`,
     null,
     "GET",
     true

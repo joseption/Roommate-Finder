@@ -41,7 +41,7 @@ export default function Login() {
           query: { email: email },
         });
       } else if (!data.user?.is_setup) {
-        void router.push("/quiz");
+        void router.push("/setup/profile");
       } else void router.push("/explore");
     },
     onError: (err: Error) => {

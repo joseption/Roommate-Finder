@@ -6,11 +6,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import CircularProgress from "../components/Feedback/CircularProgress";
-import IconButton from "../components/Inputs/IconButton";
-import QuestionsCard from "../components/Surfaces/Survey/QuestionsCard";
-import { GetSurveryInfo } from "../request/fetch";
-import { transitionVariants } from "../styles/motion-definitions";
+import CircularProgress from "../../components/Feedback/CircularProgress";
+import IconButton from "../../components/Inputs/IconButton";
+import QuestionsCard from "../../components/Surfaces/Survey/QuestionsCard";
+import { GetSurveryInfo } from "../../request/fetch";
+import { transitionVariants } from "../../styles/motion-definitions";
 
 export default function Quiz() {
   const { data, isLoading } = useQuery({
@@ -41,14 +41,14 @@ export default function Quiz() {
             "flex w-full max-w-7xl flex-col justify-center gap-4 p-4 sm:p-6 lg:p-8"
           }
         >
-          <Link scroll={false} href={"/explore"} className={"w-fit"}>
+          <Link scroll={false} href={"/setup/profile"} className={"w-fit"}>
             <IconButton className={"group gap-1"}>
               <ChevronLeftIcon
                 className={
                   "h-6 w-6 transition-transform group-hover:-translate-x-1"
                 }
               />
-              Go Back to Explore
+              Go Back to Bio & Hobbies
             </IconButton>
           </Link>
           <section

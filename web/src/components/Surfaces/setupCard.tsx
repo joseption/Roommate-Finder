@@ -32,6 +32,8 @@ export default function QuestionsCard({ isLoading, className = "" }: Props) {
   const { data, isLoading: initalDataLoading } = useQuery({
     queryKey: ["tags"],
     queryFn: () => GetBioAndTags(),
+    refetchOnMount: true,
+    cacheTime: 0,
     onSuccess: (data) => {
       console.log(data);
       if (data.tags && data.tags.length > 0) {
@@ -53,6 +55,7 @@ export default function QuestionsCard({ isLoading, className = "" }: Props) {
       mutationFn: () => UpdateBioAndTags(bio, selectedStyles),
       onSuccess: (data) => {
         console.log(data);
+        void router.push("/setup/quiz");
       },
       onError: (err: Error) => {
         toast.error(err.message);
@@ -62,7 +65,6 @@ export default function QuestionsCard({ isLoading, className = "" }: Props) {
 
   const handleClick = () => {
     mutateUpdateBioAndTags();
-    void router.push("/setup/quiz");
   };
   return (
     <Card className={`p-4 ${className}`}>
@@ -104,7 +106,11 @@ export default function QuestionsCard({ isLoading, className = "" }: Props) {
           </div>
           <div className="mx-auto flex items-center gap-5 pt-10 lg:w-4/5">
             <div className="flex w-full justify-end">
-              <Button onClick={handleClick} loading={false} disabled={false}>
+              <Button
+                onClick={handleClick}
+                loading={isUpdating ? true : false}
+                disabled={isUpdating ? true : false}
+              >
                 Next
               </Button>
             </div>

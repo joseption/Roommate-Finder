@@ -22,7 +22,11 @@ export default function UseAuthRedirect() {
             query: { email: data.user?.email },
           });
         }
-      } else if (data.user && !data.user.is_setup) {
+      } else if (
+        data.user &&
+        !data.user.is_setup &&
+        !router.pathname.startsWith("/setup")
+      ) {
         void router.push(path.setup);
       } else if (router.pathname.startsWith(path.auth)) {
         void router.push(path.explore);

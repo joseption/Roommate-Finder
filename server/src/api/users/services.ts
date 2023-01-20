@@ -54,3 +54,162 @@ export function findUserById(id: any) {
     },
   });
 }
+
+export function updateFirstName(id:string, first_name: string) {
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      first_name,
+    },
+  });
+}
+
+export function updateLastName(id:string, last_name: string) {
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      last_name,
+    },
+  });
+}
+
+//update phone number
+
+export function updatePhoneNumber(id:string, phone_number: number) {
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      phone_number,
+    },
+  });
+}
+
+//update gender
+
+export function updateGender(id:string, gender:string){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      gender,
+    },
+  });
+}
+
+export function updateZip(id:string, zip_code:number){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      zip_code,
+    },
+  });
+}
+
+export function updateCity(id:string, city:string){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      city,
+    },
+  });
+}
+
+export function updateState(id:string, state:string){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      state,
+    },
+  });
+}
+
+export function updateProfilePicture(id:string, image:string){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      image,
+    },
+  });
+}
+
+//tags
+
+//add tags to tags table 
+// @@param {string[]} tags - array of tags to add
+// @@param {string} userId - id of user to add tags to
+
+// check if tag exists in tags table
+// if it does, add tag then skip
+// if it doesn't, add tag to tags table 
+// get all tags from tags table
+// delete missing tags from tags table
+
+//actually easier way just delete all tags 
+// and add new tags... 
+export async function UpdateTagsandBio(tags:string[], user_id:string, bio:string){
+  // delete all tags of user 
+  try {
+    //update bio
+    await db.user.update({
+      where: {
+        id: user_id,
+      },
+      data: {
+        bio,
+      },
+    });
+
+    await db.tags.deleteMany({
+      where: {
+        user_id,
+      }
+    });
+  
+    // add new tags
+    for (let i = 0; i < tags.length; i++) {
+      await db.tags.create({
+        data: {
+          tag: tags[i],
+          user_id,
+        }
+      });
+    }
+    return true;
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
+//get tags and bio of user!! 
+
+export function GetTagsandBio(id:string){
+  return db.user.findMany({
+    where: {
+      id,
+    },
+    select: {
+      bio: true,
+      tags: {
+        select: {
+          tag: true,
+        }
+      },
+    }
+  });
+}

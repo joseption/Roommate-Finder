@@ -159,8 +159,8 @@ const AccountInfo = (props: any, {navigation}:any) => {
                     {title()}
                 </_Text>
                 <_Button
-                style={Style.buttonDefaultInverted}
-                textStyle={Style.buttonDefaultInvertedText}
+                style={Style.buttonInverted}
+                textStyle={Style.buttonInvertedText}
                 onPress={(e: any) => props.setView(AccountScreenType.about)}
                 >
                     Edit Interests
@@ -207,7 +207,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 <_Button
                 onPress={(e: any) => setPhoto()}
                 >
-                    {!props.accountIsSetup ? 'Add Photo' : 'Change Photo'}
+                    Upload Photo
                 </_Button>
             </_Group>
             </View>
@@ -259,10 +259,11 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 maxLength={10}
                 type="phone"
                 ></_TextInput>
-                <_Checkbox
+                {/* <_Checkbox
+                visible={false}
                 label="Make Phone Public"
                 checked={(e: any) => setPublicPhoneForm(e)}
-                />
+                /> */}
             </_Group>
             <_Group
             label="Location"
@@ -306,7 +307,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 </_Button>
                 : null }
                 <_Button
-                style={Style.buttonSuccess}
+                style={Style.buttonGold}
                 >
                     {props.accountIsSetup ? 'Save' : 'Next'}
                 </_Button>

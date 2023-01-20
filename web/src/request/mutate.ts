@@ -109,3 +109,15 @@ export async function UpdateResponse(
     true
   );
 }
+
+export async function UpdateBioAndTags(bio: string, tags: string[]) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/users/setupProfile`,
+    {
+      bio,
+      tags,
+    },
+    "POST",
+    true
+  );
+}

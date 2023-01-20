@@ -44,8 +44,8 @@ const styles = StyleSheet.create({
         color: Color.white
     },
     selected: {
-        borderColor: Color.default,
-        backgroundColor: Color.default
+        borderColor: Color.gold,
+        backgroundColor: Color.gold
     },
     button: {
         paddingTop: 5,

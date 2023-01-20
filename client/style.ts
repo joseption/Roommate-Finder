@@ -25,7 +25,10 @@ export const Color = {
     icon:'#1D1F23',
     grey: '#CDCFD1',
     transparent: 'transparent',
-    none: 'transparent'
+    none: 'transparent',
+    gold: '#edb74d',
+    goldSecondary: '#d5a445',
+    darkgrey: '383c3b'
 }
 
 export const FontSize = {
@@ -173,6 +176,17 @@ export const Style = StyleSheet.create({
       }
     }),
   },
+  buttonGold: {
+    backgroundColor: Color.gold,
+    ...Platform.select({
+      web: {
+        shadowColor: Color.goldSecondary,
+        shadowOffset: {width: -3, height: 3},
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      }
+    }),
+  },
   buttonDefault: {
     backgroundColor: Color.default,
     ...Platform.select({
@@ -191,6 +205,26 @@ export const Style = StyleSheet.create({
   },
   buttonDefaultInvertedText: {
     color: Color.default,
+    fontSize: FontSize.small,
+    fontFamily: 'Inter-SemiBold'
+  },
+  buttonGoldInverted: {
+    backgroundColor: Color.none,
+    borderColor: Color.gold,
+    borderWidth: 1,
+  },
+  buttonGoldInvertedText: {
+    color: Color.gold,
+    fontSize: FontSize.small,
+    fontFamily: 'Inter-SemiBold'
+  },
+  buttonInverted: {
+    backgroundColor: Color.none,
+    borderColor: Color.textTertiary,
+    borderWidth: 1,
+  },
+  buttonInvertedText: {
+    color: Color.textTertiary,
     fontSize: FontSize.small,
     fontFamily: 'Inter-SemiBold'
   },

@@ -13,6 +13,7 @@ model User {
   is_superuser     Boolean            @default(false)
   is_verified      Boolean            @default(false)
   image            String?
+  bio              String?
   gender           String?
   first_name       String?
   last_name        String?
@@ -37,6 +38,7 @@ model User {
   Message          Message[]
   refreshTokens    RefreshToken[]
   ResponsesOnUsers ResponsesOnUsers[]
+  tags             tags[]
 }
 
 model RefreshToken {
@@ -75,6 +77,14 @@ model User_Interests_Activity {
   option_id   String
   option_text String
   type        String
+}
+
+model tags{
+  id String @id @default(uuid())
+  tag String
+  user_id String
+  user User @relation(fields: [user_id], references: [id])
+  @@unique([tag, user_id])
 }
 
 model ResponsesOnUsers {

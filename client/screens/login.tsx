@@ -197,8 +197,9 @@ const LoginScreen = (props:any) => {
           }
         }
       }
-      else
+      else {
         updateVisibleScreen(screen.login);
+      }
     }
     else
       updateVisibleScreen(screen.login);
@@ -248,7 +249,7 @@ const LoginScreen = (props:any) => {
       style.push(Style.buttonDisabled);
     }
     else {
-      style.push(Style.buttonSuccess);
+      style.push(Style.buttonGold);
     }
 
     return style;
@@ -331,7 +332,12 @@ const LoginScreen = (props:any) => {
                 setAccountAction={props.setAccountAction}
               />
               <PasswordUpdated
-                loginPressed={() => goLeft(screen.login)}
+                loginPressed={() => 
+                  {
+                    navigation.navigate(NavTo.Login);
+                    goLeft(screen.login);
+                  }
+                }
                 style={[styles.panel, passwordUpdated ? null : styles.hidden]}
               />
             </Animated.View>

@@ -42,7 +42,7 @@ const Navigation = (props: any) => {
           if (state && state.routes) {
             let idx = state.index;
             if (!idx) {
-                idx = state.routes.length;
+                idx = state.routes.length - 1;
             }
             return state.routes[idx];
           }

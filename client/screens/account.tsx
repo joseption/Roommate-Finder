@@ -60,7 +60,7 @@ const AccountScreen = (props: any) => {
 
     const setView = async (type: AccountScreenType) => {
         let data = await getLocalStorage();
-        if (!data?.user?.is_setup && data.user.setup_step !== "survey" && type == AccountScreenType.survey)
+        if (data && data.user && data.user.setup_step !== "survey" && type == AccountScreenType.survey)
            type = AccountScreenType.info;
         // JA TODO need to auto save if user is switching views
         var view = 'info';

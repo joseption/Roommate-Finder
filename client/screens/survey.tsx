@@ -258,6 +258,10 @@ const SurveyScreen = (props: any, {navigation}:any) => {
                         let res = JSON.parse(await ret.text());
                         if (res.Error)
                         {
+                            if (res.Error == "Un-Authorized") {
+                                navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                                return;
+                            }
                             hasError = true;
                         }
                         else {

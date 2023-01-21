@@ -17,7 +17,7 @@ const Register = (props: any, {navigation}:any) => {
       props.setEmail('');
       setEmailError(false);
       setDisabled(true);
-      props.setIsRegistering(false);
+      props.setPasswordUpdateType('');
       props.loginPressed();
   }
 

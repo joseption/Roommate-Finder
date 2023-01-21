@@ -23,7 +23,7 @@ import {
   verify,
   getUserEmail,
 } from './services';
-import { sendResetPasswordEmail, sendVerifyEmail } from 'utils/sendEmail';
+import { sendResetPasswordEmail, sendUpdatePasswordEmail, sendVerifyEmail } from 'utils/sendEmail';
 import { GetSurveyQuestionsAndResponses } from 'api/survey/services';
 
 const router = express.Router()
@@ -133,7 +133,7 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
 
 router.post('/resetPassword',async (req:Request, res:Response, next:NextFunction) => {
   try {
-    const { email } = req.body;
+    const { email, type } = req.body;
     if (!email) {
       return res.status(400).json({"Error": "You must provide an email."});
     }
@@ -145,7 +145,10 @@ router.post('/resetPassword',async (req:Request, res:Response, next:NextFunction
     else{
       const jti = v4(); 
       const resetToken = generateResetToken(existingUser, jti);
-      sendResetPasswordEmail(email as string, resetToken);
+      if (type == 'update') // Used for account settings (just uses a different email template)
+        sendUpdatePasswordEmail(email as string, resetToken);
+      else
+        sendResetPasswordEmail(email as string, resetToken);
       return res.status(200).json({
         resetToken,
       });

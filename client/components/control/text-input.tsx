@@ -104,6 +104,8 @@ const _TextInput = (props: any) => {
     
     if (props.onChangeText)
       props.onChangeText(value);
+    if (props.setValue)
+      props.setValue(value);
   }
 
   const placeholder = () => {

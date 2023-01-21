@@ -18,8 +18,8 @@ const _Dropdown = (props: any, {navigation}:any) => {
     const [height,setHeight] = useState(0);
     const [options,setOptions] = useState([]);
     const [init,setInit] = useState(false);
-    const [value,setValue] = useState('');
-    const [key,setKey] = useState(''); // JA todo: use the key to send back to server
+    const [dataInit,setDataInit] = useState(false);
+    const [key,setKey] = useState('');
     const [textValue,setTextValue] = useState('');
     const [visibleOptionCount,setVisibleOptionCount] = useState(0);
     const inputRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
@@ -30,10 +30,24 @@ const _Dropdown = (props: any, {navigation}:any) => {
       }, [props.value, context.setParentFocus]);
 
     useEffect(() => {
+        if (props.value && !props.key && !dataInit) {
+            options.forEach(x => {
+                if (x && x['props']) {
+                    let prop = x['props'];
+                    if (prop['item']) {
+                        let item = prop['item'];
+                        if (props.value === item['value']) {
+                            setDataInit(true);
+                            select(item);
+                            return;
+                        }
+                    }
+                }
+            });
+        }
         if (!init) {
             mappedItems(props.value);
             setInit(true);
-            setValue(props.value);
             setKey(props.key);
             if (props.value)
                 setTextValue(props.value);
@@ -41,7 +55,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
         else if (!focus && textValue && props.options.filter((x: { value: string; }) => x.value === textValue).length == 0) {
             clearSelected(false);
         }
-    }, [options, props.options]);
+    }, [options, props.options, props.value]);
 
     const labelStyle = () => {
         var style = [];
@@ -168,7 +182,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
     const select = (e: any) => {
         setKey(e.key);
-        setValue(e.value);
+        props.setValue(e.value);
         setTextValue(e.value);
         setMenu(false)
         if (props.selected)
@@ -177,7 +191,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
     const clearSelected = (reload = true) => {
         setKey('');
-        setValue('');
+        props.setValue('');
         setTextValue('');
         if (reload)
             mappedItems(''); // Try mapping again (old value doesn't exist in list anymore)
@@ -206,6 +220,8 @@ const _Dropdown = (props: any, {navigation}:any) => {
             setMenu(true);
         if (props.onChangeText)
             props.onChangeText(e);
+        if (props.setValue)
+            props.setValue(e);
     }
 
     const onblur = (e: any) => {
@@ -214,12 +230,12 @@ const _Dropdown = (props: any, {navigation}:any) => {
                 e.relatedTarget && !e.relatedTarget.parentElement ||
                 e.relatedTarget && e.relatedTarget.parentElement && 
                 e.relatedTarget.parentElement.id != "menu") {
-                if (value && textValue)
-                    setTextValue(value);
+                if (props.value && textValue)
+                    setTextValue(props.value);
                 else {
                     setTextValue("");
                     setKey("");
-                    setValue("");
+                    props.setValue("");
                 }
                 setMenu(false);
             }
@@ -242,7 +258,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
         return <TextInput
         style={style()}
         onChangeText={(e) => onValueChange(e)}
-        value={textValue}
+        value={props.value}
         placeholder={props.placeholder}
         keyboardType={props.keyboardType}
         ref={inputRef}

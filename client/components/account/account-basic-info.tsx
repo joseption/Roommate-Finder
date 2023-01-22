@@ -243,17 +243,19 @@ const AccountInfo = (props: any, {navigation}:any) => {
     }
 
     const setBirthday = (stamp: string) => {
-        let date = new Date(stamp);
-        if (date) {
-            let year = date.getFullYear().toString();
-            let month = getMonthOptions().find(x => x.key === (date.getMonth() + 1));
-            let day = date.getDate().toString();
-            if (year)
-                setYear(year);
-            if (month)
-                setMonth(month.value);
-            if (day)
-                setDay(day);
+        if (stamp) {
+            let date = new Date(stamp);
+            if (date) {
+                let year = date.getFullYear().toString();
+                let month = getMonthOptions().find(x => x.key === (date.getMonth() + 1));
+                let day = date.getDate().toString();
+                if (year.length > 0)
+                    setYear(year);
+                if (month && month.value.length > 0)
+                    setMonth(month.value);
+                if (day.length > 0)
+                    setDay(day);
+            }
         }
     }
 

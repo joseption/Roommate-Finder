@@ -1,11 +1,9 @@
-import { RadioGroup } from "@headlessui/react";
-import { Bars4Icon } from "@heroicons/react/24/outline";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import { SurveyOnComplete } from "../../../request/fetch";
+import { GetSurveryInfo, SurveyOnComplete } from "../../../request/fetch";
 import { UpdateResponse } from "../../../request/mutate";
 import { SurveyInfo } from "../../../types/survey.types";
 import CircularProgress from "../../Feedback/CircularProgress";
@@ -14,8 +12,6 @@ import Card from "../Card";
 import AnswerButtons from "./Answers";
 import ProgessBar from "./progessBar";
 interface Props {
-  SurveyData: SurveyInfo[];
-  isLoading?: boolean;
   className?: string;
 }
 type response = {
@@ -24,23 +20,46 @@ type response = {
   question_id: string;
 };
 
-export default function QuestionsCard({
-  SurveyData,
-  isLoading,
-  className = "",
-}: Props) {
+export default function QuestionsCard({ className = "" }: Props) {
   //for answer selection
   const router = useRouter();
   const [selected, setSelected] = useState<response | null>(null);
   const [questionNumber, setQuestionNumber] = useState(0);
+  const [SurveyData, setSurveyData] = useState<SurveyInfo[]>([]);
+  const [userResponseIndex, setUserResponseIndex] = useState<number>(-1);
+  // const {
+  //   data,
+  //   isLoading: mainDataLoading,
+  //   refetch,
+  // } = useQuery({
+  //   queryKey: ["GetSurveyData"],
+  //   queryFn: () => GetSurveryInfo(),
+  //   refetchOnMount: true,
+  const { mutate: GetSurveyData, isLoading: mainDataLoading } = useMutation({
+    mutationFn: () => GetSurveryInfo(),
+    onSuccess: (data) => {
+      setSurveyData(data);
+      GetIndexOfUserResponse(data);
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+
+  useEffect(() => {
+    GetSurveyData();
+  }, []);
 
   const { mutate: mutateUpdateResponse, isLoading: isUpdating } = useMutation({
     mutationFn: () => UpdateResponse(selected?.question_id, selected?.id),
     onSuccess: (data) => {
-      console.log(data);
+      //console.log(data);
+      GetSurveyData();
+      if (questionNumber < SurveyData.length - 1)
+        setQuestionNumber(questionNumber + 1);
     },
     onError: (err: Error) => {
-      console.log(err.message);
+      //console.log(err.message);
     },
   });
 
@@ -55,11 +74,10 @@ export default function QuestionsCard({
   });
 
   const handleOnClickNext = () => {
-    if (questionNumber < SurveyData.length - 1)
-      setQuestionNumber(questionNumber + 1);
     mutateUpdateResponse();
   };
   const handleOnClickPrevious = () => {
+    GetSurveyData();
     if (questionNumber > 0) setQuestionNumber(questionNumber - 1);
   };
   const handleOnFinish = () => {
@@ -70,12 +88,27 @@ export default function QuestionsCard({
   const handleStateChange = (newState: response) => {
     setSelected(newState);
   };
+  //get index of user response for current question
+  const GetIndexOfUserResponse = (data: SurveyInfo[]) => {
+    if (data[questionNumber]?.ResponsesOnUsers) {
+      const index = data[questionNumber]?.response.findIndex(
+        (response) =>
+          response.id === data[questionNumber]?.ResponsesOnUsers[0]?.responseId
+      );
+      if (index) {
+        setUserResponseIndex(index);
+        const TobeSelected = data[questionNumber]?.response[index];
+        if (TobeSelected) setSelected(TobeSelected);
+      }
+      //console.log(index);
+    }
+  };
   return (
     <Card className={`p-4 ${className}`}>
       <div className={"flex items-center justify-between"}>
         <h1 className={"text-xl"}>Survey Q&A</h1>
       </div>
-      {isLoading ? (
+      {mainDataLoading ? (
         <CircularProgress className={"mx-auto my-12 scale-[200%]"} />
       ) : (
         <div className="w-full px-4 py-5">
@@ -90,7 +123,7 @@ export default function QuestionsCard({
           </div>
           <AnswerButtons
             Responses={SurveyData[questionNumber]?.response}
-            ResponsesOfUsers={-1}
+            ResponsesOfUsers={userResponseIndex}
             onStateChange={handleStateChange}
           />
 
@@ -114,7 +147,7 @@ export default function QuestionsCard({
               ) : (
                 <Button
                   onClick={handleOnClickNext}
-                  loading={false}
+                  loading={isUpdating ? true : false}
                   disabled={selected ? false : true}
                 >
                   Next

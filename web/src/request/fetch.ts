@@ -2,22 +2,15 @@
  * Functions to Fetch data from the API
  */
 
+import { user } from "../types/auth.types";
 import { SurveyInfo } from "../types/survey.types";
 import { BioAndTags } from "../types/tags.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 const backend_api = "https://api.roomfin.xyz";
 
-export async function authenticateUser() {
-  return await doRequest<{ message: string }>(
-    `http://localhost:8080/auth/checkAuth`,
-    {
-      refreshToken: getAuthSession()?.refreshToken,
-      accessToken: getAuthSession()?.accessToken,
-    },
-    "POST",
-    false
-  );
+export async function GetCurrentUserInfo() {
+  return await doRequest<user>(`${backend_api}/users/me`, null, "GET", true);
 }
 
 export async function GetSurveryInfo() {

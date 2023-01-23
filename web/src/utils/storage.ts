@@ -13,10 +13,6 @@ export function getAuthSession(): AuthSession {
     accessToken: localStorage.getItem("accessToken") ?? "",
     userId: localStorage.getItem("userId") ?? "",
     refreshToken: localStorage.getItem("refreshToken") ?? "",
-    user: {
-      first_name: localStorage.getItem("first_name") ?? "",
-      image: localStorage.getItem("image") ?? "",
-    },
   };
 }
 

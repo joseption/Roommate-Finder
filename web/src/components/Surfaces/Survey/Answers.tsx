@@ -1,5 +1,5 @@
 import { RadioGroup } from "@headlessui/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 type response = {
   id: string;
   response: string;
@@ -27,7 +27,6 @@ export default function AnswerButtons({
     setSelected(res);
     onStateChange(res);
   };
-
   return (
     <div className="mx-auto w-full max-w-md">
       <RadioGroup value={selected} onChange={onChange}>

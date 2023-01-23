@@ -57,7 +57,6 @@ export type navProp = StackNavigationProp<Page>;
 export const NavTo = {
   Home: 'Home' as never,
   Login: 'Login' as never,
-  ConfirmEmail: 'Login' as never,
   Account: 'Account' as never,
   Profile: 'Profile' as never,
   Survey: 'Survey' as never,

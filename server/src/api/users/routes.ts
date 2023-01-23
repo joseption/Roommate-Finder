@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { isAuthenticated } from '../../middleware';
-import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep } from './services';
+import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday } from './services';
 import db from '../../utils/db';
 const router = express.Router();
 
@@ -19,9 +19,29 @@ router.use(isAuthenticated); // ! Do this instead of adding isAuthenticated to e
 // });
 
 // ! changed the duplicate function to work using query params
+
+//Get current user profile
+
+router.get('/me', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //Get user id from payload 
+    const payload : payload = req.body[0];
+    const userId = payload.userId;
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(400).json({ Error: 'User not found' });
+    }
+    delete user.password;
+    res.status(200).json(user);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ Error: 'Server error' });
+  }
+});
+
 router.get('/profile', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.query;
+    const { userId } = req.query; 
     const user = await findUserById(userId);
     delete user.password;
     res.json(user);
@@ -82,7 +102,7 @@ router.get('/Allprofiles', async (req: Request, res: Response, next: NextFunctio
 });
 
 //end point to update First Name
-router.put('/updateFirstName', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/updateFirstName', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { firstName } = req.body;
     //get payload from body[0]
@@ -108,7 +128,7 @@ router.put('/updateFirstName', async (req: Request, res: Response, next: NextFun
 });
 
 //end point to update Last Name
-router.put('/updateLastName', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/updateLastName', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { lastName } = req.body;
     //get payload from body[0]
@@ -134,7 +154,7 @@ router.put('/updateLastName', async (req: Request, res: Response, next: NextFunc
 });
 
 //update phone number
-router.put('/updatePhoneNumber', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/updatePhoneNumber', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { phoneNumber } = req.body;
     //get payload from body[0]
@@ -142,6 +162,12 @@ router.put('/updatePhoneNumber', async (req: Request, res: Response, next: NextF
     const userId = payload.userId;
     if(!phoneNumber) {
       return res.status(400).json({ Error: 'Phone number is required' });
+    }
+    phoneNumber.replace(/\D/g, '');    
+
+    //check for valid phone number using regex
+    if(phoneNumber.length != 10) {
+      return res.status(400).json({ Error: 'Invalid phone number' });
     }
     
     const user = await findUserById(userId);
@@ -161,13 +187,14 @@ router.put('/updatePhoneNumber', async (req: Request, res: Response, next: NextF
 
 //update gender 
 
-router.put('/updateGender', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/updateGender', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { gender } = req.body;
     //get payload from body[0]
     const payload : payload = req.body[0];
     const userId = payload.userId;
-    if(gender !== 'Male' || gender !== 'Female' || gender !== 'Other'){
+    //check for valid
+    if(gender != "Male" && gender != "Female" && gender != "Other"){
       return res.status(400).json({
         Error:"Gender should be Male, Female, or Other"
     });}
@@ -186,10 +213,41 @@ router.put('/updateGender', async (req: Request, res: Response, next: NextFuncti
   }
 });
 
-//update location
+//update bday
+
+router.post('/updateBday', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { bday } = req.body;
+    //get payload from body[0]
+    const payload : payload = req.body[0];
+    const userId = payload.userId;
+    //check for valid
+    if(!bday) {
+      return res.status(400).json({ Error: 'Birthday is required' });
+    }
+    //valid date format mm-dd-yyyy
+    const dateRegex = /^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d$/;
+    if(!dateRegex.test(bday)) {
+      return res.status(400).json({ Error: 'Invalid date format. Date should be mm-dd-yyyy' });
+    }
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(400).json({ Error: 'User not found' });
+    }
+    const update = await updateBday(userId, bday);
+    if(!update) {
+      return res.status(400).json({ Error: 'Update failed' });
+    }
+    return res.status(200).json({ message: 'Update successful' });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ Error: 'Server error' });
+  }
+});
+
 
 //update zip code 
-router.put('/updateZip', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/updateZip', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { zip_code } = req.body;
     //get payload from body[0]
@@ -199,7 +257,8 @@ router.put('/updateZip', async (req: Request, res: Response, next: NextFunction)
     if(!zip_code) {
       return res.status(400).json({ Error: 'Zip code is required' });
     }
-    if(zip_code.length !== 5) {
+    //use regex to check for zip code
+    if(!/^\d{5}$/.test(zip_code)) {
       return res.status(400).json({ Error: 'Zip code should be 5 digits' });
     }
     const user = await findUserById(userId);
@@ -217,8 +276,34 @@ router.put('/updateZip', async (req: Request, res: Response, next: NextFunction)
   }
 });
 
+
+router.post('/updateCity', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { city } = req.body;
+    //get payload from body[0]
+    const payload : payload = req.body[0];
+    const userId = payload.userId;
+    //validate zip code
+    if(!city) {
+      return res.status(400).json({ Error: 'city is required' });
+    }
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(400).json({ Error: 'User not found' });
+    } 
+    const update = await updateCity(userId, city);
+    if(!update) {
+      return res.status(400).json({ Error: 'Update failed' });
+    }
+    return res.status(200).json({ message: 'Update successful' });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ Error: 'Server error' });
+  }
+});
+
 //update city
-router.put('/updateCity', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/updateCity', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { city } = req.body;
     //get payload from body[0]
@@ -244,7 +329,7 @@ router.put('/updateCity', async (req: Request, res: Response, next: NextFunction
 });
 
 //update state
-router.put('/updateState', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/updateState', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { state } = req.body;
     //get payload from body[0]
@@ -271,7 +356,7 @@ router.put('/updateState', async (req: Request, res: Response, next: NextFunctio
 
 //update proifile picture, accept url 
 
-router.put('/updateProfilePicture', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/updateProfilePicture', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { profile_picture } = req.body;
     //get payload from body[0]
@@ -295,6 +380,7 @@ router.put('/updateProfilePicture', async (req: Request, res: Response, next: Ne
     return res.status(500).json({ Error: 'Server error' });
   }
 });
+
 
 //Setup Profile
 

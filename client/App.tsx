@@ -32,6 +32,7 @@ export const App = (props: any) => {
   const [init,setInit] = useState(false);
   const [initLink,setInitLink] = useState('');
   const [isSetup,setIsSetup] = useState(false);
+  const [isLoaded,setIsLoaded] = useState(false);
   const [prompt,setPrompt] = useState(false);
   const [setupStep,setSetupStep] = useState('');
   const [scrollY,setScrollY] = useState(0);
@@ -43,6 +44,7 @@ export const App = (props: any) => {
   });
 
   useEffect(() => {
+    setIsSetup(true); // ja remove
     setMobile(isMobile());
     const subscription = Dimensions.addEventListener(
       "change",
@@ -88,6 +90,8 @@ export const App = (props: any) => {
       }
       checkLoggedIn();
       prepareStyle();
+      if (!isLoaded)
+        setIsLoaded(true);
   }
 
   const navigateToSetupStep = (step: string) => {
@@ -381,7 +385,6 @@ export const App = (props: any) => {
         </ScrollView>
         {Platform.OS === 'web' ?
         <Navigation
-        {...props}
         setAccountView={setAccountView}
         dimensions={navDimensions}
         setDimensions={setNavDimensions}
@@ -391,6 +394,8 @@ export const App = (props: any) => {
         setCurrentNav={setCurrentNav}
         mobile={mobile}
         isSetup={isSetup}
+        setIsSetup={setIsSetup}
+        isLoaded={isLoaded}
         />
         : null} 
     </NavigationContainer>

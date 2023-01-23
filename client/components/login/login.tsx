@@ -61,7 +61,7 @@ const Login = (props: any) => {
   const handleChange = (value: string, isEmail: boolean) => {
     let eValue = isEmail ? value : email;
     let pValue = !isEmail ? value : password;
-    //let emailError = !(validateEmail(eValue)); ja temp
+    //let emailError = !(validateEmail(eValue)); // ja temp
     let passwordError = pValue.length == 0;
     setPassword(pValue);
     setEmail(eValue);
@@ -80,6 +80,10 @@ const Login = (props: any) => {
   };
 
   const navigateToLast = (data: any) => {
+    navigation.reset({
+      index: 0,
+      routes: [{name: NavTo.Profile}],
+    });
     if (data && data.user) {
       if (data.user.is_setup) {
         if (data.user.setup_step == NavTo.Search)

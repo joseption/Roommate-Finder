@@ -6,6 +6,7 @@ import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 
 const backend_api = "https://api.roomfin.xyz";
+
 export async function login(email: string, password: string) {
   return await doRequest<AuthSession>(
     `${backend_api}/auth/login`,
@@ -116,6 +117,96 @@ export async function UpdateBioAndTags(bio: string, tags: string[]) {
     {
       bio,
       tags,
+    },
+    "POST",
+    true
+  );
+}
+
+export async function UpdateFirstName(firstName: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/users/updateFirstName`,
+    {
+      firstName,
+    },
+    "POST",
+    true
+  );
+}
+
+export async function UpdateLastName(lastName: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/users/updateLastName`,
+    {
+      lastName,
+    },
+    "POST",
+    true
+  );
+}
+
+export async function UpdateGender(gender: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/users/updateGender`,
+    {
+      gender,
+    },
+    "POST",
+    true
+  );
+}
+
+export async function UpdatePhone(phoneNumber: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/users/updatePhoneNumber`,
+    {
+      phoneNumber,
+    },
+    "POST",
+    true
+  );
+}
+
+export async function UpdateCity(city: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/users/updateCity`,
+    {
+      city,
+    },
+    "POST",
+    true
+  );
+}
+
+export async function UpdateState(state: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/users/updateState`,
+    {
+      state,
+    },
+    "POST",
+    true
+  );
+}
+
+export async function UpdateZip(zip_code: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/users/updateZip`,
+    {
+      zip_code,
+    },
+    "POST",
+    true
+  );
+}
+
+//update bday
+
+export async function UpdateBirthday(bday: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/users/updateBday`,
+    {
+      bday,
     },
     "POST",
     true

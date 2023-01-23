@@ -10,6 +10,7 @@ export interface ResponsesOnUsers {
 }
 
 export interface SurveyInfo {
+  ResponsesOnUsers: ResponsesOnUsers[];
   id: string;
   question_text: string;
   response: response[];

@@ -3,7 +3,7 @@ import { isAuthenticated } from '../../middleware';
 import db from '../../utils/db';
 const router = express.Router();
 
-// router.use(isAuthenticated);
+router.use(isAuthenticated);
 
 // retreive all the matches for a user
 router.get('/all', async (req: Request, res: Response) => {
@@ -59,8 +59,6 @@ router.post('/create', async (req: Request, res: Response) => {
       mySet.add(loggedInResponses[response]['responseId']);
     }
 
-    console.log(loggedInResponses);
-
     for (const user in groupedResponses) {
       if (user !== loggedInUserId) {
         // calculate the percentage of responses that match
@@ -72,13 +70,6 @@ router.post('/create', async (req: Request, res: Response) => {
           }
         }
         matchScore = (numberInCommon / totalResponses) * 100; // ! MATCH SCORE CURRENTLY OFF BECAUSE TOTALRESPONSES IS ACTUALLY 25 BUT QUIZ FRONTNEND HAS 5 QUESTIONS
-        // await db.matches.create({
-        //   data: {
-        //     userOneId: loggedInUserId,
-        //     userTwoId: user,
-        //     matchPercentage: matchScore,
-        //   },
-        // });
 
         const upsertMatchScore = await db.matches.upsert({
           where: {

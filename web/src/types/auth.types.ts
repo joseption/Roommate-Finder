@@ -20,5 +20,8 @@ export interface AuthSession {
   accessToken: string;
   refreshToken: string;
   userId: string;
-  user?: user;
+  user?: {
+    first_name: string;
+    image?: string;
+  };
 }

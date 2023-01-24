@@ -1,5 +1,6 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
+import { getLocalStorage } from '../../helper';
 
 interface Props {
   chat: any,
@@ -9,6 +10,29 @@ interface Props {
 }
 
 const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) => {
+  const [userInfo, setUserInfo] = useState<any>();
+
+  useEffect(() => {
+    getUserInfo();
+  }, [])
+
+  const getUserInfo = async () => {
+    setUserInfo(await getLocalStorage().then((res) => {return res.user}));
+  }
+  
+  const getPrefix = (id: string) => {
+    if (!userInfo) return '';
+    if (id === userInfo.id) {
+      return 'You: ';
+    }
+    for (let i = 0; i < chat.users.length; i++) {
+      if (chat.users[i].id === id) {
+        return chat.users[i].name + ': ';
+      }
+    }
+    return '';
+  }
+
   return (
     <TouchableHighlight
       style={styles.touchable}
@@ -19,10 +43,10 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
       }}
     >
       <View style={styles.content}>
-        <Image style={styles.image} source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }} />
+        <Image style={styles.image} source={{ uri: (chat.users[0].image != null) ? chat.users[0].image : 'https://reactnative.dev/img/tiny_logo.png'}} />
         <View style={styles.text}>
-            <Text numberOfLines={1} style={styles.name}>{chat.name}</Text>
-            <Text numberOfLines={2}>{chat.lastMessage}</Text>
+            <Text numberOfLines={1} style={styles.name}>{chat.chatName}</Text>
+            <Text numberOfLines={2}>{getPrefix(chat.latestMessage.userId) + chat.latestMessage.content}</Text>
         </View>
       </View>
     </TouchableHighlight>

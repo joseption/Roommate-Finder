@@ -1,43 +1,109 @@
-import { useState } from 'react';
-import { _Text, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, FlatList, TextInput, Button, StyleSheet } from 'react-native';
 import MessageTab from '../components/messages/message-tab';
 import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
+import { env, getLocalStorage } from '../helper';
 
 const MessagesScreen = (props: any, {navigation}:any) => {
   const [showPanel, updateShowPanel] = useState(false);
   const [currentChat, setCurrentChat] = useState({});
+  const [chats, setChats] = useState<any[]>([]);
+  const [userInfo, setUserInfo] = useState<any>();
 
-  const data = [...Array(20).keys()].map((item) => {
-    return {
-      name: `SD${item}`,
-      lastMessage: `Last Message ${item}`,
-      messages: [
-        {
-          sender: 'a',
-          text: `hello ${item}`
-        },
-        {
-          sender: 'a',
-          text: 'world is very fun an full of many things to do. One of those things is being able to work on SD2. Oh so much fun!'
-        },
-        {
-          sender: 'b',
-          text: `hey ${item}`
-        },
-        {
-          sender: 'b',
-          text: 'there is a lot to do, and what best time I could spend than to spend time working on my SD2 project!'
-        },
-      ]
-    }
-  });
+  useEffect(() => {
+    getUserInfo();
+  }, [])
+  
+  useEffect(() => {
+    getChats();
+  }, [userInfo])
+
+  const getUserInfo = async () => {
+    setUserInfo(await getLocalStorage().then((res) => {return res.user}));
+  }
+
+  const getMessage = async (id: string) => {
+    return fetch(
+      `${env.URL}/messages/getMessage?messageId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+        return {content: '', createdAt: '', userId: '',};
+      }
+      else {
+        let message = {
+          content: res.content,
+          createdAt: res.createdAt,
+          userId: res.userId,
+        };
+        return message;
+      }
+    });
+  }
+
+  const getUser = async (id: string) => {
+    return fetch(
+      `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      }
+      else {
+        let user = {
+          id: res.id,
+          email: res.email,
+          image: res.image,
+        };
+        return user;
+      }
+    });
+  }
+
+  const getChats = async () => {
+    fetch(
+      `${env.URL}/chats?userId=${userInfo?.id}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      }
+      else {
+        let chatArray = [];
+        for (let i = 0; i < res.length; i++) {
+          let lastMessage = await getMessage(res[i].latestMessage);
+          let users = []
+          for (let j = 0; j < res[i].users.length; j++) {
+            if (res[i].users[j] === userInfo?.id) {
+              continue;
+            }
+            let user = await getUser(res[i].users[j])
+            users.push(user);
+          }
+          let chat = {
+            chatName: res[i].chatName,
+            createdAt: res[i].createdAt,
+            groupAdmin: res[i].groupAdmin,
+            id: res[i].id,
+            isGroupChat: res[i].isGroupChat,
+            latestMessage: lastMessage,
+            updatedAt: res.updatedAt,
+            users: users,
+          };
+          chatArray.push(chat);
+        }
+        setChats(chatArray);
+      }
+    });
+  }
 
   return (
     <>
       <FlatList
-        data={data}
+        data={chats}
         renderItem={({item}) => 
           <MessageTab
             showPanel={showPanel}

@@ -42,7 +42,7 @@ const LoginScreen = (props:any) => {
   const [emailValue, setEmailValue] = useState('');
   const [stopInterval,setStopInterval] = useState(-1);
   const [url,setUrl] = useState('');
-  const [isRegistering,setIsRegistering] = useState(false);
+  const [passwordUpdateType,setPasswordUpdateType] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [token, setToken] = useState('');
   const [autoResend, setAutoResend] = useState(false);
@@ -152,10 +152,10 @@ const LoginScreen = (props:any) => {
   const route = () => {
     if (navigation) {
       let state = navigation.getState();
-      if (state) {
+      if (state && state.routes) {
         let idx = state.index;
         if (!idx) {
-            idx = state.routes ? state.routes.length - 1 : 0;
+            idx = state.routes.length - 1;
         }
         return state.routes[idx];
       }
@@ -179,16 +179,14 @@ const LoginScreen = (props:any) => {
             uEmail = rt.params['email'];
             setRegisterEmail(uEmail);
           }
+          setPasswordUpdateType(uPath);
           if (await hasValidToken(uToken, uPath)) {
-            if (uPath == "confirmEmail")
-              setIsRegistering(true);
             updateVisibleScreen(screen.updatePassword);
           }
           else {
             if (uPath == "confirmEmail") {
               setEmailValue(uEmail as string);
               setAutoResend(true);
-              setIsRegistering(true);
               updateVisibleScreen(screen.activateEmailSent);
             }
             else if (uPath == "reset")
@@ -290,7 +288,7 @@ const LoginScreen = (props:any) => {
                 sendEmailPressed={() => goLeft(screen.activateEmailSent)} // update to do stuff and then goLeft(1)
                 loginPressed={() => goRight(screen.login)}
                 style={[styles.panel, register ? null : styles.hidden]}
-                setIsRegistering={setIsRegistering}
+                setPasswordUpdateType={setPasswordUpdateType}
               />
               <Login
                 url={url}
@@ -322,8 +320,8 @@ const LoginScreen = (props:any) => {
                 updatePasswordPressed={() => goRight(screen.passwordUpdated)} // update to do stuff and then goRight(1)
                 loginPressed={() => goLeft(screen.login)}
                 style={[styles.panel, updatePassword ? null : styles.hidden]}
-                isRegistering={isRegistering}
-                setIsRegistering={setIsRegistering}
+                passwordUpdateType={passwordUpdateType}
+                setPasswordUpdateType={setPasswordUpdateType}
                 email={emailValue}
                 setEmail={setEmailValue}
                 registerPressed={() => goLeft(screen.register)}

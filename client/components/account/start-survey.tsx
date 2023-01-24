@@ -4,18 +4,20 @@ import _Dropdown from '../control/dropdown';
 import _Checkbox from '../control/checkbox';
 import _Group from '../control/group';
 import _Text from '../control/text';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Color, Content, FontSize, Radius, Style } from '../../style';
 import { styles } from '../../screens/login';
 import _Button from '../control/button';
 import _Image from '../control/image';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import DocumentPicker, {DirectoryPickerResponse, DocumentPickerResponse, isInProgress, types} from 'react-native-document-picker'
+import { AccountScreenType, authTokenHeader, env, navProp, NavTo } from '../../helper';
+import { useNavigation } from '@react-navigation/native';
 
-const StartSurvey = (props: any, {navigation}:any) => {
+const StartSurvey = (props: any) => {
     const [error,setError] = useState('');
     const [search,setIsSearch] = useState(false);
-    // JA TODO props.accountIsSetup need to know if the account is setup or not
+    const navigation = useNavigation<navProp>();
     const errorStyle = () => {
         var style = [];
         style.push(Style.textDanger);
@@ -26,6 +28,7 @@ const StartSurvey = (props: any, {navigation}:any) => {
 
     const errorContainerStyle = () => {
         var style = [];
+        style.push(_styles.error);
         if (props.mobile) {
             style.push(Style.errorMsgMobile);
         }
@@ -75,6 +78,51 @@ const StartSurvey = (props: any, {navigation}:any) => {
         return style;
     }
 
+    const completeSetup = async (gotoSurvey: boolean) => {
+        setError('');
+        let hasError = false;
+        let step = gotoSurvey ? 'survey' : 'explore';
+        let obj = {setup_step:step};
+        let js = JSON.stringify(obj);
+
+        try
+        {   
+            let tokenHeader = await authTokenHeader();
+            await fetch(`${env.URL}/users/completeSetup`,
+            {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
+                let res = JSON.parse(await ret.text());
+                if (res.Error)
+                {
+                    if (res.Error == "Un-Authorized") {
+                        navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                        return;
+                    }
+                    hasError = true;
+                }
+                else {
+                    if (gotoSurvey) {
+                        navigation.navigate(NavTo.Survey);
+                    }
+                    else {
+                        navigation.navigate(NavTo.Search);
+                    }
+                }
+            });
+        }
+        catch(e)
+        {
+            hasError = true;
+        } 
+        if (hasError) {
+            setError('A problem occurred, please try reloading the page.');
+        }
+    }
+
+    const goBack = () => {
+        navigation.navigate(NavTo.Account, {view: 'about'} as never);
+        props.setView(AccountScreenType.about);
+    }
+
     return (
     <ScrollView>
         <View
@@ -116,6 +164,7 @@ const StartSurvey = (props: any, {navigation}:any) => {
                             style={[Style.buttonDefault, _styles.surveyButton, _styles.innerGap]}
                             textStyle={ _styles.surveyButtonText}
                             containerStyle={_styles.surveyButtonContainer}
+                            onPress={(e: any) => completeSetup(true)}
                             >
                                 Start Survey
                             </_Button>
@@ -138,6 +187,7 @@ const StartSurvey = (props: any, {navigation}:any) => {
                             style={[Style.buttonGold, _styles.surveyButton, _styles.innerGap]}
                             textStyle={ _styles.surveyButtonText}
                             containerStyle={_styles.surveyButtonContainer}
+                            onPress={(e: any) => completeSetup(false)}
                             >
                                 Explore
                             </_Button>
@@ -154,6 +204,7 @@ const StartSurvey = (props: any, {navigation}:any) => {
                     >
                         <Pressable
                         style={_styles.arrowContainer}
+                        onPress={(e: any) => goBack()}
                         >
                             <FontAwesomeIcon 
                             size={20} 
@@ -185,16 +236,16 @@ const StartSurvey = (props: any, {navigation}:any) => {
                         }
                     </View> 
                 </View>
+                {error || props.error ?
+                <_Text
+                containerStyle={errorContainerStyle()}
+                style={errorStyle()}
+                >
+                    {error}
+                </_Text>
+                : null}
             </View>
         </View>
-        {props.error ?
-        <_Text
-        containerStyle={errorContainerStyle()}
-        style={errorStyle()}
-        >
-            {error}
-        </_Text>
-        : null}
     </ScrollView>
     );
 };
@@ -308,6 +359,9 @@ const _styles = StyleSheet.create({
     },
     subTitleMobile: {
         fontSize: FontSize.default
+    },
+    error: {
+        marginTop: 40
     },
     group: {
         maxWidth: Content.width / 2,

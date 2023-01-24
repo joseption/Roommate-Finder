@@ -13,7 +13,7 @@ const _ClusterOption = (props: any) => {
     const [selected,setSelected] = useState(false);
 
     useEffect(() => {
-        setSelected(props.selected.includes(props.item.key));
+        setSelected(props.selected.includes(props.item));
     }, [props.selected]);
 
     const style = () => {
@@ -28,12 +28,12 @@ const _ClusterOption = (props: any) => {
     return (
         <_Button
         style={style()}
-        onPress={() => props.onPress(props.item.key)}
+        onPress={() => props.onPress(props.item)}
         >
             <_Text
             style={selected ? styles.selectedLabel : null}
             >
-                {props.item.value}
+                {props.item}
             </_Text>
         </_Button>
     );

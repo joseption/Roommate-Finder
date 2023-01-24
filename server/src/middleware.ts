@@ -2,12 +2,15 @@ import jwt from 'jsonwebtoken';
 import{ Request, Response, NextFunction } from 'express';
 
 const prod = {
-  URL: "https://roomfin.xyz"
+  URL: "https://roomfin.xyz",
+  clientURL: "https://roomfin.xyz",
 };
 
 const dev = {
- URL: "http://localhost:8080"
+ URL: "http://localhost:8080",
+ clientURL: "http://localhost:19006"
 };
+
 export const env = process.env.NODE_ENV === "development" ? dev : prod;
 
 export function notFound(req:Request, res:Response, next:NextFunction) {

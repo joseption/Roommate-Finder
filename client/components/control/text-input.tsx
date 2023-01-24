@@ -3,7 +3,7 @@ import { setStatusBarStyle } from 'expo-status-bar';
 import React, { useContext, useEffect, useState } from 'react';
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Context, isMobile } from '../../helper';
-import { Color, Style } from '../../style';
+import { Color, Radius, Style } from '../../style';
 import _Text from './text';
 
 const _TextInput = (props: any) => {
@@ -22,19 +22,12 @@ const _TextInput = (props: any) => {
   ref: Give the input field a ref
   */
   const context = useContext(Context);
-  const phonePlaceholder = '(999) 999-9999';
   const [length,setLength] = useState(0);
-  const [value,setValue] = useState('');
-  const [init,setInit] = useState(false);
+  const [phoneMask,setPhoneMask] = useState(false);
+  const [phoneMaskLength,setPhoneMaskLength] = useState(0);
   // JA todo: phone masking is not finished
   useEffect(() => {
-    if (!init) {
-      if (props.value)
-        setValue(props.value);
-
-      setInit(true);
-    }
-  }, [value]);
+  }, []);
 
   const labelStyle = () => {
     var style = [];
@@ -61,6 +54,9 @@ const _TextInput = (props: any) => {
     if (!props.style) {
       style.push(props.style);
     }
+    style.push(styles.transparentBackground);
+    if (phoneMask)
+      style.push(styles.phoneMaskText);
     return style;
   }
 
@@ -99,27 +95,30 @@ const _TextInput = (props: any) => {
     }
   }
 
+  const phonePlaceholder = () => {
+    let mask = '(999) 999-9999';
+    return getValue() + mask.substring(phoneMaskLength);
+  }
+
   const onChangeText = (e: any) => {
-    setLength(e.length);
     var value = e;
-    // JA Todo add pattern matching (needs to be reverse of this)
-    // if (props.pattern) {
-    //   value = e.replace(/^/ + props.pattern, '');
-    // }
     if (props.keyboardType === 'numeric' || props.type === 'phone') {
       value = e.replace(/[^0-9]/g, '');
     }
-    setValue(value);
-    
+    setLength(value.length);
     if (props.onChangeText)
       props.onChangeText(value);
+    if (props.setValue)
+      props.setValue(value);
   }
 
   const placeholder = () => {
     if (props.placeholder)
       return props.placeholder;
-    else if (props.type === 'phone')
-      return phonePlaceholder;
+    else if (props.type === 'phone' && !phoneMask) {
+      setPhoneMask(true);
+      return '';
+    }
   }
 
   const keyboardType = () => {
@@ -127,6 +126,36 @@ const _TextInput = (props: any) => {
       return props.keyboardType;
     else if (props.type === 'phone')
       return 'numeric'
+  }
+
+  const getMaxLength = () => {
+    if (phoneMask && props.maxLength)
+      return props.maxLength + 4;
+    else
+      return props.maxLength;
+  }
+
+  const getValue = () => {
+    if (phoneMask) {
+      let value = '';
+      for (let i = 0; i < props.value.length; i++) {
+        if (i == 0)
+          value += '(';
+        
+         if (i == 3)
+          value += ') ';
+
+        if (i == 6)
+          value += '-';
+
+        value += props.value[i];
+      }
+      if (value.length != phoneMaskLength)
+        setPhoneMaskLength(value.length);
+      return value;
+    }
+    else
+      return props.value;
   }
 
   return (
@@ -168,23 +197,53 @@ const _TextInput = (props: any) => {
         </_Text>
         : null }
       </View>
-      <TextInput
-      style={style()}
-      onChangeText={(e: any) => onChangeText(e)}
-      value={value}
-      placeholder={placeholder()}
-      keyboardType={keyboardType()}
-      secureTextEntry={props.type === 'password'}
-      ref={props.ref}
-      multiline={props.multiline}
-      maxLength={props.maxLength}
-      />
-      
+      <View
+      style={styles.textBackground}
+      >
+        {phoneMask ?
+        <_Text
+        containerStyle={styles.phoneContainer}
+        style={styles.phoneMask}
+        >
+          {phonePlaceholder()}
+        </_Text>
+        : null }
+        <TextInput
+        style={style()}
+        onChangeText={(e: any) => onChangeText(e)}
+        value={getValue()}
+        placeholder={placeholder()}
+        keyboardType={keyboardType()}
+        secureTextEntry={props.type === 'password'}
+        ref={props.ref}
+        multiline={props.multiline}
+        maxLength={getMaxLength()}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  phoneMaskText: {
+    color: Color.textMask
+  },
+  transparentBackground: {
+    backgroundColor: Color.transparent
+  },
+  textBackground: {
+    backgroundColor: Color.white,
+    borderRadius: Radius.default
+  },
+  phoneMask: {
+    color: Color.textSecondary
+  },
+  phoneContainer: {
+    zIndex: -1,
+    position: 'absolute',
+    top: 8,
+    left: 11,
+  },
   count: {
     color: Color.textSecondary
   },

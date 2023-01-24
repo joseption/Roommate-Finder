@@ -125,6 +125,17 @@ export function updateCity(id:string, city:string){
   });
 }
 
+export function updateImage(id:string, image:string){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      image,
+    },
+  });
+}
+
 export function updateState(id:string, state:string){
   return db.user.update({
     where: {
@@ -179,7 +190,6 @@ export async function UpdateTagsandBio(tags:string[], user_id:string, bio:string
         user_id,
       }
     });
-  
     // add new tags
     for (let i = 0; i < tags.length; i++) {
       await db.tags.create({
@@ -223,4 +233,27 @@ export function updateBday(id:string, birthday:string){
         birthday,
       },
     });
+}
+
+export function updateSetupStep(id:string, setup_step:string){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      setup_step,
+    },
+  });
+}
+
+export function completeSetupAndSetStep(id:string, setup_step:string){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      is_setup: true,
+      setup_step
+    },
+  });
 }

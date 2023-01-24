@@ -19,6 +19,9 @@ const Navigation = (props: any) => {
     const navigation = useNavigation<navProp>();
 
     useEffect(() => {
+        //if (props.setIsSetup) // ja temp (isloaded and setissetup given to this component too)
+    //props.setIsSetup(true);
+
         if (props.mobile) {
             setShowMenu(false);
         }
@@ -32,17 +35,17 @@ const Navigation = (props: any) => {
                 }
             }
         }
-        setVisible(props.isLoggedIn); // JA TEMP -> props.isLoggedIn
+        setVisible(props.isLoggedIn);
         
-    }, [props.mobile, visible, props.navigation, props.isLoggedIn]);
+    }, [props.mobile, visible, props.navigation, props.isLoggedIn, props.isSetup, props.isLoaded]);
 
     const route = () => {
         if (props.navigation) {
           let state = props.navigation.getState();
-          if (state) {
+          if (state && state.routes) {
             let idx = state.index;
             if (!idx) {
-                idx = state.routes ? state.routes.length - 1 : 0;
+                idx = state.routes.length - 1;
             }
             return state.routes[idx];
           }
@@ -222,7 +225,9 @@ const Navigation = (props: any) => {
             </View>
             :
             <View>
-            {visible ?
+                <_Text>{props.isSetup == true ? 'issetup yes' : 'issetup nope'}</_Text>
+                <_Text>{visible == true ? 'visible yes' : 'visible nope'}</_Text>
+            {props.isSetup && visible ?
                 <View
                 style={styles.mobileContainer}
                 >

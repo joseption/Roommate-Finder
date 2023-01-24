@@ -21,7 +21,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
 
   useEffect(() => {
     checkDisabledBtn();
-  }, [props.isRegistering, verifyPValue, pValue]);
+  }, [props.passwordUpdateType, verifyPValue, pValue]);
 
   const checkDisabledBtn = () => {
       setDisabled(!hasSymbol || !hasCharLimit || !hasUpperCase || !isMatching);
@@ -106,7 +106,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
               setVerifyPValue('');
               setPwdError(false);
               setVerifyPwdError(false);
-              props.setIsRegistering(false);
+              props.setPasswordUpdateType('');
               props.setAccountAction(false);
               props.updatePasswordPressed();
           }
@@ -119,7 +119,14 @@ const UpdatePassword = (props: any, {navigation}:any) => {
   };
 
   const title = () => {
-    return props.isRegistering ? 'Create Password' : 'Update Password';
+    if (props.passwordUpdateType === "confirmEmail")
+      return "Create Password";
+    else if (props.passwordUpdateType === "reset")
+      return "Reset Password";
+    else if (props.passwordUpdateType === "update")
+      return "Update Password";
+    else
+      return "Set Password";
   }
   
   return (
@@ -220,7 +227,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
         onPress={() => doPasswordUpdate()}
         disabled={disabled}
         >
-          Set Password
+          Save
         </_Button>
       </View>
       <_Text

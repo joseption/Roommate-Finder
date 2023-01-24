@@ -35,10 +35,10 @@ const SearchScreen = (props: any) => {
     const route = () => {
         if (navigation) {
             let state = navigation.getState();
-            if (state) {
+            if (state && state.routes) {
                 return state.routes[state.index];
-                }
             }
+        }
         return null;
     }
 

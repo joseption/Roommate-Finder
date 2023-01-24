@@ -27,7 +27,16 @@ const AccountScreen = (props: any) => {
                     props.accountView === AccountScreenType.survey ||
                     !props.accountView &&
                     view.includes("survey")) {
-                    setView(AccountScreenType.survey);
+                    if (props.isSetup) {
+                        if (props.setup_step == 'explore') {
+                            navigation.navigate(NavTo.Search);
+                        }
+                        else {
+                            navigation.navigate(NavTo.Survey);
+                        }
+                    }
+                    else
+                        setView(AccountScreenType.survey);
                 }
                 else
                     setView(AccountScreenType.info);
@@ -37,22 +46,22 @@ const AccountScreen = (props: any) => {
         }
         else
             setView(AccountScreenType.info);
-    }, [navigation, props.accountView, props.isLoggedIn]);
+    }, [navigation, props.accountView, props.isLoggedIn, props.setupStep]);
 
     const route = () => {
         if (navigation) {
             let state = navigation.getState();
-            if (state) {
+            if (state && state.routes) {
                 return state.routes[state.index];
-                }
             }
+        }
         return null;
     }
 
     const setView = async (type: AccountScreenType) => {
         let data = await getLocalStorage();
-        //if (!data?.user?.is_setup && data.user.setup_step !== "survey" && type == AccountScreenType.survey)
-           // type = AccountScreenType.info;
+        if (data && data.user && data.user.setup_step !== "survey" && type == AccountScreenType.survey)
+           type = AccountScreenType.info;
         // JA TODO need to auto save if user is switching views
         var view = 'info';
         if (type == AccountScreenType.about)
@@ -71,6 +80,9 @@ const AccountScreen = (props: any) => {
         error={props.error}
         setError={props.setError}
         setView={(e: any) => setView(e)}
+        isSetup={props.isSetup}
+        setPrompt={props.setPrompt}
+        scrollY={props.scrollY}
         />
         :
         <View>
@@ -80,6 +92,7 @@ const AccountScreen = (props: any) => {
             error={props.error}
             setError={props.setError}
             setView={(e: any) => setView(e)}
+            isSetup={props.isSetup}
             />
             :
             <View>
@@ -89,6 +102,7 @@ const AccountScreen = (props: any) => {
                 error={props.error}
                 setError={props.setError}
                 setView={(e: any) => setView(e)}
+                isSetup={props.isSetup}
                 />
                 : null }
             </View>

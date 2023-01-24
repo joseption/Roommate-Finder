@@ -12,7 +12,7 @@ import ListingsScreen from './screens/listings';
 import MessagesScreen from './screens/messages';
 import SearchScreen from './screens/search';
 import { Color, Content } from './style';
-import { env, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack } from './helper';
+import { Context, env, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
@@ -31,6 +31,11 @@ export const App = (props: any) => {
   const [accountAction,setAccountAction] = useState(false);
   const [init,setInit] = useState(false);
   const [initLink,setInitLink] = useState('');
+  const [isSetup,setIsSetup] = useState(false);
+  const [isLoaded,setIsLoaded] = useState(false);
+  const [prompt,setPrompt] = useState(false);
+  const [setupStep,setSetupStep] = useState('');
+  const [scrollY,setScrollY] = useState(0);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
@@ -39,6 +44,7 @@ export const App = (props: any) => {
   });
 
   useEffect(() => {
+    // setIsSetup(true); // ja remove
     setMobile(isMobile());
     const subscription = Dimensions.addEventListener(
       "change",
@@ -50,6 +56,7 @@ export const App = (props: any) => {
       DeepLinking.getInitialURL().then(async (link: any) => {
         if (link) {
           setInitLink(link);
+          checkLoggedIn();
         }
       });
     }
@@ -61,7 +68,7 @@ export const App = (props: any) => {
       setup();
 
     return () => subscription?.remove();
-  }, [navDimensions.height, mobile, adjustedPos, ref, isLoggedIn, currentNav]);
+  }, [navDimensions.height, mobile, adjustedPos, ref, isLoggedIn, currentNav, prompt]);
   
   if (!loaded) {
     return null;
@@ -83,6 +90,14 @@ export const App = (props: any) => {
       }
       checkLoggedIn();
       prepareStyle();
+      if (!isLoaded)
+        setIsLoaded(true);
+  }
+
+  const navigateToSetupStep = (step: string) => {
+      if (!step)
+        step = "info";
+      ref.current?.navigate(NavTo.Account, {view: step} as never);
   }
 
   async function checkLoggedIn() {
@@ -103,9 +118,15 @@ export const App = (props: any) => {
             }
             else
             {
-              data.accessToken = res.accessToken;
-              await setLocalStorage(data);
+              await setLocalStorage(res);
+              let l_isSetup = res.user.is_setup == true ? true : false;
+              let l_setupStep = res.user.setup_step != null ? res.user.setup_step : '';
+              setIsSetup(l_isSetup);
+              setSetupStep(l_setupStep);
               setIsLoggedIn(true);
+              if (!l_isSetup) {
+                navigateToSetupStep(l_setupStep);
+              }
             }
           });
       }
@@ -117,11 +138,21 @@ export const App = (props: any) => {
     else {
       error = true;
     }
-    if (error && ref.current?.getCurrentRoute()?.name !== NavTo.Login) {
-      await setLocalStorage(null);
-      ref.current?.navigate(NavTo.Login, {timeout: 'yes'} as never);
-      ref.current?.resetRoot();
-      setIsLoggedIn(false);
+    if (error) {
+      if (ref && ref.current) {
+        let route = ref.current.getCurrentRoute();
+        if (route && route.name !== NavTo.Login) {
+          await setLocalStorage(null);
+          ref.current.navigate(NavTo.Login, {timeout: 'yes'} as never);
+            try {
+              ref.current.resetRoot();
+            }
+            catch (e) {
+              // Can't reset root
+            }
+          setIsLoggedIn(false);
+        }
+      }
     }
   }
 
@@ -146,9 +177,15 @@ export const App = (props: any) => {
       backgroundColor = Color.white;
     }
 
+    var overflow = 'auto';
+    if (prompt) {
+      overflow = 'hidden';
+    }
+
     var container = {
       backgroundColor: backgroundColor,
       marginTop: marginTop,
+      overflowY: overflow
     }
 
     setContainerStyle(container);
@@ -156,6 +193,11 @@ export const App = (props: any) => {
 
   const scroll = (e: any) => {
       getOffset(e.nativeEvent.contentSize.width);
+      let offset = e.nativeEvent.contentOffset;
+      let y = offset.y;
+      if (y > 0)
+        y -= navDimensions.height;
+      setScrollY(y)
   }
 
   const header = (e: any) => {
@@ -197,7 +239,7 @@ export const App = (props: any) => {
       paddingLeft: paddingLeft,
       paddingRight: paddingRight,
       transform: [{translateX: translate}],
-      paddingTop: paddingTop
+      paddingTop: paddingTop,
     }
     
     style.push(content);
@@ -214,6 +256,14 @@ export const App = (props: any) => {
     return ref.current;
   }
 
+  const getMainStyle = () => {
+    let style = [];
+    style.push(containerStyle);
+    style.push(styles.container);
+
+    return style;
+  }
+
   return (
     <NavigationContainer
     linking={linking}
@@ -221,7 +271,7 @@ export const App = (props: any) => {
     >
         <ScrollView
         contentContainerStyle={scrollParentContainerStyle()}
-        style={[containerStyle, styles.container]}
+        style={getMainStyle()}
         onScroll={(e) => scroll(e)}
         scrollEventThrottle={100}
         onContentSizeChange={(w, h) => getScrollDims(w, h)}
@@ -267,6 +317,10 @@ export const App = (props: any) => {
               accountView={accountView}
               setAccountView={setAccountView}
               mobile={mobile}
+              isSetup={isSetup}
+              setupStep={setupStep}
+              setPrompt={setPrompt}
+              scrollY={scrollY}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -331,7 +385,6 @@ export const App = (props: any) => {
         </ScrollView>
         {Platform.OS === 'web' ?
         <Navigation
-        {...props}
         setAccountView={setAccountView}
         dimensions={navDimensions}
         setDimensions={setNavDimensions}
@@ -339,7 +392,11 @@ export const App = (props: any) => {
         navigation={nav()}
         isLoggedIn={isLoggedIn}
         setCurrentNav={setCurrentNav}
-        mobile={mobile} />
+        mobile={mobile}
+        isSetup={isSetup}
+        setIsSetup={setIsSetup}
+        isLoaded={isLoaded}
+        />
         : null} 
     </NavigationContainer>
   );

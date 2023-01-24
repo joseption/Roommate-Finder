@@ -28,7 +28,10 @@ export const Color = {
     none: 'transparent',
     gold: '#edb74d',
     goldSecondary: '#d5a445',
-    darkgrey: '383c3b'
+    darkgrey: '#383c3b',
+    holderMask: '#F0F2F5BF',
+    whiteMask: '#FFFFFFBF',
+    textMask: '#505050',
 }
 
 export const FontSize = {

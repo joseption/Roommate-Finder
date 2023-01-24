@@ -20,6 +20,7 @@ const AccountAbout = (props: any) => {
     const [init,setInit] = useState(false);
     const [isSaved,setIsSaved] = useState(false);
     const [isLoading,setIsLoading] = useState(false);
+    const [isLoaded,setIsLoaded] = useState(false);
     const [tagsAmount,setTagsAmount] = useState(0);
     const tags = [
         "Travel",
@@ -53,7 +54,9 @@ const AccountAbout = (props: any) => {
             onLoad();
             setInit(true);
         }
-    }, [bioForm, tagForm, props.isSetup])
+        if (props.isSetup && isLoaded)
+            setIsSaved(true);
+    }, [bioForm, tagForm, props.isSetup, isLoaded])
 
     const setupPage = (data: any) => {
         setBio(data.bio);
@@ -64,7 +67,6 @@ const AccountAbout = (props: any) => {
             });
             setTagForm(tags);
         }
-        setIsSaved(true);
     }
 
     const errorStyle = () => {
@@ -126,7 +128,7 @@ const AccountAbout = (props: any) => {
         return style;
     }
 
-    const checkNextDisabled = () => {
+    const checkSubmitDisabled = () => {
         return isSaved || !bioForm || tagForm.length != 5
     }
 
@@ -215,6 +217,7 @@ const AccountAbout = (props: any) => {
                 }
                 else {
                     setupPage(res);
+                    setIsLoaded(true);
                 }
             });
         }
@@ -224,6 +227,15 @@ const AccountAbout = (props: any) => {
         } 
         if (hasError)
             setError('A problem occurred while retrieving account information, please reload the page and try again.');
+    }
+
+    const submitText = () => {
+        if (isSaved) {
+            return !props.isSetup ? 'No Changes' : 'Changes Saved';
+        }
+        else {
+            return !props.isSetup ? 'Next' : 'Save';
+        }
     }
 
     return (
@@ -313,10 +325,10 @@ const AccountAbout = (props: any) => {
                     <_Button
                     loading={isLoading}
                     style={Style.buttonGold}
-                    disabled={checkNextDisabled()}
+                    disabled={checkSubmitDisabled()}
                     onPress={(e: any) => onSave('next')}
                     >
-                        {isSaved ? 'Changes Saved' : !props.isSetup ? 'Next' : 'Save'}
+                        {submitText()}
                     </_Button>
                 </View>
             </View>

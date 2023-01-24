@@ -44,7 +44,7 @@ export const App = (props: any) => {
   });
 
   useEffect(() => {
-    setIsSetup(true); // ja remove
+    // setIsSetup(true); // ja remove
     setMobile(isMobile());
     const subscription = Dimensions.addEventListener(
       "change",

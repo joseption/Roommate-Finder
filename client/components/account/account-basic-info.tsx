@@ -11,10 +11,12 @@ import _Button from '../control/button';
 import _Image from '../control/image';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import DocumentPicker, {DirectoryPickerResponse, DocumentPickerResponse, isInProgress} from 'react-native-document-picker'
-import { AccountScreenType, authTokenHeader, env, getLocalStorage, isMobile, NavTo, setLocalStorage } from '../../helper';
+import { AccountScreenType, authTokenHeader, env, getLocalStorage, isMobile, navProp, NavTo, setLocalStorage } from '../../helper';
 import { color } from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
 
-const AccountInfo = (props: any, {navigation}:any) => {
+const AccountInfo = (props: any) => {
+    const navigation = useNavigation<navProp>();
     const [error,setError] = useState('');
     const [month,setMonth] = useState('');
     const [day,setDay] = useState('');
@@ -34,6 +36,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
     const [passwordEmailSent,setPasswordEmailSent] = useState(false);
     const [passwordEmailError,setPasswordEmailError] = useState(false);
     const [isSaved,setIsSaved] = useState(false);
+    const [isLoaded,setIsLoaded] = useState(false);
     const [imageURL,setImageURL] = useState('');
     const [init,setInit] = useState(false);
     const [photoResult, setPhotoResult] = React.useState<Array<DocumentPickerResponse> | DirectoryPickerResponse | undefined | null>()
@@ -42,7 +45,9 @@ const AccountInfo = (props: any, {navigation}:any) => {
             onLoad();
             setInit(true);
         }
-    }, [props.isSetup])
+        if (props.isSetup && isLoaded)
+            setIsSaved(true);
+    }, [props.isSetup, isLoaded])
     
     const errorStyle = () => {
         var style = [];
@@ -229,12 +234,23 @@ const AccountInfo = (props: any, {navigation}:any) => {
         setIsPasswordLoading(false);
     };
 
+    const checkSubmitDisabled = () => {
+        // ja todo add !imageURL when working
+        return isSaved || !firstName || !lastName || !year || !month || !day || !phone || !zipCode || !city || !state || !gender
+    }
+
     const completeSave = () => {
         setIsLoading(false);
         setIsSaved(true);
         if (!props.isSetup) {
             navigation.navigate(NavTo.Account, {view: 'about'} as never);
             props.setView(AccountScreenType.about);
+        }
+    }
+
+    const checkSaved = () => {
+        if (isLoaded) {
+            setIsSaved(false);
         }
     }
 
@@ -246,15 +262,18 @@ const AccountInfo = (props: any, {navigation}:any) => {
         if (stamp) {
             let date = new Date(stamp);
             if (date) {
-                let year = date.getFullYear().toString();
-                let month = getMonthOptions().find(x => x.key === (date.getMonth() + 1));
-                let day = date.getDate().toString();
-                if (year.length > 0)
-                    setYear(year);
-                if (month && month.value.length > 0)
-                    setMonth(month.value);
-                if (day.length > 0)
-                    setDay(day);
+                let l_year = date.getFullYear().toString();
+                let l_month = getMonthOptions().find(x => x.key === (date.getMonth() + 1));
+                let l_day = date.getDate().toString();
+                if (l_year)
+                    setYear(l_year);
+                if (l_month && l_month.value.length > 0)
+                    setMonth(l_month.value);
+
+                if (l_month && l_year && l_day) {
+                    getDayOptions(l_month.key - 1, l_year);
+                    setDay(l_day);
+                }
             }
         }
     }
@@ -280,7 +299,6 @@ const AccountInfo = (props: any, {navigation}:any) => {
             if (data.gender)
                 setGender(data.gender);
         }
-        setIsSaved(true);
     }
 
     const onSave = async () => {
@@ -288,7 +306,8 @@ const AccountInfo = (props: any, {navigation}:any) => {
             let hasError = false;
             setIsLoading(true);
             let birthday;
-            birthday = new Date(`${month} ${day} ${year}`);
+            let monthNumber = getMonthOptions().find(x => x.value == month);
+            birthday = `${monthNumber?.key}/${day}/${year}`;
             let obj = {
                 first_name:firstName,
                 last_name:lastName, 
@@ -298,15 +317,16 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 city: city,
                 state: state,
                 gender: gender,
-                image: imageURL 
+                image: 'https://cdn-icons-png.flaticon.com/512/168/168724.png' //imageURL // ja update with real image url
             };
 
             let js = JSON.stringify(obj);
     
             try
             {   
-                await fetch(`${env.URL}/users/SAVEACCOUNTINFO`,
-                {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+                let tokenHeader = await authTokenHeader();
+                await fetch(`${env.URL}/users/updateAllProfile`,
+                {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
                 let res = JSON.parse(await ret.text());
                 if (res.Error)
                 {
@@ -359,6 +379,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
                     }
                     else {
                         setupPage(res);
+                        setIsLoaded(true);
                     }
                 });
             }
@@ -372,6 +393,15 @@ const AccountInfo = (props: any, {navigation}:any) => {
         } 
         if (hasError)
             setError('A problem occurred while retrieving account information, please reload the page and try again.');
+    }
+
+    const submitText = () => {
+        if (isSaved) {
+            return !props.isSetup ? 'No Changes' : 'Changes Saved';
+        }
+        else {
+            return !props.isSetup ? 'Next' : 'Save';
+        }
     }
 
     return (
@@ -537,6 +567,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 maxLength={50}
                 value={firstName}
                 setValue={setFirstName}
+                onChangeText={(e: any) => setIsSaved(false)}
                 ></_TextInput>
                 <_TextInput
                 label="Last Name"
@@ -545,6 +576,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 maxLength={50}
                 value={lastName}
                 setValue={setLastName}
+                onChangeText={(e: any) => setIsSaved(false)}
                 ></_TextInput>
                 <_Group
                 required={true}
@@ -554,7 +586,13 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 >
                     <_Dropdown
                     label="Year"
-                    selected={(e: any) => setYearForm(e)}
+                    selected={(e: any) =>
+                        {
+                            if (e)
+                                checkSaved();
+                            setYearForm(e);
+                        }
+                    }
                     options={getYearOptions()}
                     placeholder="Select..."
                     value={year}
@@ -562,7 +600,13 @@ const AccountInfo = (props: any, {navigation}:any) => {
                     ></_Dropdown>
                     <_Dropdown
                     label="Month"
-                    selected={(e: any) => setMonthForm(e)}
+                    selected={(e: any) =>
+                        {
+                            if (e)
+                                checkSaved();
+                            setMonthForm(e);
+                        }
+                    }
                     options={getMonthOptions()}
                     placeholder="Select..."
                     value={month}
@@ -574,6 +618,12 @@ const AccountInfo = (props: any, {navigation}:any) => {
                     placeholder="Select..."
                     value={day}
                     setValue={setDay}
+                    selected={(e: any) =>
+                        {
+                            if (e)
+                                checkSaved();
+                        }
+                    }
                     ></_Dropdown>
                 </_Group>
                 <_Group
@@ -588,6 +638,7 @@ const AccountInfo = (props: any, {navigation}:any) => {
                     type="phone"
                     value={phone}
                     setValue={setPhone}
+                    onChangeText={(e: any) => setIsSaved(false)}
                     ></_TextInput>
                     {/* <_Checkbox
                     visible={false}
@@ -607,11 +658,13 @@ const AccountInfo = (props: any, {navigation}:any) => {
                     keyboardType="numeric"
                     value={zipCode}
                     setValue={setZipCode}
+                    onChangeText={(e: any) => setIsSaved(false)}
                     ></_TextInput>
                     <_TextInput
                     label="City"
                     value={city}
                     setValue={setCity}
+                    onChangeText={(e: any) => setIsSaved(false)}
                     ></_TextInput>
                     <_Dropdown
                     label="State"
@@ -620,6 +673,12 @@ const AccountInfo = (props: any, {navigation}:any) => {
                     direction="top"
                     value={state}
                     setValue={setState}
+                    selected={(e: any) =>
+                        {
+                            if (e)
+                                checkSaved();
+                        }
+                    }
                     ></_Dropdown>
                 </_Group>
                 <_Dropdown
@@ -629,6 +688,13 @@ const AccountInfo = (props: any, {navigation}:any) => {
                 placeholder="Select..."
                 value={gender}
                 setValue={setGender}
+                required={true}
+                selected={(e: any) =>
+                    {
+                        if (e)
+                            checkSaved();
+                    }
+                }
                 ></_Dropdown>
                 <View
                 style={_styles.buttonContainer}
@@ -645,8 +711,9 @@ const AccountInfo = (props: any, {navigation}:any) => {
                     style={Style.buttonGold}
                     loading={isLoading}
                     onPress={(e: any) => onSave()}
+                    disabled={checkSubmitDisabled()}
                     >
-                        {props.isSetup ? 'Save' : 'Next'}
+                        {submitText()}
                     </_Button>
                 </View>
                 {error || props.error ?

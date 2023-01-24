@@ -79,7 +79,7 @@ export function updateLastName(id:string, last_name: string) {
 
 //update phone number
 
-export function updatePhoneNumber(id:string, phone_number: string) {
+export function updatePhoneNumber(id:string, phone_number: number) {
   return db.user.update({
     where: {
       id,
@@ -103,7 +103,7 @@ export function updateGender(id:string, gender:string){
   });
 }
 
-export function updateZip(id:string, zip_code:string){
+export function updateZip(id:string, zip_code:number){
   return db.user.update({
     where: {
       id,
@@ -121,6 +121,17 @@ export function updateCity(id:string, city:string){
     },
     data: {
       city,
+    },
+  });
+}
+
+export function updateImage(id:string, image:string){
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      image,
     },
   });
 }

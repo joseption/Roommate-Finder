@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { isAuthenticated } from '../../middleware';
-import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday } from './services';
+import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday, updateImage } from './services';
 import db from '../../utils/db';
 const router = express.Router();
 
@@ -452,6 +452,96 @@ router.post('/completeSetup', async (req: Request, res: Response, next: NextFunc
       return res.status(400).json({ Error: 'Error finishing account setup' });
     }
     return res.status(200).json({ message: 'Account setup successfully' });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ Error: 'Server error' });
+  }
+});
+
+router.post('/updateAllProfile', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { image, first_name, last_name, birthday, phone_number, zip_code, city, state, gender } = req.body;
+    const payload : payload = req.body[0];
+    const userId = payload.userId;
+
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(400).json({ Error: 'User not found' });
+    }
+    //validate image
+    if (!image) {
+      return res.status(400).json({ Error: 'Image is required' });
+    }
+    const update_image = await updateImage(userId, image);
+    if (!update_image) {
+      return res.status(400).json({ Error: 'Update image failed' });
+    }
+    //validate first_name
+    if (!first_name) {
+      return res.status(400).json({ Error: 'First name is required' });
+    }
+    const update_first_name = await updateFirstName(userId, first_name);
+    if (!update_first_name) {
+      return res.status(400).json({ Error: 'Update first name failed' });
+    }
+    //validate last_name
+    if (!last_name) {
+      return res.status(400).json({ Error: 'Last Name is required' });
+    }
+    const update_last_name = await updateLastName(userId, last_name);
+    if (!update_last_name) {
+      return res.status(400).json({ Error: 'Update last name failed' });
+    }
+    //validate birthday
+    if (!birthday) {
+      return res.status(400).json({ Error: 'Birthday is required' });
+    }
+    const update_birthday = await updateBday(userId, birthday);
+    if (!update_birthday) {
+      return res.status(400).json({ Error: 'Update birthday failed' });
+    }
+    //validate phone_number
+    if (!phone_number) {
+      return res.status(400).json({ Error: 'Phone Number is required' });
+    }
+    const update_phone_number = await updatePhoneNumber(userId, phone_number);
+    if (!update_phone_number) {
+      return res.status(400).json({ Error: 'Update phone number failed' });
+    }
+    //validate zip_code
+    if (!zip_code) {
+      return res.status(400).json({ Error: 'Zip Code is required' });
+    }
+    const update_zip_code = await updateZip(userId, zip_code);
+    if (!update_zip_code) {
+      return res.status(400).json({ Error: 'Update zip code failed' });
+    }
+    //validate city
+    if (!city) {
+      return res.status(400).json({ Error: 'City is required' });
+    }
+    const update_city = await updateCity(userId, city);
+    if (!update_city) {
+      return res.status(400).json({ Error: 'Update city failed' });
+    }
+    //validate state
+    if (!state) {
+      return res.status(400).json({ Error: 'State is required' });
+    }
+    const update_state = await updateState(userId, state);
+    if (!update_state) {
+      return res.status(400).json({ Error: 'Update state failed' });
+    }
+    //validate gender
+    if (!gender) {
+      return res.status(400).json({ Error: 'Gender is required' });
+    }
+    const update_gender = await updateGender(userId, gender);
+    if (!update_gender) {
+      return res.status(400).json({ Error: 'Update gender failed' });
+    }
+    
+    return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ Error: 'Server error' });

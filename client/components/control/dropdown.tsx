@@ -9,6 +9,7 @@ import _Group from './group';
 import _DropdownOption from './dropdown-option';
 import Text from './text';
 import _Text from './text';
+import { getRandomValues } from 'crypto';
 
 const _Dropdown = (props: any, {navigation}:any) => {
         /*
@@ -30,8 +31,11 @@ const _Dropdown = (props: any, {navigation}:any) => {
       }, [props.value, context.setParentFocus]);
 
     useEffect(() => {
-        if (props.value && !props.key && !dataInit) {
-            options.forEach(x => {
+        if (props.value && !props.key && !dataInit && props.options) {
+            let l_options = options;
+            if (l_options.length == 0)
+                l_options = mappedItems(props.value);
+            l_options.forEach(x => {
                 if (x && x['props']) {
                     let prop = x['props'];
                     if (prop['item']) {
@@ -210,7 +214,10 @@ const _Dropdown = (props: any, {navigation}:any) => {
                 item={item} />
             });
             setOptions(items);
+            return items;
         }
+
+        return null;
     }
 
     const onValueChange = (e: string) => {
@@ -220,8 +227,8 @@ const _Dropdown = (props: any, {navigation}:any) => {
             setMenu(true);
         if (props.onChangeText)
             props.onChangeText(e);
-        if (props.setValue)
-            props.setValue(e);
+        //if (props.setValue)
+        //    props.setValue(e);
     }
 
     const onblur = (e: any) => {
@@ -258,7 +265,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
         return <TextInput
         style={style()}
         onChangeText={(e) => onValueChange(e)}
-        value={props.value}
+        value={textValue}
         placeholder={props.placeholder}
         keyboardType={props.keyboardType}
         ref={inputRef}

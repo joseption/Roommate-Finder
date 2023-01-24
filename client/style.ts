@@ -30,7 +30,8 @@ export const Color = {
     goldSecondary: '#d5a445',
     darkgrey: '#383c3b',
     holderMask: '#F0F2F5BF',
-    whiteMask: '#FFFFFFBF'
+    whiteMask: '#FFFFFFBF',
+    textMask: '#505050',
 }
 
 export const FontSize = {

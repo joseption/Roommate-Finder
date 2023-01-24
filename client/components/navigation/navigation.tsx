@@ -19,8 +19,8 @@ const Navigation = (props: any) => {
     const navigation = useNavigation<navProp>();
 
     useEffect(() => {
-        if (props.setIsSetup) // ja temp (isloaded and setissetup given to this component too)
-    props.setIsSetup(true);
+        //if (props.setIsSetup) // ja temp (isloaded and setissetup given to this component too)
+    //props.setIsSetup(true);
 
         if (props.mobile) {
             setShowMenu(false);

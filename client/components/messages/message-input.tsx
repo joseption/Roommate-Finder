@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'whitesmoke',
     padding: 5,
     paddingHorizontal: 10,
-    marginVertical: 10,
+    marginTop: 10,
     alignItems: 'center',
   },
   input: {

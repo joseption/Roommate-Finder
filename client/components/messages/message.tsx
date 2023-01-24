@@ -1,12 +1,24 @@
+import { useEffect, useState } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { Color } from "../../style";
+import { getLocalStorage } from "../../helper";
 
 interface Props {
   message: any
 }
 
 const Message = ({ message }: Props) => {
-  const isMyMessage = () => {return message.sender === 'a'};
+  const [userInfo, setUserInfo] = useState<any>();
+
+  useEffect(() => {
+    getUserInfo();
+  }, [])
+
+  const getUserInfo = async () => {
+    setUserInfo(await getLocalStorage().then((res) => {return res.user}));
+  }
+
+  const isMyMessage = () => message.userId === userInfo?.id;
 
   return (
     <View
@@ -15,7 +27,7 @@ const Message = ({ message }: Props) => {
         isMyMessage() ? null : styles.theirMessage,
       ]}
     >
-      <Text style={{color: isMyMessage() ? Color.white : undefined}}>{message.text}</Text>
+      <Text style={{color: isMyMessage() ? Color.white : undefined}}>{message.content}</Text>
     </View>
   );
 }

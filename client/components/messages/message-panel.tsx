@@ -1,5 +1,5 @@
 import { useRef, useEffect, Dispatch, SetStateAction } from 'react';
-import { View, StyleSheet, Animated, Easing, Dimensions, Text } from 'react-native';
+import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import _Button from '../control/button';
 import Messages from './messages';
 import MessageInput from './message-input';

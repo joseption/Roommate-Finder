@@ -72,10 +72,10 @@ const styles = StyleSheet.create({
     text: {
         color: Color.textSecondary,
         fontSize: FontSize.default,
-        marginRight: "5px"
+        marginRight: 5
     },
     progressBar: {
-        height: "16px",
+        height: 16,
     },
     contentContainer: {
         display: 'flex',
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     progressBarContainer: {
         backgroundColor: Color.grey,
         borderRadius: Radius.large,
-        width: "100px",
+        width: 100,
         height: "100%"
     },
     progressIndicator: {

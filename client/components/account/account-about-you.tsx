@@ -54,7 +54,7 @@ const AccountAbout = (props: any) => {
             onLoad();
             setInit(true);
         }
-        if (props.isSetup && isLoaded)
+        if (props.isSetup && isLoaded && !isSaved)
             setIsSaved(true);
     }, [bioForm, tagForm, props.isSetup, isLoaded])
 

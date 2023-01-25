@@ -56,7 +56,8 @@ const LoginScreen = (props:any) => {
     }
     else if (props.accountAction) {
       gotoScreen();
-      props.setAccountAction(false);
+      if (props.accountAction)
+        props.setAccountAction(false);
     }
   }, [left, init, navigation, props.accountAction]);
 
@@ -131,7 +132,7 @@ const LoginScreen = (props:any) => {
                 }
             });
           }
-          else if (type == "reset") {
+          else if (type == "reset" || type == "update" ) {
             let obj = {resetToken:token};
             let js = JSON.stringify(obj);  
                   
@@ -189,9 +190,14 @@ const LoginScreen = (props:any) => {
               setAutoResend(true);
               updateVisibleScreen(screen.activateEmailSent);
             }
-            else if (uPath == "reset")
+            else if (uPath == "reset") {
               updateVisibleScreen(screen.forgotPassword);
               setForgotError("Password reset failed, please enter your email and try again.");
+            }
+            else if (uPath == "update") {
+              updateVisibleScreen(screen.forgotPassword);
+              setForgotError("Password update failed, please enter your email and try again.");
+            }
           }
         }
       }
@@ -286,7 +292,12 @@ const LoginScreen = (props:any) => {
                 setEmail={setEmailValue}
                 email={emailValue}
                 sendEmailPressed={() => goLeft(screen.activateEmailSent)} // update to do stuff and then goLeft(1)
-                loginPressed={() => goRight(screen.login)}
+                loginPressed={() => 
+                  {
+                    navigation.navigate(NavTo.Login);
+                    goRight(screen.login);
+                  }
+                }
                 style={[styles.panel, register ? null : styles.hidden]}
                 setPasswordUpdateType={setPasswordUpdateType}
               />
@@ -297,6 +308,8 @@ const LoginScreen = (props:any) => {
                 registerPressed={() => goLeft(screen.register)}
                 style={[styles.panel, login ? null : styles.hidden]}
                 setIsLoggedIn={props.setIsLoggedIn}
+                setIsSetup={props.setIsSetup}
+                setNavSelector={props.setNavSelector}
               />
               <ForgotPassword
                 btnStyle={btnStyle}
@@ -318,7 +331,12 @@ const LoginScreen = (props:any) => {
               <UpdatePassword
                 btnStyle={btnStyle}
                 updatePasswordPressed={() => goRight(screen.passwordUpdated)} // update to do stuff and then goRight(1)
-                loginPressed={() => goLeft(screen.login)}
+                loginPressed={() => 
+                  {
+                    navigation.navigate(NavTo.Login);
+                    goLeft(screen.login);
+                  }
+                }
                 style={[styles.panel, updatePassword ? null : styles.hidden]}
                 passwordUpdateType={passwordUpdateType}
                 setPasswordUpdateType={setPasswordUpdateType}

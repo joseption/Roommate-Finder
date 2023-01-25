@@ -115,13 +115,6 @@ const SurveyScreen = (props: any, {navigation}:any) => {
         return style;
     }
 
-    const optionContainerStyle = (count: number) => {
-        var style = [];
-        if (count > 0) 
-            style.push(_styles.optionContainerStyle);
-        return style;
-    }
-
     const setResponse = (id: string) => {
         setResponseId(id);
         setCanGotoQuestion(true);
@@ -133,7 +126,7 @@ const SurveyScreen = (props: any, {navigation}:any) => {
             return options.map((item: any, key: any) => {
                 return <_SurveyOption
                 onPress={(e: any) => setResponse(item.id)}
-                containerStyle={optionContainerStyle(count++)}
+                containerStyle={_styles.optionContainerStyle}
                 item={item}
                 key={key}
                 selected={item.id == responseId}
@@ -141,7 +134,7 @@ const SurveyScreen = (props: any, {navigation}:any) => {
             })
         }
         else
-            return null
+            return <View></View>
     }
 
     const prepareQuestion = (question: any, idx: number, total: number) => {
@@ -295,136 +288,134 @@ const SurveyScreen = (props: any, {navigation}:any) => {
     
     return (
     <View>
-        <ScrollView>
-            <View
-            style={_styles.titleContainer}
+        <View
+        style={_styles.titleContainer}
+        >
+            <_Text
+            style={_styles.title}
             >
+                {title()}
+            </_Text>
+            <_Progress progress={progress}></_Progress>
+        </View>
+        {askReview ?
+        <View>
+        {!complete ?
+        <View>
+            <View
+            style={[containerStyle(), _styles.container]}
+            >
+                {currentNumber > -1 ?
                 <_Text
-                style={_styles.title}
+                style={questionCountTextStyle()}
+                innerContainerStyle={questionCountInnerTextStyle()}
                 >
-                    {title()}
+                    Question {currentNumber}/{totalNumber}
                 </_Text>
-                <_Progress progress={progress}></_Progress>
-            </View>
-            {!askReview ?
-            <View>
-            {!complete ?
-            <View>
+                : null}
                 <View
-                style={[containerStyle(), _styles.container]}
+                style={_styles.questionContainer}
                 >
-                    {currentNumber > -1 ?
                     <_Text
-                    style={questionCountTextStyle()}
-                    innerContainerStyle={questionCountInnerTextStyle()}
+                    style={questionTextStyle()}
                     >
-                        Question {currentNumber}/{totalNumber}
+                        {questionText}
                     </_Text>
-                    : null}
                     <View
-                    style={_styles.questionContainer}
+                    style={_styles.groupContainer}
                     >
-                        <_Text
-                        style={questionTextStyle()}
-                        >
-                            {questionText}
-                        </_Text>
-                        <View
-                        style={_styles.groupContainer}
-                        >
-                        {mappedItems()}
-                        </View>
-                    </View>
-                    <View
-                    style={_styles.separator}
-                    />
-                    <View
-                    style={_styles.btmButtonContainer}
-                    >
-                        {hasLastQuestion ?
-                        <Pressable
-                        style={_styles.arrowContainer}
-                        onPress={(e: any) => submit(-1)}
-                        >
-                            <FontAwesomeIcon 
-                            size={20} 
-                            color={Color.textSecondary} 
-                            style={_styles.backArrow} 
-                            icon="arrow-left"
-                            >
-                            </FontAwesomeIcon>
-                            <_Text
-                            style={Style.textDefaultSecondary}
-                            >
-                                Previous Question
-                            </_Text>
-                        </Pressable>
-                        :
-                        <View></View>
-                        }
-                        <View
-                        style={_styles.buttonContainer}
-                        >
-                            <_Button
-                            style={Style.buttonGold}
-                            disabled={!canGotoQuestion}
-                            onPress={(e: any) => submit(1)}
-                            loading={loading}
-                            >
-                                {nextButton}
-                            </_Button>
-                        </View>
+                    {mappedItems()}
                     </View>
                 </View>
-            </View>
-            :
-            <View
-            style={[containerStyle(), _styles.container, _styles.doneContainer]}
-            >
-                <_Text
-                style={_styles.doneHeaderText}
-                >
-                    Hang tight
-                    </_Text>
-                <_Text
-                style={_styles.doneSubHeaderText}
-                >
-                    We're getting your matches ready!
-                </_Text>
-                <ActivityIndicator
-                    size="large"
-                    color={Color.gold}
-                    style={_styles.loading}
-                />
-                <_Text>Comparing matches</_Text>
-            </View>
-            }
-            </View>
-            :
-            <View>
                 <View
-                style={[containerStyle(), _styles.container]}
+                style={_styles.separator}
+                />
+                <View
+                style={_styles.btmButtonContainer}
                 >
-                    <_Text>Screen for...Want to review your survey questions?</_Text>
-                    <_Button
-                            style={Style.buttonGold}
-                            onPress={(e: any) => getQuestions(0, true)}
-                            >
-                                Review Answers
-                    </_Button>
+                    {hasLastQuestion ?
+                    <Pressable
+                    style={_styles.arrowContainer}
+                    onPress={(e: any) => submit(-1)}
+                    >
+                        <FontAwesomeIcon 
+                        size={20} 
+                        color={Color.textSecondary} 
+                        style={_styles.backArrow} 
+                        icon="arrow-left"
+                        >
+                        </FontAwesomeIcon>
+                        <_Text
+                        style={Style.textDefaultSecondary}
+                        >
+                            Previous Question
+                        </_Text>
+                    </Pressable>
+                    :
+                    <View></View>
+                    }
+                    <View
+                    style={_styles.buttonContainer}
+                    >
+                        <_Button
+                        style={Style.buttonGold}
+                        disabled={!canGotoQuestion}
+                        onPress={(e: any) => submit(1)}
+                        loading={loading}
+                        >
+                            {nextButton}
+                        </_Button>
+                    </View>
                 </View>
             </View>
-            }
-            {error || props.error ?
-            <_Text 
-            containerStyle={errorContainerStyle()}
-            innerContainerStyle={{justifyContent: 'center'}} 
-            style={errorStyle()}
+        </View>
+        :
+        <View
+        style={[containerStyle(), _styles.container, _styles.doneContainer]}
+        >
+            <_Text
+            style={_styles.doneHeaderText}
             >
-                {error}
+                Hang tight
                 </_Text>
-            : null}
-        </ScrollView>
+            <_Text
+            style={_styles.doneSubHeaderText}
+            >
+                We're getting your matches ready!
+            </_Text>
+            <ActivityIndicator
+                size="large"
+                color={Color.gold}
+                style={_styles.loading}
+            />
+            <_Text>Comparing matches</_Text>
+        </View>
+        }
+        </View>
+        :
+        <View>
+            <View
+            style={[containerStyle(), _styles.container]}
+            >
+                <_Text>Screen for...Want to review your survey questions?</_Text>
+                <_Button
+                        style={Style.buttonGold}
+                        onPress={(e: any) => getQuestions(0, true)}
+                        >
+                            Review Answers
+                </_Button>
+            </View>
+        </View>
+        }
+        {error || props.error ?
+        <_Text 
+        containerStyle={errorContainerStyle()}
+        innerContainerStyle={{justifyContent: 'center'}} 
+        style={errorStyle()}
+        >
+            {error}
+            </_Text>
+        : null}
     </View>
     );
 };
@@ -475,8 +466,8 @@ const _styles = StyleSheet.create({
     separator: {
         width: "100%",
         backgroundColor: Color.border,
-        height: "1px",
-        marginTop: "40px"
+        height: 1,
+        marginTop: 40
     },
     groupContainer: {
         width: '100%',
@@ -502,7 +493,7 @@ const _styles = StyleSheet.create({
         marginBottom: 20
     },
     optionContainerStyle: {
-        marginTop: "10px"
+        marginTop: 10
     },
     title: {
         fontFamily: 'Inter-SemiBold',

@@ -12,6 +12,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
   const [message,setMessage] = useState('');
   const [sentMsg,setSentMsg] = useState('');
   const [autoResent,setAutoResent] = useState(false);
+  const [loading,setLoading] = useState(false);
 
   useEffect(() => {
       if (props.autoResend)
@@ -66,6 +67,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
 
   const doResendEmail = async (force: boolean = false) => 
   {
+      setLoading(true);
       if (disabled)
         return;
 
@@ -105,6 +107,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
           setMessage("An error occurred while attempting to send a password reset email!");
           return;
       }    
+      setLoading(false);
   };
   
   return (
@@ -139,6 +142,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
             style={[props.btnStyle(disabled), styles.btn]}
             onPress={() => doResendEmail()}
             disabled={disabled}
+            loading={loading}
             >
             Resend Email
             </_Button>

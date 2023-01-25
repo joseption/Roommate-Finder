@@ -50,6 +50,7 @@ const LogoutScreen = (props: any) => {
         if (!error || !user) {
             navigation.navigate(NavTo.Login);
             props.setIsLoggedIn(false);
+            props.setIsSetup(false);
         }
         else
             setMessage("An error occurred while logging out, please reload the page and try again.");

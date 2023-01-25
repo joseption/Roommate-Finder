@@ -23,10 +23,12 @@ const SearchScreen = (props: any) => {
         let rt = route();
         if (rt && rt.name == NavTo.Search) {
             if (rt.params && rt.params['view'] && (rt.params['view'] as string).toLowerCase() == "matches") {
-                props.setIsMatches(true);
+                if (!props.isMatches)
+                    props.setIsMatches(true);
             }
             else {
-                props.setIsMatches(false); 
+                if (props.isMatches)
+                    props.setIsMatches(false); 
             }
         }
         // End

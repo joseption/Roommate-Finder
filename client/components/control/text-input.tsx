@@ -25,7 +25,6 @@ const _TextInput = (props: any) => {
   const [length,setLength] = useState(0);
   const [phoneMask,setPhoneMask] = useState(false);
   const [phoneMaskLength,setPhoneMaskLength] = useState(0);
-  // JA todo: phone masking is not finished
   useEffect(() => {
   }, []);
 
@@ -87,7 +86,7 @@ const _TextInput = (props: any) => {
   const errorMessage = () => {
     if (props.error == true) {
       if (!props.errorMessage) {
-        return "is required"
+        return " is required"
       }
       else {
         return props.errorMessage;
@@ -158,6 +157,20 @@ const _TextInput = (props: any) => {
       return props.value;
   }
 
+  const checkSubmit = () => {
+    if (props.onSubmit)
+      props.onSubmit();
+  }
+
+  const returnTypeKey = () => {
+    if (props.onSubmit) {
+      return 'go';
+    }
+    else {
+      return 'default';
+    }
+  }
+
   return (
     <View
     style={containerStyle()}
@@ -218,6 +231,8 @@ const _TextInput = (props: any) => {
         ref={props.ref}
         multiline={props.multiline}
         maxLength={getMaxLength()}
+        onSubmitEditing={(e: any) => {checkSubmit()}}
+        returnKeyType={returnTypeKey()}
         />
       </View>
     </View>

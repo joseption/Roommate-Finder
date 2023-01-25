@@ -8,40 +8,29 @@ import { Color, Content, FontSize, Radius, Style } from '../../style';
 import NavMenuButton from '../control/nav-menu-button';
 import NavMobileButton from '../control/nav-mobile-button';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { AccountScreenType, navProp, NavTo } from '../../helper';
+import { AccountScreenType, isLoggedIn, isSetup, navProp, NavTo } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 
 const Navigation = (props: any) => {
     const [showMenu,setShowMenu] = useState(false);
     const [visible,setVisible] = useState(false);
     const [init,setInit] = useState(false);
-    const [navSelector,setNavSelector] = useState('');
     const navigation = useNavigation<navProp>();
 
     useEffect(() => {
-        //if (props.setIsSetup) // ja temp (isloaded and setissetup given to this component too)
-    //props.setIsSetup(true);
-
-        if (props.mobile) {
+        if (!props.mobile)
             setShowMenu(false);
-        }
-
         let rt = route();
-        if (rt && rt.name) {
+        if (rt && rt.name && !init)
             setNavigation(rt.name);
-            if (!init) {
-                if (Platform.OS !== 'web') {
-                    setInit(true);
-                }
-            }
-        }
         setVisible(props.isLoggedIn);
+        setInit(true);
         
-    }, [props.mobile, visible, props.navigation, props.isLoggedIn, props.isSetup, props.isLoaded]);
+    }, [props.mobile, visible, props.isLoaded, props.isLoggedIn, props.isSetup, props.navSelector]);
 
     const route = () => {
-        if (props.navigation) {
-          let state = props.navigation.getState();
+        if (navigation) {
+          let state = navigation.getState();
           if (state && state.routes) {
             let idx = state.index;
             if (!idx) {
@@ -55,21 +44,17 @@ const Navigation = (props: any) => {
     }
 
     const setNavigation = (nav: any) => {
-        if (props.setCurrentNav)
-            props.setCurrentNav(nav);
         if (nav == NavTo.Account)
             nav = NavTo.Profile
-        setNavSelector(nav)
+        props.setNavSelector(nav);
+            
         setVisible(nav != NavTo.Login);
     };
 
     const navigate = (nav: never, params: any = {}) => {
         setNavigation(nav);
         setShowMenu(false);
-        if (props.navigation)
-            props.navigation.navigate(nav, params as never);
-        else if (navigation)
-            navigation.navigate(nav, params as never);
+        navigation.navigate(nav, params as never);
     };
 
     const toggleMenu = () => {
@@ -79,9 +64,9 @@ const Navigation = (props: any) => {
     const getMenuStyle = () => {
         var style = [];
         style.push(styles.menu);
-        var right = (props.dimensions.width - Content.width) / 2;
+        var right = (props.width - Content.width) / 2;
         var placement = {
-            top: props.dimensions.height,
+            top: props.height,
             right: right
         }
         style.push(placement);
@@ -90,14 +75,21 @@ const Navigation = (props: any) => {
     }
 
     const setNavLayout = (e: any) => {
-        props.setDimensions({height: e.nativeEvent.layout.height, width: e.nativeEvent.layout.width});
+        props.setHeight(e.nativeEvent.layout.height);
+        props.setWidth(e.nativeEvent.layout.width);
     }
 
     const setAccount = () => {
         props.setAccountView(AccountScreenType.info);
         navigate(NavTo.Account);
     }
-    
+
+    const navigateMobileMatches = () => {
+        navigate(NavTo.Search, {view: 'matches'});
+        if (props.setIsMatches)
+            props.setIsMatches(true);
+    }
+
     return (
         <View
         onLayout={(e: any) => setNavLayout(e)}
@@ -225,47 +217,40 @@ const Navigation = (props: any) => {
             </View>
             :
             <View>
-                <_Text>{props.isSetup == true ? 'issetup yes' : 'issetup nope'}</_Text>
-                <_Text>{visible == true ? 'visible yes' : 'visible nope'}</_Text>
             {props.isSetup && visible ?
                 <View
                 style={styles.mobileContainer}
                 >
                     <NavMobileButton
-                    navigate={() => navigate(NavTo.Profile)}
+                    navigate={navigate}
                     icon="user"
-                    currentNav={navSelector}
+                    currentNav={props.navSelector}
                     navTo={NavTo.Profile}
                     />
                     <NavMobileButton
-                    navigate={() => navigate(NavTo.Survey)}
+                    navigate={navigate}
                     icon="poll"
-                    currentNav={navSelector}
+                    currentNav={props.navSelector}
                     navTo={NavTo.Survey}
                     />
                     <NavMobileButton
-                    navigate={() => navigate(NavTo.Listings)}
+                    navigate={navigate}
                     icon="house-flag"
-                    currentNav={navSelector}
+                    currentNav={props.navSelector}
                     navTo={NavTo.Listings}
                     />
                     <NavMobileButton
-                    navigate={
-                        () => {
-                            navigate(NavTo.Search, {view: 'matches'});
-                            if (props.setIsMatches)
-                                props.setIsMatches(true);
-                        }
-                    }
+                    navigate={navigateMobileMatches}
                     icon="check-double"
-                    currentNav={navSelector}
+                    currentNav={props.navSelector}
                     navTo={NavTo.Search}
                     />
                     <NavMobileButton
-                    navigate={() => navigate(NavTo.Messages)}
+                    navigate={navigate}
                     icon="message"
-                    currentNav={navSelector}
+                    currentNav={props.navSelector}
                     navTo={NavTo.Messages}
+                    count={7}
                     />
                 </View>
                 :

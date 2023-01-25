@@ -3,7 +3,7 @@ import { User } from '@prisma/client';
 
 export function generateAccessToken(user: { id: any; }) {
   return jwt.sign({ userId: user.id }, process.env.JWT_ACCESS_SECRET, {
-    expiresIn: '15m',
+    expiresIn: '60m',
   });
 }
 

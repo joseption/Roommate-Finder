@@ -18,6 +18,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
   const [verifyPValue, setVerifyPValue] = useState('');
   const [pwdError,setPwdError] = useState(false);
   const [verifyPwdError,setVerifyPwdError] = useState(false);
+  const [loading,setLoading] = useState(false);
 
   useEffect(() => {
     checkDisabledBtn();
@@ -69,6 +70,16 @@ const UpdatePassword = (props: any, {navigation}:any) => {
 
   const doPasswordUpdate = async () => 
   {
+      setLoading(true);
+      setPwdError(false);
+      setVerifyPwdError(false);
+
+      if (disabled) {
+        setPwdError(!pValue);
+        setVerifyPwdError(!verifyPValue);
+        return;
+      }
+
       setPwdError(false);
       setVerifyPwdError(false);
 
@@ -114,8 +125,8 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       catch(e)
       {
           setMessage('An unexpected error occurred while updating your password. Please try again.');
-          return;
       }  
+      setLoading(false);
   };
 
   const title = () => {
@@ -148,12 +159,15 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       containerStyle={LoginStyle.inputStyle}
       onChangeText={(e: any) => {handleChange(e)}}
       value={pValue}
+      error={pwdError}
       />
     <_TextInput
       type="password"
       label="Verify Password"
       onChangeText={(e: any) => {handleVerifyChange(e)}}
       value={verifyPValue}
+      onSubmit={doPasswordUpdate}
+      error={verifyPwdError}
       />
       <View
       style={styles.requirements}
@@ -226,6 +240,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
         style={props.btnStyle(disabled)}
         onPress={() => doPasswordUpdate()}
         disabled={disabled}
+        loading={loading}
         >
           Save
         </_Button>

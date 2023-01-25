@@ -11,6 +11,7 @@ const Register = (props: any, {navigation}:any) => {
   const [disabled, setDisabled] = useState(true);
   const [message, setMessage] = useState('');
   const [emailError,setEmailError] = useState(false);
+  const [loading,setLoading] = useState(false);
 
   const backToLogin = () => {
       setMessage('');
@@ -29,8 +30,13 @@ const Register = (props: any, {navigation}:any) => {
 
   const doRegister = async () => 
   {
-      if (disabled)
+      setLoading(true);
+      setEmailError(false);
+
+      if (disabled) {
+        setEmailError(!props.email);
         return;
+      }
 
       setMessage("");
       setDisabled(true);
@@ -62,8 +68,8 @@ const Register = (props: any, {navigation}:any) => {
       {
           setMessage('An unknown error occurred');
           setDisabled(false);
-          return;
       }    
+      setLoading(false);
   };
   return (
     <View
@@ -84,6 +90,8 @@ const Register = (props: any, {navigation}:any) => {
       onChangeText={(e: any) => {handleChange(e)}}
       value={props.email}
       error={emailError}
+      onSubmit={doRegister}
+      loading={loading}
       />}
       <View
       style={Style.alignRight}
@@ -92,6 +100,7 @@ const Register = (props: any, {navigation}:any) => {
         style={props.btnStyle(disabled)}
         onPress={() => doRegister()}
         disabled={disabled}
+        loading={loading}
         >
           Next
         </_Button>

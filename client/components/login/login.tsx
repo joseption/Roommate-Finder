@@ -17,7 +17,9 @@ const Login = (props: any) => {
   const [emailError,setEmailError] = useState(false);
   const [passwordError,setPasswordError] = useState(false);
   const [init,setInit] = useState(false);
+  const [loading,setLoading] = useState(false);
   const navigation = useNavigation<navProp>();
+
 
   useEffect(() => { 
     if (!init) {
@@ -30,7 +32,14 @@ const Login = (props: any) => {
     let user = await getLocalStorage();
     if (user && user.refreshToken) {
       navigateToLast(user);
+      markAsLoggedIn(user);
     }
+  }
+
+  const markAsLoggedIn = (data: any) => {
+    props.setIsLoggedIn(true);
+    if (data && data.user)
+      props.setIsSetup(data.user.is_setup);
   }
 
   const route = () => {
@@ -99,13 +108,23 @@ const Login = (props: any) => {
           step = "info";
         navigation.navigate(NavTo.Account, {view: step} as never);
       }
+      let name = route()?.name;
+      if (name)
+        props.setNavSelector(name);
     }
   };
 
   const doLogin = async () => 
   {
-      if (disabled)
+    setLoading(true);
+    setEmailError(false);
+    setPasswordError(false);
+
+      if (disabled) {
+        setEmailError(!email);
+        setPasswordError(!password);
         return;
+      }
 
       setMessage('');
       let obj = {email:email,password:password};
@@ -125,15 +144,15 @@ const Login = (props: any) => {
                 await setLocalStorage(res);
                 setMessage('');
                 navigateToLast(res);
-                props.setIsLoggedIn(true);
+                markAsLoggedIn(res);
               }
           });
       }
       catch(e: any)
       {
           setMessage('An unknown error occurred');
-          return;
       }    
+      setLoading(false);
   };
   
   return (
@@ -162,6 +181,7 @@ const Login = (props: any) => {
       onChangeText={(e: any) => {handleChange(e, false)}}
       value={password}
       error={passwordError}
+      onSubmit={doLogin}
       />
       <_Text
       style={Style.textSmallDefault}
@@ -177,6 +197,7 @@ const Login = (props: any) => {
         style={props.btnStyle(disabled)}
         onPress={() => doLogin()}
         disabled={disabled}
+        loading={loading}
         >
           Login
         </_Button>

@@ -12,14 +12,15 @@ import ListingsScreen from './screens/listings';
 import MessagesScreen from './screens/messages';
 import SearchScreen from './screens/search';
 import { Color, Content } from './style';
-import { Context, env, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack } from './helper';
+import { Context, env, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, navProp } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
 import * as DeepLinking from 'expo-linking';
 
 export const App = (props: any) => {
-  const [navDimensions,setNavDimensions] = useState({height: 0, width: 0});
+  const [navHeight,setNavHeight] = useState(0);
+  const [navWidth,setNavWidth] = useState(0);
   const [containerStyle,setContainerStyle] = useState({});
   const [mobile,setMobile] = useState(false);
   const [adjustedPos,setAdjustedPos] = useState(0);
@@ -27,7 +28,7 @@ export const App = (props: any) => {
   const [isMatches,setIsMatches] = useState(false);
   const [ref,setRef] = useState(React.createRef<NavigationContainerRef<Page>>());
   const [isLoggedIn,setIsLoggedIn] = useState(false);
-  const [currentNav,setCurrentNav] = useState('');
+  const [isLoggingOut,setIsLoggingOut] = useState(false);
   const [accountAction,setAccountAction] = useState(false);
   const [init,setInit] = useState(false);
   const [initLink,setInitLink] = useState('');
@@ -36,6 +37,9 @@ export const App = (props: any) => {
   const [prompt,setPrompt] = useState(false);
   const [setupStep,setSetupStep] = useState('');
   const [scrollY,setScrollY] = useState(0);
+  const [navSelector,setNavSelector] = useState('');
+  const [verifiedDeepLink,setVerifiedDeepLink] = useState(false);
+  const [pageVerified,setPageVerified] = useState(false);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
@@ -44,7 +48,6 @@ export const App = (props: any) => {
   });
 
   useEffect(() => {
-    // setIsSetup(true); // ja remove
     setMobile(isMobile());
     const subscription = Dimensions.addEventListener(
       "change",
@@ -52,23 +55,27 @@ export const App = (props: any) => {
           setMobile(isMobile());
       }
     );
-    if (!initLink) {
+    if (!verifiedDeepLink && !pageVerified) {
       DeepLinking.getInitialURL().then(async (link: any) => {
-        if (link) {
+        if (!initLink) {
           setInitLink(link);
-          checkLoggedIn();
+          checkDeepLink(link);
         }
+        else
+          checkDeepLink(initLink);
       });
     }
-    else if (!init) {
-      setInit(true);
-      setup(initLink);
+    else if (pageVerified) {
+      if (verifiedDeepLink)
+        setVerifiedDeepLink(false);
+      else
+        checkSetup();
     }
-    else
-      setup();
+    prepareStyle();   
+    setIsLoaded(true);
 
-    return () => subscription?.remove();
-  }, [navDimensions.height, mobile, adjustedPos, ref, isLoggedIn, currentNav, prompt]);
+      return () => subscription?.remove();
+  }, [navHeight, adjustedPos, prompt, navSelector, ref.current]);
   
   if (!loaded) {
     return null;
@@ -78,20 +85,58 @@ export const App = (props: any) => {
     return ref.current?.getCurrentRoute()?.name;
   }
 
-  function setup(link: string = '') {
-      if (ref && ref.current && link && link.toLowerCase().includes('/auth')) {
-          var cRoute = DeepLinking.parse(link);
-          var path = cRoute.path?.substring(cRoute.path?.lastIndexOf('/') + 1);
-          if (cRoute?.queryParams)
-            cRoute.queryParams.path = path;
-          ref.current?.navigate(NavTo.Login, cRoute.queryParams as never);
-          setAccountAction(true);
-          return;
+  const logout = async () => {
+    try
+    {   
+        let user = await getLocalStorage();
+        if (user && user.refreshToken) {
+          let obj = {refreshToken:user.refreshToken};
+          let js = JSON.stringify(obj);
+
+          await fetch(`${env.URL}/auth/logout`,
+          {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+              let res = JSON.parse(await ret.text());
+              if (!res.Error) {
+                  await setLocalStorage(null);
+                  setIsLoggingOut(true);
+                  setIsLoggedIn(false);
+                  setIsSetup(false);
+              }
+          });
       }
+    }
+    catch(e)
+    {
+      // Couldn't log out
+    } 
+}
+
+  async function checkDeepLink(link: string) {
+    if (ref && ref.current) {
+      if (link && link.toLowerCase().includes('/auth')) {
+        var cRoute = DeepLinking.parse(link);
+        var path = cRoute.path?.substring(cRoute.path?.lastIndexOf('/') + 1);
+        if (cRoute?.queryParams)
+          cRoute.queryParams.path = path;
+        await logout();
+        if (!accountAction)
+          setAccountAction(true);
+
+        ref.current?.navigate(NavTo.Login, cRoute.queryParams as never);
+        return;
+      }
+      else if (!verifiedDeepLink && !pageVerified) {
+        setPageVerified(true);
+        checkSetup(true);
+      }
+      setVerifiedDeepLink(true);
+    }
+  }
+
+  function checkSetup(force: boolean = false) {
+    if (force || pageVerified) {
       checkLoggedIn();
-      prepareStyle();
-      if (!isLoaded)
-        setIsLoaded(true);
+    } 
   }
 
   const navigateToSetupStep = (step: string) => {
@@ -101,59 +146,78 @@ export const App = (props: any) => {
   }
 
   async function checkLoggedIn() {
-    let error = false;
-    let data = await getLocalStorage();
-    if (data) {
-      let obj = {refreshToken:data.refreshToken, accessToken: data.accessToken};
-      let js = JSON.stringify(obj);
+    if (!isLoggingOut) {
+      let error = false;
+      let data = await getLocalStorage();
+      if (data) {
+        let obj = {refreshToken:data.refreshToken, accessToken: data.accessToken};
+        let js = JSON.stringify(obj);
 
-      try
-      {   
-          await fetch(`${env.URL}/auth/checkAuth`,
-          {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
-            let res = JSON.parse(await ret.text());
-            if (res.Error)
-            {
-              error = true;
-            }
-            else
-            {
-              await setLocalStorage(res);
-              let l_isSetup = res.user.is_setup == true ? true : false;
-              let l_setupStep = res.user.setup_step != null ? res.user.setup_step : '';
-              setIsSetup(l_isSetup);
-              setSetupStep(l_setupStep);
-              setIsLoggedIn(true);
-              if (!l_isSetup) {
-                navigateToSetupStep(l_setupStep);
+        try
+        {   
+            await fetch(`${env.URL}/auth/checkAuth`,
+            {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+              let res = JSON.parse(await ret.text());
+              if (res.Error)
+              {
+                error = true;
               }
-            }
-          });
+              else
+              {
+                let aToken;
+                await fetch(`${env.URL}/auth/refreshToken`,
+                {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
+                  let res = JSON.parse(await ret.text());
+                  if (res.Error)
+                  {
+                    error = true;
+                  }
+                  else if (res.accessToken) {
+                    aToken = res.accessToken;
+                  }
+                });
+
+                if (aToken && res)
+                  res.accessToken = aToken;
+                await setLocalStorage(res);
+                let l_isSetup = res.user.is_setup == true ? true : false;
+                let l_setupStep = res.user.setup_step != null ? res.user.setup_step : '';
+                setIsSetup(l_isSetup);
+                setSetupStep(l_setupStep);
+                setIsLoggedIn(true);
+                if (!l_isSetup)
+                  navigateToSetupStep(l_setupStep);
+              }
+            });
+        }
+        catch(e)
+        {
+          error = true;
+        }   
       }
-      catch(e)
-      {
+      else {
         error = true;
-      }   
-    }
-    else {
-      error = true;
-    }
-    if (error) {
-      if (ref && ref.current) {
-        let route = ref.current.getCurrentRoute();
-        if (route && route.name !== NavTo.Login) {
-          await setLocalStorage(null);
-          ref.current.navigate(NavTo.Login, {timeout: 'yes'} as never);
-            try {
-              ref.current.resetRoot();
-            }
-            catch (e) {
-              // Can't reset root
-            }
-          setIsLoggedIn(false);
+      }
+      if (error) {
+        if (ref && ref.current) {
+          let route = ref.current.getCurrentRoute();
+          if (route && route.name !== NavTo.Login) {
+            await setLocalStorage(null);
+            ref.current.navigate(NavTo.Login, {timeout: 'yes'} as never);
+              try {
+                ref.current.resetRoot();
+              }
+              catch (e) {
+                // Can't reset root
+              }
+            if (isLoggedIn)
+              setIsLoggedIn(false);
+          }
         }
       }
     }
+    else
+      setIsLoggingOut(false);
   }
 
   const getOffset = (scrollView: number) => {
@@ -172,7 +236,7 @@ export const App = (props: any) => {
 
   function prepareStyle() {
     var backgroundColor = Color.holder;
-    var marginTop = Platform.OS === 'web' ? navDimensions.height : 0;
+    var marginTop = Platform.OS === 'web' ? navHeight : 0;
     if (mobile) {
       backgroundColor = Color.white;
     }
@@ -196,18 +260,28 @@ export const App = (props: any) => {
       let offset = e.nativeEvent.contentOffset;
       let y = offset.y;
       if (y > 0)
-        y -= navDimensions.height;
+        y -= navHeight;
       setScrollY(y)
   }
 
-  const header = (e: any) => {
+  const header = (props: any) => {
     if (Platform.OS !== 'web')
       return <Navigation
-      screen={e.options.title} 
+      {...props}
+      screen={props.options.title} 
       setAccountView={setAccountView}
-      dimensions={navDimensions}
-      setDimensions={setNavDimensions}
-      mobile={mobile} />
+      height={navHeight}
+      setHeight={setNavHeight}
+      width={navWidth}
+      setWidth={setNavWidth}
+      setIsMatches={setIsMatches}
+      mobile={mobile}
+      isLoaded={isLoaded}
+      isSetup={isSetup}
+      isLoggedIn={isLoggedIn}
+      navSelector={navSelector}
+      setNavSelector={setNavSelector}
+      />
     else
       return <View></View>;
   }
@@ -250,10 +324,6 @@ export const App = (props: any) => {
     var style = [];
     style.push(styles.scrollParentContainer);
     return style;
-  }
-
-  const nav = () => {
-    return ref.current;
   }
 
   const getMainStyle = () => {
@@ -304,8 +374,10 @@ export const App = (props: any) => {
                   {...props}
                   mobile={mobile}
                   setIsLoggedIn={setIsLoggedIn}
+                  setIsSetup={setIsSetup}
                   accountAction={accountAction}
                   setAccountAction={setAccountAction}
+                  setNavSelector={setNavSelector}
                   />}
               </Stack.Screen>
               <Stack.Screen
@@ -378,6 +450,7 @@ export const App = (props: any) => {
               {...props}
               mobile={mobile}
               setIsLoggedIn={setIsLoggedIn}
+              setIsSetup={setIsSetup}
               />}
               </Stack.Screen>
             </Stack.Navigator>
@@ -386,16 +459,17 @@ export const App = (props: any) => {
         {Platform.OS === 'web' ?
         <Navigation
         setAccountView={setAccountView}
-        dimensions={navDimensions}
-        setDimensions={setNavDimensions}
+        height={navHeight}
+        setHeight={setNavHeight}
+        width={navWidth}
+        setWidth={setNavWidth}
         setIsMatches={setIsMatches}
-        navigation={nav()}
-        isLoggedIn={isLoggedIn}
-        setCurrentNav={setCurrentNav}
         mobile={mobile}
-        isSetup={isSetup}
-        setIsSetup={setIsSetup}
         isLoaded={isLoaded}
+        isSetup={isSetup}
+        isLoggedIn={isLoggedIn}
+        navSelector={navSelector}
+        setNavSelector={setNavSelector}
         />
         : null} 
     </NavigationContainer>

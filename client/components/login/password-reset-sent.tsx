@@ -10,6 +10,7 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
   const [disabled,setDisabled] = useState(false);
   const [counter,setCounter] = useState('');
   const [message,setMessage] = useState('');
+  const [loading,setLoading] = useState(false);
 
   const btnTimer = (disabled: boolean, time: number) => {
     let interval: any;
@@ -50,6 +51,7 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
 
   const doResendEmail = async () => 
   {
+    setLoading(true);
     let interval: any;
       if (disabled)
         return;
@@ -90,8 +92,8 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
           disableBtn(false);
           clearInterval(interval);
           setMessage("An error occurred while attempting to send a password reset email.");
-          return;
-      }    
+      }  
+      setLoading(false);  
   };
   
   return (
@@ -123,6 +125,7 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
           onPress={() => doResendEmail()}
           value={!disabled ? 'Resend Email' : 'Email Sent'}
           disabled={disabled}
+          loading={loading}
           >
           </_Button>
       </View>

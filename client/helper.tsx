@@ -140,6 +140,22 @@ export const isLoggedIn = async () => {
   }
 }
 
+export const isSetup = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@user_data');
+    const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+    if (data && data.user) {
+      return data.user.is_setup ? true : false;
+    }
+    else {
+      return false;
+    }
+  }
+  catch {
+    return false;
+  }
+}
+
 export const authTokenHeader = async () => {
   let data = await getLocalStorage();
   if (data) {

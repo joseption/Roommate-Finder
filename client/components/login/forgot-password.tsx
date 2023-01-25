@@ -10,6 +10,7 @@ const ForgotPassword = (props: any, {navigation}:any) => {
     const [message,setMessage] = useState('');
     const [disabled,setDisabled] = useState(true);
     const [emailError,setEmailError] = useState(false);
+    const [loading,setLoading] = useState(false);
 
     const backToLogin = () => {
         setMessage('');
@@ -27,8 +28,13 @@ const ForgotPassword = (props: any, {navigation}:any) => {
 
     const doSendEmail = async () => 
     {
-        if (disabled)
+        setLoading(true);
+        setEmailError(false);
+
+        if (disabled) {
+          setEmailError(!props.email);
           return;
+        }
         
         props.setEmail(props.email);
         setDisabled(true);
@@ -61,8 +67,8 @@ const ForgotPassword = (props: any, {navigation}:any) => {
         {
             setDisabled(false);
             setMessage("An unexpected error occurred while sending the password reset email. Please try again.");
-            return;
         }    
+        setLoading(false);
     };
 
   return (
@@ -84,6 +90,7 @@ const ForgotPassword = (props: any, {navigation}:any) => {
       onChangeText={(e: any) => {handleChange(e)}}
       value={props.email}
       error={emailError}
+      onSubmit={doSendEmail}
       />
       <View
       style={Style.alignRight}
@@ -92,6 +99,7 @@ const ForgotPassword = (props: any, {navigation}:any) => {
         style={props.btnStyle(disabled)}
         onPress={() => doSendEmail()}
         disabled={disabled}
+        loading={loading}
         >
           Send Email
         </_Button>

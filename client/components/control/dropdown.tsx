@@ -146,7 +146,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
     const menuStyle = () => {
         if (props.direction == "top") {
             return {
-                bottom: "-25px"
+                bottom: 25
             }
         }
         else {

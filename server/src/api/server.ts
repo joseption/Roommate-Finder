@@ -13,7 +13,7 @@ import bodyParser from 'body-parser';
 
 const port = process.env.PORT || 8080;
 const app = express();
-// app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.json({ limit: '10mb' }));
 const cors = require('cors');
 app.use(cors());
 

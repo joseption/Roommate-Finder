@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { isAuthenticated } from '../../middleware';
 import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday, updateImage } from './services';
 import db from '../../utils/db';
+import { uploadImage } from 'utils/uploadImage';
 const router = express.Router();
 
 router.use(isAuthenticated); // ! Do this instead of adding isAuthenticated to every function
@@ -95,6 +96,10 @@ router.get('/profileSearch', async (req: Request, res: Response) => {
 router.get('/Allprofiles', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await db.user.findMany();
+    //delete password
+    users.forEach(user => {
+      delete user.password;
+    });
     return res.json(users);
   } catch (err) {
     next(err);
@@ -366,15 +371,25 @@ router.post('/updateProfilePicture', async (req: Request, res: Response, next: N
     if(!profile_picture) {
       return res.status(400).json({ Error: 'Profile picture URL is required' });
     }
+    //check if profile_picture is a base64 image 
+    if(!/^data:image\/[a-z]+;base64,/.test(profile_picture)) {
+      return res.status(400).json({ Error: 'Profile picture should be a base64 image' });
+    }
+
     const user = await findUserById(userId);
     if (!user) {
       return res.status(400).json({ Error: 'User not found' });
     }
-    const update = await updateProfilePicture(userId, profile_picture);
+    //uploading image to s3 bucket
+    const upload = await uploadImage(profile_picture);
+    if(!upload) {
+      return res.status(400).json({ Error: 'Upload failed' });
+    }
+    const update = await updateProfilePicture(userId, upload);
     if(!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
-    return res.status(200).json({ message: 'Update successful' });
+    return res.status(200).json({ message: upload });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ Error: 'Server error' });
@@ -472,7 +487,16 @@ router.post('/updateAllProfile', async (req: Request, res: Response, next: NextF
     if (!image) {
       return res.status(400).json({ Error: 'Image is required' });
     }
-    const update_image = await updateImage(userId, image);
+    //check if image is a base64 image
+    if (!/^data:image\/[a-z]+;base64,/.test(image)) {
+      return res.status(400).json({ Error: 'Image should be a base64 image' });
+    }
+    //uploading image to s3 bucket
+    const upload = await uploadImage(image);
+    if (!upload) {
+      return res.status(400).json({ Error: 'Upload failed' });
+    }
+    const update_image = await updateImage(userId, upload);
     if (!update_image) {
       return res.status(400).json({ Error: 'Update image failed' });
     }

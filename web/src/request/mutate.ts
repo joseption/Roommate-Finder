@@ -6,7 +6,6 @@ import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 
 const backend_api = "https://api.roomfin.xyz";
-
 export async function login(email: string, password: string) {
   return await doRequest<AuthSession>(
     `${backend_api}/auth/login`,
@@ -207,6 +206,17 @@ export async function UpdateBirthday(bday: string) {
     `${backend_api}/users/updateBday`,
     {
       bday,
+    },
+    "POST",
+    true
+  );
+}
+
+export async function UpdateProfilePicture(profile_picture: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/users/updateProfilePicture`,
+    {
+      profile_picture,
     },
     "POST",
     true

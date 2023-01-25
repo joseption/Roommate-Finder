@@ -1,4 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import Image from "next/image";
+import { ChangeEvent } from "react";
 import { toast } from "react-hot-toast";
 
 import CircularProgress from "../../components/Feedback/CircularProgress";
@@ -12,6 +14,7 @@ import {
   UpdateGender,
   UpdateLastName,
   UpdatePhone,
+  UpdateProfilePicture,
   UpdateState,
   UpdateZip,
 } from "../../request/mutate";
@@ -32,7 +35,7 @@ export default function Settings() {
   const { mutate: mutateUpdateFirstName } = useMutation({
     mutationFn: (Firstname: string) => UpdateFirstName(Firstname),
     onSuccess: () => {
-      UserData;
+      void UserData();
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -42,7 +45,7 @@ export default function Settings() {
   const { mutate: mutateUpdateLastName } = useMutation({
     mutationFn: (LastName: string) => UpdateLastName(LastName),
     onSuccess: () => {
-      UserData;
+      void UserData();
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -52,7 +55,7 @@ export default function Settings() {
   const { mutate: mutateUpdateGender } = useMutation({
     mutationFn: (gender: string) => UpdateGender(gender),
     onSuccess: () => {
-      UserData;
+      void UserData();
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -62,18 +65,18 @@ export default function Settings() {
   const { mutate: mutateUpdatePhone } = useMutation({
     mutationFn: (phone: string) => UpdatePhone(phone),
     onSuccess: () => {
-      UserData;
+      void UserData();
     },
     onError: (err: Error) => {
       toast.error(err.message);
-      UserData;
+      void UserData();
     },
   });
 
   const { mutate: mutateUpdateCity } = useMutation({
     mutationFn: (city: string) => UpdateCity(city),
     onSuccess: () => {
-      UserData;
+      void UserData();
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -83,7 +86,7 @@ export default function Settings() {
   const { mutate: mutateUpdateState } = useMutation({
     mutationFn: (state: string) => UpdateState(state),
     onSuccess: () => {
-      UserData;
+      void UserData();
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -93,7 +96,7 @@ export default function Settings() {
   const { mutate: mutateUpdateZip } = useMutation({
     mutationFn: (zip_code: string) => UpdateZip(zip_code),
     onSuccess: () => {
-      UserData;
+      void UserData();
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -104,13 +107,48 @@ export default function Settings() {
   const { mutate: mutateUpdateBday } = useMutation({
     mutationFn: (bday: string) => UpdateBirthday(bday),
     onSuccess: () => {
-      UserData;
+      void UserData();
     },
     onError: (err: Error) => {
       toast.error(err.message);
     },
   });
 
+  const { mutate: updateProfile, isLoading: isUpdatingProfile } = useMutation({
+    mutationKey: ["update_profile"],
+    mutationFn: UpdateProfilePicture,
+    onSuccess: (data) => {
+      toast.success("Profile updated");
+      localStorage.setItem("image", data.message ?? "");
+      void UserData();
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+
+  const handleUpdateImage = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+    if (file.type !== "image/jpeg" && file.type !== "image/png") {
+      return toast.error("Invalid image type. Only jpg, png are allowed.");
+    }
+
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+    fileReader.onload = () => {
+      if (!fileReader.result) {
+        return toast.error("Could not read file.");
+      }
+      if (fileReader.result.toString().length > 8 * 1024 * 1024) {
+        return toast.error("Image size is too large. Max size is 8MB.");
+      }
+      // Update the profile image
+      console.log(fileReader.result.toString());
+      updateProfile(fileReader.result.toString());
+    };
+  };
   return (
     <>
       <div className="min-h-screen bg-white">
@@ -143,7 +181,12 @@ export default function Settings() {
                         </div>
                         <div className="mt-6">
                           <dl className="divide-y divide-gray-200">
-                            <ProfilePicture Name="Profile Picture" Value="" />
+                            <ProfilePicture
+                              Name="Profile Picture"
+                              Value={data?.image}
+                              onImageChange={handleUpdateImage}
+                              isLoading={isUpdatingProfile}
+                            />
                             <SettingsSection
                               Name="First Name"
                               Value={data.first_name}

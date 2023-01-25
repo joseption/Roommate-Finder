@@ -23,14 +23,15 @@ export default function ProfileImage({
         <CustomImage
           src={image}
           alt="Profile Image"
-          fill
-          priority
+          width={10}
+          height={10}
           sizes={"12rem"}
-          containerClassName={"relative h-48 w-48 rounded-full"}
+          containerClassName={"relative h-10 w-10 rounded-full"}
           className={"absolute h-full w-full rounded-full object-cover"}
+          isAvatar={true}
         />
       ) : (
-        <div className="h-48 w-48">
+        <div className="h-10 w-10">
           <MdAccountCircle className="h-full w-full text-slate-800 dark:text-slate-100" />
         </div>
       )}
@@ -46,6 +47,7 @@ export default function ProfileImage({
             <>
               <input
                 type={"file"}
+                accept="image/*"
                 onChange={onImageChange}
                 title={" "}
                 aria-label={"Set Profile Image"}
@@ -54,7 +56,7 @@ export default function ProfileImage({
                 }
               />
               <MdEdit
-                className={`absolute top-1/2 left-1/2 h-full w-10 -translate-x-1/2 -translate-y-1/2 text-slate-100 
+                className={`absolute top-1/2 left-1/2 h-full w-5 -translate-x-1/2 -translate-y-1/2 text-slate-100 
                   opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100`}
               />
             </>

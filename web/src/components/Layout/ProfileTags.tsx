@@ -2,25 +2,15 @@ import SelectableChip from "../Inputs/SelectableChip";
 interface Props {
   styles: string[];
   selectedStyles: string[];
-  setSelectedStyles: (styles: string[]) => void;
   className?: string;
 }
 
-export default function StyleList({
+export default function ProfileTags({
   styles,
   selectedStyles,
-  setSelectedStyles,
   className = "",
 }: Props) {
   //#region Handlers
-
-  const handleStyleSelect = (style: string, selected: boolean) => {
-    if (selected) {
-      setSelectedStyles([...selectedStyles, style]);
-    } else {
-      setSelectedStyles(selectedStyles.filter((s) => s !== style));
-    }
-  };
 
   //#endregion
 
@@ -33,7 +23,8 @@ export default function StyleList({
           <SelectableChip
             label={style}
             selected={selectedStyles.includes(style)}
-            onSelect={handleStyleSelect}
+            onSelect={(style, selected) => {}}
+            className={"bg-yellow-700 disabled:pointer-events-none"}
           />
         </li>
       ))}

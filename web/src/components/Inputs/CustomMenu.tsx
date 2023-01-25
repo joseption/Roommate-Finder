@@ -92,7 +92,7 @@ export default function CustomMenu({
                 variants={transitionVariants}
                 style={{
                   position: strategy,
-                  top: y ?? 35,
+                  top: y ?? 45,
                   left: x ?? -100,
                 }}
                 className={`z-50 w-max max-w-[90vw] rounded-xl bg-slate-50/90 p-2 shadow-lg ring-1 ring-black/5 

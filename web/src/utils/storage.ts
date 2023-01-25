@@ -16,6 +16,10 @@ export function getAuthSession(): AuthSession {
   };
 }
 
+export function getUserImage(): string | null {
+  return localStorage.getItem("image") ?? null;
+}
+
 export function clearAuthSession() {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("userId");

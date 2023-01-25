@@ -8,7 +8,6 @@ import { BioAndTags } from "../types/tags.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 const backend_api = "https://api.roomfin.xyz";
-
 export async function GetCurrentUserInfo() {
   return await doRequest<user>(`${backend_api}/users/me`, null, "GET", true);
 }
@@ -34,6 +33,15 @@ export async function SurveyOnComplete() {
 export async function GetBioAndTags() {
   return await doRequest<BioAndTags>(
     `${backend_api}/users/getBioAndTags`,
+    null,
+    "GET",
+    true
+  );
+}
+
+export async function GetAllUsers() {
+  return await doRequest<user[]>(
+    `${backend_api}/users/Allprofiles`,
     null,
     "GET",
     true

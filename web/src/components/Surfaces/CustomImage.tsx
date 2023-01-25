@@ -6,6 +6,7 @@ interface Props extends ImageProps {
   alt: string;
   containerClassName?: string;
   className?: string;
+  isAvatar?: boolean;
 }
 
 /**
@@ -22,6 +23,7 @@ export default function CustomImage({
   alt,
   containerClassName = "",
   className = "",
+  isAvatar = false,
   ...rest
 }: Props) {
   //#region Hooks
@@ -48,11 +50,16 @@ export default function CustomImage({
   } else {
     imageStyles += " opacity-100";
   }
-
   //#endregion
 
   return (
-    <div className={`${containerStyles} ${containerClassName}`}>
+    <div
+      className={
+        isAvatar
+          ? `${containerClassName}`
+          : `${containerStyles} ${containerClassName}`
+      }
+    >
       <Image
         src={src}
         alt={alt}

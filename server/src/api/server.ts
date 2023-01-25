@@ -9,9 +9,11 @@ import chats from './chats/routes';
 import messages from './messages/routes';
 import listings from './listings/routes';
 import matches from './matches/routes';
+import bodyParser from 'body-parser';
 
 const port = process.env.PORT || 8080;
 const app = express();
+app.use(bodyParser.json({ limit: '50mb' }));
 const cors = require('cors');
 app.use(cors());
 

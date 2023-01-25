@@ -12,13 +12,15 @@ import { AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { MdAccountCircle } from "react-icons/md";
 
-import { clearAuthSession } from "../utils/storage";
+import { clearAuthSession, getUserImage } from "../utils/storage";
 import LinearProgress from "./Feedback/LinearProgress";
 import Button from "./Inputs/Button";
 import CustomMenu from "./Inputs/CustomMenu";
 import IconButton from "./Inputs/IconButton";
-
+import CustomImage from "./Surfaces/CustomImage";
 const navigation = [
   { name: "Explore", href: "/explore" },
   { name: "Listings", href: "/listings" },
@@ -52,6 +54,13 @@ export default function Nav() {
   //#region Hooks
   //#endregion
   const router = useRouter();
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+
+  useEffect(() => {
+    const imageData = localStorage.getItem("image") ?? null;
+    setUserAvatar(imageData);
+  }, []);
+
   if (router.pathname.includes("/auth")) return null;
   else
     return (
@@ -101,10 +110,25 @@ export default function Nav() {
                     <CustomMenu
                       popoverPlacement={"bottom-end"}
                       button={
-                        <IconButton>
-                          <span className="sr-only">Open user menu</span>
-                          <Cog8ToothIcon className={`h-8 w-8`} />
-                        </IconButton>
+                        userAvatar ? (
+                          <CustomImage
+                            src={userAvatar}
+                            alt="User Avatar"
+                            fill
+                            priority
+                            sizes={"2.5rem"}
+                            draggable={false}
+                            containerClassName={
+                              "relative h-10 w-10 rounded-full"
+                            }
+                            className={
+                              "absolute h-full w-full rounded-full object-cover hover:brightness-125"
+                            }
+                            isAvatar={true}
+                          />
+                        ) : (
+                          <MdAccountCircle className={"h-full w-10"} />
+                        )
                       }
                     >
                       {({ open }) =>

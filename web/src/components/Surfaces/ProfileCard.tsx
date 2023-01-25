@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import ProfileDialog from "../Dialogs/ProfileDialog";
 import Author from "../Widgets/Author";
 // import ImageDialog from "../Dialogs/ImageDialog";
 import Card from "./Card";
@@ -16,11 +17,13 @@ interface Props {
 }
 
 export default function ProfileCard({
+  id,
   src,
   bio,
   authorName,
   showDialog = true,
   className = "",
+  tags,
 }: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -79,6 +82,15 @@ export default function ProfileCard({
           />
         </div>
       </Card>
+      <ProfileDialog
+        id={id}
+        src={src}
+        bio={bio ? bio : "No bio 🙃"}
+        authorName={authorName}
+        isOpen={isDialogOpen}
+        tags={tags}
+        onClose={handleDialogClose}
+      />
       {/* pop up here */}
     </>
   );

@@ -1,10 +1,12 @@
 import { RadioGroup } from "@headlessui/react";
 import React, { useEffect, useState } from "react";
+
 type response = {
   id: string;
   response: string;
   question_id: string;
 };
+
 interface Props {
   Responses: response[] | undefined;
   ResponsesOfUsers: number;

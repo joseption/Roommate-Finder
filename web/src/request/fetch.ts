@@ -7,7 +7,8 @@ import { SurveyInfo } from "../types/survey.types";
 import { BioAndTags } from "../types/tags.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
-const backend_api = "https://api.roomfin.xyz";
+// const backend_api = "https://api.roomfin.xyz";
+const backend_api = "http://localhost:8080";
 export async function GetCurrentUserInfo() {
   return await doRequest<user>(`${backend_api}/users/me`, null, "GET", true);
 }

@@ -36,8 +36,8 @@ export default function ProfileList({
               animate={"show"}
               exit={"hidden"}
               transition={transitions.springStiff}
-              className={`grid list-none grid-cols-fill-10 justify-items-center gap-2 sm:grid-cols-fill-20 md:gap-4 
-            lg:grid-cols-fill-30 2xl:grid-cols-fill-40 ${className}`}
+              className={`grid-cols-fill-10 sm:grid-cols-fill-20 lg:grid-cols-fill-30 2xl:grid-cols-fill-40 grid list-none justify-items-center 
+            gap-2 md:gap-4 ${className}`}
             >
               <AnimatePresence mode={"popLayout"}>
                 {profiles
@@ -56,6 +56,20 @@ export default function ProfileList({
                         src={profile.image ? profile.image : "/placeholder.png"}
                         bio={profile.bio}
                         authorName={profile.first_name}
+                        tags={[
+                          "🎮 Games",
+                          "🥕 Drugs",
+                          "🥕 Music",
+                          "🥕 Art",
+                          "🥕 Food",
+                          "🥕 Travel",
+                          "🎮 Games",
+                          "🥕 Drugs",
+                          "🥕 Music",
+                          "🥕 Art",
+                          "🥕 Food",
+                          "🥕 Travel",
+                        ]}
                       />
                     </motion.li>
                   ))}

@@ -1,19 +1,18 @@
 //Upload image to s3 bucket. 
 
-import AWS from 'aws-sdk'
+import S3 from 'aws-sdk/clients/s3';
 import { uuid } from "uuidv4";
 import { Buffer } from 'buffer';
 
+
 // @params file: string (base64) image file
 export const uploadImage = async (image: string) => {
-    const s3 = new AWS.S3({
-        accessKeyId: process.env.AWSACCESS_KEY,
-        secretAccessKey: process.env.AWSSECRET_KEY,
-    })
 
-    
     try {
-
+        const s3 = new S3({
+            accessKeyId: process.env.AWSACCESS_KEY,
+            secretAccessKey: process.env.AWSSECRET_KEY,
+        })
         const base64Data = Buffer.from(image.replace(/^data:image\/\w+;base64,/, ""), 'base64');
         const type = image.split(';')[0].split('/')[1];
 

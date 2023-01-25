@@ -1,7 +1,7 @@
 import { FlatList } from "react-native";
 import Message from "./message";
 import { useEffect, useState } from "react";
-import { env, getLocalStorage } from "../../helper";
+import { env } from "../../helper";
 
 interface Props {
   chat: any

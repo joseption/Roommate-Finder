@@ -10,6 +10,7 @@ import messages from './messages/routes';
 import listings from './listings/routes';
 import matches from './matches/routes';
 import bodyParser from 'body-parser';
+import { startSocketIO } from './websockets';
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -45,6 +46,8 @@ app.use('/listings', listings);
 app.use('/survey', survey);
 app.use('/matches', matches);
 // Start the express server.
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Listening on http://localhost:${port}`);
 });
+
+startSocketIO(server);

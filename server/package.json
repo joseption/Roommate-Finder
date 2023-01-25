@@ -54,6 +54,7 @@
     "express-jwt": "^7.7.7",
     "jsonwebtoken": "^8.5.1",
     "jwks-rsa": "^2.1.5",
+    "socket.io": "^4.5.4",
     "tsc-alias": "^1.7.0",
     "uuid": "^9.0.0",
     "uuidv4": "^6.2.13"

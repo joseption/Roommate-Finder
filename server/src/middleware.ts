@@ -11,7 +11,12 @@ const dev = {
  clientURL: "http://localhost:19006"
 };
 
+const frontendDev = {
+  URL: "http://localhost:19006"
+}
+
 export const env = process.env.NODE_ENV === "development" ? dev : prod;
+export const frontendEnv = process.env.NODE_ENV === "development" ? frontendDev : prod;
 
 export function notFound(req:Request, res:Response, next:NextFunction) {
   res.status(404);

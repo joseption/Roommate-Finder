@@ -5,6 +5,9 @@ import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
 import { env, getLocalStorage } from '../helper';
+import io from 'socket.io-client'
+
+const socket = io(env.URL);
 
 const MessagesScreen = (props: any, {navigation}:any) => {
   const [showPanel, updateShowPanel] = useState(false);

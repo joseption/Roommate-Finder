@@ -1,4 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SectionList } from 'react-navigation';
@@ -7,11 +8,11 @@ import _Progress from '../components/control/progress';
 import _SurveyOption from '../components/control/survey-option';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
-import { env, getLocalStorage, authTokenHeader, NavTo } from '../helper';
+import { env, getLocalStorage, authTokenHeader, NavTo, navProp, setLocalStorage } from '../helper';
 import { Style, Color, FontSize, Radius } from '../style';
 import { styles } from './login';
 
-const SurveyScreen = (props: any, {navigation}:any) => {
+const SurveyScreen = (props: any) => {
     /*
     Joseph: Add all content for the single page view here,
     If you need to make reusable components, create a folder
@@ -33,6 +34,8 @@ const SurveyScreen = (props: any, {navigation}:any) => {
     const [loading,setLoading] = useState(false);
     const [complete,setComplete] = useState(false);
     const [askReview,setAskReview] = useState(true);
+    const [isLoaded,setIsLoaded] = useState(false);
+    const navigation = useNavigation<navProp>();
     
     useEffect(() => {
         if (!init) {
@@ -40,7 +43,6 @@ const SurveyScreen = (props: any, {navigation}:any) => {
             setInit(true);
         }
     }, [questions, options, progress, questionId, totalNumber, currentNumber]);
-    // JA TODO props.accountIsSetup need to know if the account is setup or not
     const errorStyle = () => {
         var style = [];
         style.push(Style.textDanger);
@@ -203,7 +205,7 @@ const SurveyScreen = (props: any, {navigation}:any) => {
                     if (res.Error)
                     {
                         if (res.Error == "Un-Authorized") {
-                            navigation.navigate(NavTo.Login, {timeout: 'yes'});
+                            await unauthorized();
                             return;
                         }
                         hasError = true;
@@ -226,12 +228,23 @@ const SurveyScreen = (props: any, {navigation}:any) => {
             setError('Unable to load survey question, please refresh to try again.');
 
         setLoading(false);
+        setIsLoaded(true);
     }
 
     const generateMatches = async () => {
         setComplete(true);
 
         setLoading(false);
+    }
+
+    const unauthorized = async () => {
+        await setLocalStorage(null);
+        props.setIsLoggedIn(false);
+        props.setIsSetup(false);
+        navigation.reset({
+            index: 0,
+            routes: [{name: NavTo.Login, params: {timeout: 'yes'} as never}],
+        });
     }
 
     const submit = async (goto: number) => {
@@ -252,7 +265,7 @@ const SurveyScreen = (props: any, {navigation}:any) => {
                         if (res.Error)
                         {
                             if (res.Error == "Un-Authorized") {
-                                navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                                await unauthorized();
                                 return;
                             }
                             hasError = true;
@@ -367,6 +380,17 @@ const SurveyScreen = (props: any, {navigation}:any) => {
                         </_Button>
                     </View>
                 </View>
+                {!isLoaded ?
+                <View
+                style={Style.maskPrompt}
+                >
+                    <ActivityIndicator
+                    size="large"
+                    color={Color.gold}
+                    style={Style.maskLoading}
+                    />    
+                </View>
+                : null }
             </View>
         </View>
         :

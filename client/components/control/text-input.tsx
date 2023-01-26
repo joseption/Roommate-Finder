@@ -256,8 +256,16 @@ const styles = StyleSheet.create({
   phoneContainer: {
     zIndex: -1,
     position: 'absolute',
-    top: 8,
-    left: 11,
+    ...Platform.select({
+      web: {
+        top: 8,
+        left: 11,
+      },
+      android: {
+        top: 5,
+        left: 10,
+      }
+    }),
   },
   count: {
     color: Color.textSecondary

@@ -7,8 +7,8 @@ import _Button from '../control/button';
 import _Image from '../control/image';
 import _Cluster from '../control/cluster';
 import _ClusterOption from '../control/cluster-option';
-import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { AccountScreenType, authTokenHeader, env, getLocalStorage, navProp, NavTo } from '../../helper';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { AccountScreenType, authTokenHeader, env, getLocalStorage, navProp, NavTo, setLocalStorage } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
@@ -21,32 +21,28 @@ const AccountAbout = (props: any) => {
     const [isSaved,setIsSaved] = useState(false);
     const [isLoading,setIsLoading] = useState(false);
     const [isLoaded,setIsLoaded] = useState(false);
+    const [isComplete,setIsComplete] = useState(false);
     const [tagsAmount,setTagsAmount] = useState(0);
     const tags = [
-        "Travel",
-        "Photography",
-        "Fitness",
-        "Wellness",
-        "Food",
-        "Reading",
-        "Music",
-        "Arts",
-        "Technology",
-        "Sports",
-        "Pets",
-        "Environmentalism",
-        "Cars",
-        "Finance",
-        "Business",
-        "Film",
-        "Gaming",
-        "Science",
-        "History",
-        "Anime",
-        "Shopping",
-        "Alcohol",
-        "Politics",
-        "Nature",
+        "✈️ Travel",
+        "📷 Photography",
+        "💪 Fitness",
+        "🍲 Food",
+        "📖 Reading",
+        "🎵 Music",
+        "🎨 Arts",
+        "💻 Technology",
+        "⚽ Sports",
+        "🐾 Pets",
+        "🚗 Cars",
+        "💼 Business",
+        "🎥 Film",
+        "🎮 Gaming",
+        "🔬 Science",
+        "🏛 History",
+        "🌸 Anime",
+        "🛍 Shopping",
+        "🍻 Alcohol",
       ];
 
     useEffect(() => {
@@ -54,9 +50,11 @@ const AccountAbout = (props: any) => {
             onLoad();
             setInit(true);
         }
-        if (props.isSetup && isLoaded && !isSaved)
+        if (props.isSetup && isComplete) {
             setIsSaved(true);
-    }, [bioForm, tagForm, props.isSetup, isLoaded])
+            setIsComplete(false);
+        }
+    }, [props.isSetup, bioForm, tagForm, isLoaded, isComplete])
 
     const setupPage = (data: any) => {
         setBio(data.bio);
@@ -67,6 +65,8 @@ const AccountAbout = (props: any) => {
             });
             setTagForm(tags);
         }
+        if (props.isSetup)
+            setIsSaved(true);
     }
 
     const errorStyle = () => {
@@ -115,7 +115,7 @@ const AccountAbout = (props: any) => {
     }
 
     const subtitle = () => {
-        return !props.isSetup ? "Tell us more about yourself" : "Update information about yourself";
+        return !props.isSetup ? "Tell us about yourself" : "Update your information";
     }
 
     const subTitleStyle = () => {
@@ -151,7 +151,7 @@ const AccountAbout = (props: any) => {
     }
 
     const onSave = async (loc: string = '') => {
-        if (!isSaved) {
+        if (!checkSubmitDisabled()) {
             setError('');
             setIsLoading(true);
             let hasError = false;
@@ -168,7 +168,7 @@ const AccountAbout = (props: any) => {
                     if (res.Error)
                     {
                         if (res.Error == "Un-Authorized") {
-                            navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                            await props.unauthorized();
                             return;
                         }
                         hasError = true;
@@ -210,14 +210,14 @@ const AccountAbout = (props: any) => {
                 if (res.Error)
                 {
                     if (res.Error == "Un-Authorized") {
-                        navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                        await props.unauthorized();
                         return;
                     }
                     hasError = true;
                 }
                 else {
+                    setIsComplete(true);
                     setupPage(res);
-                    setIsLoaded(true);
                 }
             });
         }
@@ -225,8 +225,10 @@ const AccountAbout = (props: any) => {
         {
             hasError = true;
         } 
-        if (hasError)
+        if (hasError) 
             setError('A problem occurred while retrieving account information, please reload the page and try again.');
+    
+        setIsLoaded(true);
     }
 
     const submitText = () => {
@@ -239,110 +241,123 @@ const AccountAbout = (props: any) => {
     }
 
     return (
-    <ScrollView>
-        <View>
+    <View>
+        <ScrollView>
+            <View>
+                <View
+                style={_styles.titleContainer}
+                >
+                    <_Text
+                    style={_styles.title}
+                    >
+                        {title()}
+                    </_Text>
+                    {props.isSetup ?
+                    <_Button
+                    style={Style.buttonInverted}
+                    textStyle={Style.buttonInvertedText}
+                    onPress={(e: any) => onSave('info')}
+                    >
+                        Edit Account
+                    </_Button>
+                    : null }
+                </View>
+            </View>
             <View
-            style={_styles.titleContainer}
+            style={[containerStyle(), _styles.container]}
             >
                 <_Text
-                style={_styles.title}
+                style={subTitleStyle()}
                 >
-                    {title()}
+                    {subtitle()}
                 </_Text>
-                {props.isSetup ?
-                <_Button
-                style={Style.buttonInverted}
-                textStyle={Style.buttonInvertedText}
-                onPress={(e: any) => onSave('info')}
+                <_TextInput
+                multiline={true}
+                height={250}
+                label="Bio"
+                required={true}
+                containerStyle={_styles.formGap}
+                showMaxLength={true}
+                maxLength={1000}
+                onChangeText={(e: any) => setBio(e)}
+                value={bioForm}
                 >
-                    Edit Account
-                </_Button>
+
+                </_TextInput>
+                <_Cluster
+                label="Activities and Interests"
+                required={true}
+                minAmount={5}
+                amount={tagsAmount}
+                setAmount={setTagsAmount}
+                options={tags}
+                containerStyle={_styles.formGap}
+                selected={tagForm}
+                select={setTagForm}
+                updated={setIsSaved}
+                >
+                </_Cluster>
+                <View
+                style={_styles.options}
+                >
+                    {!props.isSetup ?
+                    <Pressable
+                    style={_styles.arrowContainer}
+                    onPress={(e: any) => onSave('back')}
+                    >
+                        <FontAwesomeIcon 
+                        size={20} 
+                        color={Color.textSecondary} 
+                        style={_styles.backArrow} 
+                        icon="arrow-left"
+                        >
+                        </FontAwesomeIcon>
+                        <_Text
+                        style={Style.textDefaultSecondary}
+                        >
+                            Go Back
+                        </_Text>
+                    </Pressable>
+                    :
+                    <View>
+                    </View>
+                    }
+                    <View
+                    style={_styles.buttonContainer}
+                    >
+                        <_Button
+                        loading={isLoading}
+                        style={Style.buttonGold}
+                        disabled={checkSubmitDisabled()}
+                        onPress={(e: any) => onSave('next')}
+                        >
+                            {submitText()}
+                        </_Button>
+                    </View>
+                </View>
+                {error || props.error ?
+                <_Text
+                containerStyle={errorContainerStyle()}
+                innerContainerStyle={{justifyContent: 'center'}}
+                style={errorStyle()}
+                >
+                    {error}
+                </_Text>
+                : null}
+                {!isLoaded ?
+                <View
+                style={Style.maskPrompt}
+                >
+                    <ActivityIndicator
+                    size="large"
+                    color={Color.gold}
+                    style={Style.maskLoading}
+                    />    
+                </View>
                 : null }
             </View>
-        </View>
-        <View
-        style={[containerStyle(), _styles.container]}
-        >
-            <_Text
-            style={subTitleStyle()}
-            >
-                {subtitle()}
-            </_Text>
-            <_TextInput
-            multiline={true}
-            height={250}
-            label="Bio"
-            required={true}
-            containerStyle={_styles.formGap}
-            showMaxLength={true}
-            maxLength={1000}
-            onChangeText={(e: any) => setBio(e)}
-            value={bioForm}
-            >
-
-            </_TextInput>
-            <_Cluster
-            label="Activities and Interests"
-            required={true}
-            minAmount={5}
-            amount={tagsAmount}
-            setAmount={setTagsAmount}
-            options={tags}
-            containerStyle={_styles.formGap}
-            selected={tagForm}
-            select={setTagForm}
-            updated={setIsSaved}
-            >
-            </_Cluster>
-            <View
-            style={_styles.options}
-            >
-                {!props.isSetup ?
-                <Pressable
-                style={_styles.arrowContainer}
-                onPress={(e: any) => onSave('back')}
-                >
-                    <FontAwesomeIcon 
-                    size={20} 
-                    color={Color.textSecondary} 
-                    style={_styles.backArrow} 
-                    icon="arrow-left"
-                    >
-                    </FontAwesomeIcon>
-                    <_Text
-                    style={Style.textDefaultSecondary}
-                    >
-                        Go Back
-                    </_Text>
-                </Pressable>
-                :
-                <View>
-                </View>
-                }
-                <View
-                style={_styles.buttonContainer}
-                >
-                    <_Button
-                    loading={isLoading}
-                    style={Style.buttonGold}
-                    disabled={checkSubmitDisabled()}
-                    onPress={(e: any) => onSave('next')}
-                    >
-                        {submitText()}
-                    </_Button>
-                </View>
-            </View>
-            {error || props.error ?
-            <_Text
-            containerStyle={errorContainerStyle()}
-            innerContainerStyle={{justifyContent: 'center'}}
-            style={errorStyle()}
-            >
-                {error}
-            </_Text>
-            : null}
-        </View>
-    </ScrollView>
+        </ScrollView>
+    </View>
     );
 };
 

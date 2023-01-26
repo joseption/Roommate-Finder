@@ -1,4 +1,4 @@
-import { Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import _TextInput from '../control/text-input';
 import _Dropdown from '../control/dropdown';
 import _Checkbox from '../control/checkbox';
@@ -14,6 +14,8 @@ import DocumentPicker, {DirectoryPickerResponse, DocumentPickerResponse, isInPro
 import { AccountScreenType, authTokenHeader, env, getLocalStorage, isMobile, navProp, NavTo, setLocalStorage } from '../../helper';
 import { color } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
+import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { rmSync } from 'fs';
 
 const AccountInfo = (props: any) => {
     const navigation = useNavigation<navProp>();
@@ -28,7 +30,7 @@ const AccountInfo = (props: any) => {
     const [city,setCity] = useState('');
     const [state,setState] = useState('');
     const [zipCode,setZipCode] = useState('');
-    const [photoError,setPhotoError] = useState('');
+    const [imageError,setImageError] = useState('');
     const [dayOptions,setDayOptions] = useState([]);
     const [isLoading,setIsLoading] = useState(false);
     const [isPasswordLoading,setIsPasswordLoading] = useState(false);
@@ -39,15 +41,18 @@ const AccountInfo = (props: any) => {
     const [isLoaded,setIsLoaded] = useState(false);
     const [imageURL,setImageURL] = useState('');
     const [init,setInit] = useState(false);
-    const [photoResult, setPhotoResult] = React.useState<Array<DocumentPickerResponse> | DirectoryPickerResponse | undefined | null>()
+    const [imageUri, setImageUri] = useState('');
+    const [isComplete,setIsComplete] = useState(false);
     useEffect(() => {
         if (!init) {
             onLoad();
             setInit(true);
         }
-        if (props.isSetup && isLoaded)
+        if (props.isSetup && isComplete) {
             setIsSaved(true);
-    }, [props.isSetup, isLoaded])
+            setIsComplete(false);
+        }
+    }, [props.isSetup, isLoaded, imageURL, imageUri, isComplete])
     
     const errorStyle = () => {
         var style = [];
@@ -117,15 +122,45 @@ const AccountInfo = (props: any) => {
         return style;
     }
 
-    const setPhoto = async () => {
-        try { // JA NEED TO SETUP PROPERLY
-            const img = await DocumentPicker.pickSingle({type: [DocumentPicker.types.images]});
-            setPhotoResult(img);
-            setImageURL("url for photo that will be saved");
+    const handleImage = (res: ImagePickerResponse) => {
+        if (res && res.assets) {
+            if (Platform.OS === 'web') {
+                if (res.assets[0].uri) {
+                    setImageUri(res.assets[0].uri);
+                }
+                else {
+                    setImageError("Photo could not be attached");
+                }
+            }
+            else {
+                if (res.assets[0].base64) {
+                    if (res.assets[0].uri) {
+                        setImageURL(res.assets[0].uri);
+                    }
+                    setImageUri("data:image/jpeg;base64," + res.assets[0].base64);
+                }
+                else {
+                    setImageError("Photo could not be attached");
+                }
+            }
         }
-        catch (e: any) {
-            var x = e;
+        else {
+            setImageError("A problem occurred while attaching your photo, please try again");
         }
+
+        setIsSaved(false);
+    }
+
+    const takePhoto = async () => {
+        launchCamera({mediaType: 'photo', maxHeight: 1000, maxWidth: 1000, cameraType: 'front', includeBase64: true, saveToPhotos: true}, (res) => {
+            handleImage(res);
+        });
+    }
+
+    const uploadPhoto = async () => {
+        launchImageLibrary({mediaType: 'photo', maxHeight: 1000, maxWidth: 1000, includeBase64: true}, (res) => {
+            handleImage(res);
+        });
     }
 
     const getYearOptions = () => {
@@ -235,8 +270,8 @@ const AccountInfo = (props: any) => {
     };
 
     const checkSubmitDisabled = () => {
-        // ja todo add !imageURL when working
-        return isSaved || !firstName || !lastName || !year || !month || !day || !phone || !zipCode || !city || !state || !gender
+        let hasImage = imageUri || imageURL;
+        return isSaved || !hasImage || !firstName || !lastName || !year || !month || !day || !phone || !zipCode || !city || !state || !gender
     }
 
     const completeSave = () => {
@@ -252,10 +287,6 @@ const AccountInfo = (props: any) => {
         if (isLoaded) {
             setIsSaved(false);
         }
-    }
-
-    const setPhotoFromLink = async (url: string) => {
-        // get the photo
     }
 
     const setBirthday = (stamp: string) => {
@@ -281,7 +312,7 @@ const AccountInfo = (props: any) => {
     const setupPage = (data: any) => {
         if (data) {
             if (data.image)
-                setPhotoFromLink(data.image);
+                setImageURL(data.image);
             if (data.first_name)
                 setFirstName(data.first_name);
             if (data.last_name)
@@ -295,9 +326,12 @@ const AccountInfo = (props: any) => {
             if (data.city)
                 setCity(data.city);
             if (data.state)
-                setState(data.state); // JA are we storing short or long version in db?
+                setState(data.state);
             if (data.gender)
                 setGender(data.gender);
+
+            if (props.isSetup)
+                setIsSaved(true);
         }
     }
 
@@ -317,7 +351,8 @@ const AccountInfo = (props: any) => {
                 city: city,
                 state: state,
                 gender: gender,
-                image: 'https://cdn-icons-png.flaticon.com/512/168/168724.png' //imageURL // ja update with real image url
+                imageUri: imageUri,
+                imageURL: imageURL
             };
 
             let js = JSON.stringify(obj);
@@ -331,7 +366,7 @@ const AccountInfo = (props: any) => {
                 if (res.Error)
                 {
                     if (res.Error == "Un-Authorized") {
-                        navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                        await props.unauthorized();
                         return;
                     }
                     hasError = true;
@@ -372,14 +407,14 @@ const AccountInfo = (props: any) => {
                     if (res.Error)
                     {
                         if (res.Error == "Un-Authorized") {
-                            navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                            await props.unauthorized();
                             return;
                         }
                         hasError = true;
                     }
                     else {
+                        setIsComplete(true);
                         setupPage(res);
-                        setIsLoaded(true);
                     }
                 });
             }
@@ -393,6 +428,8 @@ const AccountInfo = (props: any) => {
         } 
         if (hasError)
             setError('A problem occurred while retrieving account information, please reload the page and try again.');
+    
+        setIsLoaded(true);
     }
 
     const submitText = () => {
@@ -402,6 +439,17 @@ const AccountInfo = (props: any) => {
         else {
             return !props.isSetup ? 'Next' : 'Save';
         }
+    }
+
+    const getPhoto = () => {
+        if (Platform.OS === 'web') {
+            if (imageUri)
+                return imageUri;
+        }
+        if (imageURL)
+            return imageURL;
+        else
+            '';
     }
 
     return (
@@ -529,7 +577,7 @@ const AccountInfo = (props: any) => {
                 vertical={true}
                 style={_styles.imageContainer}
                 >
-                    {!props.accountPhoto ?
+                    {!imageURL && !imageUri ?
                     <View
                     style={[_styles.image, _styles.defaultImage]}
                     >
@@ -543,21 +591,35 @@ const AccountInfo = (props: any) => {
                     :
                     <_Image
                     style={_styles.image}
-                    // source={require(props.accountPhoto)}
+                    source={Platform.OS === 'web' ? getPhoto() : {uri: getPhoto()}}
+                    height={125}
+                    width={125}
                     >
                     </_Image>
                     }
-                    {/* // JA todo need to hook up add photo button */}
                     <_Text
-                    style={[Style.textSmallDanger, _styles.photoError]}
+                    style={[Style.textSmallDanger, _styles.imageError]}
                     >
-                        {photoError}
+                        {imageError}
                     </_Text>
-                    <_Button
-                    onPress={(e: any) => setPhoto()}
+                    <View
+                    style={_styles.photoButtonContainer}
                     >
-                        {props.isSetup ? "Change Photo" : "Add Photo"}
-                    </_Button>
+                        <_Button
+                        onPress={(e: any) => uploadPhoto()}
+                        style={Style.buttonDefault}
+                        >
+                            {Platform.OS === 'web' ? 'Upload Photo' : 'Upload'}
+                        </_Button>
+                        {Platform.OS !== 'web' ?
+                        <_Button
+                        onPress={(e: any) => takePhoto()}
+                        style={[Style.buttonGold, _styles.photoButton]}
+                        >
+                            Take Photo
+                        </_Button>
+                        : null }
+                    </View>
                 </_Group>
                 </View>
                 <_TextInput
@@ -673,10 +735,9 @@ const AccountInfo = (props: any) => {
                     direction="top"
                     value={state}
                     setValue={setState}
-                    selected={(e: any) =>
-                        {
-                            if (e)
-                                checkSaved();
+                    selected={(e: any) => {
+                        if (e)
+                            checkSaved();
                         }
                     }
                     ></_Dropdown>
@@ -689,10 +750,9 @@ const AccountInfo = (props: any) => {
                 value={gender}
                 setValue={setGender}
                 required={true}
-                selected={(e: any) =>
-                    {
-                        if (e)
-                            checkSaved();
+                selected={(e: any) => {
+                    if (e)
+                        checkSaved();
                     }
                 }
                 ></_Dropdown>
@@ -725,6 +785,17 @@ const AccountInfo = (props: any) => {
                     {error}
                     </_Text>
                 : null}
+                {!isLoaded ?
+                <View
+                style={Style.maskPrompt}
+                >
+                    <ActivityIndicator
+                    size="large"
+                    color={Color.gold}
+                    style={Style.maskLoading}
+                    />    
+                </View>
+                : null }
             </View>
         </ScrollView>
     </View>
@@ -732,6 +803,15 @@ const AccountInfo = (props: any) => {
 };
 
 const _styles = StyleSheet.create({
+    photoButton: {
+        marginLeft: 5
+    },
+    photoButtonContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
     passwordResetText: {
         fontWeight: 'bold',
         marginBottom: 10,
@@ -770,9 +850,9 @@ const _styles = StyleSheet.create({
         borderRadius: 20,
         maxWidth: 400
     },
-    photoError: {
+    imageError: {
         marginBottom: 5,
-        height: 17
+        height: 20
     },
     newUserIcon: {
         ...Platform.select({

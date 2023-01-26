@@ -8,13 +8,14 @@ import { Color, Content, FontSize, Radius, Style } from '../../style';
 import NavMenuButton from '../control/nav-menu-button';
 import NavMobileButton from '../control/nav-mobile-button';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { AccountScreenType, isLoggedIn, isSetup, navProp, NavTo } from '../../helper';
+import { AccountScreenType, getLocalStorage, isLoggedIn, isSetup, navProp, NavTo } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 
 const Navigation = (props: any) => {
     const [showMenu,setShowMenu] = useState(false);
     const [visible,setVisible] = useState(false);
     const [init,setInit] = useState(false);
+    const [image,setImage] = useState('');
     const navigation = useNavigation<navProp>();
 
     useEffect(() => {
@@ -25,8 +26,12 @@ const Navigation = (props: any) => {
             setNavigation(rt.name);
         setVisible(props.isLoggedIn);
         setInit(true);
+        if (props.isLoggedIn)
+            profilePicture();
+        else
+            setImage('');
         
-    }, [props.mobile, visible, props.isLoaded, props.isLoggedIn, props.isSetup, props.navSelector]);
+    }, [props.mobile, visible, props.isLoaded, props.isLoggedIn, props.isSetup, props.navSelector, image]);
 
     const route = () => {
         if (navigation) {
@@ -90,6 +95,13 @@ const Navigation = (props: any) => {
             props.setIsMatches(true);
     }
 
+    const profilePicture = async () => {
+        let data = await getLocalStorage();
+        if (data && data.user) {
+            setImage(data.user.image);
+        }
+    }
+
     return (
         <View
         onLayout={(e: any) => setNavLayout(e)}
@@ -112,6 +124,7 @@ const Navigation = (props: any) => {
                     <View
                     style={styles.iconContainer}
                     >
+                        {props.isSetup ?
                         <Pressable
                         onPress={() => navigate(NavTo.Messages)}
                         style={styles.icon}
@@ -129,6 +142,7 @@ const Navigation = (props: any) => {
                                 7
                             </_Text>
                         </Pressable>
+                        : null }
                         <Pressable
                         onPress={() => toggleMenu()}
                         style={styles.icon}
@@ -136,11 +150,21 @@ const Navigation = (props: any) => {
                             <View
                             style={styles.userIconContainer}
                             >
+                                {image ?
                                 <_Image
                                 style={styles.userIcon}
-                                source={require('../../assets/images/logo.png')}
+                                source={image}
                                 height={40}
+                                width={40}
                                 />
+                                :
+                                <_Image
+                                style={styles.userIcon}
+                                source={require('../../assets/images/user.png')}
+                                height={30}
+                                width={30}
+                                />
+                                }
                             </View>
                             <FontAwesomeIcon
                             color={Color.icon}
@@ -163,48 +187,52 @@ const Navigation = (props: any) => {
                     <View
                     style={getMenuStyle()}
                     >
-                        <NavMenuButton
-                        navigate={() => navigate(NavTo.Profile)}
-                        icon="user"
-                        value="View Profile"
-                        navTo={NavTo.Profile}
-                        />
-                        <NavMenuButton
-                        navigate={() => setAccount()}
-                        icon="edit"
-                        value="Edit Account"
-                        navTo={NavTo.Account}
-                        />
-                        <NavMenuButton
-                        navigate={() => navigate(NavTo.Survey)}
-                        icon="poll"
-                        value="Take the Survey"
-                        navTo={NavTo.Survey}
-                        />
-                        <NavMenuButton
-                        navigate={() => {
-                            navigate(NavTo.Search, {view: 'matches'});
-                            props.setIsMatches(true)}
-                        }
-                        icon="check-double"
-                        value="See Matches"
-                        navTo={NavTo.Search}
-                        />
-                        <NavMenuButton
-                        navigate={() => {
-                            navigate(NavTo.Search);
-                            props.setIsMatches(false)}
-                        }
-                        icon="globe"
-                        value="Explore"
-                        navTo={NavTo.Search}
-                        />
-                        <NavMenuButton
-                        navigate={() => navigate(NavTo.Listings)}
-                        icon="house-flag"
-                        value="Room Listings"
-                        navTo={NavTo.Listings}
-                        />
+                        {props.isSetup ?
+                        <View>
+                            <NavMenuButton
+                            navigate={() => navigate(NavTo.Profile)}
+                            icon="user"
+                            value="View Profile"
+                            navTo={NavTo.Profile}
+                            />
+                            <NavMenuButton
+                            navigate={() => setAccount()}
+                            icon="edit"
+                            value="Edit Account"
+                            navTo={NavTo.Account}
+                            />
+                            <NavMenuButton
+                            navigate={() => navigate(NavTo.Survey)}
+                            icon="poll"
+                            value="Take the Survey"
+                            navTo={NavTo.Survey}
+                            />
+                            <NavMenuButton
+                            navigate={() => {
+                                navigate(NavTo.Search, {view: 'matches'});
+                                props.setIsMatches(true)}
+                            }
+                            icon="check-double"
+                            value="See Matches"
+                            navTo={NavTo.Search}
+                            />
+                            <NavMenuButton
+                            navigate={() => {
+                                navigate(NavTo.Search);
+                                props.setIsMatches(false)}
+                            }
+                            icon="globe"
+                            value="Explore"
+                            navTo={NavTo.Search}
+                            />
+                            <NavMenuButton
+                            navigate={() => navigate(NavTo.Listings)}
+                            icon="house-flag"
+                            value="Room Listings"
+                            navTo={NavTo.Listings}
+                            />
+                        </View>
+                        : null }
                         <NavMenuButton
                         navigate={() => navigate(NavTo.Logout)}
                         icon="sign-out"
@@ -346,6 +374,7 @@ const Navigation = (props: any) => {
         },
         userIcon: {
             borderRadius: Radius.round,
+            margin: 'auto',
             ...Platform.select({
                 web: {
                 outlineStyle: 'none',

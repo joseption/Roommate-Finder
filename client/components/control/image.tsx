@@ -27,7 +27,9 @@ const _Image = (props: any) => {
         }
         else {
             var img = Image.resolveAssetSource(props.source);
-            getStyle(img.width, img.height);
+            if (img) {
+                getStyle(img.width, img.height);
+            }
         }
     }, [props.source]);
 
@@ -126,7 +128,7 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         justifyContent: 'center',
-    }
+    },
 });
 
 export default _Image;

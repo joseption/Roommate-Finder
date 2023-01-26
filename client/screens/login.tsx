@@ -11,20 +11,10 @@ import PasswordUpdated from '../components/login/password-updated';
 import Register from '../components/login/register';
 import UpdatePassword from '../components/login/update-password';
 import { Color, LoginStyle, Radius, Style } from '../style';
-import { env, navProp, NavTo } from '../helper';
+import { env, LoginNavTo, navProp, NavTo } from '../helper';
 import { useNavigation } from '@react-navigation/native';
 
 const LoginScreen = (props:any) => {
-  enum screen {
-    activateEmailSent,
-    register,
-    login,
-    forgotPassword,
-    passwordResetSent,
-    updatePassword,
-    passwordUpdated
-  }
-
   const [init, setInit] = useState(false);
   const [initScreen, setInitScreen] = useState(false);
   const [width, setWidth] = useState(0);
@@ -38,7 +28,7 @@ const LoginScreen = (props:any) => {
   const [passwordResetSent, setPasswordResetSent] = useState(false);
   const [updatePassword, setUpdatePassword] = useState(false);
   const [passwordUpdated, setPasswordUpdated] = useState(false);
-  const [currentScreen, setCurrentScreen] = useState(screen.login);
+  const [currentScreen, setCurrentScreen] = useState(LoginNavTo.Login);
   const [emailValue, setEmailValue] = useState('');
   const [stopInterval,setStopInterval] = useState(-1);
   const [url,setUrl] = useState('');
@@ -59,7 +49,21 @@ const LoginScreen = (props:any) => {
       if (props.accountAction)
         props.setAccountAction(false);
     }
-  }, [left, init, navigation, props.accountAction]);
+    let rt = route();
+    if (rt && rt.name == NavTo.Login && rt.params && rt.params['view']) {
+      let view = rt.params['view'];
+      if (view as typeof LoginNavTo && currentScreen != view && view != LoginNavTo.Login) {
+        updateVisibleScreen(view, false);
+      }
+    }
+    else if (props.loginViewChanged) {
+      let uView = props.loginViewChanged;
+      if (uView == 'login')
+        uView = '';
+      updateVisibleScreen(uView, false);
+      props.setLoginViewChanged('');
+    }
+  }, [left, init, navigation, props.accountAction, currentScreen, props.loginViewChanged]);
 
   const setup = () => {
     const oldOpacity = opacity;
@@ -71,7 +75,7 @@ const LoginScreen = (props:any) => {
     }).start();
   };
 
-  const goLeft = (s: screen) => {
+  const goLeft = (s: typeof LoginNavTo) => {
       setMoved(true);
       updateVisibleScreen(s, true);
       setLeft(-width - 42);
@@ -93,7 +97,7 @@ const LoginScreen = (props:any) => {
        }, 25);
   };
     
-  const goRight = (s: screen) => {
+  const goRight = (s: typeof LoginNavTo) => {
       setMoved(true);
       updateVisibleScreen(s, true);
       setLeft(width + 42);
@@ -182,44 +186,44 @@ const LoginScreen = (props:any) => {
           }
           setPasswordUpdateType(uPath);
           if (await hasValidToken(uToken, uPath)) {
-            updateVisibleScreen(screen.updatePassword);
+            updateVisibleScreen(LoginNavTo.UpdatePassword);
           }
           else {
             if (uPath == "confirmEmail") {
               setEmailValue(uEmail as string);
               setAutoResend(true);
-              updateVisibleScreen(screen.activateEmailSent);
+              updateVisibleScreen(LoginNavTo.ActivateEmailSent);
             }
             else if (uPath == "reset") {
-              updateVisibleScreen(screen.forgotPassword);
+              updateVisibleScreen(LoginNavTo.ForgotPassword);
               setForgotError("Password reset failed, please enter your email and try again.");
             }
             else if (uPath == "update") {
-              updateVisibleScreen(screen.forgotPassword);
+              updateVisibleScreen(LoginNavTo.ForgotPassword);
               setForgotError("Password update failed, please enter your email and try again.");
             }
           }
         }
       }
       else {
-        updateVisibleScreen(screen.login);
+        updateVisibleScreen(LoginNavTo.Login);
       }
     }
     else
-      updateVisibleScreen(screen.login);
+      updateVisibleScreen(LoginNavTo.Login);
 
     setInitScreen(true);
   }
 
-  const updateVisibleScreen = (s: screen, delay = false) => {
-    setActivateEmailSent(s == screen.activateEmailSent || delay && currentScreen == screen.activateEmailSent);
-    setRegister(s == screen.register || delay && currentScreen == screen.register);
-    setLogin(s == screen.login || delay && currentScreen == screen.login);
-    setForgotPassword(s == screen.forgotPassword || delay && currentScreen == screen.forgotPassword);
-    setPasswordResetSent(s == screen.passwordResetSent || delay && currentScreen == screen.passwordResetSent);
-    setUpdatePassword(s == screen.updatePassword || delay && currentScreen == screen.updatePassword);
-    setPasswordUpdated(s == screen.passwordUpdated || delay && currentScreen == screen.passwordUpdated);
-    setCurrentScreen(s);
+  const updateVisibleScreen = (s: typeof LoginNavTo, delay = false) => {
+    setActivateEmailSent(s == LoginNavTo.ActivateEmailSent || delay && currentScreen == LoginNavTo.ActivateEmailSent);
+    setRegister(s == LoginNavTo.Register || delay && currentScreen == LoginNavTo.Register);
+    setLogin(s == LoginNavTo.Login || delay && currentScreen == LoginNavTo.Login);
+    setForgotPassword(s == LoginNavTo.ForgotPassword || delay && currentScreen == LoginNavTo.ForgotPassword);
+    setPasswordResetSent(s == LoginNavTo.PasswordResetSent || delay && currentScreen == LoginNavTo.PasswordResetSent);
+    setUpdatePassword(s == LoginNavTo.UpdatePassword || delay && currentScreen == LoginNavTo.UpdatePassword);
+    setPasswordUpdated(s == LoginNavTo.PasswordUpdated || delay && currentScreen == LoginNavTo.PasswordUpdated);
+    setCurrentScreen(s as never);
   }
 
   const getLeft = () => {
@@ -283,7 +287,11 @@ const LoginScreen = (props:any) => {
                 stopInterval={stopInterval}
                 setEmail={setEmailValue}
                 email={emailValue}
-                registerPressed={() => goRight(screen.register)}
+                registerPressed={() => {
+                    navigation.push(NavTo.Login, {view: LoginNavTo.Register} as never);
+                    goRight(LoginNavTo.Register);
+                  }
+                }
                 style={[styles.panel, activateEmailSent ? null : styles.hidden]}
                 autoResend={autoResend}
               />
@@ -291,11 +299,17 @@ const LoginScreen = (props:any) => {
                 btnStyle={btnStyle}
                 setEmail={setEmailValue}
                 email={emailValue}
-                sendEmailPressed={() => goLeft(screen.activateEmailSent)} // update to do stuff and then goLeft(1)
-                loginPressed={() => 
-                  {
-                    navigation.navigate(NavTo.Login);
-                    goRight(screen.login);
+                sendEmailPressed={() => {
+                    navigation.push(NavTo.Login, {view: LoginNavTo.ActivateEmailSent} as never);
+                    goLeft(LoginNavTo.ActivateEmailSent);
+                  }
+                }
+                loginPressed={() => {
+                    navigation.reset({
+                      index: 0,
+                      routes: [{name: NavTo.Login}],
+                    });
+                    goRight(LoginNavTo.Login);
                   }
                 }
                 style={[styles.panel, register ? null : styles.hidden]}
@@ -304,8 +318,16 @@ const LoginScreen = (props:any) => {
               <Login
                 url={url}
                 btnStyle={btnStyle}
-                forgotPasswordPressed={() => goRight(screen.forgotPassword)}
-                registerPressed={() => goLeft(screen.register)}
+                forgotPasswordPressed={() => {
+                    navigation.push(NavTo.Login, {view: LoginNavTo.ForgotPassword} as never);
+                    goRight(LoginNavTo.ForgotPassword);
+                  }
+                }
+                registerPressed={() => {
+                    navigation.push(NavTo.Login, {view: LoginNavTo.Register} as never);
+                    goLeft(LoginNavTo.Register);
+                  }
+                }
                 style={[styles.panel, login ? null : styles.hidden]}
                 setIsLoggedIn={props.setIsLoggedIn}
                 setIsSetup={props.setIsSetup}
@@ -315,8 +337,19 @@ const LoginScreen = (props:any) => {
                 btnStyle={btnStyle}
                 setEmail={setEmailValue}
                 email={emailValue}
-                sendEmailPressed={() => goRight(screen.passwordResetSent)} // update to do stuff and then goRight(1)
-                loginPressed={() => goLeft(screen.login)}
+                sendEmailPressed={() => {
+                    navigation.push(NavTo.Login, {view: LoginNavTo.PasswordResetSent} as never);
+                    goRight(LoginNavTo.PasswordResetSent);
+                  } 
+                }
+                loginPressed={() => {
+                    navigation.reset({
+                      index: 0,
+                      routes: [{name: NavTo.Login}],
+                    });
+                    goLeft(LoginNavTo.Login);
+                  }
+                }
                 style={[styles.panel, forgotPassword ? null : styles.hidden]}
                 forgotError={forgotError}
               />
@@ -324,17 +357,28 @@ const LoginScreen = (props:any) => {
                 btnStyle={btnStyle}
                 setStopInterval={setStopInterval}
                 stopInterval={stopInterval}
-                passwordPressed={() => goLeft(screen.forgotPassword)}
+                passwordPressed={() => {
+                    navigation.push(NavTo.Login, {view: LoginNavTo.ForgotPassword} as never);
+                    goLeft(LoginNavTo.ForgotPassword);
+                  }
+                }
                 style={[styles.panel, passwordResetSent ? null : styles.hidden]}
                 email={emailValue}
               />
               <UpdatePassword
+                setIsPasswordReset={props.setIsPasswordReset}
                 btnStyle={btnStyle}
-                updatePasswordPressed={() => goRight(screen.passwordUpdated)} // update to do stuff and then goRight(1)
-                loginPressed={() => 
-                  {
-                    navigation.navigate(NavTo.Login);
-                    goLeft(screen.login);
+                updatePasswordPressed={() => {
+                    navigation.push(NavTo.Login, {view: LoginNavTo.PasswordUpdated} as never);
+                    goRight(LoginNavTo.PasswordUpdated);
+                  }
+                }
+                loginPressed={() => {
+                    navigation.reset({
+                      index: 0,
+                      routes: [{name: NavTo.Login}],
+                    });
+                    goLeft(LoginNavTo.Login);
                   }
                 }
                 style={[styles.panel, updatePassword ? null : styles.hidden]}
@@ -342,16 +386,22 @@ const LoginScreen = (props:any) => {
                 setPasswordUpdateType={setPasswordUpdateType}
                 email={emailValue}
                 setEmail={setEmailValue}
-                registerPressed={() => goLeft(screen.register)}
+                registerPressed={() => {
+                    navigation.push(NavTo.Login, {view: LoginNavTo.Register} as never);
+                    goLeft(LoginNavTo.Register);
+                  }
+                }
                 registerEmail={registerEmail}
                 token={token}
                 setAccountAction={props.setAccountAction}
               />
               <PasswordUpdated
-                loginPressed={() => 
-                  {
-                    navigation.navigate(NavTo.Login);
-                    goLeft(screen.login);
+                loginPressed={() => {
+                    navigation.reset({
+                      index: 0,
+                      routes: [{name: NavTo.Login}],
+                    });
+                    goLeft(LoginNavTo.Login);
                   }
                 }
                 style={[styles.panel, passwordUpdated ? null : styles.hidden]}

@@ -89,12 +89,12 @@ const Login = (props: any) => {
   };
 
   const navigateToLast = (data: any) => {
-    navigation.reset({
-      index: 0,
-      routes: [{name: NavTo.Profile}],
-    });
     if (data && data.user) {
       if (data.user.is_setup) {
+        navigation.reset({
+          index: 0,
+          routes: [{name: NavTo.Profile}],
+        });
         if (data.user.setup_step == NavTo.Search)
           navigation.navigate(NavTo.Search);
         else if (data.user.setup_step == NavTo.Survey)
@@ -103,6 +103,10 @@ const Login = (props: any) => {
           navigation.navigate(NavTo.Search, {view: 'matches'} as never);
       }
       else {
+        navigation.reset({
+          index: 0,
+          routes: [{name: NavTo.Account}],
+        });
         let step = data.user.setup_step;
         if (!step)
           step = "info";
@@ -174,6 +178,7 @@ const Login = (props: any) => {
       onChangeText={(e: any) => {handleChange(e, true)}}
       value={email}
       error={emailError}
+      keyboardType='email-address'
       />
       <_TextInput
       type="password"

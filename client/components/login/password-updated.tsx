@@ -10,7 +10,10 @@ import _TextInput from '../control/text-input';
 const PasswordUpdated = (props: any) => {
   const navigation = useNavigation<navProp>();
   const loginPressed = () => {
-    navigation.navigate(NavTo.Login);
+    navigation.reset({
+      index: 0,
+      routes: [{name: NavTo.Login}],
+    });
     props.loginPressed()
   }
 

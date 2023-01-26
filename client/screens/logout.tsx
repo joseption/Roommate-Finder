@@ -17,7 +17,7 @@ const LogoutScreen = (props: any) => {
 
     useEffect(() => {
         logout();
-    },[]);
+    },[props.isSetup, props.isLoggedIn]);
 
     const logout = async () => {
         let error = false;
@@ -48,9 +48,12 @@ const LogoutScreen = (props: any) => {
         } 
 
         if (!error || !user) {
-            navigation.navigate(NavTo.Login);
             props.setIsLoggedIn(false);
             props.setIsSetup(false);
+            navigation.reset({
+                index: 0,
+                routes: [{name: NavTo.Login}],
+            });
         }
         else
             setMessage("An error occurred while logging out, please reload the page and try again.");

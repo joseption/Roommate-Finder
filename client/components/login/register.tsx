@@ -92,6 +92,7 @@ const Register = (props: any, {navigation}:any) => {
       error={emailError}
       onSubmit={doRegister}
       loading={loading}
+      keyboardType='email-address'
       />}
       <View
       style={Style.alignRight}

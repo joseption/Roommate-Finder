@@ -66,6 +66,16 @@ export const NavTo = {
   Logout: 'Logout' as never,
 }
 
+export const LoginNavTo = {
+  Login: '' as never,
+  Register: 'register' as never,
+  ActivateEmailSent: 'email-sent' as never,
+  ForgotPassword: 'forgot-password' as never,
+  PasswordResetSent: 'reset-sent' as never,
+  UpdatePassword: 'update-password' as never,
+  PasswordUpdated: 'password-updated' as never,
+}
+
 export type Page = {
   Home: undefined;
   Login: undefined;

@@ -33,6 +33,7 @@ export const Color = {
     holderMask: '#F0F2F5BF',
     whiteMask: '#FFFFFFBF',
     textMask: '#505050',
+    defaultLight: '#d9e8fe',
 }
 
 export const FontSize = {

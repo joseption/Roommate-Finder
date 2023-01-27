@@ -95,10 +95,12 @@ const Login = (props: any) => {
           index: 0,
           routes: [{name: NavTo.Profile}],
         });
-        if (data.user.setup_step == NavTo.Search)
+        if (data.user.setup_step == 'search')
           navigation.navigate(NavTo.Search);
-        else if (data.user.setup_step == NavTo.Survey)
+        else if (data.user.setup_step == 'survey')
           navigation.navigate(NavTo.Survey);
+        else if (data.user.setup_step == 'explore')
+          navigation.navigate(NavTo.Search);
         else
           navigation.navigate(NavTo.Search, {view: 'matches'} as never);
       }

@@ -180,7 +180,7 @@ const SurveyScreen = (props: any) => {
         if (res.length > 0) {
             let percent = Math.ceil((progressCnt / res.length) * 100);
             setProgress(percent);
-            if (init) {
+            if (percent == 100 && init) {
                 setComplete(true);
                 setReviewMode(true);
             }

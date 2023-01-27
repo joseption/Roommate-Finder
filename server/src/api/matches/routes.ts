@@ -31,6 +31,19 @@ router.get('/all', async (req: Request, res: Response) => {
 router.post('/create', async (req: Request, res: Response) => {
   try {
     const { loggedInUserId } = req.body;
+
+    // Mark the survey as complete
+    if (loggedInUserId) {
+      await db.user.update({
+        where: {
+          id: loggedInUserId,
+        },
+        data: {
+          setup_step: 'survey_complete',
+        },
+      });
+    }
+
     const loggedInResponses = await db.responsesOnUsers.findMany({
       where: {
         userId: loggedInUserId,

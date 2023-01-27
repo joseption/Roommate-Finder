@@ -27,7 +27,7 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
     }
     for (let i = 0; i < chat.users.length; i++) {
       if (chat.users[i].id === id) {
-        return chat.users[i].name + ': ';
+        return chat.users[i].first_name + ': ';
       }
     }
     return '';

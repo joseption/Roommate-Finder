@@ -4,10 +4,11 @@ import MessageTab from '../components/messages/message-tab';
 import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
-import { env, getLocalStorage } from '../helper';
-import io from 'socket.io-client'
+import { authTokenHeader, env, getLocalStorage } from '../helper';
+import io, { Socket } from 'socket.io-client'
+import { DefaultEventsMap } from '@socket.io/component-emitter';
 
-const socket = io(env.URL);
+const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io(env.URL);
 
 const MessagesScreen = (props: any, {navigation}:any) => {
   const [showPanel, updateShowPanel] = useState(false);
@@ -22,6 +23,10 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   useEffect(() => {
     getChats();
   }, [userInfo])
+
+  useEffect(() => {
+    connectToChatRooms();
+  }, [chats])
 
   const getUserInfo = async () => {
     setUserInfo(await getLocalStorage().then((res) => {return res.user}));
@@ -48,8 +53,9 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }
 
   const getUser = async (id: string) => {
+    let tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
+      `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
@@ -57,6 +63,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       }
       else {
         let user = {
+          first_name: res.first_name,
           id: res.id,
           email: res.email,
           image: res.image,
@@ -64,6 +71,14 @@ const MessagesScreen = (props: any, {navigation}:any) => {
         return user;
       }
     });
+  }
+
+  const connectToChatRooms = () => {
+    if (chats.length === 0) return;
+    const rooms = chats.map((chat: any) => {
+      return chat.id;
+    })
+    socket.emit('join_room', rooms)
   }
 
   const getChats = async () => {
@@ -116,7 +131,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
           />
         }
       />
-      <MessagePanel showPanel={showPanel} updateShowPanel={updateShowPanel} chat={currentChat}/>
+      <MessagePanel showPanel={showPanel} socket={socket} updateShowPanel={updateShowPanel} chat={currentChat}/>
     </>
   );
 };

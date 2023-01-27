@@ -2,17 +2,27 @@ import { FlatList } from "react-native";
 import Message from "./message";
 import { useEffect, useState } from "react";
 import { env } from "../../helper";
+import io, { Socket } from 'socket.io-client'
+import { DefaultEventsMap } from '@socket.io/component-emitter';
 
 interface Props {
-  chat: any
+  chat: any,
+  socket: Socket<DefaultEventsMap, DefaultEventsMap>
 }
 
-const Messages = ({chat}: Props) => {
+const Messages = ({chat, socket}: Props) => {
   const [messages, setMessages] = useState<any[]>([]);
   
   useEffect(() => {
     getMessages(chat.id);
   }, [chat])
+
+  
+  useEffect(() => {
+    socket.on('receive_message', (data: any) => {
+      setMessages([data, ...messages]);
+    });
+  }, [socket, messages])
 
   const getMessages = async (id: string) => {
     return fetch(

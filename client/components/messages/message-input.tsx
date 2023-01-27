@@ -1,10 +1,54 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextInput, View, StyleSheet } from "react-native";
 import _Button from "../control/button";
+import { env, getLocalStorage } from "../../helper";
+import { Socket } from "socket.io-client";
+import { DefaultEventsMap } from '@socket.io/component-emitter';
 
-const MessageInput = () => {
+interface Props {
+  chat: any,
+  socket: Socket<DefaultEventsMap, DefaultEventsMap>
+}
+
+const MessageInput = ({chat, socket}: Props) => {
   const [newMessage, setNewMessage] = useState('');
+  const [userInfo, setUserInfo] = useState<any>();
+
+  useEffect(() => {
+    getUserInfo();
+  }, [])
   
+  const getUserInfo = async () => {
+    setUserInfo(await getLocalStorage().then((res) => {return res.user}));
+  }
+  
+  const sendMessage = () => {
+    if (newMessage === '') {
+      return;
+    }
+
+    let obj = {content: newMessage, userId: userInfo.id, chatId: chat.id};
+    let js = JSON.stringify(obj);
+
+    return fetch(
+      `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json'}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      }
+      else {
+        const data = {
+          chatId: chat.id,
+          content: newMessage,
+          userId: userInfo.id,
+        }
+        await socket.emit('send_message', data);
+        setNewMessage('');
+      }
+    });
+  };
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -13,7 +57,7 @@ const MessageInput = () => {
         style={styles.input}
         multiline
       />
-      <_Button>Send</_Button>
+      <_Button onPress={sendMessage}>Send</_Button>
     </View>
   );
 }

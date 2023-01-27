@@ -1,4 +1,3 @@
-import { Socket } from 'socket.io';
 import { frontendEnv } from 'middleware';
 import { IncomingMessage, Server, ServerResponse } from 'node:http';
 
@@ -13,7 +12,15 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
   
   io.on('connection', (socket: any) => {
     console.log('User connected', socket.id);
-  
+
+    socket.on('join_room', (data: any) => {
+      socket.join(data);
+    })
+
+    socket.on('send_message', (data: any) => {
+      socket.nsp.to(data.chatId).emit('receive_message', data);
+    })
+
     socket.on('disconnect', () =>  {
       console.log('User disconnected', socket.id);
     });

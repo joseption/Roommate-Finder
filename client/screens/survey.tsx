@@ -36,6 +36,7 @@ const SurveyScreen = (props: any) => {
     const [generating,setGenerating] = useState(false);
     const [complete,setComplete] = useState(false);
     const [isLoaded,setIsLoaded] = useState(false);
+    const [reviewMode,setReviewMode] = useState(false);
     const navigation = useNavigation<navProp>();
     
     useEffect(() => {
@@ -49,17 +50,6 @@ const SurveyScreen = (props: any) => {
         style.push(Style.textDanger);
         if (props.mobile)
           style.push(Style.errorText);        
-        return style;
-    }
-
-    const errorContainerStyle = () => {
-        var style = [];
-        if (props.mobile) {
-            style.push(Style.errorMsgMobile);
-        }
-        else {
-            style.push(Style.errorMsg);
-        }
         return style;
     }
 
@@ -150,7 +140,7 @@ const SurveyScreen = (props: any) => {
             setResponseId('');
         setHasLastQuestion(idx != 0);
         setCanGotoQuestion(question.ResponsesOnUsers.length > 0);
-        let next = (idx + 1 == total) ? 'Complete Survey' : 'Next Question';
+        let next = (idx + 1 == total) ? 'Complete Survey' : 'Next';
         setTotalNumber(total);
         setCurrentNumber(idx + 1);
         setNextButton(next);
@@ -192,6 +182,7 @@ const SurveyScreen = (props: any) => {
             setProgress(percent);
             if (init) {
                 setComplete(true);
+                setReviewMode(true);
             }
         }
     }
@@ -237,6 +228,7 @@ const SurveyScreen = (props: any) => {
 
     const generateMatches = async () => {
         let hasError = false;
+        setError('');
         setGenerating(true);
         try
         {   
@@ -257,6 +249,9 @@ const SurveyScreen = (props: any) => {
                         hasError = true;
                     }
                     else {
+                        setReviewMode(true);
+                        setGenerating(false);
+                        setComplete(true);
                         navigation.navigate(NavTo.Search, {view: 'matches'} as never);
                     }
                 });
@@ -270,12 +265,10 @@ const SurveyScreen = (props: any) => {
             hasError = true;
         } 
         if (hasError) {
-            setError('A problem occurred while generating your matches, reload the page to try again');
+            setError('A problem occurred while generating your matches, press refresh to try again.');
         }
 
         setLoading(false);
-        setGenerating(false);
-        setComplete(true);
     }
 
     const goToMatches = () => {
@@ -356,13 +349,14 @@ const SurveyScreen = (props: any) => {
             </_Text>
             <_Progress progress={progress}></_Progress>
         </View>
+        <View
+        style={[containerStyle(), _styles.container]}
+        >
         {!complete ?
         <View>
         {!generating ?
         <View>
-            <View
-            style={[containerStyle(), _styles.container]}
-            >
+            <View>
                 {currentNumber > -1 ?
                 <_Text
                 style={questionCountTextStyle()}
@@ -406,7 +400,7 @@ const SurveyScreen = (props: any) => {
                         <_Text
                         style={Style.textDefaultSecondary}
                         >
-                            Previous Question
+                            Go Back
                         </_Text>
                     </Pressable>
                     :
@@ -415,6 +409,19 @@ const SurveyScreen = (props: any) => {
                     <View
                     style={_styles.buttonContainer}
                     >
+                        {reviewMode && nextButton != 'Complete Survey' ?
+                        <_Button
+                        style={[Style.buttonDefault, _styles.finishButton]}
+                        disabled={!canGotoQuestion}
+                        onPress={(e: any) => {
+                            submit(1);
+                            generateMatches();
+                            }
+                        }
+                        >
+                            Finish
+                        </_Button>
+                        : null }
                         <_Button
                         style={Style.buttonGold}
                         disabled={!canGotoQuestion}
@@ -440,7 +447,7 @@ const SurveyScreen = (props: any) => {
         </View>
         :
         <View
-        style={[containerStyle(), _styles.container, _styles.doneContainer]}
+        style={_styles.doneContainer}
         >
             <_Text
             style={_styles.doneHeaderText}
@@ -452,22 +459,38 @@ const SurveyScreen = (props: any) => {
             >
                 You will be automatically redirected
             </_Text>
-            <View
-            style={_styles.genHolder}
-            >
+            <View>
                 <_Image
                     source={require('../assets/images/matches.png')}
-                    height={300}
+                    width={325}
                     containerStyle={_styles.containerStyle}
                 ></_Image>
-                <ActivityIndicator
-                    size="large"
-                    color={Color.white}
-                    style={_styles.loading}
-                />
+                <View
+                style={!error ? _styles.loading : _styles.refreshIconContainer}
+                >
+                    {!error ?
+                    <ActivityIndicator
+                        size="large"
+                        color={Color.white}
+                    />
+                    :
+                    <Pressable
+                    onPress={(e: any) => generateMatches()}
+                    >
+                        <FontAwesomeIcon 
+                            size={30} 
+                            color={Color.white} 
+                            icon="refresh"
+                            style={_styles.refreshIcon}
+                        >
+                        </FontAwesomeIcon>
+                    </Pressable>
+                    }
+                </View>
                 <_Text
-                containerStyle={_styles.genText}
-                >Hang tight...</_Text>
+                containerStyle={_styles.genTextContainer}
+                style={_styles.genText}
+                >{error ? 'Try again?' : 'Hang tight...'}</_Text>
             </View>
         </View>
         }
@@ -475,7 +498,7 @@ const SurveyScreen = (props: any) => {
         :
         <View>
             <View
-            style={[containerStyle(), _styles.container, _styles.doneContainer]}
+            style={_styles.doneContainer}
             >
                 <_Text
                 style={_styles.doneHeaderText}
@@ -489,7 +512,7 @@ const SurveyScreen = (props: any) => {
                 </_Text>
                 <_Image
                     source={require('../assets/images/checklist.png')}
-                    height={300}
+                    width={325}
                     containerStyle={_styles.containerStyle}
                 ></_Image>
                 <View
@@ -513,20 +536,24 @@ const SurveyScreen = (props: any) => {
         }
         {error || props.error ?
         <_Text 
-        containerStyle={errorContainerStyle()}
+        containerStyle={_styles.error}
         innerContainerStyle={{justifyContent: 'center'}} 
         style={errorStyle()}
         >
             {error}
             </_Text>
         : null}
+        </View>
     </View>
     );
 };
 
 const _styles = StyleSheet.create({
-    genHolder: {
-
+    finishButton: {
+        marginRight: 5,
+    },
+    error: {
+        paddingTop: 20,
     },
     containerStyle: {
         backgroundColor: Color.defaultLight,
@@ -559,13 +586,22 @@ const _styles = StyleSheet.create({
     loading: {
         padding: 20,
         position: 'absolute',
+        right: 95,
+        top: 91,
+    },
+    refreshIconContainer: {
+        padding: 20,
+        position: 'absolute',
         right: 98,
         top: 93,
     },
-    genText: {
+    genTextContainer: {
         position: 'absolute',
         left: 120,
-        top: 120,
+        top: 117,
+    },
+    genText: {
+        fontWeight: 'bold'
     },
     questionContainer: {
         minHeight: 300,
@@ -588,6 +624,13 @@ const _styles = StyleSheet.create({
     },
     backArrow: {
         marginRight: 5,
+        ...Platform.select({
+            web: {
+                outlineStyle: 'none'
+            }
+        })
+    },
+    refreshIcon: {
         ...Platform.select({
             web: {
                 outlineStyle: 'none'

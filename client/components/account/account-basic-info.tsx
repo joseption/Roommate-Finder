@@ -31,7 +31,6 @@ const AccountInfo = (props: any) => {
     const [state,setState] = useState('');
     const [zipCode,setZipCode] = useState('');
     const [imageError,setImageError] = useState('');
-    const [dayOptions,setDayOptions] = useState([]);
     const [isLoading,setIsLoading] = useState(false);
     const [isPasswordLoading,setIsPasswordLoading] = useState(false);
     const [promptPassword,setPromptPassword] = useState(false);
@@ -42,7 +41,14 @@ const AccountInfo = (props: any) => {
     const [imageURL,setImageURL] = useState('');
     const [init,setInit] = useState(false);
     const [imageUri, setImageUri] = useState('');
+    const [email, setEmail] = useState('');
     const [isComplete,setIsComplete] = useState(false);
+    const lastNameRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const yearRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const phoneRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const zipRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const cityRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const stateRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
     useEffect(() => {
         if (!init) {
             onLoad();
@@ -60,15 +66,6 @@ const AccountInfo = (props: any) => {
         if (props.mobile)
           style.push(Style.errorText);        
         return style;
-    }
-
-    const setMonthForm = (e: any) => {
-        getDayOptions(e, year);
-    }
-
-    const setYearForm = (e: any) => {
-        let m = getMonthOptions().find(x => x.value == month);
-        getDayOptions(m?.key, e);
     }
 
     const errorContainerStyle = () => {
@@ -123,6 +120,7 @@ const AccountInfo = (props: any) => {
     }
 
     const handleImage = (res: ImagePickerResponse) => {
+        setImageError('');
         if (res && res.assets) {
             if (Platform.OS === 'web') {
                 if (res.assets[0].uri) {
@@ -144,9 +142,8 @@ const AccountInfo = (props: any) => {
                 }
             }
         }
-        else {
+        else if (res.errorCode)
             setImageError("A problem occurred while attaching your photo, please try again");
-        }
 
         setIsSaved(false);
     }
@@ -186,19 +183,22 @@ const AccountInfo = (props: any) => {
         return [{key:'Male', value: 'Male'}, {key:'Female', value: 'Female'}, {key:'Other', value: 'Other'}];
     }
 
-    const getDayOptions = (sMonth: any, sYear: any) => {
+    const getDayOptions = () => {
         var days = [];
-        if (sMonth && sYear) {
-            var count = new Date(parseInt(sYear), parseInt(sMonth), 0).getDate();
-            for (var i = 1; i <= count; i++) {
-                days.push({key:i, value:i.toString()});
-            }
-            if (day && parseInt(day) > count) {
-                setDay('');
+        if (year && month) {
+            let m = getMonthOptions().find(x => x.value == month);
+            if (m) {
+                var count = new Date(parseInt(year), parseInt(m.key.toString()), 0).getDate();
+                for (var i = 1; i <= count; i++) {
+                    days.push({key:i, value:i.toString()});
+                }
+                if (day && parseInt(day) > count) {
+                    setDay('');
 
+                }
             }
         }
-        setDayOptions(days as never);
+        return days;
     }
 
     const triggerPrompt = () => {
@@ -302,7 +302,6 @@ const AccountInfo = (props: any) => {
                     setMonth(l_month.value);
 
                 if (l_month && l_year && l_day) {
-                    getDayOptions(l_month.key - 1, l_year);
                     setDay(l_day);
                 }
             }
@@ -399,6 +398,7 @@ const AccountInfo = (props: any) => {
         {   
             let data = await getLocalStorage();
             if (data && data.user) {
+                setEmail(data.user.email);
                 let userId = data.user.id;
                 let tokenHeader = await authTokenHeader();
                 await fetch(`${env.URL}/users/profile?userId=${userId}`,
@@ -543,7 +543,9 @@ const AccountInfo = (props: any) => {
             </View>
         </View>
         : null}
-        <ScrollView>
+        <ScrollView
+        keyboardShouldPersistTaps={'handled'}
+        >
             <View>
                 <View
                 style={_styles.titleContainer}
@@ -609,7 +611,7 @@ const AccountInfo = (props: any) => {
                         onPress={(e: any) => uploadPhoto()}
                         style={Style.buttonDefault}
                         >
-                            {Platform.OS === 'web' ? 'Upload Photo' : 'Upload'}
+                            {Platform.OS === 'web' ? (imageUri || imageURL) ? 'Change Photo' : 'Upload Photo' : (imageUri || imageURL) ? 'Change' : 'Upload'}
                         </_Button>
                         {Platform.OS !== 'web' ?
                         <_Button
@@ -623,6 +625,12 @@ const AccountInfo = (props: any) => {
                 </_Group>
                 </View>
                 <_TextInput
+                label="Email"
+                containerStyle={_styles.formGap}
+                value={email}
+                readonly={true}
+                ></_TextInput>
+                <_TextInput
                 label="First Name"
                 required={true}
                 containerStyle={_styles.formGap}
@@ -630,6 +638,9 @@ const AccountInfo = (props: any) => {
                 value={firstName}
                 setValue={setFirstName}
                 onChangeText={(e: any) => setIsSaved(false)}
+                blurOnSubmit={false}
+                onSubmit={() => { lastNameRef.current?.focus(); }}
+                returnKeyType='next'
                 ></_TextInput>
                 <_TextInput
                 label="Last Name"
@@ -639,6 +650,10 @@ const AccountInfo = (props: any) => {
                 value={lastName}
                 setValue={setLastName}
                 onChangeText={(e: any) => setIsSaved(false)}
+                blurOnSubmit={false}
+                onSubmit={() => { yearRef.current?.focus(); }}
+                returnKeyType='next'
+                innerRef={lastNameRef}
                 ></_TextInput>
                 <_Group
                 required={true}
@@ -652,13 +667,13 @@ const AccountInfo = (props: any) => {
                         {
                             if (e)
                                 checkSaved();
-                            setYearForm(e);
                         }
                     }
                     options={getYearOptions()}
                     placeholder="Select..."
                     value={year}
                     setValue={setYear}
+                    innerRef={yearRef}
                     ></_Dropdown>
                     <_Dropdown
                     label="Month"
@@ -666,7 +681,6 @@ const AccountInfo = (props: any) => {
                         {
                             if (e)
                                 checkSaved();
-                            setMonthForm(e);
                         }
                     }
                     options={getMonthOptions()}
@@ -676,7 +690,7 @@ const AccountInfo = (props: any) => {
                     ></_Dropdown>
                     <_Dropdown
                     label="Day"
-                    options={dayOptions}
+                    options={getDayOptions()}
                     placeholder="Select..."
                     value={day}
                     setValue={setDay}
@@ -701,6 +715,10 @@ const AccountInfo = (props: any) => {
                     value={phone}
                     setValue={setPhone}
                     onChangeText={(e: any) => setIsSaved(false)}
+                    blurOnSubmit={false}
+                    onSubmit={() => { zipRef.current?.focus(); }}
+                    returnKeyType='next'
+                    innerRef={phoneRef}
                     ></_TextInput>
                     {/* <_Checkbox
                     visible={false}
@@ -721,12 +739,20 @@ const AccountInfo = (props: any) => {
                     value={zipCode}
                     setValue={setZipCode}
                     onChangeText={(e: any) => setIsSaved(false)}
+                    blurOnSubmit={false}
+                    onSubmit={() => { cityRef.current?.focus(); }}
+                    returnKeyType='next'
+                    innerRef={zipRef}
                     ></_TextInput>
                     <_TextInput
                     label="City"
                     value={city}
                     setValue={setCity}
                     onChangeText={(e: any) => setIsSaved(false)}
+                    blurOnSubmit={false}
+                    onSubmit={() => { stateRef.current?.focus(); }}
+                    returnKeyType='next'
+                    innerRef={cityRef}
                     ></_TextInput>
                     <_Dropdown
                     label="State"
@@ -735,6 +761,7 @@ const AccountInfo = (props: any) => {
                     direction="top"
                     value={state}
                     setValue={setState}
+                    innerRef={stateRef}
                     selected={(e: any) => {
                         if (e)
                             checkSaved();
@@ -826,11 +853,21 @@ const _styles = StyleSheet.create({
         position: 'absolute',
         top:0,
         left:0,
-        zIndex:99
-
+        zIndex:99,
+        ...Platform.select({
+            android: {
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+            }
+        }),
     },
     passwordContainerContent: {
-        height: '100vh'
+        ...Platform.select({
+            web: {
+                height: '100vh'
+            },
+        }),
     },
     passwordPromptContainerMobile: {
         backgroundColor: Color.whiteMask

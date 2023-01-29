@@ -439,6 +439,7 @@ export const App = (props: any) => {
         onScroll={(e) => scroll(e)}
         scrollEventThrottle={100}
         onContentSizeChange={(w, h) => getScrollDims(w, h)}
+        keyboardShouldPersistTaps={'handled'}
         >
           <View
           style={styles.stack}

@@ -242,7 +242,9 @@ const AccountAbout = (props: any) => {
 
     return (
     <View>
-        <ScrollView>
+        <ScrollView
+        keyboardShouldPersistTaps={'handled'}
+        >
             <View>
                 <View
                 style={_styles.titleContainer}

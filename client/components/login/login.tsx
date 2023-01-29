@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { perPlatformTypes } from 'react-native-document-picker/lib/typescript/fileTypes';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
@@ -19,6 +19,7 @@ const Login = (props: any) => {
   const [init,setInit] = useState(false);
   const [loading,setLoading] = useState(false);
   const navigation = useNavigation<navProp>();
+  const passwordRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
 
 
   useEffect(() => { 
@@ -181,6 +182,9 @@ const Login = (props: any) => {
       value={email}
       error={emailError}
       keyboardType='email-address'
+      blurOnSubmit={false}
+      onSubmit={() => { passwordRef.current?.focus(); }}
+      returnKeyType='next'
       />
       <_TextInput
       type="password"
@@ -189,6 +193,7 @@ const Login = (props: any) => {
       value={password}
       error={passwordError}
       onSubmit={doLogin}
+      innerRef={passwordRef}
       />
       <_Text
       style={Style.textSmallDefault}

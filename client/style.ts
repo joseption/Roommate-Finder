@@ -34,6 +34,12 @@ export const Color = {
     whiteMask: '#FFFFFFBF',
     textMask: '#505050',
     defaultLight: '#d9e8fe',
+    whiteUnderlay: '#FFFFFF30',
+    defaultUnderlay: '#66a3fc',
+    goldUnderlay: '#f0c570',
+    successUnderlay: '#76cb84',
+    dangerUnderlay: '#e33266',
+    warningUnderlay: '#e3aa32',
 }
 
 export const FontSize = {
@@ -78,7 +84,7 @@ export const Style = StyleSheet.create({
     borderColor: Color.border,
     borderRadius: Radius.default,
     borderWidth: 1,
-    height: 35,
+    height: 40,
     paddingLeft: 10,
     paddingRight: 25,
     paddingTop: 5,

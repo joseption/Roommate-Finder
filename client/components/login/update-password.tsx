@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { acceptableSymbols, config, env, includesSymbol, includesUpperContains, isAtLeastEightChars, textMatches } from '../../helper';
@@ -19,6 +19,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
   const [pwdError,setPwdError] = useState(false);
   const [verifyPwdError,setVerifyPwdError] = useState(false);
   const [loading,setLoading] = useState(false);
+  const verifyPasswordRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
 
   useEffect(() => {
     checkDisabledBtn();
@@ -160,6 +161,9 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       onChangeText={(e: any) => {handleChange(e)}}
       value={pValue}
       error={pwdError}
+      blurOnSubmit={false}
+      onSubmit={() => { verifyPasswordRef.current?.focus(); }}
+      returnKeyType='next'
       />
     <_TextInput
       type="password"
@@ -168,6 +172,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       value={verifyPValue}
       onSubmit={doPasswordUpdate}
       error={verifyPwdError}
+      innerRef={verifyPasswordRef}
       />
       <View
       style={styles.requirements}

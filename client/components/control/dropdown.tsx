@@ -1,24 +1,23 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { setStatusBarTranslucent } from 'expo-status-bar';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { View, TextInput, StyleSheet, Pressable, PanResponder, GestureResponderEvent, Platform, Alert, NativeSyntheticEvent, TextInputFocusEventData, Modal, ScrollView } from 'react-native';
+import { View, TextInput, StyleSheet, Pressable, Platform, ScrollView, Modal, Text } from 'react-native';
 import { Context, isMobile } from '../../helper';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from './button';
 import _Group from './group';
 import _DropdownOption from './dropdown-option';
-import Text from './text';
 import _Text from './text';
-import { getRandomValues } from 'crypto';
 
 const _Dropdown = (props: any, {navigation}:any) => {
         /*
     Props: JA TODO 
     */
+    const [initModal,setInitModal] = useState(false);
     const [focus,setFocus] = useState(false);
     const [height,setHeight] = useState(0);
     const [options,setOptions] = useState([]);
     const [init,setInit] = useState(false);
+    const [blurring,setBlurring] = useState(false);
     const [dataInit,setDataInit] = useState(false);
     const [key,setKey] = useState('');
     const [textValue,setTextValue] = useState('');
@@ -31,6 +30,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
       }, [props.value, context.setParentFocus]);
 
     useEffect(() => {
+
         if (props.value && !props.key && !dataInit && props.options) {
             let l_options = options;
             if (l_options.length == 0)
@@ -59,7 +59,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
         else if (!focus && textValue && props.options.filter((x: { value: string; }) => x.value === textValue).length == 0) {
             clearSelected(false);
         }
-    }, [options, props.options, props.value]);
+    }, [options, props.options, props.value, focus]);
 
     const labelStyle = () => {
         var style = [];
@@ -112,31 +112,56 @@ const _Dropdown = (props: any, {navigation}:any) => {
     const errorMessage = () => {
         if (props.error == true) {
             if (!props.errorMessage) {
-            return "is required"
+                return " is required"
             }
             else {
-            return props.errorMessage;
+                return props.errorMessage;
             }
         }
     }
 
     const onPress = () => {
-        setMenu(!focus, true);
-        if (props.selected)
-            props.selected(key);
+        if (blurring) {
+            setBlurring(false);
+            return;
+        }
+        else {
+            setMenu(!focus, true);
+            if (props.selected)
+                props.selected(key);
+        }
     }
 
-    const setMenu = (focus: boolean, fromBtn = false) => {
-        if (focus) {
-            if (fromBtn) {
-                inputRef.current?.focus();
+    const setMenu = (isFocus: boolean, fromBtn = false) => {
+        if (isFocus) {
+            if (fromBtn) {        
+                if (props.innerRef) 
+                    props.innerRef.current?.focus();
+                else
+                    inputRef.current?.focus();
             }
             else
                 mappedItems(textValue);
         }
+        else {
+            if (props.innerRef)
+                props.innerRef.current?.blur();
+            else
+                inputRef.current?.blur();
+        }
+        onFocus(isFocus);
+        setFocus(isFocus);
 
-        setFocus(focus);
-        onFocus(focus);
+        // JA hacky mobile fix for modal not initially showing
+        if (isFocus && !initModal && Platform.OS !== 'web') {
+            setInitModal(true);
+            setTimeout(() => {
+                setFocus(!isFocus);
+                setTimeout(() => {
+                    setFocus(isFocus);
+                }, 0);
+            }, 0);
+        }
     }
 
     const setNavLayout = (e: any) => {
@@ -223,12 +248,11 @@ const _Dropdown = (props: any, {navigation}:any) => {
     const onValueChange = (e: string) => {
         setTextValue(e);
         mappedItems(e);
-        if (!focus)
+        if (!focus) {
             setMenu(true);
+        }
         if (props.onChangeText)
             props.onChangeText(e);
-        //if (props.setValue)
-        //    props.setValue(e);
     }
 
     const onblur = (e: any) => {
@@ -244,6 +268,10 @@ const _Dropdown = (props: any, {navigation}:any) => {
                     setKey("");
                     props.setValue("");
                 }
+                setBlurring(true);
+                setTimeout(() => {
+                    setBlurring(false);
+                }, 250);
                 setMenu(false);
             }
         }
@@ -255,25 +283,30 @@ const _Dropdown = (props: any, {navigation}:any) => {
         }
     }
 
-    const onKeyPress = (e: any) => {
-        if ((e.keyCode === 13 || e.keyCode === 9) && focus) {
-            // JA: Todo conveniently select top option when enter or tab is pressed on keyboard if time permits
-        }
+    const input = (isWeb: boolean = true) => {
+        return <TextInput
+            style={style()}
+            onChangeText={(e) => onValueChange(e)}
+            value={textValue}
+            placeholder={props.placeholder}
+            keyboardType={props.keyboardType}
+            ref={props.innerRef ? props.innerRef : inputRef}
+            onFocus={(e: any) => onfocus(e)}
+            onBlur={(e: any) => onblur(e)}
+            showSoftInputOnFocus={isWeb}
+            caretHidden={!isWeb}
+            selectTextOnFocus={isWeb}
+            >
+            </TextInput>
     }
 
-    const input = () => {
-        return <TextInput
-        style={style()}
-        onChangeText={(e) => onValueChange(e)}
-        value={textValue}
-        placeholder={props.placeholder}
-        keyboardType={props.keyboardType}
-        ref={inputRef}
-        onFocus={(e: any) => onfocus(e)}
-        onBlur={(e: any) => onblur(e)}
-        onKeyPress={(e: any) => onKeyPress(e)}
-        ></TextInput>
+    const iconStyle = () => {
+        let style = [];
+        style.push(styles.iconContainer);
+        if (Platform.OS !== 'web')
+            style.push(styles.iconContainerMobile);
 
+            return style;
     }
 
     return (
@@ -308,9 +341,9 @@ const _Dropdown = (props: any, {navigation}:any) => {
             : null
             }
             </View>
-                {input()}
+                {input(Platform.OS === 'web')}
                 <Pressable
-                style={styles.iconContainer}
+                style={iconStyle()}
                 onPress={() => onPress()}
                 >
                 <FontAwesomeIcon
@@ -336,6 +369,8 @@ const _Dropdown = (props: any, {navigation}:any) => {
             </View>
             :
             <Modal
+            onShow={() => mappedItems(props.value)}
+            visible={true}
             animationType='fade'
             transparent={true}
             onRequestClose={() => setFocus(false)}
@@ -345,6 +380,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
                 >
                     {input()}
                     <ScrollView
+                        keyboardShouldPersistTaps={'handled'}
                         style={[styles.modalMenu]}
                         >
                         {visibleOptionCount === 0 ?
@@ -413,7 +449,7 @@ const styles = StyleSheet.create({
     modalMenuContainer: {
         height: '100%',
         width: '100%',
-        backgroundColor: Color.blackMask,
+        backgroundColor: Color.holderMask,
         padding: 20
     },
     modalMenu: {
@@ -442,11 +478,17 @@ const styles = StyleSheet.create({
         bottom: 0,
         right: 0,
         position: 'absolute',
-        height: 35,
+        height: 40,
         display: 'flex',
         justifyContent: 'center',
         width: 25,
         alignItems: 'center',
+    },
+    iconContainerMobile: {
+        width: '100%',
+        justifyContent: 'flex-end',
+        flexDirection: 'row',
+        right: 5
     },
     content: {
         position: 'relative'

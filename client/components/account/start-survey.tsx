@@ -100,6 +100,7 @@ const StartSurvey = (props: any) => {
                     hasError = true;
                 }
                 else {
+                    props.setIsSetup(true);
                     if (gotoSurvey) {
                         navigation.navigate(NavTo.Survey);
                     }
@@ -124,7 +125,9 @@ const StartSurvey = (props: any) => {
     }
 
     return (
-    <ScrollView>
+    <ScrollView
+    keyboardShouldPersistTaps={'handled'}
+    >
         <View
         style={_styles.titleContainer}
         >

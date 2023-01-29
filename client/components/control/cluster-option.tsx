@@ -48,8 +48,8 @@ const styles = StyleSheet.create({
         backgroundColor: Color.gold
     },
     button: {
-        paddingTop: 5,
-        paddingBottom: 5,
+        paddingTop: 7,
+        paddingBottom: 7,
         paddingRight: 10,
         paddingLeft: 10,
         backgroundColor: Color.white,

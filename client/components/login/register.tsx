@@ -30,6 +30,7 @@ const Register = (props: any, {navigation}:any) => {
 
   const doRegister = async () => 
   {
+    let hasError = false;
       setLoading(true);
       setEmailError(false);
 
@@ -51,9 +52,10 @@ const Register = (props: any, {navigation}:any) => {
           await fetch(`${env.URL}/auth/registerFast`,
           {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
-              if (res.error)
+              if (res.Error)
               {
                     setMessage(res.error);
+                    hasError = true;
               }
               else
               {
@@ -66,9 +68,12 @@ const Register = (props: any, {navigation}:any) => {
       }
       catch(e)
       {
-          setMessage('An unknown error occurred');
-          setDisabled(false);
+        setMessage('An unknown error occurred');
+        hasError = true;
       }    
+      if (hasError) {
+        setDisabled(false);
+      }
       setLoading(false);
   };
   return (

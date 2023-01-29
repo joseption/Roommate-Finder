@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { setStatusBarStyle } from 'expo-status-bar';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { forwardRef, useContext, useEffect, useState } from 'react';
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Context, isMobile } from '../../helper';
 import { Color, Radius, Style } from '../../style';
@@ -41,10 +41,18 @@ const _TextInput = (props: any) => {
     return style;
   }
 
+  const inputStyle = () => {
+    let align = props.multiline ? 'top' : 'center';
+    return {
+        height: 40,
+        textAlignVertical: align
+    }
+  }
+
   const style = () => {
     var style = [];
     style.push(Style.inputDefault);
-    style.push(styles.input);
+    style.push(inputStyle());
     if (props.multiline) {
       style.push({
         height: props.height,
@@ -56,6 +64,10 @@ const _TextInput = (props: any) => {
     style.push(styles.transparentBackground);
     if (phoneMask)
       style.push(styles.phoneMaskText);
+
+    if (props.readonly) 
+      style.push(styles.disabled);
+
     return style;
   }
 
@@ -163,7 +175,10 @@ const _TextInput = (props: any) => {
   }
 
   const returnTypeKey = () => {
-    if (props.onSubmit) {
+    if (props.returnKeyType) {
+      return props.returnKeyType;
+    }
+    else if (props.onSubmit) {
       return 'go';
     }
     else {
@@ -212,6 +227,7 @@ const _TextInput = (props: any) => {
       </View>
       <View
       style={styles.textBackground}
+      pointerEvents={props.readonly ? 'none' : 'auto'}
       >
         {phoneMask ?
         <_Text
@@ -228,18 +244,25 @@ const _TextInput = (props: any) => {
         placeholder={placeholder()}
         keyboardType={keyboardType()}
         secureTextEntry={props.type === 'password'}
-        ref={props.ref}
+        ref={props.innerRef}
         multiline={props.multiline}
         maxLength={getMaxLength()}
         onSubmitEditing={(e: any) => {checkSubmit()}}
         returnKeyType={returnTypeKey()}
+        editable={props.readonly}
+        caretHidden={props.readonly}
+        blurOnSubmit={props.blurOnSubmit}
         />
       </View>
     </View>
-  );
+  )
 };
 
 const styles = StyleSheet.create({
+  disabled: {
+    color: Color.textTertiary,
+    backgroundColor: Color.holder,
+  },
   phoneMaskText: {
     color: Color.textMask
   },
@@ -258,11 +281,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     ...Platform.select({
       web: {
-        top: 8,
+        top: 10,
         left: 11,
       },
       android: {
-        top: 5,
+        top: 8,
         left: 10,
       }
     }),
@@ -287,13 +310,6 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '100%',
-  },
-  input: {
-    ...Platform.select({
-      android: {
-        textAlignVertical: 'top'
-      }
-    }),
   }
 });
 

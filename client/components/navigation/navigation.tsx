@@ -253,7 +253,7 @@ const Navigation = (props: any) => {
                     navigate={navigate}
                     icon="user"
                     currentNav={props.navSelector}
-                    navTo={NavTo.Profile}
+                    navTo={NavTo.Account}
                     />
                     <NavMobileButton
                     navigate={navigate}

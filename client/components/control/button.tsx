@@ -1,6 +1,6 @@
 import { useLinkProps, useNavigation } from '@react-navigation/native';
 import React, { useRef } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, TouchableHighlight, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { navProp } from '../../helper';
 import { Color, FontSize, Style } from '../../style';
@@ -30,11 +30,13 @@ const _Button = (props: any) => {
     }
 
     const press = () => {
-        if (props.navigate) {
-            navigation.navigate(props.navigate);
-        }
-        else if (props.onPress) {
-            props.onPress();
+        if (!props.disabled) {
+            if (props.navigate) {
+                navigation.navigate(props.navigate);
+            }
+            else if (props.onPress) {
+                props.onPress();
+            }
         }
     }
 
@@ -53,19 +55,19 @@ const _Button = (props: any) => {
          }
 
          return style;
-      }
+    }
 
     return (
     <View
     style={props.containerStyle}
     >
-        <Pressable
+        <TouchableHighlight
         disabled={props.disabled || props.loading}
-        style={style()}
         onPress={() => press()}
+        underlayColor={Color.white}
         >
             <View
-            style={styles.contentContainer}
+            style={[styles.contentContainer, style()]}
             >
                 {props.loading ?
                 <ActivityIndicator
@@ -81,7 +83,7 @@ const _Button = (props: any) => {
                     {props.value ? props.value : props.children}
                 </_Text>
             </View>
-        </Pressable>
+        </TouchableHighlight>
     </View>
     );
 };

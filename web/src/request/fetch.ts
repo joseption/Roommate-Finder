@@ -9,25 +9,8 @@ import { chatInfo } from "../types/chat.types";
 import { ListingInfo } from "../types/listings.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
-<<<<<<< HEAD
 const backend_api = "https://api.roomfin.xyz";
-=======
-const backend_api = "http://localhost:8080";
 
-export async function GetChats() {
-  return await doRequest<chatInfo>(`${backend_api}/chats`, null, "GET", true);
-}
-
-export async function GetListings() {
-  return await doRequest<ListingInfo[]>(
-    `${backend_api}/listings/all`,
-    null,
-    "GET",
-    true
-  );
-}
-
->>>>>>> c420888 (feat: add connection to listings backend and initial listings components)
 export async function GetCurrentUserInfo() {
   return await doRequest<user>(`${backend_api}/users/me`, null, "GET", true);
 }
@@ -62,6 +45,15 @@ export async function GetBioAndTags() {
 export async function GetAllUsers() {
   return await doRequest<user[]>(
     `${backend_api}/users/Allprofiles`,
+    null,
+    "GET",
+    true
+  );
+}
+
+export async function GetListings() {
+  return await doRequest<ListingInfo[]>(
+    `${backend_api}/listings/all`,
     null,
     "GET",
     true

@@ -15,7 +15,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         <AuthRedirectWrapper>
           <Nav />
           <Component {...pageProps} />
-          <ReactQueryDevtools initialIsOpen={true} position="bottom-right" />
+          <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
           <Toaster
             position={"bottom-center"}
             containerClassName={"!bottom-16 !select-none !text-center"}

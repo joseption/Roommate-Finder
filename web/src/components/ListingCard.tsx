@@ -1,6 +1,7 @@
-import React from "react";
-import { ListingInfo } from "../types/listings.types";
 import Link from "next/link";
+import React from "react";
+
+import { ListingInfo } from "../types/listings.types";
 
 interface Props {
   listing: ListingInfo;

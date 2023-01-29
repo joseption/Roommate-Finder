@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { GetListings } from "../request/fetch";
-import ListingCard from "../components/ListingCard";
-import { ListingInfo } from "../types/listings.types";
-import Button from "../components/Inputs/Button";
 import { useRouter } from "next/router";
+
+import Button from "../components/Inputs/Button";
+import ListingCard from "../components/ListingCard";
+import { GetListings } from "../request/fetch";
+import { ListingInfo } from "../types/listings.types";
 
 //This is a placeholder...
 export default function Listings() {
@@ -15,7 +16,7 @@ export default function Listings() {
       {isLoading || !data ? (
         <div>Loading...</div>
       ) : (
-        <div className="align-center flex justify-center">
+        <div className="flex justify-center">
           <ul className="">
             {data.map((listing: ListingInfo) => {
               return (
@@ -28,7 +29,7 @@ export default function Listings() {
         </div>
       )}
       <Button
-        onClick={() => router.push("./createListing")}
+        onClick={() => void router.push("/create-listing")}
         className="absolute top-2 m-10"
       >
         Create Listing

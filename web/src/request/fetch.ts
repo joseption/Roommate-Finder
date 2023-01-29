@@ -3,10 +3,10 @@
  */
 
 import { user } from "../types/auth.types";
-import { SurveyInfo } from "../types/survey.types";
-import { BioAndTags } from "../types/tags.types";
 import { chatInfo } from "../types/chat.types";
 import { ListingInfo } from "../types/listings.types";
+import { SurveyInfo } from "../types/survey.types";
+import { BioAndTags } from "../types/tags.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 const backend_api = "https://api.roomfin.xyz";

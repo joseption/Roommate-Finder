@@ -4,10 +4,9 @@ import ListingCard from "../components/ListingCard";
 import { ListingInfo } from "../types/listings.types";
 import Button from "../components/Inputs/Button";
 import { useRouter } from "next/router";
-import Link from "next/link";
 
 //This is a placeholder...
-export default function listings() {
+export default function Listings() {
   const { data, isLoading } = useQuery(["listings"], GetListings);
   const router = useRouter();
 

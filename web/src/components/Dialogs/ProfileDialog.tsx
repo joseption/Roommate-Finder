@@ -104,14 +104,14 @@ export default function ProfileDialog({
           <div
             className={"mx-auto w-full items-center justify-center text-center"}
           >
-            <div className="mx-auto flex w-full items-center justify-between">
-              {/* <Button>Message</Button> */}
-              <ArrowUpCircleIcon
-                className={`mx-auto h-10 w-10 justify-center  text-center ${
-                  slide === "Bio" ? "hidden" : ""
-                }`}
-                onClick={goUp}
-              />
+            <div className="mx-auto flex w-full items-center justify-end  ">
+              <Button
+                overRideStyle={
+                  "bg-white text-black hover:bg-slate-300 focus-visible:bg-indigo-700 "
+                }
+              >
+                Message
+              </Button>
             </div>
           </div>
           {/* <AnimatePresence>
@@ -121,41 +121,35 @@ export default function ProfileDialog({
               animate={slide === "Bio" ? "slide1" : "slide2"}
               className="flex flex-1 flex-col justify-center gap-2 p-4 md:p-6 lg:gap-4"
             > */}
-          {slide === "Bio" ? (
-            <div className="flex flex-1 flex-col justify-center gap-2 p-4 md:p-6 lg:gap-4">
-              <p className="text-lg font-semibold">🔥 Match: 69%</p>
+          <div className="flex flex-1 flex-col justify-center gap-2 p-4 md:p-6 lg:gap-4">
+            <p className="text-lg font-semibold">🔥 Match: 69%</p>
 
-              <h1 className="px-1 text-left text-5xl font-bold">
-                {authorName}, 21
-              </h1>
-              <p className="overflow-y-auto px-1 text-left text-lg sm:text-xl md:text-xl lg:text-2xl">
-                {bio}
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-1 flex-col justify-center gap-2 p-4 md:p-6 lg:gap-4">
-              <h1 className="px-1 text-left text-3xl font-semibold">
-                My Interests & Hobbies
-              </h1>
-
-              <ProfileTags
-                styles={tags}
-                selectedStyles={tags}
-                className={"overflow-x-auto px-1"}
-              />
-            </div>
-          )}
+            <h1 className="px-1 text-left text-5xl font-bold">
+              {authorName}, 21
+            </h1>
+            <p className="overflow-y-auto px-1 text-left text-lg sm:text-xl md:text-xl lg:text-2xl">
+              {bio}
+            </p>
+            <h1 className="px-1 pt-5 text-left text-3xl font-semibold">
+              My Interests & Hobbies
+            </h1>
+            <ProfileTags
+              styles={tags}
+              selectedStyles={tags}
+              className={"overflow-x-auto px-1"}
+            />
+          </div>
           {/* </motion.div>
           </AnimatePresence> */}
           <div
             className={"mx-auto w-full items-center justify-center text-center"}
           >
-            {slide === "Bio" && (
+            {/* {slide === "Bio" && (
               <ArrowDownCircleIcon
                 className="mx-auto h-10 w-10 justify-center text-center"
                 onClick={goDown}
               />
-            )}
+            )} */}
           </div>
         </div>
 

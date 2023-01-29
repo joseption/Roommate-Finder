@@ -57,18 +57,11 @@ export default function ProfileList({
                         bio={profile.bio}
                         authorName={profile.first_name}
                         tags={[
-                          "🎮 Games",
-                          "🥕 Drugs",
-                          "🥕 Music",
-                          "🥕 Art",
-                          "🥕 Food",
-                          "🥕 Travel",
-                          "🎮 Games",
-                          "🥕 Drugs",
-                          "🥕 Music",
-                          "🥕 Art",
-                          "🥕 Food",
-                          "🥕 Travel",
+                          "⚽ Sports",
+                          "🐾 Pets",
+                          "🚗 Cars",
+                          "💼 Business",
+                          "🎥 Film",
                         ]}
                       />
                     </motion.li>

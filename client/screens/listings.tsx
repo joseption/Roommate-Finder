@@ -1,33 +1,38 @@
 import { useEffect, useState } from 'react';
-import { View, _Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
 import AllListingsView from '../components/listings/all-listings';
 import ListingView from '../components/listings/listing';
+import SearchBar from '../components/listings/search-bar';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { env } from '../helper';
+import BottomNavbar from '../components/listings/bottom-nav';
+import Dropdown from '../components/listings/drop-down';
 
 const ListingsScreen = (props: any, {navigation}:any) => {
-    /*
-    Erick: Add all content for the single page view here,
-    If you need to make reusable components, create a folder
-    in the components folder named "listings" and add your component files there
-    */
+
+    // used for tracking, first parameter is for current state
+    // second value is function used to update state
+    // inside useState is the initial state, what it defaults to
     const [isListing,setIsListing] = useState(false);
     const [listingID,setListingID] = useState('');
     const [listingData, setListingData] = useState({});
     const [allListings, setAllListings] = useState([]);
     const [init,setInit] = useState(false);
+    const [searchText, setSearchText] = useState("");
+    const [selectedFilter, setSelectedFilter] = useState('all');
 
-    // anytime page is rendered it will run this
+    // anytime page is rendered it will run this. 
+    // allows you to perform side effects in your components.
+    // fetching data, directly updating the DOM, and timers.
     useEffect(() => {
         if(!init)
         {
            getAllListings();
            setInit(true); 
         }
-        else
-        //get rid later
-            getListing();
+  
         
     },[listingID]);
 
@@ -58,16 +63,28 @@ const ListingsScreen = (props: any, {navigation}:any) => {
         return {data:"Hello"};
     } 
 
+    const updateListings = () => {
+        props.setListingID('myID');
+        props.setIsListing(true);
+       }
+
     return (
     <View>  
         { /* If isListing is false it will show all listings else it will show a single listing */}
-        {!isListing?
+        {/*<SearchBar searchText={searchText} setSearchText={setSearchText}/>
+        <Text>{searchText}</Text>  */}
+        <Dropdown setSelectedFilter={setSelectedFilter} /> {/* pass the setSelectedFilter function to the dropdown component */}
+      <AllListingsView allListings={allListings} setListingID={setListingID} setIsListing={setIsListing} selectedFilter={selectedFilter} /> {/* pass the selectedFilter value to AllListingsView component */}
+               
+        {/*!isListing?
      <AllListingsView allListings={allListings} setListingID={setListingID} setIsListing={setIsListing}></AllListingsView>
      :   
      <ListingView listingData={listingData} setIsListing={setIsListing}></ListingView>
-        }
+    */}
+        <BottomNavbar></BottomNavbar>
      </View>
     );
+
 };
 
 export default ListingsScreen;

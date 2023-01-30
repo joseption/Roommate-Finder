@@ -1,9 +1,10 @@
 import { FlatList } from "react-native";
 import Message from "./message";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { env } from "../../helper";
-import io, { Socket } from 'socket.io-client'
+import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface Props {
   chat: any,
@@ -12,17 +13,25 @@ interface Props {
 
 const Messages = ({chat, socket}: Props) => {
   const [messages, setMessages] = useState<any[]>([]);
+  const chatRef = useRef(chat);
+  const messagesRef = useRef(messages);
   
   useEffect(() => {
+    chatRef.current = chat
     getMessages(chat.id);
   }, [chat])
 
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages])
   
   useEffect(() => {
     socket.on('receive_message', (data: any) => {
-      setMessages([data, ...messages]);
+      if (data.chatId === chatRef.current.id) {
+        setMessages([data, ...messagesRef.current]);
+      }
     });
-  }, [socket, messages])
+  }, [socket])
 
   const getMessages = async (id: string) => {
     return fetch(
@@ -40,11 +49,13 @@ const Messages = ({chat, socket}: Props) => {
   }
 
   return (
-    <FlatList
-      data={messages}
-      renderItem={({ item }) => <Message message={item} />}
-      inverted
-    />
+    <SafeAreaView style={{flex: 1}}>
+      <FlatList
+        data={messages}
+        renderItem={({ item }) => <Message message={item} key={item.id}/>}
+        inverted
+      />
+    </SafeAreaView>
   );
 }
 

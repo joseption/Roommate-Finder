@@ -38,10 +38,17 @@ const MessageInput = ({chat, socket}: Props) => {
         console.warn("Error: ", res.Error);
       }
       else {
+        const randomNum = () => {
+          (Math.floor(Math.random() * 20) + 1).toString()
+        }
+
         const data = {
           chatId: chat.id,
           content: newMessage,
           userId: userInfo.id,
+          // id is temporary for rendering purposes. 
+          // It provides no value otherwise.
+          id: randomNum(),
         }
         await socket.emit('send_message', data);
         setNewMessage('');

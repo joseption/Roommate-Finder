@@ -43,7 +43,7 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
       }}
     >
       <View style={styles.content}>
-        <Image style={styles.image} source={{ uri: (chat.users[0].image != null) ? chat.users[0].image : 'https://reactnative.dev/img/tiny_logo.png'}} />
+        <Image style={styles.image} source={{ uri: (chat?.users[0]?.image != null) ? chat?.users[0]?.image : 'https://reactnative.dev/img/tiny_logo.png'}} />
         <View style={styles.text}>
             <Text numberOfLines={1} style={styles.name}>{chat.chatName}</Text>
             <Text numberOfLines={2}>{getPrefix(chat.latestMessage.userId) + chat.latestMessage.content}</Text>

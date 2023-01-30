@@ -29,7 +29,7 @@ export default function Listings() {
         </div>
       )}
       <Button
-        onClick={() => void router.push("/create-listing")}
+        onClick={() => void router.push("/createListing")}
         className="absolute top-2 m-10"
       >
         Create Listing

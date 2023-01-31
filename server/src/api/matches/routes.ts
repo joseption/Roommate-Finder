@@ -30,7 +30,9 @@ router.get('/all', async (req: Request, res: Response) => {
 // create all the matches for a user thats completed the quiz
 router.post('/create', async (req: Request, res: Response) => {
   try {
-    const { loggedInUserId } = req.body;
+    //const { loggedInUserId } = req.body; why???? 
+    const payload: payload = req.body[0];
+    const loggedInUserId = payload.userId;
 
     // Mark the survey as complete
     if (loggedInUserId) {

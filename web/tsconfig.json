@@ -17,9 +17,5 @@
     "noUncheckedIndexedAccess": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.cjs", "**/*.mjs"],
-  "exclude": [
-    "dist",
-    "build",
-    "node_modules",
-  ]
+  "exclude": ["dist", "build", "node_modules"]
 }

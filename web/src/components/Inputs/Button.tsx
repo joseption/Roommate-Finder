@@ -9,6 +9,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
   variant?: "filled" | "text";
   className?: string;
+  overRideStyle?: string | null;
   children: ReactNode;
 }
 
@@ -26,6 +27,7 @@ export default function Button({
   disabled = false,
   loading = false,
   variant = "filled",
+  overRideStyle = null,
   className = "",
   children,
   ...rest
@@ -58,8 +60,13 @@ export default function Button({
       " dark:text-slate-900 dark:bg-indigo-200 dark:hover:bg-indigo-400 dark:focus-visible:bg-indigo-400";
   }
 
+  if (overRideStyle)
+    baseStyle =
+      "flex select-none items-center justify-center rounded-full gap-2 px-4 py-2 transition duration-200 " +
+      "ease-out active:duration-300 focus-visible:ring-4 focus-visible:ring-indigo-300/90 ring-inset outline-none group " +
+      "active:scale-[96%] " +
+      overRideStyle;
   //#endregion
-
   return (
     <button
       className={`${baseStyle} ${className}`}

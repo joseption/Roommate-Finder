@@ -11,6 +11,7 @@ interface Props {
   selected: boolean;
   onSelect: (style: string, selected: boolean) => void;
   className?: string;
+  displayIcon?: boolean;
 }
 
 export default function SelectableChip({
@@ -18,6 +19,7 @@ export default function SelectableChip({
   selected,
   onSelect,
   className = "",
+  displayIcon = true,
 }: Props) {
   //#region Handlers
 
@@ -37,6 +39,10 @@ export default function SelectableChip({
     : " bg-slate-200 text-slate-900 hover:bg-slate-300 focus-visible:bg-slate-300 focus-visible:ring-slate-300" +
       " dark:bg-slate-800 dark:text-slate-50 dark:hover:bg-slate-700 dark:focus-visible:bg-slate-700 dark:focus-visible:ring-slate-700";
 
+  if (!displayIcon)
+    styles =
+      "flex gap-2 px-2 py-0.5 sm:px-4 sm:py-1 rounded-full transition duration-200 ease-in-out outline-none focus-visible:ring-2 focus-visible:ring-offset-2 items-center text-black bg-slate-100";
+
   //#endregion
 
   return (
@@ -50,10 +56,12 @@ export default function SelectableChip({
           animate={"scaleIn"}
           transition={transitions.spring}
         >
-          {selected ? (
+          {selected && displayIcon ? (
             <MdCheck className={"h-full w-5"} />
-          ) : (
+          ) : displayIcon ? (
             <MdAdd className={"h-full w-5"} />
+          ) : (
+            <></>
           )}
         </motion.div>
       </AnimatePresence>

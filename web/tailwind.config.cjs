@@ -4,6 +4,9 @@ module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      colors: {
+        mintYellow: "#F1C656",
+      },
       screens: {
         sm: "600px",
         md: "720px",
@@ -11,7 +14,6 @@ module.exports = {
         xl: "1280px",
         "2xl": "1650px",
       },
-      colors: {},
       gridTemplateColumns: {
         "fill-10": "repeat(auto-fill, minmax(40vw, 1fr))",
         "fill-20": "repeat(auto-fill, minmax(30vw, 1fr))",
@@ -29,6 +31,7 @@ module.exports = {
   },
   plugins: [
     require("@tailwindcss/line-clamp"),
+    require("@tailwindcss/forms"),
     // require("@headlessui/tailwindcss")({ prefix: "ui" }),
   ],
 };

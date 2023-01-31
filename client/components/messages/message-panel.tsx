@@ -8,9 +8,10 @@ interface Props {
   showPanel: boolean,
   updateShowPanel: Dispatch<SetStateAction<boolean>>,
   chat: any,
+  socket: any,
 }
 
-const MessagePanel = ({ showPanel, updateShowPanel, chat }: Props) => {
+const MessagePanel = ({ showPanel, updateShowPanel, chat, socket }: Props) => {
   // These values are mapped to percentage of screen size.
   const PANEL_OUT_OF_SCREEN = Dimensions.get('window').width * 1.5;
   const PANEL_IN_SCREEN = 0;
@@ -49,8 +50,8 @@ const MessagePanel = ({ showPanel, updateShowPanel, chat }: Props) => {
         ]}
       >
         <_Button onPress={() => updateShowPanel(!showPanel)}>Back</_Button>
-        <Messages chat={chat}/>
-        <MessageInput />
+        <Messages chat={chat} socket={socket}/>
+        <MessageInput chat={chat} socket={socket}/>
       </Animated.View>
     </>
   );

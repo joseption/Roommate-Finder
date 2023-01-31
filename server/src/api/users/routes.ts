@@ -95,11 +95,27 @@ router.get('/profileSearch', async (req: Request, res: Response) => {
 
 router.get('/Allprofiles', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const users = await db.user.findMany();
-    //delete password
-    users.forEach(user => {
-      delete user.password;
-    });
+    const payload:payload = req.body[0];
+    const userId = payload.userId;
+    const users = await db.user.findMany(
+      {
+        select:{
+          id: true,
+          bio: true,
+          first_name: true,
+          last_name: true,
+          birthday: true,
+          tags: true,
+          image: true,
+          matches: {
+            where:{
+              userTwoId: userId,
+            },
+          },
+        },
+      },
+    );
+  
     return res.json(users);
   } catch (err) {
     next(err);

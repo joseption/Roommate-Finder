@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 
 import {
   staggerContainerVariants,
@@ -56,6 +57,8 @@ export default function ProfileList({
                         src={profile.image ? profile.image : "/placeholder.png"}
                         bio={profile.bio}
                         authorName={profile.first_name}
+                        tags={profile.tags}
+                        matches={profile.matches}
                       />
                     </motion.li>
                   ))}

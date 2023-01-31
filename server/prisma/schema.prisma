@@ -39,6 +39,7 @@ model User {
   refreshTokens    RefreshToken[]
   ResponsesOnUsers ResponsesOnUsers[]
   tags             tags[]
+  matches          Matches[]
 }
 
 model RefreshToken {
@@ -79,11 +80,12 @@ model User_Interests_Activity {
   type        String
 }
 
-model tags{
-  id String @id @default(uuid())
-  tag String
+model tags {
+  id      String @id @default(uuid())
+  tag     String
   user_id String
-  user User @relation(fields: [user_id], references: [id])
+  user    User   @relation(fields: [user_id], references: [id])
+
   @@unique([tag, user_id])
 }
 
@@ -141,6 +143,7 @@ model Matches {
   userOneId       String
   userTwoId       String
   matchPercentage Float
+  User            User?  @relation(fields: [userOneId], references: [id])
 
   @@unique([userOneId, userTwoId])
 }

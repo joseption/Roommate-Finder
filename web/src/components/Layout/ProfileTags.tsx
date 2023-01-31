@@ -16,7 +16,7 @@ export default function ProfileTags({
 
   return (
     <ul
-      className={`flex list-none flex-wrap justify-center gap-2 sm:gap-4 ${className}`}
+      className={`justify-left flex list-none flex-wrap gap-2 sm:gap-4 ${className}`}
     >
       {styles.map((style) => (
         <li key={style}>
@@ -24,7 +24,8 @@ export default function ProfileTags({
             label={style}
             selected={selectedStyles.includes(style)}
             onSelect={(style, selected) => {}}
-            className={"bg-yellow-700 disabled:pointer-events-none"}
+            className={"disabled:pointer-events-none"}
+            displayIcon={false}
           />
         </li>
       ))}

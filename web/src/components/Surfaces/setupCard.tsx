@@ -1,19 +1,17 @@
-import { RadioGroup } from "@headlessui/react";
-import { Bars4Icon } from "@heroicons/react/24/outline";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { imageStyles } from "../../data/styles";
-import { GetBioAndTags, SurveyOnComplete } from "../../request/fetch";
-import { UpdateBioAndTags, UpdateResponse } from "../../request/mutate";
-import { SurveyInfo } from "../../types/survey.types";
+import { GetBioAndTags } from "../../request/fetch";
+import { UpdateBioAndTags } from "../../request/mutate";
 import CircularProgress from "../Feedback/CircularProgress";
 import Button from "../Inputs/Button";
 import TextField from "../Inputs/TextField";
 import StyleList from "../Layout/StyleList";
 import Card from "./Card";
+
 interface Props {
   isLoading?: boolean;
   className?: string;

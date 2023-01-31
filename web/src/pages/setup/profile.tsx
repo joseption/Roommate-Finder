@@ -1,16 +1,7 @@
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import Head from "next/head";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
-import CircularProgress from "../../components/Feedback/CircularProgress";
-import IconButton from "../../components/Inputs/IconButton";
 import SetupCard from "../../components/Surfaces/setupCard";
-import QuestionsCard from "../../components/Surfaces/Survey/QuestionsCard";
-import { GetSurveryInfo } from "../../request/fetch";
 import { transitionVariants } from "../../styles/motion-definitions";
 export default function ProfileSetup() {
   return (

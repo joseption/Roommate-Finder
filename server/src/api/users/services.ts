@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { tagsStyles } from "utils/tags";
 import { uuid } from "uuidv4";
 
 import db from '../../utils/db';
@@ -175,6 +176,7 @@ export function updateProfilePicture(id:string, image:string){
 export async function UpdateTagsandBio(tags:string[], user_id:string, bio:string){
   // delete all tags of user 
   try {
+    tags = tags.filter(tag => tagsStyles.includes(tag));
     //update bio
     await db.user.update({
       where: {

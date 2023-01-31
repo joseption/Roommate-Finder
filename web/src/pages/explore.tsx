@@ -14,9 +14,6 @@ export default function Explore() {
   const { data, isLoading } = useQuery({
     queryKey: ["GetAllUsers"],
     queryFn: () => GetAllUsers(),
-    onSuccess: (data) => {
-      console.log(data);
-    },
     onError: (err: Error) => {
       toast.error(err.message);
     },

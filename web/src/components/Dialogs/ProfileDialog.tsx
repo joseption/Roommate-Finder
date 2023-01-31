@@ -51,7 +51,6 @@ export default function ProfileDialog({
   useEffect(() => {
     if (tags && tags.length > 0) {
       const SelectedTags = tags.map((tagObj) => tagObj.tag);
-      console.log(SelectedTags);
       setSelectedStyles(SelectedTags);
     }
   }, []);

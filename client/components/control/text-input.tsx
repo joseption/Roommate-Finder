@@ -31,7 +31,7 @@ const _TextInput = (props: any) => {
   const labelStyle = () => {
     var style = [];
     if (!props.labelStyle)
-      style.push(Style.labelDefault)
+      style.push(Style(props.isDarkMode).labelDefault)
     else
       style.push(props.labelStyle);
 
@@ -51,7 +51,7 @@ const _TextInput = (props: any) => {
 
   const style = () => {
     var style = [];
-    style.push(Style.inputDefault);
+    style.push(Style(props.isDarkMode).inputDefault);
     style.push(inputStyle());
     if (props.multiline) {
       style.push({
@@ -76,9 +76,9 @@ const _TextInput = (props: any) => {
     style.push(styles.container);
     if (context.isGroup) {
       if (isMobile())
-          style.push(Style.verticalGroup);
+          style.push(Style(props.isDarkMode).verticalGroup);
       else
-          style.push(Style.horizontalGroup);
+          style.push(Style(props.isDarkMode).horizontalGroup);
     }
     if (context.isGroup) {
     var container = {
@@ -186,6 +186,61 @@ const _TextInput = (props: any) => {
     }
   }
 
+  const styles = StyleSheet.create({
+    disabled: {
+      color: Color(props.isDarkMode).textTertiary,
+      backgroundColor: Color(props.isDarkMode).holder,
+    },
+    phoneMaskText: {
+      color: Color(props.isDarkMode).textMask
+    },
+    transparentBackground: {
+      backgroundColor: Color(props.isDarkMode).transparent
+    },
+    textBackground: {
+      backgroundColor: Color(props.isDarkMode).white,
+      borderRadius: Radius.default
+    },
+    phoneMask: {
+      color: Color(props.isDarkMode).textSecondary
+    },
+    phoneContainer: {
+      zIndex: -1,
+      position: 'absolute',
+      ...Platform.select({
+        web: {
+          top: 10,
+          left: 11,
+        },
+        android: {
+          top: 8,
+          left: 10,
+        }
+      }),
+    },
+    count: {
+      color: Color(props.isDarkMode).textSecondary
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexDirection: 'row'
+    },
+    text: {
+        gap: 5,
+        display: 'flex',
+        flexDirection: 'row'
+    },
+    error: {
+      color: Color(props.isDarkMode).danger,
+      fontFamily: 'Inter-Bold'
+    },
+    container: {
+      width: '100%',
+    }
+  });
+
   return (
     <View
     style={containerStyle()}
@@ -257,60 +312,5 @@ const _TextInput = (props: any) => {
     </View>
   )
 };
-
-const styles = StyleSheet.create({
-  disabled: {
-    color: Color.textTertiary,
-    backgroundColor: Color.holder,
-  },
-  phoneMaskText: {
-    color: Color.textMask
-  },
-  transparentBackground: {
-    backgroundColor: Color.transparent
-  },
-  textBackground: {
-    backgroundColor: Color.white,
-    borderRadius: Radius.default
-  },
-  phoneMask: {
-    color: Color.textSecondary
-  },
-  phoneContainer: {
-    zIndex: -1,
-    position: 'absolute',
-    ...Platform.select({
-      web: {
-        top: 10,
-        left: 11,
-      },
-      android: {
-        top: 8,
-        left: 10,
-      }
-    }),
-  },
-  count: {
-    color: Color.textSecondary
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexDirection: 'row'
-  },
-  text: {
-      gap: 5,
-      display: 'flex',
-      flexDirection: 'row'
-  },
-  error: {
-    color: Color.danger,
-    fontFamily: 'Inter-Bold'
-  },
-  container: {
-    width: '100%',
-  }
-});
 
 export default _TextInput;

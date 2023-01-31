@@ -13,6 +13,12 @@ const Register = (props: any, {navigation}:any) => {
   const [emailError,setEmailError] = useState(false);
   const [loading,setLoading] = useState(false);
 
+  useEffect(() => {
+    if (props.emailValue) {
+      setDisabled(false);
+    }
+  }, [props.emailValue]);
+
   const backToLogin = () => {
       setMessage('');
       props.setEmail('');
@@ -80,29 +86,31 @@ const Register = (props: any, {navigation}:any) => {
     <View
     style={props.style}>
       <_Text
-      style={[Style.textHuge, Style.boldFont]}
+      style={[Style(props.isDarkMode).textHuge, Style(props.isDarkMode).boldFont]}
       >
         Register
       </_Text>
       <_Text
-      style={[Style.textDefaultTertiary, LoginStyle.actionText]}
+      style={[Style(props.isDarkMode).textDefaultTertiary, LoginStyle(props.isDarkMode).actionText]}
       >
         Create an account with your UCF email
       </_Text>
       {<_TextInput
       label="Email"
-      containerStyle={LoginStyle.inputStyle}
+      containerStyle={LoginStyle(props.isDarkMode).inputStyle}
       onChangeText={(e: any) => {handleChange(e)}}
       value={props.email}
       error={emailError}
       onSubmit={doRegister}
       loading={loading}
       keyboardType='email-address'
+      isDarkMode={props.isDarkMode}
       />}
       <View
-      style={Style.alignRight}
+      style={Style(props.isDarkMode).alignRight}
       >
         <_Button
+        isDarkMode={props.isDarkMode}
         style={props.btnStyle(disabled)}
         onPress={() => doRegister()}
         disabled={disabled}
@@ -112,20 +120,20 @@ const Register = (props: any, {navigation}:any) => {
         </_Button>
       </View>
       <_Text
-      style={LoginStyle.errorMessage}
+      style={LoginStyle(props.isDarkMode).errorMessage}
       >
         {message}
       </_Text>
         <View
-        style={LoginStyle.previousPageText}
+        style={LoginStyle(props.isDarkMode).previousPageText}
         >
         <_Text
-        style={Style.textDefaultTertiary}
+        style={Style(props.isDarkMode).textDefaultTertiary}
         >
           Already have an account?
         </_Text>
         <_Text
-        style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
+        style={[Style(props.isDarkMode).textDefaultDefault, Style(props.isDarkMode).boldFont, LoginStyle(props.isDarkMode).previousPageAction]}
         onPress={() => backToLogin()}
         >Login</_Text>
       </View>

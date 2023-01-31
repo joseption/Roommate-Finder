@@ -42,20 +42,42 @@ const _Button = (props: any) => {
 
     const style = () => {
         var style = [];
-        style.push(Style.button);
+        style.push(Style(props.isDarkMode).button);
         if (!props.style) {
-            style.push(Style.buttonDefault);
+            style.push(Style(props.isDarkMode).buttonDefault);
          }
          else {
             style.push(props.style);
          }
 
          if (props.disabled || props.loading) {
-            style.push(Style.buttonDisabled);
+            style.push(Style(props.isDarkMode).buttonDisabled);
          }
 
          return style;
     }
+
+    const styles = StyleSheet.create({
+        text: {
+            color: Color(props.isDarkMode).actualWhite,
+            fontSize: FontSize.default,
+            margin: 'auto'
+        },
+        textDisabled: {
+            color: Color(props.isDarkMode).textDisabled,
+            fontSize: FontSize.default,
+            margin: 'auto'
+        },
+        contentContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row'
+        },
+        loading: {
+            marginRight: 5
+        }
+    });
 
     return (
     <View
@@ -64,7 +86,7 @@ const _Button = (props: any) => {
         <TouchableHighlight
         disabled={props.disabled || props.loading}
         onPress={() => press()}
-        underlayColor={Color.white}
+        underlayColor={Color(props.isDarkMode).white}
         >
             <View
             style={[styles.contentContainer, style()]}
@@ -72,7 +94,7 @@ const _Button = (props: any) => {
                 {props.loading ?
                 <ActivityIndicator
                     size="small"
-                    color={Color.textDisabled}
+                    color={Color(props.isDarkMode).textDisabled}
                     style={styles.loading}
                 />
                 : null}
@@ -87,27 +109,5 @@ const _Button = (props: any) => {
     </View>
     );
 };
-
-const styles = StyleSheet.create({
-    text: {
-        color: Color.white,
-        fontSize: FontSize.default,
-        margin: 'auto'
-    },
-    textDisabled: {
-        color: Color.textDisabled,
-        fontSize: FontSize.default,
-        margin: 'auto'
-    },
-    contentContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'row'
-    },
-    loading: {
-        marginRight: 5
-    }
-});
 
 export default _Button;

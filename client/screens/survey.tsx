@@ -11,7 +11,6 @@ import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
 import { env, getLocalStorage, authTokenHeader, NavTo, navProp, setLocalStorage } from '../helper';
 import { Style, Color, FontSize, Radius } from '../style';
-import { styles } from './login';
 
 const SurveyScreen = (props: any) => {
     /*
@@ -47,16 +46,16 @@ const SurveyScreen = (props: any) => {
     }, [questions, options, progress, questionId, totalNumber, currentNumber, complete]);
     const errorStyle = () => {
         var style = [];
-        style.push(Style.textDanger);
+        style.push(Style(props.isDarkMode).textDanger);
         if (props.mobile)
-          style.push(Style.errorText);        
+          style.push(Style(props.isDarkMode).errorText);        
         return style;
     }
 
     const containerStyle = () => {
         var padding = 20;
         var borderRadius = Radius.large;
-        var borderColor = Color.border;
+        var borderColor = Color(props.isDarkMode).border;
         var borderWidth = 1;
         var marginTop = 10;
         if (props.mobile) {
@@ -123,6 +122,7 @@ const SurveyScreen = (props: any) => {
                 item={item}
                 key={key}
                 selected={item.id == responseId}
+                isDarkMode={props.isDarkMode}
                 >{item.response}</_SurveyOption>
             })
         }
@@ -189,6 +189,7 @@ const SurveyScreen = (props: any) => {
 
     const getQuestions = async (goto: number, restart: boolean = false, init: boolean = false) => {
         let hasError = false;
+        setError('');
         try
         {   
             let data = await getLocalStorage();
@@ -287,6 +288,7 @@ const SurveyScreen = (props: any) => {
     }
 
     const submit = async (goto: number) => {
+        setError('');
         setLoading(true);
         let hasError = false;
         let obj = {questionId:questionId, responseId:responseId};
@@ -337,6 +339,155 @@ const SurveyScreen = (props: any) => {
             setLoading(false);
         }
     }
+
+    const _styles = StyleSheet.create({
+        finishButton: {
+            marginRight: 5,
+        },
+        error: {
+            paddingTop: 20,
+        },
+        containerStyle: {
+            backgroundColor: Color(props.isDarkMode).defaultLight,
+            padding: 30,
+            margin: 20,
+        },
+        reviewButton: {
+            marginLeft: 8,
+        },
+        reviewButtonContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row',
+        },
+        doneContainer: {
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 20,
+            textAlign: 'center'
+        },
+        doneHeaderText: {
+            fontSize: FontSize.large,
+            fontWeight: 'bold',
+            color: Color(props.isDarkMode).text
+        },
+        doneSubHeaderText: {
+            fontSize: FontSize.default,
+            textAlign: 'center',
+            color: Color(props.isDarkMode).text
+        },
+        loading: {
+            padding: 20,
+            position: 'absolute',
+            right: 95,
+            top: 91,
+        },
+        refreshIconContainer: {
+            padding: 20,
+            position: 'absolute',
+            right: 98,
+            top: 93,
+        },
+        genTextContainer: {
+            position: 'absolute',
+            left: 120,
+            top: 117,
+        },
+        genText: {
+            fontWeight: 'bold'
+        },
+        questionContainer: {
+            minHeight: 300,
+            justifyContent: 'flex-start',
+        },
+        questionCountContainerStyle: {
+            width: '100%',
+            justifyContent: 'flex-end',
+        },
+        btmButtonContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        arrowContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            flexDirection: 'row'
+        },
+        backArrow: {
+            marginRight: 5,
+            ...Platform.select({
+                web: {
+                    outlineStyle: 'none'
+                }
+            })
+        },
+        refreshIcon: {
+            ...Platform.select({
+                web: {
+                    outlineStyle: 'none'
+                }
+            })
+        },
+        separator: {
+            width: "100%",
+            backgroundColor: Color(props.isDarkMode).separator,
+            height: 1,
+            marginTop: 40
+        },
+        groupContainer: {
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            alignItems: 'center',
+        },
+        titleContainer: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            flexDirection: 'row',
+            alignItems: 'center'
+        },
+        container: {
+            backgroundColor: Color(props.isDarkMode).white,
+        },
+        buttonContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            marginTop: 20,
+            marginBottom: 20
+        },
+        optionContainerStyle: {
+            marginTop: 10
+        },
+        title: {
+            fontFamily: 'Inter-SemiBold',
+            fontSize: FontSize.large,
+            color: Color(props.isDarkMode).titleText
+        },
+        questionText: {
+            color: Color(props.isDarkMode).text,
+            paddingBottom: 20,
+            fontSize: FontSize.default,
+            fontWeight: "bold"
+        },
+        questionTextMobile: {
+            fontSize: FontSize.default,
+        },
+        questionCntText: {
+            color: Color(props.isDarkMode).subTitleText,
+            fontSize: FontSize.default,
+            paddingBottom: 10,
+            fontWeight: 'bold'
+        },
+        questionCntTextMobile: {
+            fontSize: FontSize.default,
+            paddingTop: 10
+        }
+    });
     
     return (
     <View>
@@ -348,7 +499,7 @@ const SurveyScreen = (props: any) => {
             >
                 {title()}
             </_Text>
-            <_Progress progress={progress}></_Progress>
+            <_Progress isDarkMode={props.isDarkMode} progress={progress}></_Progress>
         </View>
         <View
         style={[containerStyle(), _styles.container]}
@@ -393,13 +544,13 @@ const SurveyScreen = (props: any) => {
                     >
                         <FontAwesomeIcon 
                         size={20} 
-                        color={Color.textSecondary} 
+                        color={Color(props.isDarkMode).textSecondary} 
                         style={_styles.backArrow} 
                         icon="arrow-left"
                         >
                         </FontAwesomeIcon>
                         <_Text
-                        style={Style.textDefaultSecondary}
+                        style={Style(props.isDarkMode).textDefaultSecondary}
                         >
                             Go Back
                         </_Text>
@@ -412,7 +563,8 @@ const SurveyScreen = (props: any) => {
                     >
                         {reviewMode && nextButton != 'Complete Survey' ?
                         <_Button
-                        style={[Style.buttonDefault, _styles.finishButton]}
+                        isDarkMode={props.isDarkMode}
+                        style={[Style(props.isDarkMode).buttonDefault, _styles.finishButton]}
                         disabled={!canGotoQuestion}
                         onPress={(e: any) => {
                             submit(1);
@@ -424,7 +576,8 @@ const SurveyScreen = (props: any) => {
                         </_Button>
                         : null }
                         <_Button
-                        style={Style.buttonGold}
+                        isDarkMode={props.isDarkMode}
+                        style={Style(props.isDarkMode).buttonGold}
                         disabled={!canGotoQuestion}
                         onPress={(e: any) => submit(1)}
                         loading={loading}
@@ -435,12 +588,12 @@ const SurveyScreen = (props: any) => {
                 </View>
                 {!isLoaded ?
                 <View
-                style={Style.maskPrompt}
+                style={Style(props.isDarkMode).maskPrompt}
                 >
                     <ActivityIndicator
                     size="large"
-                    color={Color.gold}
-                    style={Style.maskLoading}
+                    color={Color(props.isDarkMode).gold}
+                    style={Style(props.isDarkMode).maskLoading}
                     />    
                 </View>
                 : null }
@@ -472,7 +625,7 @@ const SurveyScreen = (props: any) => {
                     {!error ?
                     <ActivityIndicator
                         size="large"
-                        color={Color.white}
+                        color={Color(props.isDarkMode).actualWhite}
                     />
                     :
                     <Pressable
@@ -480,7 +633,7 @@ const SurveyScreen = (props: any) => {
                     >
                         <FontAwesomeIcon 
                             size={30} 
-                            color={Color.white} 
+                            color={Color(props.isDarkMode).white} 
                             icon="refresh"
                             style={_styles.refreshIcon}
                         >
@@ -520,13 +673,15 @@ const SurveyScreen = (props: any) => {
                 style={_styles.reviewButtonContainer}
                 >
                 <_Button
-                        style={Style.buttonDefault}
+                        isDarkMode={props.isDarkMode}
+                        style={Style(props.isDarkMode).buttonDefault}
                         onPress={(e: any) => goToMatches()}
                         >
                             Go to Matches
                 </_Button>
                 <_Button
-                        style={[Style.buttonGold, _styles.reviewButton]}
+                        isDarkMode={props.isDarkMode}
+                        style={[Style(props.isDarkMode).buttonGold, _styles.reviewButton]}
                         onPress={(e: any) => getQuestions(0, true)}
                         >
                             Review Answers
@@ -548,151 +703,5 @@ const SurveyScreen = (props: any) => {
     </View>
     );
 };
-
-const _styles = StyleSheet.create({
-    finishButton: {
-        marginRight: 5,
-    },
-    error: {
-        paddingTop: 20,
-    },
-    containerStyle: {
-        backgroundColor: Color.defaultLight,
-        padding: 30,
-        margin: 20,
-    },
-    reviewButton: {
-        marginLeft: 8,
-    },
-    reviewButtonContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'row',
-    },
-    doneContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 20,
-        textAlign: 'center'
-    },
-    doneHeaderText: {
-        fontSize: FontSize.large,
-        fontWeight: 'bold'
-    },
-    doneSubHeaderText: {
-        fontSize: FontSize.default,
-        textAlign: 'center'
-    },
-    loading: {
-        padding: 20,
-        position: 'absolute',
-        right: 95,
-        top: 91,
-    },
-    refreshIconContainer: {
-        padding: 20,
-        position: 'absolute',
-        right: 98,
-        top: 93,
-    },
-    genTextContainer: {
-        position: 'absolute',
-        left: 120,
-        top: 117,
-    },
-    genText: {
-        fontWeight: 'bold'
-    },
-    questionContainer: {
-        minHeight: 300,
-        justifyContent: 'flex-start',
-    },
-    questionCountContainerStyle: {
-        width: '100%',
-        justifyContent: 'flex-end',
-    },
-    btmButtonContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    arrowContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        flexDirection: 'row'
-    },
-    backArrow: {
-        marginRight: 5,
-        ...Platform.select({
-            web: {
-                outlineStyle: 'none'
-            }
-        })
-    },
-    refreshIcon: {
-        ...Platform.select({
-            web: {
-                outlineStyle: 'none'
-            }
-        })
-    },
-    separator: {
-        width: "100%",
-        backgroundColor: Color.border,
-        height: 1,
-        marginTop: 40
-    },
-    groupContainer: {
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    titleContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    container: {
-        backgroundColor: Color.white,
-    },
-    buttonContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 20,
-        marginBottom: 20
-    },
-    optionContainerStyle: {
-        marginTop: 10
-    },
-    title: {
-        fontFamily: 'Inter-SemiBold',
-        fontSize: FontSize.large
-    },
-    questionText: {
-        color: Color.text,
-        paddingBottom: 20,
-        fontSize: FontSize.default,
-        fontWeight: "bold"
-    },
-    questionTextMobile: {
-        fontSize: FontSize.default,
-    },
-    questionCntText: {
-        color: Color.textSecondary,
-        fontSize: FontSize.default,
-        paddingBottom: 10,
-        fontWeight: 'bold'
-    },
-    questionCntTextMobile: {
-        fontSize: FontSize.default,
-        paddingTop: 10
-    }
-});
 
 export default SurveyScreen;

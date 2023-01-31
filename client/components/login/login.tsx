@@ -166,18 +166,18 @@ const Login = (props: any) => {
     <View
     style={props.style}>
       <_Text
-      style={[Style.textHuge, Style.boldFont]}
+      style={[Style(props.isDarkMode).textHuge, Style(props.isDarkMode).boldFont]}
       >
         Login
       </_Text>
       <_Text
-      style={[Style.textDefaultTertiary, LoginStyle.actionText]}
+      style={[Style(props.isDarkMode).textDefaultTertiary, LoginStyle(props.isDarkMode).actionText]}
       >
         Please sign in to continue
       </_Text>
       <_TextInput
       label="Email"
-      containerStyle={LoginStyle.inputStyle}
+      containerStyle={LoginStyle(props.isDarkMode).inputStyle}
       onChangeText={(e: any) => {handleChange(e, true)}}
       value={email}
       error={emailError}
@@ -185,6 +185,7 @@ const Login = (props: any) => {
       blurOnSubmit={false}
       onSubmit={() => { passwordRef.current?.focus(); }}
       returnKeyType='next'
+      isDarkMode={props.isDarkMode}
       />
       <_TextInput
       type="password"
@@ -194,18 +195,20 @@ const Login = (props: any) => {
       error={passwordError}
       onSubmit={doLogin}
       innerRef={passwordRef}
+      isDarkMode={props.isDarkMode}
       />
       <_Text
-      style={Style.textSmallDefault}
+      style={Style(props.isDarkMode).textSmallDefault}
       onPress={() => props.forgotPasswordPressed()}
-      containerStyle={LoginStyle.rightTextHint}
+      containerStyle={LoginStyle(props.isDarkMode).rightTextHint}
       >
         Forgot Password?
       </_Text>
       <View
-      style={Style.alignRight}
+      style={Style(props.isDarkMode).alignRight}
       >
         <_Button
+        isDarkMode={props.isDarkMode}
         style={props.btnStyle(disabled)}
         onPress={() => doLogin()}
         disabled={disabled}
@@ -215,20 +218,20 @@ const Login = (props: any) => {
         </_Button>
       </View>
       <_Text
-      style={LoginStyle.errorMessage}
+      style={LoginStyle(props.isDarkMode).errorMessage}
       >
         {!message && expired() ? "Your session has expired, please login" : message}
       </_Text>
         <View
-        style={LoginStyle.previousPageText}
+        style={LoginStyle(props.isDarkMode).previousPageText}
         >
           <_Text
-          style={Style.textDefaultTertiary}
+          style={Style(props.isDarkMode).textDefaultTertiary}
           >
             Don't have an account?
           </_Text>
           <_Text
-          style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
+          style={[Style(props.isDarkMode).textDefaultDefault, Style(props.isDarkMode).boldFont, LoginStyle(props.isDarkMode).previousPageAction]}
           onPress={() => goRegister()}
           >
             Sign up

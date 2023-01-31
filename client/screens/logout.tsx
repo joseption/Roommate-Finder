@@ -60,6 +60,17 @@ const LogoutScreen = (props: any) => {
             setMessage("An error occurred while logging out, please reload the page and try again.");
     }
 
+    const styles = StyleSheet.create({
+        text: {
+            fontWeight: "bold",
+            color: Color(props.isDarkMode).textSecondary
+        },
+        textContainer: {
+            justifyContent: "center",
+            padding: 20
+        }
+    });
+
     return (
     <View>
         <_Text
@@ -71,16 +82,5 @@ const LogoutScreen = (props: any) => {
     </View>
     );
 };
-
-export const styles = StyleSheet.create({
-    text: {
-        fontWeight: "bold",
-        color: Color.textSecondary
-    },
-    textContainer: {
-        justifyContent: "center",
-        padding: 20
-    }
-});
 
 export default LogoutScreen;

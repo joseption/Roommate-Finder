@@ -9,9 +9,26 @@ const _DropdownOption = (props: any, {navigation}:any) => {
     /*
     Props: JA TODO 
     */
+
+    const styles = StyleSheet.create({
+        style: {
+            width: '100%',
+            paddingLeft: 10,
+            paddingRight: 10,
+            paddingTop: 10,
+            paddingBottom: 10,
+            fontSize: FontSize.default,
+            color: Color(props.isDarkMode).text
+        },
+        hide: {
+            display: 'none'
+        }
+    });
+      
+
     return (
     <TouchableHighlight
-    underlayColor={Color.default}
+    underlayColor={Color(props.isDarkMode).default}
     onPress={() => props.onPress(props.item)}
     style={props.item.display === 'none' ? styles.hide : null}
     >
@@ -23,21 +40,5 @@ const _DropdownOption = (props: any, {navigation}:any) => {
     </TouchableHighlight>
     );
 };
-
-const styles = StyleSheet.create({
-    style: {
-        width: '100%',
-        paddingLeft: 10,
-        paddingRight: 10,
-        paddingTop: 10,
-        paddingBottom: 10,
-        fontSize: FontSize.default,
-        color: Color.text
-    },
-    hide: {
-        display: 'none'
-    }
-  });
-  
 
 export default _DropdownOption;

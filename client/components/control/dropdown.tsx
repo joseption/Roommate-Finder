@@ -64,7 +64,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
     const labelStyle = () => {
         var style = [];
         if (!props.labelStyle)
-            style.push(Style.labelDefault)
+            style.push(Style(props.isDarkMode).labelDefault)
         else
             style.push(props.labelStyle);
         if (props.error == true)
@@ -75,10 +75,10 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
     const style = () => {
         if (!props.style) {
-            return Style.dropdownDefault;
+            return Style(props.isDarkMode).dropdownDefault;
         }
         else {
-            return [Style.dropdownDefault, props.style];
+            return [Style(props.isDarkMode).dropdownDefault, props.style];
         }
     }
 
@@ -89,9 +89,9 @@ const _Dropdown = (props: any, {navigation}:any) => {
             style.push(styles.containerFocus);
         if (context.isGroup) {
             if (isMobile())
-                style.push(Style.verticalGroup);
+                style.push(Style(props.isDarkMode).verticalGroup);
             else
-                style.push(Style.horizontalGroup);
+                style.push(Style(props.isDarkMode).horizontalGroup);
         }
 
         if (context.isGroup) {
@@ -190,9 +190,9 @@ const _Dropdown = (props: any, {navigation}:any) => {
             var items = props.options.filter((x: any) => {
                 if (x && x.value && x.value.trim().toLowerCase().includes(value.trim().toLowerCase()) || !value) {
                     if (cnt % 2 != 0)
-                        x.background = Color.holder;
+                        x.background = Color(props.isDarkMode).holder;
                     else
-                        x.background = Color.white;
+                        x.background = Color(props.isDarkMode).white;
 
                     x.display = "block";
                     cnt++;
@@ -309,6 +309,102 @@ const _Dropdown = (props: any, {navigation}:any) => {
             return style;
     }
 
+    const styles = StyleSheet.create({
+        closeModalButton: {
+            marginTop: 10,
+        },
+        menuContainer: {
+            ...Platform.select({
+                web: {
+                    position: 'absolute',
+                    width: '100%'
+                }
+            })
+        },
+        menuVoid: {
+            backgroundColor: Color(props.isDarkMode).black,
+            height: '100%',
+            width: '100%'
+        },
+        noResults: {
+            textAlign: 'center',
+            padding: 10,
+            fontSize: FontSize.default,
+            fontFamily: 'Inter-Regular',
+            width: '100%',
+            color: Color(props.isDarkMode).textTertiary
+        },
+        menu: {
+            backgroundColor: Color(props.isDarkMode).white,
+            borderColor: Color(props.isDarkMode).border,
+            borderWidth: 1,
+            width: '100%',
+            maxHeight: 300,
+            borderRadius: Radius.default,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            position: 'absolute',
+            shadowColor: Color(props.isDarkMode).black,
+            shadowOffset: {width: -4, height: 4},
+            shadowOpacity: .15,
+            shadowRadius: 15,
+        },
+        modalMenuContainer: {
+            height: '100%',
+            width: '100%',
+            backgroundColor: Color(props.isDarkMode).holderMask,
+            padding: 20
+        },
+        modalMenu: {
+            backgroundColor: Color(props.isDarkMode).white,
+            borderColor: Color(props.isDarkMode).border,
+            borderWidth: 1,
+            marginTop: 10
+        },
+        text: {
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 5
+        },
+        error: {
+          color: Color(props.isDarkMode).danger,
+          fontFamily: 'Inter-Bold'
+        },
+        icon: {
+            height: 16,
+            width: 16,
+            color: Color(props.isDarkMode).icon,
+            outlineStyle: 'none',
+            marginRight: 2,
+        },
+        iconContainer: {
+            bottom: 0,
+            right: 0,
+            position: 'absolute',
+            height: 40,
+            display: 'flex',
+            justifyContent: 'center',
+            width: 25,
+            alignItems: 'center',
+        },
+        iconContainerMobile: {
+            width: '100%',
+            justifyContent: 'flex-end',
+            flexDirection: 'row',
+            right: 5
+        },
+        content: {
+            position: 'relative'
+        },
+        container: {
+            width: '100%'
+        },
+        containerFocus: {
+            zIndex: 1,
+            elevation: 1
+        },
+      });
+
     return (
     <View
     style={containerStyle()}
@@ -391,8 +487,9 @@ const _Dropdown = (props: any, {navigation}:any) => {
                         {options}
                     </ScrollView>
                     <_Button
+                    isDarkMode={props.isDarkMode}
                     onPress={(e: any) => setFocus(false)}
-                    style={[Style.buttonDanger, styles.closeModalButton]}
+                    style={[Style(props.isDarkMode).buttonDanger, styles.closeModalButton]}
                     >
                         Close
                     </_Button>
@@ -404,103 +501,6 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
     </View>
     );
-};
-
-const styles = StyleSheet.create({
-    closeModalButton: {
-        marginTop: 10,
-    },
-    menuContainer: {
-        ...Platform.select({
-            web: {
-                position: 'absolute',
-                width: '100%'
-            }
-        })
-    },
-    menuVoid: {
-        backgroundColor: Color.black,
-        height: '100%',
-        width: '100%'
-    },
-    noResults: {
-        textAlign: 'center',
-        padding: 10,
-        fontSize: FontSize.default,
-        fontFamily: 'Inter-Regular',
-        width: '100%',
-        color: Color.textTertiary
-    },
-    menu: {
-        backgroundColor: Color.white,
-        borderColor: Color.border,
-        borderWidth: 1,
-        width: '100%',
-        maxHeight: 300,
-        borderRadius: Radius.default,
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        position: 'absolute',
-        shadowColor: Color.black,
-        shadowOffset: {width: -4, height: 4},
-        shadowOpacity: .15,
-        shadowRadius: 15,
-    },
-    modalMenuContainer: {
-        height: '100%',
-        width: '100%',
-        backgroundColor: Color.holderMask,
-        padding: 20
-    },
-    modalMenu: {
-        backgroundColor: Color.white,
-        borderColor: Color.border,
-        borderWidth: 1,
-        marginTop: 10
-    },
-    text: {
-        display: 'flex',
-        flexDirection: 'row',
-        gap: 5
-    },
-    error: {
-      color: Color.danger,
-      fontFamily: 'Inter-Bold'
-    },
-    icon: {
-        height: 16,
-        width: 16,
-        color: Color.icon,
-        outlineStyle: 'none',
-        marginRight: 2,
-    },
-    iconContainer: {
-        bottom: 0,
-        right: 0,
-        position: 'absolute',
-        height: 40,
-        display: 'flex',
-        justifyContent: 'center',
-        width: 25,
-        alignItems: 'center',
-    },
-    iconContainerMobile: {
-        width: '100%',
-        justifyContent: 'flex-end',
-        flexDirection: 'row',
-        right: 5
-    },
-    content: {
-        position: 'relative'
-    },
-    container: {
-        width: '100%'
-    },
-    containerFocus: {
-        zIndex: 1,
-        elevation: 1
-    },
-  });
-  
+}; 
 
 export default _Dropdown;

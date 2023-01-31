@@ -90,11 +90,6 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
                   let res = JSON.parse(await ret.text());
                   if(res.error)
                   {
-                      // if (res.error === "Invalid Email") {
-                      //     setMessage("You must use a valid email address");
-                      //     clearInterval(interval);
-                      // }
-                      // else
                       setMessage(res.error);
                       disableBtn(false);
                   }
@@ -114,31 +109,32 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
     <View
     style={props.style}>
       <_Text
-      style={[Style.textHuge, Style.boldFont]}
+      style={[Style(props.isDarkMode).textHuge, Style(props.isDarkMode).boldFont]}
       >
         {props.autoResend ? "Activation Email Sent" : "Activation Email Resent"}
       </_Text>
       <_Text
-      style={[Style.textDefaultTertiary, LoginStyle.actionText]}
+      style={[Style(props.isDarkMode).textDefaultTertiary, LoginStyle(props.isDarkMode).actionText]}
       >
         Check your email to verify your account
       </_Text>
       <_Text
-      style={LoginStyle.sentText}
+      style={LoginStyle(props.isDarkMode).sentText}
       >
         {sentMsg}
       </_Text>
       <View
-      style={LoginStyle.mainContent}>
+      style={LoginStyle(props.isDarkMode).mainContent}>
         <_Text
-        style={[Style.textSmallSecondary, LoginStyle.resendText]}
+        style={[Style(props.isDarkMode).textSmallSecondary, LoginStyle(props.isDarkMode).resendText]}
         >
             Still haven't received an email yet?
         </_Text>
         <View
-        style={Style.alignRight}
+        style={Style(props.isDarkMode).alignRight}
         >
             <_Button
+            isDarkMode={props.isDarkMode}
             style={[props.btnStyle(disabled), styles.btn]}
             onPress={() => doResendEmail()}
             disabled={disabled}
@@ -148,26 +144,26 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
             </_Button>
         </View>
         <_Text
-        style={[Style.textTinyTertiary, LoginStyle.timerText]}
+        style={[Style(props.isDarkMode).textTinyTertiary, LoginStyle(props.isDarkMode).timerText]}
         >
           {counter}
         </_Text>
         <_Text
-        style={LoginStyle.errorMessage}
+        style={LoginStyle(props.isDarkMode).errorMessage}
         >
             {message}
         </_Text>
       </View>
         <View
-        style={LoginStyle.previousPageText}
+        style={LoginStyle(props.isDarkMode).previousPageText}
         >
         <_Text
-        style={Style.textDefaultTertiary}
+        style={Style(props.isDarkMode).textDefaultTertiary}
         >
           Go back to
         </_Text>
         <_Text
-        style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
+        style={[Style(props.isDarkMode).textDefaultDefault, Style(props.isDarkMode).boldFont, LoginStyle(props.isDarkMode).previousPageAction]}
         onPress={() => goBackRegister()}
         >register</_Text>
       </View>

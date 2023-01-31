@@ -43,6 +43,58 @@ const NavMobileButton = (props: any) => {
             props.navigate(props.navTo);
     }
 
+    const styles = StyleSheet.create({
+        container: {
+            flex: 1,
+            justifyContent: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+        },
+        icon: {
+            height: 23,
+            width: 23,
+            color: Color(props.isDarkMode).icon,
+            marginBottom: 10,
+            outlineStyle: 'none',
+        },
+        iconSelected: {
+            color: Color(props.isDarkMode).gold,
+            height: 23,
+            width: 23,
+            marginBottom: 10,
+            outlineStyle: 'none',
+        },
+        indicator: {
+            width: '100%',
+            borderBottomColor: Color(props.isDarkMode).gold,
+            borderBottomWidth: 2,
+            position: 'absolute',
+            bottom: 0,
+            left: 0
+        },
+        count: {
+            backgroundColor: Color(props.isDarkMode).danger,
+            fontSize: FontSize.tiny,
+            color: Color(props.isDarkMode).actualWhite,
+            borderRadius: Radius.round,
+            display: 'flex',
+            alignItems: 'center',
+            minWidth: 17,
+            justifyContent: 'center',
+            minHeight: 17,
+            textAlign: 'center'
+        },
+        countContainer: {
+            position: 'absolute',
+        },
+        innerCountContainer: {
+            position: 'absolute',
+            top: -23,
+            left: 0
+        }
+    });
+
     return (
     <Pressable
     onPress={() => navigate()}
@@ -69,57 +121,5 @@ const NavMobileButton = (props: any) => {
     </Pressable>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    icon: {
-        height: 23,
-        width: 23,
-        color: Color.icon,
-        marginBottom: 10,
-        outlineStyle: 'none',
-    },
-    iconSelected: {
-        color: Color.gold,
-        height: 23,
-        width: 23,
-        marginBottom: 10,
-        outlineStyle: 'none',
-    },
-    indicator: {
-        width: '100%',
-        borderBottomColor: Color.gold,
-        borderBottomWidth: 2,
-        position: 'absolute',
-        bottom: 0,
-        left: 0
-    },
-    count: {
-        backgroundColor: Color.danger,
-        fontSize: FontSize.tiny,
-        color: Color.white,
-        borderRadius: Radius.round,
-        display: 'flex',
-        alignItems: 'center',
-        minWidth: 17,
-        justifyContent: 'center',
-        minHeight: 17,
-        textAlign: 'center'
-    },
-    countContainer: {
-        position: 'absolute',
-    },
-    innerCountContainer: {
-        position: 'absolute',
-        top: -23,
-        left: 0
-    }
-});
 
 export default NavMobileButton;

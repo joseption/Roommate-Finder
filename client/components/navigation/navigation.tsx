@@ -102,6 +102,150 @@ const Navigation = (props: any) => {
         }
     }
 
+    const styles = StyleSheet.create({
+        nav: {
+            backgroundColor: Color(props.isDarkMode).white,
+            width: '100%',
+            ...Platform.select({
+                web: {
+                    position: 'fixed',
+                }
+            })
+        },
+        logoContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+        },
+        container: {
+            paddingTop: 5,
+            paddingBottom: 5,
+            backgroundColor: Color(props.isDarkMode).white,
+            borderBottomColor: Color(props.isDarkMode).border,
+            borderBottomWidth: 1,
+            display: 'flex',
+            flexDirection: 'column-reverse',
+        },
+        content: {
+            width: Content.width ,
+            margin: 'auto',
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+        },
+        icon: {
+            backgroundColor: Color(props.isDarkMode).imgBackground,
+            height: 40,
+            width: 40,
+            borderRadius: Radius.round,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'relative',
+            marginLeft: 10,
+            ...Platform.select({
+                web: {
+                    outlineStyle: 'none',
+                }
+            }),
+        },
+        userIconContainer: {
+            height: 40,
+            width: 40,
+            overflow: 'hidden',
+            borderRadius: Radius.round,
+            display: 'flex',
+            justifyContent: 'center'
+        },
+        message: {
+            ...Platform.select({
+                web: {
+                    outlineStyle: 'none',
+                }
+            }),
+        },
+        count: {
+            backgroundColor: Color(props.isDarkMode).danger,
+            fontSize: FontSize.tiny,
+            color: Color(props.isDarkMode).actualWhite,
+            padding: 5,
+            borderRadius: Radius.round,
+            maxHeight: 20,
+            display: 'flex',
+            alignItems: 'center',
+            minWidth: 20,
+            justifyContent: 'center',
+            height: 20,
+        },
+        countContainer: {
+            position: 'absolute',
+            top: -3,
+            right: -3
+        },
+        iconContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+        },
+        userIcon: {
+            borderRadius: Radius.round,
+            margin: 'auto',
+            ...Platform.select({
+                web: {
+                outlineStyle: 'none',
+                }
+            }),
+        },
+        menuIcon: {
+            position: 'absolute',
+            bottom: 0,
+            right: -3,
+            padding: 1,
+            backgroundColor: Color(props.isDarkMode).imgBackground,
+            borderRadius: Radius.round,
+            ...Platform.select({
+                web: {
+                outlineStyle: 'none',
+                }
+            }),
+        },
+        mobileContainer: {
+            paddingTop: 10,
+            backgroundColor: Color(props.isDarkMode).contentBackground,
+            borderBottomColor: Color(props.isDarkMode).border,
+            borderBottomWidth: 1,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+        },
+        menu: {
+            backgroundColor: Color(props.isDarkMode).contentBackground,
+            borderColor: Color(props.isDarkMode).border,
+            borderWidth: 1,
+            shadowColor: Color(props.isDarkMode).shadow,
+            shadowOffset: {width: -4, height: 4},
+            shadowOpacity: .15,
+            shadowRadius: 15,
+            padding: 10,
+            borderRadius: Radius.default,
+            width: 'max-content;',
+            position: 'absolute',
+            right: 0
+        },
+        menuVoid: {
+            backgroundColor: Color(props.isDarkMode).black,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            height: '100vh',
+            width: '100vw',
+            margin: -5,
+            opacity: 0
+        },
+        logoContainerStyle: {
+            paddingTop: 5,
+            paddingBottom: 5
+        }
+    });
+
     return (
         <View
         onLayout={(e: any) => setNavLayout(e)}
@@ -114,7 +258,7 @@ const Navigation = (props: any) => {
                 style={styles.content}
                 >
                     <_Image
-                    source={require('../../assets/images/logo.png')}
+                    source={props.isDarkMode ? require('../../assets/images/logo_w.png') : require('../../assets/images/logo.png')}
                     height={30}
                     onPress={() => navigate(NavTo.Home)}
                     pressStyle={styles.logoContainer}
@@ -131,7 +275,7 @@ const Navigation = (props: any) => {
                         >
                             <FontAwesomeIcon
                             size={18}
-                            color={Color.icon}
+                            color={Color(props.isDarkMode).icon}
                             style={styles.message}
                             icon="message"
                             />
@@ -167,7 +311,7 @@ const Navigation = (props: any) => {
                                 }
                             </View>
                             <FontAwesomeIcon
-                            color={Color.icon}
+                            color={Color(props.isDarkMode).icon}
                             size={14}
                             style={styles.menuIcon}
                             icon="caret-down" />
@@ -194,18 +338,21 @@ const Navigation = (props: any) => {
                             icon="user"
                             value="View Profile"
                             navTo={NavTo.Profile}
+                            isDarkMode={props.isDarkMode}
                             />
                             <NavMenuButton
                             navigate={() => setAccount()}
                             icon="edit"
                             value="Edit Account"
                             navTo={NavTo.Account}
+                            isDarkMode={props.isDarkMode}
                             />
                             <NavMenuButton
                             navigate={() => navigate(NavTo.Survey)}
                             icon="poll"
                             value="Take the Survey"
                             navTo={NavTo.Survey}
+                            isDarkMode={props.isDarkMode}
                             />
                             <NavMenuButton
                             navigate={() => {
@@ -215,6 +362,7 @@ const Navigation = (props: any) => {
                             icon="check-double"
                             value="See Matches"
                             navTo={NavTo.Search}
+                            isDarkMode={props.isDarkMode}
                             />
                             <NavMenuButton
                             navigate={() => {
@@ -224,12 +372,14 @@ const Navigation = (props: any) => {
                             icon="globe"
                             value="Explore"
                             navTo={NavTo.Search}
+                            isDarkMode={props.isDarkMode}
                             />
                             <NavMenuButton
                             navigate={() => navigate(NavTo.Listings)}
                             icon="house-flag"
                             value="Room Listings"
                             navTo={NavTo.Listings}
+                            isDarkMode={props.isDarkMode}
                             />
                         </View>
                         : null }
@@ -238,6 +388,7 @@ const Navigation = (props: any) => {
                         icon="sign-out"
                         value="Logout"
                         navTo={NavTo.Logout}
+                        isDarkMode={props.isDarkMode}
                         />
                     </View>
                 </View>
@@ -254,24 +405,28 @@ const Navigation = (props: any) => {
                     icon="user"
                     currentNav={props.navSelector}
                     navTo={NavTo.Account}
+                    isDarkMode={props.isDarkMode}
                     />
                     <NavMobileButton
                     navigate={navigate}
                     icon="poll"
                     currentNav={props.navSelector}
                     navTo={NavTo.Survey}
+                    isDarkMode={props.isDarkMode}
                     />
                     <NavMobileButton
                     navigate={navigate}
                     icon="house-flag"
                     currentNav={props.navSelector}
                     navTo={NavTo.Listings}
+                    isDarkMode={props.isDarkMode}
                     />
                     <NavMobileButton
                     navigate={navigateMobileMatches}
                     icon="check-double"
                     currentNav={props.navSelector}
                     navTo={NavTo.Search}
+                    isDarkMode={props.isDarkMode}
                     />
                     <NavMobileButton
                     navigate={navigate}
@@ -279,6 +434,7 @@ const Navigation = (props: any) => {
                     currentNav={props.navSelector}
                     navTo={NavTo.Messages}
                     count={7}
+                    isDarkMode={props.isDarkMode}
                     />
                 </View>
                 :
@@ -288,149 +444,5 @@ const Navigation = (props: any) => {
         </View>
         );
     };  
-
-    const styles = StyleSheet.create({
-        nav: {
-            backgroundColor: Color.white,
-            width: '100%',
-            ...Platform.select({
-                web: {
-                    position: 'fixed',
-                }
-            })
-        },
-        logoContainer: {
-            display: 'flex',
-            justifyContent: 'center',
-        },
-        container: {
-            paddingTop: 5,
-            paddingBottom: 5,
-            backgroundColor: Color.white,
-            borderBottomColor: Color.border,
-            borderBottomWidth: 1,
-            display: 'flex',
-            flexDirection: 'column-reverse',
-        },
-        content: {
-            width: Content.width ,
-            margin: 'auto',
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between'
-        },
-        icon: {
-            backgroundColor: Color.imgBackground,
-            height: 40,
-            width: 40,
-            borderRadius: Radius.round,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'relative',
-            marginLeft: 10,
-            ...Platform.select({
-                web: {
-                    outlineStyle: 'none',
-                }
-            }),
-        },
-        userIconContainer: {
-            height: 40,
-            width: 40,
-            overflow: 'hidden',
-            borderRadius: Radius.round,
-            display: 'flex',
-            justifyContent: 'center'
-        },
-        message: {
-            ...Platform.select({
-                web: {
-                    outlineStyle: 'none',
-                }
-            }),
-        },
-        count: {
-            backgroundColor: Color.danger,
-            fontSize: FontSize.tiny,
-            color: Color.white,
-            padding: 5,
-            borderRadius: Radius.round,
-            maxHeight: 20,
-            display: 'flex',
-            alignItems: 'center',
-            minWidth: 20,
-            justifyContent: 'center',
-            height: 20,
-        },
-        countContainer: {
-            position: 'absolute',
-            top: -3,
-            right: -3
-        },
-        iconContainer: {
-            display: 'flex',
-            flexDirection: 'row',
-        },
-        userIcon: {
-            borderRadius: Radius.round,
-            margin: 'auto',
-            ...Platform.select({
-                web: {
-                outlineStyle: 'none',
-                }
-            }),
-        },
-        menuIcon: {
-            position: 'absolute',
-            bottom: 0,
-            right: -3,
-            padding: 1,
-            backgroundColor: Color.imgBackground,
-            borderRadius: Radius.round,
-            ...Platform.select({
-                web: {
-                outlineStyle: 'none',
-                }
-            }),
-        },
-        mobileContainer: {
-            paddingTop: 10,
-            backgroundColor: Color.white,
-            borderBottomColor: Color.border,
-            borderBottomWidth: 1,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-        },
-        menu: {
-            backgroundColor: Color.white,
-            borderColor: Color.border,
-            borderWidth: 1,
-            shadowColor: Color.black,
-            shadowOffset: {width: -4, height: 4},
-            shadowOpacity: .15,
-            shadowRadius: 15,
-            padding: 10,
-            borderRadius: Radius.default,
-            width: 'max-content;',
-            position: 'absolute',
-            right: 0
-        },
-        menuVoid: {
-            backgroundColor: Color.black,
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            height: '100vh',
-            width: '100vw',
-            margin: -5,
-            opacity: 0
-        },
-        logoContainerStyle: {
-            paddingTop: 5,
-            paddingBottom: 5
-        }
-    });
 
 export default Navigation;

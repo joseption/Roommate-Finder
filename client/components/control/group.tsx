@@ -50,6 +50,50 @@ const _Group = (props: any, {navigation}:any) => {
         return style;
     }
 
+    const styles = StyleSheet.create({
+        label: {
+            marginBottom: 5,
+        },
+        group: {
+            backgroundColor: Color(props.isDarkMode).holder,
+            display: 'flex',
+            borderRadius: Radius.default,
+        },
+        groupAccent: {
+            padding: 10,
+            shadowColor: Color(props.isDarkMode).holderSecondary,
+            shadowOffset: {width: -3, height: 3},
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            marginLeft: 3,
+            ...Platform.select({
+                web: {
+                    width: 'calc(100% - 3px)'
+                },
+                android: {
+                    marginLeft: 0
+                }
+            })
+        },
+        groupNoBG: {
+            backgroundColor: Color(props.isDarkMode).none,
+        },
+        groupFocus: {
+            zIndex: 1,
+            elevation: 1
+        },
+        horizontal: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingRight: 0,
+        },
+        vertical: {
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            marginTop: 0
+        },
+    });
+
     return (
         <View
         style={containerStyle()}
@@ -72,49 +116,5 @@ const _Group = (props: any, {navigation}:any) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    label: {
-        marginBottom: 5,
-    },
-    group: {
-        backgroundColor: Color.holder,
-        display: 'flex',
-        borderRadius: Radius.default,
-    },
-    groupAccent: {
-        padding: 10,
-        shadowColor: Color.holderSecondary,
-        shadowOffset: {width: -3, height: 3},
-        shadowOpacity: 1,
-        shadowRadius: 0,
-        marginLeft: 3,
-        ...Platform.select({
-            web: {
-                width: 'calc(100% - 3px)'
-            },
-            android: {
-                marginLeft: 0
-            }
-        })
-    },
-    groupNoBG: {
-        backgroundColor: Color.none,
-    },
-    groupFocus: {
-        zIndex: 1,
-        elevation: 1
-    },
-    horizontal: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingRight: 0,
-    },
-    vertical: {
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        marginTop: 0
-    },
-});
 
 export default _Group;

@@ -38,6 +38,12 @@ const _TextInput = (props: any) => {
     if (props.error == true)
       style.push(styles.error);
 
+    if (props.readonly) {
+      style.push({color: Color(props.isDarkMode).disabledText});
+    }
+    else
+      style.push({color: Color(props.isDarkMode).text});
+
     return style;
   }
 
@@ -188,8 +194,8 @@ const _TextInput = (props: any) => {
 
   const styles = StyleSheet.create({
     disabled: {
-      color: Color(props.isDarkMode).textTertiary,
-      backgroundColor: Color(props.isDarkMode).holder,
+      color: Color(props.isDarkMode).disabledText,
+      backgroundColor: Color(props.isDarkMode).disabledTextInput,
     },
     phoneMaskText: {
       color: Color(props.isDarkMode).textMask
@@ -198,11 +204,11 @@ const _TextInput = (props: any) => {
       backgroundColor: Color(props.isDarkMode).transparent
     },
     textBackground: {
-      backgroundColor: Color(props.isDarkMode).white,
+      backgroundColor: Color(props.isDarkMode).input,
       borderRadius: Radius.default
     },
     phoneMask: {
-      color: Color(props.isDarkMode).textSecondary
+      color: Color(props.isDarkMode).maskText
     },
     phoneContainer: {
       zIndex: -1,
@@ -296,6 +302,7 @@ const _TextInput = (props: any) => {
         style={style()}
         onChangeText={(e: any) => onChangeText(e)}
         value={getValue()}
+        placeholderTextColor={Color(props.isDarkMode).placeHolderText}
         placeholder={placeholder()}
         keyboardType={keyboardType()}
         secureTextEntry={props.type === 'password'}

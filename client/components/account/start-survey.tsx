@@ -39,6 +39,7 @@ const StartSurvey = (props: any) => {
     }
 
     const containerStyle = () => {
+        var container = Color(props.isDarkMode).contentBackground;
         var padding = 20;
         var borderRadius = Radius.large;
         var borderColor = Color(props.isDarkMode).border;
@@ -49,6 +50,7 @@ const StartSurvey = (props: any) => {
             borderRadius = 0;
             borderWidth = 0;
             marginTop = 0
+            container = Color(props.isDarkMode).contentBackgroundSecondary;
         }
 
         return {
@@ -56,7 +58,8 @@ const StartSurvey = (props: any) => {
             borderRadius: borderRadius,
             borderColor: borderColor,
             borderWidth: borderWidth,
-            marginTop: marginTop
+            marginTop: marginTop,
+            backgroundColor: container
         }
     }
 
@@ -186,7 +189,8 @@ const StartSurvey = (props: any) => {
             justifyContent: 'center',
             flexDirection: 'row',
             width: '100%',
-            textAlign: 'center'
+            textAlign: 'center',
+            color: Color(props.isDarkMode).text
         },
         innerContainer: {
             display: 'flex',
@@ -219,12 +223,10 @@ const StartSurvey = (props: any) => {
             flexDirection: 'row',
             alignItems: 'center'
         },
-        container: {
-            backgroundColor: Color(props.isDarkMode).white,
-        },
         title: {
             fontFamily: 'Inter-SemiBold',
-            fontSize: FontSize.large
+            fontSize: FontSize.large,
+            color: Color(props.isDarkMode).titleText,
         },
         subtitle: {
             color: Color(props.isDarkMode).textTertiary,
@@ -239,11 +241,11 @@ const StartSurvey = (props: any) => {
         },
         group: {
             maxWidth: Content.width / 2,
-            backgroundColor: Color(props.isDarkMode).holder,
+            backgroundColor: Color(props.isDarkMode).contentDialogBackground,
             display: 'flex',
             borderRadius: Radius.default,
             padding: 40,
-            shadowColor: Color(props.isDarkMode).holderSecondary,
+            shadowColor: Color(props.isDarkMode).contentDialogBackgroundSecondary,
             shadowOffset: {width: -3, height: 3},
             shadowOpacity: 1,
             shadowRadius: 0,
@@ -272,7 +274,7 @@ const StartSurvey = (props: any) => {
             </_Text>
         </View>
         <View
-        style={[containerStyle(), _styles.container]}
+        style={[containerStyle()]}
         >
             <_Text
             style={subTitleStyle()}

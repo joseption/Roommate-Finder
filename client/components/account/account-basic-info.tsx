@@ -79,6 +79,7 @@ const AccountInfo = (props: any) => {
     }
 
     const containerStyle = () => {
+        var container = Color(props.isDarkMode).contentBackground;
         var padding = 20;
         var borderRadius = Radius.large;
         var borderColor = Color(props.isDarkMode).border;
@@ -89,6 +90,7 @@ const AccountInfo = (props: any) => {
             borderRadius = 0;
             borderWidth = 0;
             marginTop = 0
+            container = Color(props.isDarkMode).contentBackgroundSecondary;
         }
 
         return {
@@ -96,7 +98,8 @@ const AccountInfo = (props: any) => {
             borderRadius: borderRadius,
             borderColor: borderColor,
             borderWidth: borderWidth,
-            marginTop: marginTop
+            marginTop: marginTop,
+            backgroundColor: container
         }
     }
 
@@ -214,6 +217,7 @@ const AccountInfo = (props: any) => {
 
     const passwordContainerStyle = () => {
         let style = [];
+        style.push({backgroundColor: !props.isDarkMode ? Color(props.isDarkMode).holderMask : Color(props.isDarkMode).promptMaskMobile});
         style.push(_styles.passwordPromptContainer);
         if (props.mobile) {
             style.push(_styles.passwordPromptContainerMobile);
@@ -464,12 +468,12 @@ const AccountInfo = (props: any) => {
         passwordResetText: {
             fontWeight: 'bold',
             marginBottom: 10,
+            color: Color(props.isDarkMode).text
         },
         spacingLeft: {
             marginLeft: 8,
         },
         passwordPromptContainer: {
-            backgroundColor: Color(props.isDarkMode).holderMask,
             height: '100%',
             width: '100%',
             position: 'absolute',
@@ -563,9 +567,6 @@ const AccountInfo = (props: any) => {
         groupFocus: {
             zIndex: 1,
             elevation: 1
-        },
-        container: {
-            backgroundColor: Color(props.isDarkMode).white,
         },
         title: {
             fontFamily: 'Inter-SemiBold',
@@ -714,7 +715,7 @@ const AccountInfo = (props: any) => {
                 </View>
             </View>
             <View
-            style={[containerStyle(), _styles.container]}
+            style={[containerStyle()]}
             >
                 <_Text
                 style={subTitleStyle()}

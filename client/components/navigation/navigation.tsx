@@ -119,8 +119,8 @@ const Navigation = (props: any) => {
         container: {
             paddingTop: 5,
             paddingBottom: 5,
-            backgroundColor: Color(props.isDarkMode).white,
-            borderBottomColor: Color(props.isDarkMode).border,
+            backgroundColor: Color(props.isDarkMode).contentBackground,
+            borderBottomColor: Color(props.isDarkMode).separator,
             borderBottomWidth: 1,
             display: 'flex',
             flexDirection: 'column-reverse',
@@ -209,7 +209,7 @@ const Navigation = (props: any) => {
         },
         mobileContainer: {
             paddingTop: 10,
-            backgroundColor: Color(props.isDarkMode).contentBackground,
+            backgroundColor: Color(props.isDarkMode).contentBackgroundSecondary,
             borderBottomColor: Color(props.isDarkMode).border,
             borderBottomWidth: 1,
             display: 'flex',

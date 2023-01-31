@@ -331,7 +331,7 @@ export const App = (props: any) => {
     var backgroundColor = Color(isDarkMode).background;
     var marginTop = Platform.OS === 'web' ? navHeight : 0;
     if (mobile) {
-      backgroundColor = Color(isDarkMode).white;
+      backgroundColor = Color(isDarkMode).contentBackgroundSecondary;
     }
 
     var overflow = 'auto';
@@ -390,7 +390,7 @@ export const App = (props: any) => {
     var translate = !mobile ? adjustedPos : 0;
 
     if (mobile) {
-      backgroundColor = Color(isDarkMode).white;
+      backgroundColor = Color(isDarkMode).contentBackgroundSecondary;
       paddingLeft = 10;
       paddingRight = 10;
 
@@ -435,8 +435,9 @@ export const App = (props: any) => {
 
   const MyTheme = () => {
     return {
+      dark: Color(isDarkMode),
       colors: {
-        background: Color(isDarkMode).background
+        background: isMobile() ? Color(isDarkMode).contentBackgroundSecondary : Color(isDarkMode).background
       },
     }
   };

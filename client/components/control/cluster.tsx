@@ -64,13 +64,13 @@ const _Cluster = (props: any) => {
             marginBottom: 5
         },
         cluster: {
-            backgroundColor: Color(props.isDarkMode).holder,
+            backgroundColor: Color(props.isDarkMode).contentHolder,
             display: 'flex',
             flexWrap: 'wrap',
             flexDirection: 'row',
             borderRadius: Radius.default,
             padding: 7.5,
-            shadowColor: Color(props.isDarkMode).holderSecondary,
+            shadowColor: Color(props.isDarkMode).contentHolderSecondary,
             shadowOffset: {width: -3, height: 3},
             shadowOpacity: 1,
             shadowRadius: 0,
@@ -96,6 +96,7 @@ const _Cluster = (props: any) => {
             {props.label ?
             <_Text
             required={props.required}
+            style={{color: Color(props.isDarkMode).text}}
             >
                 {props.label}
             </_Text>

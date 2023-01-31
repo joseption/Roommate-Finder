@@ -89,6 +89,7 @@ const AccountAbout = (props: any) => {
     }
 
     const containerStyle = () => {
+        var container = Color(props.isDarkMode).contentBackground;
         var padding = 20;
         var borderRadius = Radius.large;
         var borderColor = Color(props.isDarkMode).border;
@@ -99,6 +100,7 @@ const AccountAbout = (props: any) => {
             borderRadius = 0;
             borderWidth = 0;
             marginTop = 0
+            container = Color(props.isDarkMode).contentBackgroundSecondary;
         }
 
         return {
@@ -106,7 +108,8 @@ const AccountAbout = (props: any) => {
             borderRadius: borderRadius,
             borderColor: borderColor,
             borderWidth: borderWidth,
-            marginTop: marginTop
+            marginTop: marginTop,
+            backgroundColor: container
         }
     }
 
@@ -257,12 +260,10 @@ const AccountAbout = (props: any) => {
             flexDirection: 'row',
             alignItems: 'center'
         },
-        container: {
-            backgroundColor: Color(props.isDarkMode).white,
-        },
         title: {
             fontFamily: 'Inter-SemiBold',
-            fontSize: FontSize.large
+            fontSize: FontSize.large,
+            color: Color(props.isDarkMode).titleText
         },
         subtitle: {
             color: Color(props.isDarkMode).textTertiary,
@@ -322,7 +323,7 @@ const AccountAbout = (props: any) => {
                 </View>
             </View>
             <View
-            style={[containerStyle(), _styles.container]}
+            style={[containerStyle()]}
             >
                 <_Text
                 style={subTitleStyle()}

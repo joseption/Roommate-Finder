@@ -346,6 +346,15 @@ export const LightStyle = StyleSheet.create({
       top: 0,
       left: 0
   },
+  maskPromptMobile: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: Color(false).promptMaskMobile,
+    position: 'absolute',
+    borderRadius: Radius.large,
+    top: 0,
+    left: 0
+  },
 });
 
 export const LightLoginStyle = StyleSheet.create({
@@ -467,13 +476,24 @@ function LightColor() {
     warningUnderlay: '#e3aa32',
     background:'#F0F2F5',
     contentBackground: '#FFFFFF',
+    contentBackgroundSecondary: '#FFFFFF',
     shadow: '#000000',
     titleText: '#000000',
     subTitleText: '#65676B',
     separator: '#D2D4D9',
     disabledButton: '#D2D4D9',
     disabledButtonSecondary: '#B3B4B9',
-    promptMask: '#F0F2F5BF'
+    promptMask: '#F0F2F5BF',
+    promptMaskMobile: '#F0F2F5BF',
+    contentHolder: '#F0F2F5',
+    contentHolderSecondary: '#E4E6E9',
+    disabledText: '#4B4B4B',
+    disabledTextInput: '#F0F2F5',
+    input: '#FFFFFF',
+    maskText: '#65676B',
+    placeHolderText: '#050505',
+    contentDialogBackground: '#F0F2F5',
+    contentDialogBackgroundSecondary: '#E4E6E9',
   }
 }
 
@@ -796,6 +816,15 @@ export const DarkStyle = StyleSheet.create({
       top: 0,
       left: 0
   },
+  maskPromptMobile: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: Color(true).promptMaskMobile,
+    position: 'absolute',
+    borderRadius: Radius.large,
+    top: 0,
+    left: 0
+  },
 });
 
 export const DarkLoginStyle = StyleSheet.create({
@@ -906,8 +935,8 @@ function DarkColor() {
     goldSecondary: '#d5a445',
     darkgrey: '#383c3b',
     holderMask: '#F0F2F5BF',
-    whiteMask: '#FFFFFFBF',
-    textMask: '#505050',
+    whiteMask: '#141414bf',
+    textMask: '#FFFFFF',
     defaultLight: '#d9e8fe',
     whiteUnderlay: '#FFFFFF30',
     defaultUnderlay: '#66a3fc',
@@ -915,15 +944,26 @@ function DarkColor() {
     successUnderlay: '#76cb84',
     dangerUnderlay: '#e33266',
     warningUnderlay: '#e3aa32',
-    background: '#18191A',
-    contentBackground: '#242526',
+    background: '#141414',
+    contentBackground: '#191919',
+    contentBackgroundSecondary: '#141414',
     shadow: '#000000',
     titleText: '#e7e7e7',
     subTitleText: '#e7e7e7',
     separator: '#3A3B3C',
     disabledButton: '#4E4F50',
     disabledButtonSecondary: '#3A3B3C',
-    promptMask: '#242526b5'
+    promptMask: '#191919bf',
+    promptMaskMobile: '#141414bf',
+    contentHolder: '#1e1e1e',
+    contentHolderSecondary: '#1b1b1b',
+    disabledText: '#777777',
+    disabledTextInput: '#1b1b1b',
+    input: '#242526',
+    maskText: '#888888',
+    placeHolderText: '#888888',
+    contentDialogBackground: '#242526',
+    contentDialogBackgroundSecondary: '#202122',
   }
 }
 

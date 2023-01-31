@@ -53,6 +53,7 @@ const SurveyScreen = (props: any) => {
     }
 
     const containerStyle = () => {
+        var container = Color(props.isDarkMode).contentBackground;
         var padding = 20;
         var borderRadius = Radius.large;
         var borderColor = Color(props.isDarkMode).border;
@@ -63,6 +64,7 @@ const SurveyScreen = (props: any) => {
             borderRadius = 0;
             borderWidth = 0;
             marginTop = 0
+            container = Color(props.isDarkMode).contentBackgroundSecondary;
         }
 
         return {
@@ -70,7 +72,8 @@ const SurveyScreen = (props: any) => {
             borderRadius: borderRadius,
             borderColor: borderColor,
             borderWidth: borderWidth,
-            marginTop: marginTop
+            marginTop: marginTop,
+            backgroundColor: container
         }
     }
 
@@ -340,6 +343,13 @@ const SurveyScreen = (props: any) => {
         }
     }
 
+    const promptMask = () => {
+        if (props.isMobile)
+            return Style(props.isDarkMode).maskPromptMobile;
+        else
+            return Style(props.isDarkMode).maskPrompt;
+    }
+
     const _styles = StyleSheet.create({
         finishButton: {
             marginRight: 5,
@@ -450,9 +460,6 @@ const SurveyScreen = (props: any) => {
             flexDirection: 'row',
             alignItems: 'center'
         },
-        container: {
-            backgroundColor: Color(props.isDarkMode).white,
-        },
         buttonContainer: {
             display: 'flex',
             flexDirection: 'row',
@@ -502,7 +509,7 @@ const SurveyScreen = (props: any) => {
             <_Progress isDarkMode={props.isDarkMode} progress={progress}></_Progress>
         </View>
         <View
-        style={[containerStyle(), _styles.container]}
+        style={[containerStyle()]}
         >
         {!complete ?
         <View>
@@ -588,7 +595,7 @@ const SurveyScreen = (props: any) => {
                 </View>
                 {!isLoaded ?
                 <View
-                style={Style(props.isDarkMode).maskPrompt}
+                style={promptMask()}
                 >
                     <ActivityIndicator
                     size="large"

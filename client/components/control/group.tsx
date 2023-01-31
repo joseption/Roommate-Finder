@@ -53,15 +53,16 @@ const _Group = (props: any, {navigation}:any) => {
     const styles = StyleSheet.create({
         label: {
             marginBottom: 5,
+            color: Color(props.isDarkMode).text
         },
         group: {
-            backgroundColor: Color(props.isDarkMode).holder,
+            backgroundColor: Color(props.isDarkMode).contentHolder,
             display: 'flex',
             borderRadius: Radius.default,
         },
         groupAccent: {
             padding: 10,
-            shadowColor: Color(props.isDarkMode).holderSecondary,
+            shadowColor: Color(props.isDarkMode).contentHolderSecondary,
             shadowOffset: {width: -3, height: 3},
             shadowOpacity: 1,
             shadowRadius: 0,

@@ -192,7 +192,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
                     if (cnt % 2 != 0)
                         x.background = Color(props.isDarkMode).holder;
                     else
-                        x.background = Color(props.isDarkMode).white;
+                        x.background = Color(props.isDarkMode).holderSecondary;
 
                     x.display = "block";
                     cnt++;
@@ -234,6 +234,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
         else {
             var items = fItems.map((item: any, key: any) => {
                 return <_DropdownOption
+                isDarkMode={props.isDarkMode}
                 onPress={(e: any) => select(e)}
                 key={key}
                 item={item} />
@@ -296,6 +297,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
             showSoftInputOnFocus={isWeb}
             caretHidden={!isWeb}
             selectTextOnFocus={isWeb}
+            placeholderTextColor={Color(props.isDarkMode).placeHolderText}
             >
             </TextInput>
     }
@@ -344,7 +346,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
             overflowY: 'auto',
             overflowX: 'hidden',
             position: 'absolute',
-            shadowColor: Color(props.isDarkMode).black,
+            shadowColor: Color(props.isDarkMode).shadow,
             shadowOffset: {width: -4, height: 4},
             shadowOpacity: .15,
             shadowRadius: 15,
@@ -352,7 +354,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
         modalMenuContainer: {
             height: '100%',
             width: '100%',
-            backgroundColor: Color(props.isDarkMode).holderMask,
+            backgroundColor: Color(props.isDarkMode).promptMaskMobile,
             padding: 20
         },
         modalMenu: {

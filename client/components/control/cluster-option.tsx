@@ -27,7 +27,7 @@ const _ClusterOption = (props: any) => {
 
     const styles = StyleSheet.create({
         selectedLabel: {
-            color: Color(props.isDarkMode).white
+            color: Color(props.isDarkMode).actualWhite
         },
         selected: {
             borderColor: Color(props.isDarkMode).gold,
@@ -53,7 +53,7 @@ const _ClusterOption = (props: any) => {
         onPress={() => props.onPress(props.item)}
         >
             <_Text
-            style={selected ? styles.selectedLabel : null}
+            style={selected ? styles.selectedLabel : {color: Color(props.isDarkMode).text}}
             >
                 {props.item}
             </_Text>

@@ -78,6 +78,7 @@ const MessageInput = ({chat, socket}: Props) => {
         onChangeText={setNewMessage}
         onLayout={(e) => setHiddenTextWidth(e.nativeEvent.layout.width)}
         style={[styles.input, {height: height}]}
+        placeholder={'Aa'}
         multiline
       />
       <View style={styles.buttonContainer}>

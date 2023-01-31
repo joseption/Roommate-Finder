@@ -21,6 +21,7 @@ export const Color = {
     borderSecondary:'#B3B4B9',
     holder:'#F0F2F5',
     holderSecondary:'#E4E6E9',
+    holderTertiary:'#CDCFD1',
     imgBackground:'#E4E6EB',
     icon:'#1D1F23',
     grey: '#CDCFD1',
@@ -32,6 +33,7 @@ export const Color = {
     holderMask: '#F0F2F5BF',
     whiteMask: '#FFFFFFBF',
     textMask: '#505050',
+    defaultLight: '#d9e8fe',
 }
 
 export const FontSize = {
@@ -201,6 +203,17 @@ export const Style = StyleSheet.create({
       }
     }),
   },
+  buttonNormal: {
+    backgroundColor: Color.textSecondary,
+    ...Platform.select({
+      web: {
+        shadowColor: Color.textTertiary,
+        shadowOffset: {width: -3, height: 3},
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      }
+    }),
+  },
   buttonDefaultInverted: {
     backgroundColor: Color.none,
     borderColor: Color.default,
@@ -340,7 +353,24 @@ export const Style = StyleSheet.create({
   },
   horizontalGroup: {
       marginRight: 10
-  }
+  },
+  maskLoading: {
+    margin: 'auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%'
+
+  },
+  maskPrompt: {
+      height: '100%',
+      width: '100%',
+      backgroundColor: Color.whiteMask,
+      position: 'absolute',
+      borderRadius: Radius.large,
+      top: 0,
+      left: 0
+  },
 });
 
 export const LoginStyle = StyleSheet.create({
@@ -416,5 +446,5 @@ export const LoginStyle = StyleSheet.create({
     alignItems: 'center',
     gap: 5,
     display: 'flex'
-  }
+  },
 });

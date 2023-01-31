@@ -3,6 +3,8 @@
  */
 
 import { user } from "../types/auth.types";
+import { chatInfo } from "../types/chat.types";
+import { ListingInfo } from "../types/listings.types";
 import { SurveyInfo } from "../types/survey.types";
 import { BioAndTags } from "../types/tags.types";
 import { getAuthSession } from "../utils/storage";
@@ -43,6 +45,15 @@ export async function GetBioAndTags() {
 export async function GetAllUsers() {
   return await doRequest<user[]>(
     `${backend_api}/users/Allprofiles`,
+    null,
+    "GET",
+    true
+  );
+}
+
+export async function GetListings() {
+  return await doRequest<ListingInfo[]>(
+    `${backend_api}/listings/all`,
     null,
     "GET",
     true

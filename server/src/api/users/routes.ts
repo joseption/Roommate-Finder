@@ -491,7 +491,7 @@ router.post('/completeSetup', async (req: Request, res: Response, next: NextFunc
 
 router.post('/updateAllProfile', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { image, first_name, last_name, birthday, phone_number, zip_code, city, state, gender } = req.body;
+    const { imageUri, imageURL, first_name, last_name, birthday, phone_number, zip_code, city, state, gender } = req.body;
     const payload : payload = req.body[0];
     const userId = payload.userId;
 
@@ -500,21 +500,23 @@ router.post('/updateAllProfile', async (req: Request, res: Response, next: NextF
       return res.status(400).json({ Error: 'User not found' });
     }
     //validate image
-    if (!image) {
+    if (!imageUri && !imageURL) {
       return res.status(400).json({ Error: 'Image is required' });
     }
     //check if image is a base64 image
-    if (!/^data:image\/[a-z]+;base64,/.test(image)) {
-      return res.status(400).json({ Error: 'Image should be a base64 image' });
-    }
-    //uploading image to s3 bucket
-    const upload = await uploadImage(image);
-    if (!upload) {
-      return res.status(400).json({ Error: 'Upload failed' });
-    }
-    const update_image = await updateImage(userId, upload);
-    if (!update_image) {
-      return res.status(400).json({ Error: 'Update image failed' });
+    if (imageUri) {
+      if (!/^data:image\/[a-z]+;base64,/.test(imageUri)) {
+        return res.status(400).json({ Error: 'Image should be a base64 image' });
+      }
+      //uploading image to s3 bucket
+      const upload = await uploadImage(imageUri);
+      if (!upload) {
+        return res.status(400).json({ Error: 'Upload failed' });
+      }
+      const update_image = await updateImage(userId, upload);
+      if (!update_image) {
+        return res.status(400).json({ Error: 'Update image failed' });
+      }
     }
     //validate first_name
     if (!first_name) {

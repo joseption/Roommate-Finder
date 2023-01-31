@@ -11,7 +11,7 @@ import _Button from '../control/button';
 import _Image from '../control/image';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import DocumentPicker, {DirectoryPickerResponse, DocumentPickerResponse, isInProgress, types} from 'react-native-document-picker'
-import { AccountScreenType, authTokenHeader, env, navProp, NavTo } from '../../helper';
+import { AccountScreenType, authTokenHeader, env, navProp, NavTo, setLocalStorage } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 
 const StartSurvey = (props: any) => {
@@ -94,7 +94,7 @@ const StartSurvey = (props: any) => {
                 if (res.Error)
                 {
                     if (res.Error == "Un-Authorized") {
-                        navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                        await props.unauthorized();
                         return;
                     }
                     hasError = true;

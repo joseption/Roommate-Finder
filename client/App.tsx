@@ -1,9 +1,9 @@
-import { NavigationContainer, NavigationContainerRef, StackRouter, useLinkProps, useNavigation } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef, StackRouter, useFocusEffect, useLinkProps, useNavigation } from '@react-navigation/native';
 import HomeScreen from './screens/home';
 import { useFonts } from 'expo-font';
 import Navigation from './components/navigation/navigation';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { BackHandler, Dimensions, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import 'react-native-gesture-handler';
 import AccountScreen from './screens/account';
 import ProfileScreen from './screens/profile';
@@ -17,6 +17,7 @@ import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
 import * as DeepLinking from 'expo-linking';
+import { Params } from '@fortawesome/fontawesome-svg-core';
 
 export const App = (props: any) => {
   const [navHeight,setNavHeight] = useState(0);
@@ -39,7 +40,12 @@ export const App = (props: any) => {
   const [scrollY,setScrollY] = useState(0);
   const [navSelector,setNavSelector] = useState('');
   const [verifiedDeepLink,setVerifiedDeepLink] = useState(false);
+  const [isPasswordReset,setIsPasswordReset] = useState(false);
   const [pageVerified,setPageVerified] = useState(false);
+  const [isBackPressed,setIsBackPressed] = useState(false);
+  const [backCount,setBackCount] = useState(0);
+  const [backTimer,setBackTimer] = useState(0);
+  const [loginViewChanged,setLoginViewChanged] = useState('');
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
@@ -49,40 +55,113 @@ export const App = (props: any) => {
 
   useEffect(() => {
     setMobile(isMobile());
-    const subscription = Dimensions.addEventListener(
-      "change",
-      (e) => {
-          setMobile(isMobile());
-      }
-    );
-    if (!verifiedDeepLink && !pageVerified) {
-      DeepLinking.getInitialURL().then(async (link: any) => {
-        if (!initLink) {
-          setInitLink(link);
-          checkDeepLink(link);
-        }
-        else
-          checkDeepLink(initLink);
-      });
-    }
-    else if (pageVerified) {
-      if (verifiedDeepLink)
-        setVerifiedDeepLink(false);
-      else
-        checkSetup();
-    }
-    prepareStyle();   
-    setIsLoaded(true);
+    const dimsChanged = Dimensions.addEventListener("change", (e) => setMobile(isMobile()));
+    const back = BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
-      return () => subscription?.remove();
-  }, [navHeight, adjustedPos, prompt, navSelector, ref.current]);
+    if (!isBackPressed) {
+      if (!verifiedDeepLink && !pageVerified) {
+        DeepLinking.getInitialURL().then(async (link: any) => {
+          if (!initLink) {
+            setInitLink(link);
+            checkDeepLink(link);
+          }
+          else
+            checkDeepLink(initLink);
+        });
+      }
+      else if (pageVerified) {
+        if (verifiedDeepLink)
+          setVerifiedDeepLink(false);
+        else {
+          checkSetup();
+        }
+      }
+      prepareStyle();   
+      setIsLoaded(true);
+    }
+    else {
+      setIsBackPressed(false);
+    }
+  
+    return () => {
+      back.remove();
+      dimsChanged?.remove();
+    }
+  }, [navHeight, adjustedPos, prompt, navSelector, ref.current, backTimer, backCount]);
   
   if (!loaded) {
     return null;
   }
 
+  const onBackPress = () => {
+    setIsBackPressed(true);
+    let current = getRouteName();
+    let name = getPreviousRouteName();
+    if (name) {
+      if (current == NavTo.Login) {
+        let view = getRouteView();
+        if (!view) {
+          BackHandler.exitApp();
+        }
+        else {
+          ref?.current?.goBack();
+          let uView = getRouteView();
+          if (!uView) {
+            uView = 'login'
+          }
+          setLoginViewChanged(uView); 
+        }
+        return true;
+      }
+      setNavSelector(name);
+    }
+    let time = new Date().getTime();
+    if (backTimer == 0 || (time - backTimer) < 250) {
+      if (backCount == 1) {
+        ref.current?.navigate(NavTo.Logout);
+        setBackCount(0);
+        setBackTimer(0);
+      }
+      else {
+        if (backTimer == 0) {
+          setBackTimer(time);
+        }
+        setBackCount(backCount + 1);
+      }
+    }
+    else {
+      setBackCount(1);
+      setBackTimer(time);
+    }
+
+    return false;
+  };
+
   const getRouteName = () => {
     return ref.current?.getCurrentRoute()?.name;
+  }
+
+  const getRouteView = () => {
+    let route = ref.current?.getCurrentRoute();
+    if (route && route.params) {
+      let params = route.params as never;
+      if (params['view'])
+        return params['view'];
+    }
+    return '';
+  }
+
+  const getPreviousRouteName = () => {
+    let routes = ref.current?.getState()?.routes;
+    if (routes) {
+      if (routes.length > 2) {
+        return routes[routes.length - 2].name;
+      }
+      else if (routes.length == 1) {
+        return routes[0].name;
+      }
+    }
+    return NavTo.Profile;
   }
 
   const logout = async () => {
@@ -109,21 +188,27 @@ export const App = (props: any) => {
     {
       // Couldn't log out
     } 
-}
+  }
 
   async function checkDeepLink(link: string) {
     if (ref && ref.current) {
       if (link && link.toLowerCase().includes('/auth')) {
-        var cRoute = DeepLinking.parse(link);
-        var path = cRoute.path?.substring(cRoute.path?.lastIndexOf('/') + 1);
-        if (cRoute?.queryParams)
-          cRoute.queryParams.path = path;
-        await logout();
-        if (!accountAction)
-          setAccountAction(true);
+        if (!isPasswordReset) {
+          setIsPasswordReset(true);
+          var cRoute = DeepLinking.parse(link);
+          var path = cRoute.path?.substring(cRoute.path?.lastIndexOf('/') + 1);
+          if (cRoute?.queryParams)
+            cRoute.queryParams.path = path;
+          await logout();
+          if (!accountAction)
+            setAccountAction(true);
 
-        ref.current?.navigate(NavTo.Login, cRoute.queryParams as never);
-        return;
+          ref.current?.navigate(NavTo.Login, cRoute.queryParams as never);
+          return;
+        }
+        else {
+          setIsPasswordReset(false);
+        }
       }
       else if (!verifiedDeepLink && !pageVerified) {
         setPageVerified(true);
@@ -334,11 +419,20 @@ export const App = (props: any) => {
     return style;
   }
 
+  const checkKeyboardDismiss = () => {
+    if (Platform.OS !== 'web')
+      Keyboard.dismiss();
+  }
+
   return (
     <NavigationContainer
     linking={linking}
     ref={ref}
     >
+      <KeyboardAvoidingView
+      behavior='padding'
+      style={styles.avoidContainer}>
+      <TouchableWithoutFeedback onPress={(e:any) => checkKeyboardDismiss()}>
         <ScrollView
         contentContainerStyle={scrollParentContainerStyle()}
         style={getMainStyle()}
@@ -378,6 +472,9 @@ export const App = (props: any) => {
                   accountAction={accountAction}
                   setAccountAction={setAccountAction}
                   setNavSelector={setNavSelector}
+                  setIsPasswordReset={setIsPasswordReset}
+                  loginViewChanged={loginViewChanged}
+                  setLoginViewChanged={setLoginViewChanged}
                   />}
               </Stack.Screen>
               <Stack.Screen
@@ -393,6 +490,8 @@ export const App = (props: any) => {
               setupStep={setupStep}
               setPrompt={setPrompt}
               scrollY={scrollY}
+              setIsLoggedIn={setIsLoggedIn}
+              setIsSetup={setIsSetup}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -411,6 +510,8 @@ export const App = (props: any) => {
               {(props: any) => <SurveyScreen
               {...props}
               mobile={mobile}
+              setIsLoggedIn={setIsLoggedIn}
+              setIsSetup={setIsSetup}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -456,6 +557,8 @@ export const App = (props: any) => {
             </Stack.Navigator>
           </View>
         </ScrollView>
+        </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
         {Platform.OS === 'web' ?
         <Navigation
         setAccountView={setAccountView}
@@ -471,12 +574,16 @@ export const App = (props: any) => {
         navSelector={navSelector}
         setNavSelector={setNavSelector}
         />
+        
         : null} 
     </NavigationContainer>
   );
 };
 
 const styles = StyleSheet.create({
+  avoidContainer: {
+    flex: 1,
+  },
   stack: {
     width: '100%',
     height: '100%',

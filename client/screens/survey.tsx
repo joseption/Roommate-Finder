@@ -1,17 +1,19 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SectionList } from 'react-navigation';
 import _Button from '../components/control/button';
+import _Image from '../components/control/image';
 import _Progress from '../components/control/progress';
 import _SurveyOption from '../components/control/survey-option';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
-import { env, getLocalStorage, authTokenHeader, NavTo } from '../helper';
+import { env, getLocalStorage, authTokenHeader, NavTo, navProp, setLocalStorage } from '../helper';
 import { Style, Color, FontSize, Radius } from '../style';
 import { styles } from './login';
 
-const SurveyScreen = (props: any, {navigation}:any) => {
+const SurveyScreen = (props: any) => {
     /*
     Joseph: Add all content for the single page view here,
     If you need to make reusable components, create a folder
@@ -31,16 +33,17 @@ const SurveyScreen = (props: any, {navigation}:any) => {
     const [totalNumber,setTotalNumber] = useState(-1);
     const [currentNumber,setCurrentNumber] = useState(-1);
     const [loading,setLoading] = useState(false);
+    const [generating,setGenerating] = useState(false);
     const [complete,setComplete] = useState(false);
-    const [askReview,setAskReview] = useState(true);
+    const [isLoaded,setIsLoaded] = useState(false);
+    const navigation = useNavigation<navProp>();
     
     useEffect(() => {
         if (!init) {
-            getQuestions(0);
+            getQuestions(0, false, true);
             setInit(true);
         }
-    }, [questions, options, progress, questionId, totalNumber, currentNumber]);
-    // JA TODO props.accountIsSetup need to know if the account is setup or not
+    }, [questions, options, progress, questionId, totalNumber, currentNumber, complete]);
     const errorStyle = () => {
         var style = [];
         style.push(Style.textDanger);
@@ -153,13 +156,13 @@ const SurveyScreen = (props: any, {navigation}:any) => {
         setNextButton(next);
     }
 
-    const setupQuestions = (res: any, goto: number = 0, restart: boolean = false) => {
+    const setupQuestions = (res: any, goto: number = 0, restart: boolean = false, init: boolean = false) => {
         let isSet = false;
         let progressCnt = 0;
         setQuestions(res);
 
         if (restart) {
-            setAskReview(false);
+            setComplete(false);
             prepareQuestion(res[0], 0, res.length);
         }
         else if (questionId && goto != 0) {
@@ -187,10 +190,13 @@ const SurveyScreen = (props: any, {navigation}:any) => {
         if (res.length > 0) {
             let percent = Math.ceil((progressCnt / res.length) * 100);
             setProgress(percent);
+            if (init) {
+                setComplete(true);
+            }
         }
     }
 
-    const getQuestions = async (goto: number, restart: boolean = false) => {
+    const getQuestions = async (goto: number, restart: boolean = false, init: boolean = false) => {
         let hasError = false;
         try
         {   
@@ -203,13 +209,13 @@ const SurveyScreen = (props: any, {navigation}:any) => {
                     if (res.Error)
                     {
                         if (res.Error == "Un-Authorized") {
-                            navigation.navigate(NavTo.Login, {timeout: 'yes'});
+                            await unauthorized();
                             return;
                         }
                         hasError = true;
                     }
                     else {
-                        setupQuestions(res, goto, restart);
+                        setupQuestions(res, goto, restart, init);
                     }
                 });
             }
@@ -226,12 +232,64 @@ const SurveyScreen = (props: any, {navigation}:any) => {
             setError('Unable to load survey question, please refresh to try again.');
 
         setLoading(false);
+        setIsLoaded(true);
     }
 
     const generateMatches = async () => {
-        setComplete(true);
+        let hasError = false;
+        setGenerating(true);
+        try
+        {   
+            let data = await getLocalStorage();
+            if (data && data.user) {
+                let obj = {loggedInUserId:data.user.id};
+                let js = JSON.stringify(obj);
+                let tokenHeader = await authTokenHeader();
+                await fetch(`${env.URL}/matches/create`,
+                {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
+                    let res = JSON.parse(await ret.text());
+                    if (res.Error)
+                    {
+                        if (res.Error == "Un-Authorized") {
+                            await unauthorized();
+                            return;
+                        }
+                        hasError = true;
+                    }
+                    else {
+                        navigation.navigate(NavTo.Search, {view: 'matches'} as never);
+                    }
+                });
+            }
+            else {
+                hasError = true;
+            }
+        }
+        catch(e)
+        {
+            hasError = true;
+        } 
+        if (hasError) {
+            setError('A problem occurred while generating your matches, reload the page to try again');
+        }
 
         setLoading(false);
+        setGenerating(false);
+        setComplete(true);
+    }
+
+    const goToMatches = () => {
+        navigation.navigate(NavTo.Search, {view: 'matches'} as never);
+    }
+
+    const unauthorized = async () => {
+        await setLocalStorage(null);
+        props.setIsLoggedIn(false);
+        props.setIsSetup(false);
+        navigation.reset({
+            index: 0,
+            routes: [{name: NavTo.Login, params: {timeout: 'yes'} as never}],
+        });
     }
 
     const submit = async (goto: number) => {
@@ -252,7 +310,7 @@ const SurveyScreen = (props: any, {navigation}:any) => {
                         if (res.Error)
                         {
                             if (res.Error == "Un-Authorized") {
-                                navigation.navigate(NavTo.Login, {timeout: 'yes'} as never);
+                                await unauthorized();
                                 return;
                             }
                             hasError = true;
@@ -260,7 +318,7 @@ const SurveyScreen = (props: any, {navigation}:any) => {
                         else {
                             if (goto == 1 && totalNumber - currentNumber == 0) {
                                 setProgress(100);
-                                generateMatches();
+                                await generateMatches();
                             }
                             else
                                 getQuestions(goto);
@@ -298,9 +356,9 @@ const SurveyScreen = (props: any, {navigation}:any) => {
             </_Text>
             <_Progress progress={progress}></_Progress>
         </View>
-        {askReview ?
-        <View>
         {!complete ?
+        <View>
+        {!generating ?
         <View>
             <View
             style={[containerStyle(), _styles.container]}
@@ -367,6 +425,17 @@ const SurveyScreen = (props: any, {navigation}:any) => {
                         </_Button>
                     </View>
                 </View>
+                {!isLoaded ?
+                <View
+                style={Style.maskPrompt}
+                >
+                    <ActivityIndicator
+                    size="large"
+                    color={Color.gold}
+                    style={Style.maskLoading}
+                    />    
+                </View>
+                : null }
             </View>
         </View>
         :
@@ -376,34 +445,69 @@ const SurveyScreen = (props: any, {navigation}:any) => {
             <_Text
             style={_styles.doneHeaderText}
             >
-                Hang tight
+                We're getting your matches ready!
                 </_Text>
             <_Text
             style={_styles.doneSubHeaderText}
             >
-                We're getting your matches ready!
+                You will be automatically redirected
             </_Text>
-            <ActivityIndicator
-                size="large"
-                color={Color.gold}
-                style={_styles.loading}
-            />
-            <_Text>Comparing matches</_Text>
+            <View
+            style={_styles.genHolder}
+            >
+                <_Image
+                    source={require('../assets/images/matches.png')}
+                    height={300}
+                    containerStyle={_styles.containerStyle}
+                ></_Image>
+                <ActivityIndicator
+                    size="large"
+                    color={Color.white}
+                    style={_styles.loading}
+                />
+                <_Text
+                containerStyle={_styles.genText}
+                >Hang tight...</_Text>
+            </View>
         </View>
         }
         </View>
         :
         <View>
             <View
-            style={[containerStyle(), _styles.container]}
+            style={[containerStyle(), _styles.container, _styles.doneContainer]}
             >
-                <_Text>Screen for...Want to review your survey questions?</_Text>
+                <_Text
+                style={_styles.doneHeaderText}
+                >
+                    Looks like you have some matches!
+                    </_Text>
+                <_Text
+                style={_styles.doneSubHeaderText}
+                >
+                    Would you like to review your responses?
+                </_Text>
+                <_Image
+                    source={require('../assets/images/checklist.png')}
+                    height={300}
+                    containerStyle={_styles.containerStyle}
+                ></_Image>
+                <View
+                style={_styles.reviewButtonContainer}
+                >
                 <_Button
-                        style={Style.buttonGold}
+                        style={Style.buttonDefault}
+                        onPress={(e: any) => goToMatches()}
+                        >
+                            Go to Matches
+                </_Button>
+                <_Button
+                        style={[Style.buttonGold, _styles.reviewButton]}
                         onPress={(e: any) => getQuestions(0, true)}
                         >
                             Review Answers
                 </_Button>
+                </View>
             </View>
         </View>
         }
@@ -421,20 +525,47 @@ const SurveyScreen = (props: any, {navigation}:any) => {
 };
 
 const _styles = StyleSheet.create({
+    genHolder: {
+
+    },
+    containerStyle: {
+        backgroundColor: Color.defaultLight,
+        padding: 30,
+        margin: 20,
+    },
+    reviewButton: {
+        marginLeft: 8,
+    },
+    reviewButtonContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'row',
+    },
     doneContainer: {
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 20
+        marginTop: 20,
+        textAlign: 'center'
     },
     doneHeaderText: {
         fontSize: FontSize.large,
         fontWeight: 'bold'
     },
     doneSubHeaderText: {
-        fontSize: FontSize.default
+        fontSize: FontSize.default,
+        textAlign: 'center'
     },
     loading: {
-        padding: 20
+        padding: 20,
+        position: 'absolute',
+        right: 98,
+        top: 93,
+    },
+    genText: {
+        position: 'absolute',
+        left: 120,
+        top: 120,
     },
     questionContainer: {
         minHeight: 300,

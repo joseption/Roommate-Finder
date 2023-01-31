@@ -7,7 +7,7 @@ import StartSurvey from '../components/account/start-survey';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
-import { AccountScreenType, getLocalStorage, navProp, NavTo } from '../helper';
+import { AccountScreenType, getLocalStorage, navProp, NavTo, setLocalStorage } from '../helper';
 
 const AccountScreen = (props: any) => {
     const navigation = useNavigation<navProp>();
@@ -59,10 +59,6 @@ const AccountScreen = (props: any) => {
     }
 
     const setView = async (type: AccountScreenType) => {
-        let data = await getLocalStorage();
-        if (data && data.user && data.user.setup_step !== "survey" && type == AccountScreenType.survey)
-           type = AccountScreenType.info;
-        // JA TODO need to auto save if user is switching views
         var view = 'info';
         if (type == AccountScreenType.about)
             view = 'about'
@@ -70,6 +66,16 @@ const AccountScreen = (props: any) => {
             view = 'survey'
         props.navigation.navigate(NavTo.Account, {view: view});
         props.setAccountView(type);
+    }
+
+    const unauthorized = async () => {
+        await setLocalStorage(null);
+        props.setIsLoggedIn(false);
+        props.setIsSetup(false);
+        navigation.reset({
+            index: 0,
+            routes: [{name: NavTo.Login, params: {timeout: 'yes'} as never}],
+        });
     }
 
     return (
@@ -83,6 +89,7 @@ const AccountScreen = (props: any) => {
         isSetup={props.isSetup}
         setPrompt={props.setPrompt}
         scrollY={props.scrollY}
+        unauthorized={unauthorized}
         />
         :
         <View>
@@ -93,6 +100,7 @@ const AccountScreen = (props: any) => {
             setError={props.setError}
             setView={(e: any) => setView(e)}
             isSetup={props.isSetup}
+            unauthorized={unauthorized}
             />
             :
             <View>
@@ -103,6 +111,7 @@ const AccountScreen = (props: any) => {
                 setError={props.setError}
                 setView={(e: any) => setView(e)}
                 isSetup={props.isSetup}
+                unauthorized={unauthorized}
                 />
                 : null }
             </View>

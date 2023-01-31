@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { GetSurveryInfo, SurveyOnComplete } from "../../../request/fetch";
-import { UpdateResponse } from "../../../request/mutate";
+import { CreateMatches, UpdateResponse } from "../../../request/mutate";
 import { SurveyInfo } from "../../../types/survey.types";
 import CircularProgress from "../../Feedback/CircularProgress";
 import Button from "../../Inputs/Button";
@@ -66,8 +66,16 @@ export default function QuestionsCard({ className = "" }: Props) {
   const { mutate: mutateComplete, isLoading: isFinshing } = useMutation({
     mutationFn: () => SurveyOnComplete(),
     onSuccess: (data) => {
+      mutateMatches();
       void router.push("/explore");
     },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+
+  const { mutate: mutateMatches, isLoading: isCreatingMatches } = useMutation({
+    mutationFn: () => CreateMatches(),
     onError: (err: Error) => {
       toast.error(err.message);
     },
@@ -139,8 +147,10 @@ export default function QuestionsCard({ className = "" }: Props) {
               {questionNumber === SurveyData.length - 1 ? (
                 <Button
                   onClick={handleOnFinish}
-                  loading={selected ? false : true}
-                  disabled={isFinshing ? true : false}
+                  loading={
+                    isFinshing || isUpdating || isCreatingMatches ? true : false
+                  }
+                  disabled={selected ? false : true}
                 >
                   Finish
                 </Button>

@@ -1,11 +1,12 @@
 import { useState } from "react";
 
+import { Matches } from "../../types/auth.types";
+import { Tags } from "../../types/tags.types";
 import ProfileDialog from "../Dialogs/ProfileDialog";
 import Author from "../Widgets/Author";
 // import ImageDialog from "../Dialogs/ImageDialog";
 import Card from "./Card";
 import CustomImage from "./CustomImage";
-
 interface Props {
   id: string;
   src: string;
@@ -13,7 +14,8 @@ interface Props {
   authorName: string;
   showDialog?: boolean;
   className?: string;
-  tags?: string[];
+  tags?: Tags[] | null;
+  matches?: Matches[] | null;
 }
 
 export default function ProfileCard({
@@ -24,6 +26,7 @@ export default function ProfileCard({
   showDialog = true,
   className = "",
   tags,
+  matches,
 }: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -76,6 +79,11 @@ export default function ProfileCard({
             {/* display alt message if no bio */}
             {bio ? bio : "No bio 🙃"}
           </p>
+          {matches && matches.length > 0 && (
+            <p className="text-center text-lg">
+              Match: {matches[0]?.matchPercentage}%
+            </p>
+          )}
           <Author
             authorName={authorName ? authorName : "No Name 🙃"}
             className={"justify-center"}
@@ -90,6 +98,7 @@ export default function ProfileCard({
         isOpen={isDialogOpen}
         tags={tags}
         onClose={handleDialogClose}
+        matches={matches}
       />
       {/* pop up here */}
     </>

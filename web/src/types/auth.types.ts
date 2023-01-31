@@ -14,6 +14,18 @@ export interface user {
   gender: string | null;
   bio: string | null;
   image: string | null;
+  tags: Tags[] | null;
+  matches: Matches[] | null;
+}
+
+export interface Matches {
+  userOneId: string;
+  userTwoId: string;
+  matchPercentage: number;
+}
+
+export interface Tags {
+  tag: string;
 }
 
 export interface AuthSession {

@@ -3,11 +3,13 @@ import {
   ArrowUpCircleIcon,
 } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion, useAnimation } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MdLibraryAdd } from "react-icons/md";
 
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { transitions } from "../../styles/motion-definitions";
+import { Matches } from "../../types/auth.types";
+import { Tags } from "../../types/tags.types";
 import Button from "../Inputs/Button";
 import ProfileTags from "../Layout/ProfileTags";
 // import AddToCollectionPanel from "../Panels/AddToCollectionPanel";
@@ -22,7 +24,8 @@ interface Props {
   bio: string;
   authorName: string;
   isOpen: boolean;
-  tags: string[];
+  tags?: Tags[] | null;
+  matches?: Matches[] | null;
   onClose: () => void;
 }
 
@@ -33,6 +36,7 @@ export default function ProfileDialog({
   authorName,
   isOpen,
   tags,
+  matches,
   onClose,
 }: Props) {
   //#region Hooks
@@ -42,38 +46,20 @@ export default function ProfileDialog({
     onClose();
   };
 
-  const [slide, setSlide] = useState<string | "Bio" | "Interests">("Bio");
-  const goUp = () => {
-    setSlide("Bio");
-  };
-  const goDown = () => {
-    setSlide("Interests");
-  };
+  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
 
-  const variants = {
-    enter: (direction: number) => {
-      return {
-        y: slide === "Bio" ? 1000 : -1000,
-        opacity: 0,
-      };
-    },
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: number) => {
-      return {
-        zIndex: 0,
-        y: slide === "Interests" ? 1000 : -1000,
-        opacity: 0,
-      };
-    },
-  };
+  useEffect(() => {
+    if (tags && tags.length > 0) {
+      const SelectedTags = tags.map((tagObj) => tagObj.tag);
+      console.log(SelectedTags);
+      setSelectedStyles(SelectedTags);
+    }
+  }, []);
 
   return (
     <StyledDialog isOpen={isOpen} onClose={handleDialogClose}>
       <Card
+        // eslint-disable-next-line tailwindcss/no-custom-classname
         className={
           "relative flex max-h-[90vh] w-full flex-col overflow-hidden bg-mintYellow text-white md:aspect-video md:flex-row"
         }
@@ -122,7 +108,11 @@ export default function ProfileDialog({
               className="flex flex-1 flex-col justify-center gap-2 p-4 md:p-6 lg:gap-4"
             > */}
           <div className="flex flex-1 flex-col justify-center gap-2 p-4 md:p-6 lg:gap-4">
-            <p className="text-lg font-semibold">🔥 Match: 69%</p>
+            {matches && matches.length > 0 && (
+              <p className="text-lg font-semibold">
+                🔥 Match: {matches[0]?.matchPercentage}%
+              </p>
+            )}
 
             <h1 className="px-1 text-left text-5xl font-bold">
               {authorName}, 21
@@ -133,11 +123,13 @@ export default function ProfileDialog({
             <h1 className="px-1 pt-5 text-left text-3xl font-semibold">
               My Interests & Hobbies
             </h1>
-            <ProfileTags
-              styles={tags}
-              selectedStyles={tags}
-              className={"overflow-x-auto px-1"}
-            />
+            {tags && (
+              <ProfileTags
+                styles={selectedStyles}
+                selectedStyles={selectedStyles}
+                className={"overflow-x-auto px-1"}
+              />
+            )}
           </div>
           {/* </motion.div>
           </AnimatePresence> */}

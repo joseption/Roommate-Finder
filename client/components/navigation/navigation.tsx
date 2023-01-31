@@ -304,7 +304,7 @@ const Navigation = (props: any) => {
                                 :
                                 <_Image
                                 style={styles.userIcon}
-                                source={require('../../assets/images/user.png')}
+                                source={props.isDarkMode ? require('../../assets/images/user_w.png') : require('../../assets/images/user.png')}
                                 height={30}
                                 width={30}
                                 />
@@ -404,7 +404,7 @@ const Navigation = (props: any) => {
                     navigate={navigate}
                     icon="user"
                     currentNav={props.navSelector}
-                    navTo={NavTo.Account}
+                    navTo={NavTo.Profile}
                     isDarkMode={props.isDarkMode}
                     />
                     <NavMobileButton

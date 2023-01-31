@@ -55,7 +55,7 @@ export const App = (props: any) => {
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
   useEffect(() => {
-    setIsDarkMode(true);
+    setIsDarkMode(true); // ja temp need to implement user defined dark mode
     setMobile(isMobile());
     const dimsChanged = Dimensions.addEventListener("change", (e) => setMobile(isMobile()));
     const back = BackHandler.addEventListener('hardwareBackPress', onBackPress);
@@ -463,10 +463,10 @@ export const App = (props: any) => {
           <View
           style={styles.stack}
           >
-            <_Button isDarkMode={isDarkMode} onPress={() => setIsDarkMode(!isDarkMode)}>Switch</_Button>
+            {/* <_Button isDarkMode={isDarkMode} onPress={() => setIsDarkMode(!isDarkMode)}>Switch</_Button> */}
             <StatusBar
-              backgroundColor={Color(isDarkMode).white}
-              barStyle="dark-content"
+              backgroundColor={Color(isDarkMode).statusBar}
+              barStyle={isDarkMode ? "light-content" : "dark-content"}
             />
             <Stack.Navigator
             screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle()}}

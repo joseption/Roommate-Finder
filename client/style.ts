@@ -371,7 +371,8 @@ export const LightLoginStyle = StyleSheet.create({
     maxHeight: 150,
     overflowY: 'auto',
     margin: 'auto',
-    width: '100%'
+    width: '100%',
+    marginTop: 40
   },
   previousPageText: {
     display: 'flex',
@@ -494,6 +495,8 @@ function LightColor() {
     placeHolderText: '#050505',
     contentDialogBackground: '#F0F2F5',
     contentDialogBackgroundSecondary: '#E4E6E9',
+    userIcon: '#D2D4D9',
+    statusBar: '#FFFFFF'
   }
 }
 
@@ -841,7 +844,8 @@ export const DarkLoginStyle = StyleSheet.create({
     maxHeight: 150,
     overflowY: 'auto',
     margin: 'auto',
-    width: '100%'
+    width: '100%',
+    marginTop: 40
   },
   previousPageText: {
     display: 'flex',
@@ -964,6 +968,8 @@ function DarkColor() {
     placeHolderText: '#888888',
     contentDialogBackground: '#242526',
     contentDialogBackgroundSecondary: '#202122',
+    userIcon: '#D2D4D9',
+    statusBar: '#141414'
   }
 }
 

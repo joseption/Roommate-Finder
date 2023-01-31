@@ -89,7 +89,7 @@ const _Button = (props: any) => {
         underlayColor={Color(props.isDarkMode).white}
         >
             <View
-            style={[styles.contentContainer, style()]}
+                style={[styles.contentContainer, style()]}
             >
                 {props.loading ?
                 <ActivityIndicator

@@ -734,7 +734,7 @@ const AccountInfo = (props: any) => {
                     >
                         <FontAwesomeIcon
                         style={_styles.newUserIcon}
-                        size={40} color={Color(props.isDarkMode).border}
+                        size={40} color={Color(props.isDarkMode).userIcon}
                         icon="user-plus"
                         >
                         </FontAwesomeIcon>

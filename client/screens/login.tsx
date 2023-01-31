@@ -259,7 +259,7 @@ const LoginScreen = (props:any) => {
 
   const btnStyle = (disabled: boolean) => {
     var style = [];
-    style.push(LoginStyle(props.isDarkMode).submitButton);
+    //style.push(LoginStyle(props.isDarkMode).submitButton);
     if (disabled) {
       style.push(Style(props.isDarkMode).buttonDisabled);
     }
@@ -291,7 +291,7 @@ const LoginScreen = (props:any) => {
 
   const styles = StyleSheet.create({
     passwordPromptContainer: {
-      backgroundColor: Color(props.isDarkMode).holderMask,
+      backgroundColor: Color(props.isDarkMode).promptMaskMobile,
       height: '100%',
       width: '100%',
       position: 'absolute',
@@ -334,6 +334,7 @@ const LoginScreen = (props:any) => {
     padding: 10,
   },
   containerMobile: {
+    backgroundColor: Color(props.isDarkMode).contentBackgroundSecondary,
     paddingLeft:10,
     paddingRight:10,
     paddingTop: 40,
@@ -346,9 +347,9 @@ const LoginScreen = (props:any) => {
     maxWidth:400,
     maxHeight:600,
     borderRadius:Radius.large,
-    borderColor:Color(props.isDarkMode).border,
+    borderColor:Color(props.isDarkMode).contentBackground,
     borderWidth: 1,
-    shadowColor: Color(props.isDarkMode).borderSecondary,
+    shadowColor: Color(props.isDarkMode).holderSecondary,
     shadowOffset: {width: -3, height: 3},
     shadowOpacity: 1,
     shadowRadius: 0,

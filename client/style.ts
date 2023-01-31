@@ -484,7 +484,7 @@ function LightColor() {
     separator: '#D2D4D9',
     disabledButton: '#D2D4D9',
     disabledButtonSecondary: '#B3B4B9',
-    promptMask: '#F0F2F5BF',
+    promptMask: '#FFFFFFBF',
     promptMaskMobile: '#F0F2F5BF',
     contentHolder: '#F0F2F5',
     contentHolderSecondary: '#E4E6E9',

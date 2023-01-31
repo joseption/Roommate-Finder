@@ -1,6 +1,6 @@
 import { useLinkProps, useNavigation } from '@react-navigation/native';
 import React, { useRef } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, TouchableHighlight, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { navProp } from '../../helper';
 import { Color, FontSize, Style } from '../../style';
@@ -30,47 +30,71 @@ const _Button = (props: any) => {
     }
 
     const press = () => {
-        if (props.navigate) {
-            navigation.navigate(props.navigate);
-        }
-        else if (props.onPress) {
-            props.onPress();
+        if (!props.disabled) {
+            if (props.navigate) {
+                navigation.navigate(props.navigate);
+            }
+            else if (props.onPress) {
+                props.onPress();
+            }
         }
     }
 
     const style = () => {
         var style = [];
-        style.push(Style.button);
+        style.push(Style(props.isDarkMode).button);
         if (!props.style) {
-            style.push(Style.buttonDefault);
+            style.push(Style(props.isDarkMode).buttonDefault);
          }
          else {
             style.push(props.style);
          }
 
          if (props.disabled || props.loading) {
-            style.push(Style.buttonDisabled);
+            style.push(Style(props.isDarkMode).buttonDisabled);
          }
 
          return style;
-      }
+    }
+
+    const styles = StyleSheet.create({
+        text: {
+            color: Color(props.isDarkMode).actualWhite,
+            fontSize: FontSize.default,
+            margin: 'auto'
+        },
+        textDisabled: {
+            color: Color(props.isDarkMode).textDisabled,
+            fontSize: FontSize.default,
+            margin: 'auto'
+        },
+        contentContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row'
+        },
+        loading: {
+            marginRight: 5
+        }
+    });
 
     return (
     <View
     style={props.containerStyle}
     >
-        <Pressable
+        <TouchableHighlight
         disabled={props.disabled || props.loading}
-        style={style()}
         onPress={() => press()}
+        underlayColor={Color(props.isDarkMode).white}
         >
             <View
-            style={styles.contentContainer}
+                style={[styles.contentContainer, style()]}
             >
                 {props.loading ?
                 <ActivityIndicator
                     size="small"
-                    color={Color.textDisabled}
+                    color={Color(props.isDarkMode).textDisabled}
                     style={styles.loading}
                 />
                 : null}
@@ -81,31 +105,9 @@ const _Button = (props: any) => {
                     {props.value ? props.value : props.children}
                 </_Text>
             </View>
-        </Pressable>
+        </TouchableHighlight>
     </View>
     );
 };
-
-const styles = StyleSheet.create({
-    text: {
-        color: Color.white,
-        fontSize: FontSize.default,
-        margin: 'auto'
-    },
-    textDisabled: {
-        color: Color.textDisabled,
-        fontSize: FontSize.default,
-        margin: 'auto'
-    },
-    contentContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'row'
-    },
-    loading: {
-        marginRight: 5
-    }
-});
 
 export default _Button;

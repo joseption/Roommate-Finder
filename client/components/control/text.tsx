@@ -18,7 +18,7 @@ const _Text = (props: any) => {
   const navigation = useNavigation<navProp>();
   const style = () => {
     var style = [];
-    style.push(Style.textDefault);
+    style.push(Style(props.isDarkMode).textDefault);
     if (props.style)
       style.push(props.style);
     if (props.error)
@@ -44,6 +44,18 @@ const _Text = (props: any) => {
       return props.errorMessage;
     }
   }
+
+  const styles = StyleSheet.create({
+    text: {
+        gap: 5,
+        display: 'flex',
+        flexDirection: 'row'
+    },
+    error: {
+      color: Color(props.isDarkMode).danger
+    }
+  });
+  
 
   return (
     <View
@@ -107,16 +119,5 @@ const _Text = (props: any) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  text: {
-      gap: 5,
-      display: 'flex',
-      flexDirection: 'row'
-  },
-  error: {
-    color: Color.danger
-  }
-});
 
 export default _Text;

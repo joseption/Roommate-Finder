@@ -21,20 +21,21 @@ const PasswordUpdated = (props: any) => {
     <View
     style={props.style}>
       <_Text
-      style={[Style.textHuge, Style.boldFont]}
+      style={[Style(props.isDarkMode).textHuge, Style(props.isDarkMode).boldFont]}
       >
         Password Updated
       </_Text>
       <_Text
-      style={[Style.textDefaultTertiary, LoginStyle.actionText]}
+      style={[Style(props.isDarkMode).textDefaultTertiary, LoginStyle(props.isDarkMode).actionText]}
       >
         Your password has been updated
       </_Text>
         <View
-        style={Style.alignRight}
+        style={Style(props.isDarkMode).alignRight}
         >
             <_Button
-            style={[Style.buttonDefault, LoginStyle.submitButton]}
+            isDarkMode={props.isDarkMode}
+            style={[Style(props.isDarkMode).buttonDefault, LoginStyle(props.isDarkMode).submitButton]}
             onPress={() => loginPressed()}
             >
             Back to Login

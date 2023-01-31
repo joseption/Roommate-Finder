@@ -20,9 +20,9 @@ const StartSurvey = (props: any) => {
     const navigation = useNavigation<navProp>();
     const errorStyle = () => {
         var style = [];
-        style.push(Style.textDanger);
+        style.push(Style(props.isDarkMode).textDanger);
         if (props.mobile)
-          style.push(Style.errorText);        
+          style.push(Style(props.isDarkMode).errorText);        
         return style;
     }
 
@@ -30,18 +30,19 @@ const StartSurvey = (props: any) => {
         var style = [];
         style.push(_styles.error);
         if (props.mobile) {
-            style.push(Style.errorMsgMobile);
+            style.push(Style(props.isDarkMode).errorMsgMobile);
         }
         else {
-            style.push(Style.errorMsg);
+            style.push(Style(props.isDarkMode).errorMsg);
         }
         return style;
     }
 
     const containerStyle = () => {
+        var container = Color(props.isDarkMode).contentBackground;
         var padding = 20;
         var borderRadius = Radius.large;
-        var borderColor = Color.border;
+        var borderColor = Color(props.isDarkMode).border;
         var borderWidth = 1;
         var marginTop = 10;
         if (props.mobile) {
@@ -49,6 +50,7 @@ const StartSurvey = (props: any) => {
             borderRadius = 0;
             borderWidth = 0;
             marginTop = 0
+            container = Color(props.isDarkMode).contentBackgroundSecondary;
         }
 
         return {
@@ -56,7 +58,8 @@ const StartSurvey = (props: any) => {
             borderRadius: borderRadius,
             borderColor: borderColor,
             borderWidth: borderWidth,
-            marginTop: marginTop
+            marginTop: marginTop,
+            backgroundColor: container
         }
     }
 
@@ -100,6 +103,7 @@ const StartSurvey = (props: any) => {
                     hasError = true;
                 }
                 else {
+                    props.setIsSetup(true);
                     if (gotoSurvey) {
                         navigation.navigate(NavTo.Survey);
                     }
@@ -123,8 +127,143 @@ const StartSurvey = (props: any) => {
         props.setView(AccountScreenType.about);
     }
 
+    const _styles = StyleSheet.create({
+        innerGroup: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            ...Platform.select({
+                android: {
+                    width: '100%'
+                }
+            })
+        },
+        searchToggle: {
+            color: Color(props.isDarkMode).default,
+            fontFamily: 'Inter-SemiBold'
+        },
+        arrowContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            flexDirection: 'row'
+        },
+        backArrow: {
+            marginRight: 5,
+            ...Platform.select({
+                web: {
+                    outlineStyle: 'none'
+                }
+            })
+        },
+        options: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            flexDirection: 'row',
+            margin: 'auto',
+            marginTop: 20,
+            alignItems: 'center',
+            width: '100%',
+        },
+        groupContainer: {
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            alignItems: 'center'
+        },
+        surveyButton: {
+            fontSize: FontSize.large,
+            width: 200,
+        },
+        surveyButtonContainer: {
+            justifyContent: 'center',
+            display: 'flex',
+            flexDirection: 'row'
+        },
+        surveyButtonText: {
+            fontSize: FontSize.huge,
+            fontFamily: 'Inter-Bold'
+        },
+        surveyText: {
+            display: 'flex',
+            justifyContent: 'center',
+            flexDirection: 'row',
+            width: '100%',
+            textAlign: 'center',
+            color: Color(props.isDarkMode).text
+        },
+        innerContainer: {
+            display: 'flex',
+            justifyContent: 'center'
+        },
+        innerGap: {
+            marginBottom: 80
+        },
+        tipText: {
+            color: Color(props.isDarkMode).textSecondary,
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            width: '100%'
+        },
+        formGap: {
+            marginBottom: 20
+        },
+        buttonContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            marginTop: 20,
+            marginBottom: 20,
+        },
+        titleContainer: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            flexDirection: 'row',
+            alignItems: 'center'
+        },
+        title: {
+            fontFamily: 'Inter-SemiBold',
+            fontSize: FontSize.large,
+            color: Color(props.isDarkMode).titleText,
+        },
+        subtitle: {
+            color: Color(props.isDarkMode).textTertiary,
+            paddingBottom: 20,
+            fontSize: FontSize.large
+        },
+        subTitleMobile: {
+            fontSize: FontSize.default
+        },
+        error: {
+            marginTop: 40
+        },
+        group: {
+            maxWidth: Content.width / 2,
+            backgroundColor: Color(props.isDarkMode).contentDialogBackground,
+            display: 'flex',
+            borderRadius: Radius.default,
+            padding: 40,
+            shadowColor: Color(props.isDarkMode).contentDialogBackgroundSecondary,
+            shadowOffset: {width: -3, height: 3},
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            marginLeft: 3,
+            ...Platform.select({
+                android: {
+                    marginLeft: 0,
+                    width: '100%',
+                    padding: 30,
+                }
+            })
+        },
+    });
+
     return (
-    <ScrollView>
+    <ScrollView
+    keyboardShouldPersistTaps={'handled'}
+    >
         <View
         style={_styles.titleContainer}
         >
@@ -135,7 +274,7 @@ const StartSurvey = (props: any) => {
             </_Text>
         </View>
         <View
-        style={[containerStyle(), _styles.container]}
+        style={[containerStyle()]}
         >
             <_Text
             style={subTitleStyle()}
@@ -161,10 +300,11 @@ const StartSurvey = (props: any) => {
                                 Find your ideal roommates by taking the survey. Get better matches by answering more questions.
                             </_Text>
                             <_Button
-                            style={[Style.buttonDefault, _styles.surveyButton, _styles.innerGap]}
+                            style={[Style(props.isDarkMode).buttonDefault, _styles.surveyButton, _styles.innerGap]}
                             textStyle={ _styles.surveyButtonText}
                             containerStyle={_styles.surveyButtonContainer}
                             onPress={(e: any) => completeSetup(true)}
+                            isDarkMode={props.isDarkMode}
                             >
                                 Start Survey
                             </_Button>
@@ -184,10 +324,11 @@ const StartSurvey = (props: any) => {
                                 If you decide to answer questions later, you can access the survey from the navigation menu.
                             </_Text>
                             <_Button
-                            style={[Style.buttonGold, _styles.surveyButton, _styles.innerGap]}
+                            style={[Style(props.isDarkMode).buttonGold, _styles.surveyButton, _styles.innerGap]}
                             textStyle={ _styles.surveyButtonText}
                             containerStyle={_styles.surveyButtonContainer}
                             onPress={(e: any) => completeSetup(false)}
+                            isDarkMode={props.isDarkMode}
                             >
                                 Explore
                             </_Button>
@@ -208,13 +349,13 @@ const StartSurvey = (props: any) => {
                         >
                             <FontAwesomeIcon 
                             size={20} 
-                            color={Color.textSecondary} 
+                            color={Color(props.isDarkMode).textSecondary} 
                             style={_styles.backArrow} 
                             icon="arrow-left"
                             >
                             </FontAwesomeIcon>
                             <_Text
-                            style={Style.textDefaultSecondary}
+                            style={Style(props.isDarkMode).textDefaultSecondary}
                             >
                                 Go Back
                             </_Text>
@@ -249,139 +390,5 @@ const StartSurvey = (props: any) => {
     </ScrollView>
     );
 };
-
-const _styles = StyleSheet.create({
-    innerGroup: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        ...Platform.select({
-            android: {
-                width: '100%'
-            }
-        })
-    },
-    searchToggle: {
-        color: Color.default,
-        fontFamily: 'Inter-SemiBold'
-    },
-    arrowContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        flexDirection: 'row'
-    },
-    backArrow: {
-        marginRight: 5,
-        ...Platform.select({
-            web: {
-                outlineStyle: 'none'
-            }
-        })
-    },
-    options: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        flexDirection: 'row',
-        margin: 'auto',
-        marginTop: 20,
-        alignItems: 'center',
-        width: '100%',
-    },
-    groupContainer: {
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        alignItems: 'center'
-    },
-    surveyButton: {
-        fontSize: FontSize.large,
-        width: 200,
-    },
-    surveyButtonContainer: {
-        justifyContent: 'center',
-        display: 'flex',
-        flexDirection: 'row'
-    },
-    surveyButtonText: {
-        fontSize: FontSize.huge,
-        fontFamily: 'Inter-Bold'
-    },
-    surveyText: {
-        display: 'flex',
-        justifyContent: 'center',
-        flexDirection: 'row',
-        width: '100%',
-        textAlign: 'center'
-    },
-    innerContainer: {
-        display: 'flex',
-        justifyContent: 'center'
-    },
-    innerGap: {
-        marginBottom: 80
-    },
-    tipText: {
-        color: Color.textSecondary,
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        width: '100%'
-    },
-    formGap: {
-        marginBottom: 20
-    },
-    buttonContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 20,
-        marginBottom: 20,
-    },
-    titleContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    container: {
-        backgroundColor: Color.white,
-    },
-    title: {
-        fontFamily: 'Inter-SemiBold',
-        fontSize: FontSize.large
-    },
-    subtitle: {
-        color: Color.textTertiary,
-        paddingBottom: 20,
-        fontSize: FontSize.large
-    },
-    subTitleMobile: {
-        fontSize: FontSize.default
-    },
-    error: {
-        marginTop: 40
-    },
-    group: {
-        maxWidth: Content.width / 2,
-        backgroundColor: Color.holder,
-        display: 'flex',
-        borderRadius: Radius.default,
-        padding: 40,
-        shadowColor: Color.holderSecondary,
-        shadowOffset: {width: -3, height: 3},
-        shadowOpacity: 1,
-        shadowRadius: 0,
-        marginLeft: 3,
-        ...Platform.select({
-            android: {
-                marginLeft: 0,
-                width: '100%',
-                padding: 30,
-            }
-        })
-    },
-});
 
 export default StartSurvey;

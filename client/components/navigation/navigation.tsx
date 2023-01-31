@@ -102,196 +102,9 @@ const Navigation = (props: any) => {
         }
     }
 
-    return (
-        <View
-        onLayout={(e: any) => setNavLayout(e)}
-        style={styles.nav}
-        >
-            {!props.mobile ?
-            <View
-            style={styles.container}>
-                <View
-                style={styles.content}
-                >
-                    <_Image
-                    source={require('../../assets/images/logo.png')}
-                    height={30}
-                    onPress={() => navigate(NavTo.Home)}
-                    pressStyle={styles.logoContainer}
-                    containerStyle={styles.logoContainerStyle}
-                    />
-                    {visible ?
-                    <View
-                    style={styles.iconContainer}
-                    >
-                        {props.isSetup ?
-                        <Pressable
-                        onPress={() => navigate(NavTo.Messages)}
-                        style={styles.icon}
-                        >
-                            <FontAwesomeIcon
-                            size={18}
-                            color={Color.icon}
-                            style={styles.message}
-                            icon="message"
-                            />
-                            <_Text
-                            containerStyle={styles.countContainer}
-                            style={styles.count}
-                            >
-                                7
-                            </_Text>
-                        </Pressable>
-                        : null }
-                        <Pressable
-                        onPress={() => toggleMenu()}
-                        style={styles.icon}
-                        >
-                            <View
-                            style={styles.userIconContainer}
-                            >
-                                {image ?
-                                <_Image
-                                style={styles.userIcon}
-                                source={image}
-                                height={40}
-                                width={40}
-                                />
-                                :
-                                <_Image
-                                style={styles.userIcon}
-                                source={require('../../assets/images/user.png')}
-                                height={30}
-                                width={30}
-                                />
-                                }
-                            </View>
-                            <FontAwesomeIcon
-                            color={Color.icon}
-                            size={14}
-                            style={styles.menuIcon}
-                            icon="caret-down" />
-                        </Pressable>
-                    </View>
-                    :
-                    null
-                    }
-                </View>
-                {showMenu ?
-                <View>
-                    <Pressable
-                    onPress={() => setShowMenu(false)}
-                    style={styles.menuVoid}
-                    >
-                    </Pressable>
-                    <View
-                    style={getMenuStyle()}
-                    >
-                        {props.isSetup ?
-                        <View>
-                            <NavMenuButton
-                            navigate={() => navigate(NavTo.Profile)}
-                            icon="user"
-                            value="View Profile"
-                            navTo={NavTo.Profile}
-                            />
-                            <NavMenuButton
-                            navigate={() => setAccount()}
-                            icon="edit"
-                            value="Edit Account"
-                            navTo={NavTo.Account}
-                            />
-                            <NavMenuButton
-                            navigate={() => navigate(NavTo.Survey)}
-                            icon="poll"
-                            value="Take the Survey"
-                            navTo={NavTo.Survey}
-                            />
-                            <NavMenuButton
-                            navigate={() => {
-                                navigate(NavTo.Search, {view: 'matches'});
-                                props.setIsMatches(true)}
-                            }
-                            icon="check-double"
-                            value="See Matches"
-                            navTo={NavTo.Search}
-                            />
-                            <NavMenuButton
-                            navigate={() => {
-                                navigate(NavTo.Search);
-                                props.setIsMatches(false)}
-                            }
-                            icon="globe"
-                            value="Explore"
-                            navTo={NavTo.Search}
-                            />
-                            <NavMenuButton
-                            navigate={() => navigate(NavTo.Listings)}
-                            icon="house-flag"
-                            value="Room Listings"
-                            navTo={NavTo.Listings}
-                            />
-                        </View>
-                        : null }
-                        <NavMenuButton
-                        navigate={() => navigate(NavTo.Logout)}
-                        icon="sign-out"
-                        value="Logout"
-                        navTo={NavTo.Logout}
-                        />
-                    </View>
-                </View>
-                : null}
-            </View>
-            :
-            <View>
-            {props.isSetup && visible ?
-                <View
-                style={styles.mobileContainer}
-                >
-                    <NavMobileButton
-                    navigate={navigate}
-                    icon="user"
-                    currentNav={props.navSelector}
-                    navTo={NavTo.Profile}
-                    />
-                    <NavMobileButton
-                    navigate={navigate}
-                    icon="poll"
-                    currentNav={props.navSelector}
-                    navTo={NavTo.Survey}
-                    />
-                    <NavMobileButton
-                    navigate={navigate}
-                    icon="house-flag"
-                    currentNav={props.navSelector}
-                    navTo={NavTo.Listings}
-                    />
-                    <NavMobileButton
-                    navigate={navigateMobileMatches}
-                    icon="check-double"
-                    currentNav={props.navSelector}
-                    navTo={NavTo.Search}
-                    />
-                    <NavMobileButton
-                    navigate={navigate}
-                    icon="message"
-                    currentNav={props.navSelector}
-                    navTo={NavTo.Messages}
-                    count={7}
-                    />
-                </View>
-                :
-                null }
-            </View>
-            }   
-        </View>
-        );
-    };  
-
     const styles = StyleSheet.create({
         nav: {
-            backgroundColor: Color.white,
+            backgroundColor: Color(props.isDarkMode).white,
             width: '100%',
             ...Platform.select({
                 web: {
@@ -306,8 +119,8 @@ const Navigation = (props: any) => {
         container: {
             paddingTop: 5,
             paddingBottom: 5,
-            backgroundColor: Color.white,
-            borderBottomColor: Color.border,
+            backgroundColor: Color(props.isDarkMode).contentBackground,
+            borderBottomColor: Color(props.isDarkMode).separator,
             borderBottomWidth: 1,
             display: 'flex',
             flexDirection: 'column-reverse',
@@ -320,7 +133,7 @@ const Navigation = (props: any) => {
             justifyContent: 'space-between'
         },
         icon: {
-            backgroundColor: Color.imgBackground,
+            backgroundColor: Color(props.isDarkMode).imgBackground,
             height: 40,
             width: 40,
             borderRadius: Radius.round,
@@ -351,9 +164,9 @@ const Navigation = (props: any) => {
             }),
         },
         count: {
-            backgroundColor: Color.danger,
+            backgroundColor: Color(props.isDarkMode).danger,
             fontSize: FontSize.tiny,
-            color: Color.white,
+            color: Color(props.isDarkMode).actualWhite,
             padding: 5,
             borderRadius: Radius.round,
             maxHeight: 20,
@@ -386,7 +199,7 @@ const Navigation = (props: any) => {
             bottom: 0,
             right: -3,
             padding: 1,
-            backgroundColor: Color.imgBackground,
+            backgroundColor: Color(props.isDarkMode).imgBackground,
             borderRadius: Radius.round,
             ...Platform.select({
                 web: {
@@ -396,18 +209,18 @@ const Navigation = (props: any) => {
         },
         mobileContainer: {
             paddingTop: 10,
-            backgroundColor: Color.white,
-            borderBottomColor: Color.border,
+            backgroundColor: Color(props.isDarkMode).contentBackgroundSecondary,
+            borderBottomColor: Color(props.isDarkMode).border,
             borderBottomWidth: 1,
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'space-around',
         },
         menu: {
-            backgroundColor: Color.white,
-            borderColor: Color.border,
+            backgroundColor: Color(props.isDarkMode).contentBackground,
+            borderColor: Color(props.isDarkMode).border,
             borderWidth: 1,
-            shadowColor: Color.black,
+            shadowColor: Color(props.isDarkMode).shadow,
             shadowOffset: {width: -4, height: 4},
             shadowOpacity: .15,
             shadowRadius: 15,
@@ -418,7 +231,7 @@ const Navigation = (props: any) => {
             right: 0
         },
         menuVoid: {
-            backgroundColor: Color.black,
+            backgroundColor: Color(props.isDarkMode).black,
             position: 'absolute',
             top: 0,
             left: 0,
@@ -432,5 +245,204 @@ const Navigation = (props: any) => {
             paddingBottom: 5
         }
     });
+
+    return (
+        <View
+        onLayout={(e: any) => setNavLayout(e)}
+        style={styles.nav}
+        >
+            {!props.mobile ?
+            <View
+            style={styles.container}>
+                <View
+                style={styles.content}
+                >
+                    <_Image
+                    source={props.isDarkMode ? require('../../assets/images/logo_w.png') : require('../../assets/images/logo.png')}
+                    height={30}
+                    onPress={() => navigate(NavTo.Home)}
+                    pressStyle={styles.logoContainer}
+                    containerStyle={styles.logoContainerStyle}
+                    />
+                    {visible ?
+                    <View
+                    style={styles.iconContainer}
+                    >
+                        {props.isSetup ?
+                        <Pressable
+                        onPress={() => navigate(NavTo.Messages)}
+                        style={styles.icon}
+                        >
+                            <FontAwesomeIcon
+                            size={18}
+                            color={Color(props.isDarkMode).icon}
+                            style={styles.message}
+                            icon="message"
+                            />
+                            <_Text
+                            containerStyle={styles.countContainer}
+                            style={styles.count}
+                            >
+                                7
+                            </_Text>
+                        </Pressable>
+                        : null }
+                        <Pressable
+                        onPress={() => toggleMenu()}
+                        style={styles.icon}
+                        >
+                            <View
+                            style={styles.userIconContainer}
+                            >
+                                {image ?
+                                <_Image
+                                style={styles.userIcon}
+                                source={image}
+                                height={40}
+                                width={40}
+                                />
+                                :
+                                <_Image
+                                style={styles.userIcon}
+                                source={props.isDarkMode ? require('../../assets/images/user_w.png') : require('../../assets/images/user.png')}
+                                height={30}
+                                width={30}
+                                />
+                                }
+                            </View>
+                            <FontAwesomeIcon
+                            color={Color(props.isDarkMode).icon}
+                            size={14}
+                            style={styles.menuIcon}
+                            icon="caret-down" />
+                        </Pressable>
+                    </View>
+                    :
+                    null
+                    }
+                </View>
+                {showMenu ?
+                <View>
+                    <Pressable
+                    onPress={() => setShowMenu(false)}
+                    style={styles.menuVoid}
+                    >
+                    </Pressable>
+                    <View
+                    style={getMenuStyle()}
+                    >
+                        {props.isSetup ?
+                        <View>
+                            <NavMenuButton
+                            navigate={() => navigate(NavTo.Profile)}
+                            icon="user"
+                            value="View Profile"
+                            navTo={NavTo.Profile}
+                            isDarkMode={props.isDarkMode}
+                            />
+                            <NavMenuButton
+                            navigate={() => setAccount()}
+                            icon="edit"
+                            value="Edit Account"
+                            navTo={NavTo.Account}
+                            isDarkMode={props.isDarkMode}
+                            />
+                            <NavMenuButton
+                            navigate={() => navigate(NavTo.Survey)}
+                            icon="poll"
+                            value="Take the Survey"
+                            navTo={NavTo.Survey}
+                            isDarkMode={props.isDarkMode}
+                            />
+                            <NavMenuButton
+                            navigate={() => {
+                                navigate(NavTo.Search, {view: 'matches'});
+                                props.setIsMatches(true)}
+                            }
+                            icon="check-double"
+                            value="See Matches"
+                            navTo={NavTo.Search}
+                            isDarkMode={props.isDarkMode}
+                            />
+                            <NavMenuButton
+                            navigate={() => {
+                                navigate(NavTo.Search);
+                                props.setIsMatches(false)}
+                            }
+                            icon="globe"
+                            value="Explore"
+                            navTo={NavTo.Search}
+                            isDarkMode={props.isDarkMode}
+                            />
+                            <NavMenuButton
+                            navigate={() => navigate(NavTo.Listings)}
+                            icon="house-flag"
+                            value="Room Listings"
+                            navTo={NavTo.Listings}
+                            isDarkMode={props.isDarkMode}
+                            />
+                        </View>
+                        : null }
+                        <NavMenuButton
+                        navigate={() => navigate(NavTo.Logout)}
+                        icon="sign-out"
+                        value="Logout"
+                        navTo={NavTo.Logout}
+                        isDarkMode={props.isDarkMode}
+                        />
+                    </View>
+                </View>
+                : null}
+            </View>
+            :
+            <View>
+            {props.isSetup && visible ?
+                <View
+                style={styles.mobileContainer}
+                >
+                    <NavMobileButton
+                    navigate={navigate}
+                    icon="user"
+                    currentNav={props.navSelector}
+                    navTo={NavTo.Profile}
+                    isDarkMode={props.isDarkMode}
+                    />
+                    <NavMobileButton
+                    navigate={navigate}
+                    icon="poll"
+                    currentNav={props.navSelector}
+                    navTo={NavTo.Survey}
+                    isDarkMode={props.isDarkMode}
+                    />
+                    <NavMobileButton
+                    navigate={navigate}
+                    icon="house-flag"
+                    currentNav={props.navSelector}
+                    navTo={NavTo.Listings}
+                    isDarkMode={props.isDarkMode}
+                    />
+                    <NavMobileButton
+                    navigate={navigateMobileMatches}
+                    icon="check-double"
+                    currentNav={props.navSelector}
+                    navTo={NavTo.Search}
+                    isDarkMode={props.isDarkMode}
+                    />
+                    <NavMobileButton
+                    navigate={navigate}
+                    icon="message"
+                    currentNav={props.navSelector}
+                    navTo={NavTo.Messages}
+                    count={7}
+                    isDarkMode={props.isDarkMode}
+                    />
+                </View>
+                :
+                null }
+            </View>
+            }   
+        </View>
+        );
+    };  
 
 export default Navigation;

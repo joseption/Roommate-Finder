@@ -10,6 +10,35 @@ const NavMenuButton = (props: any) => {
     icon: Give the icon an icon name (from the available Font Awesome icon library, you may need to implement more icons in app file)
     value: The text that appears next to the icon for the button
     */
+
+    const styles = StyleSheet.create({
+        content: {
+            borderRadius: Radius.round,
+            borderColor: Color(props.isDarkMode).imgBackground,
+            borderWidth: 1,
+            backgroundColor: Color(props.isDarkMode).imgBackground,
+        },
+        icon: {
+            height: 16,
+            width: 16,
+            padding: 7,
+            color: Color(props.isDarkMode).icon,
+            outlineStyle: 'none'
+        },
+        container: {
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 10,
+            alignItems: 'center',
+            padding: 10,
+            borderRadius: Radius.default
+        },
+        text: {
+            color: Color(props.isDarkMode).textTertiary,
+            fontSize: FontSize.default,
+            fontFamily: 'Inter-SemiBold'
+        }
+    });
     
     return (
     <Pressable
@@ -32,34 +61,5 @@ const NavMenuButton = (props: any) => {
     </Pressable>
     );
 };
-
-const styles = StyleSheet.create({
-    content: {
-        borderRadius: Radius.round,
-        borderColor: Color.imgBackground,
-        borderWidth: 1,
-        backgroundColor: Color.imgBackground,
-    },
-    icon: {
-        height: 16,
-        width: 16,
-        padding: 7,
-        color: Color.icon,
-        outlineStyle: 'none'
-    },
-    container: {
-        display: 'flex',
-        flexDirection: 'row',
-        gap: 10,
-        alignItems: 'center',
-        padding: 10,
-        borderRadius: Radius.default
-    },
-    text: {
-        color: Color.textTertiary,
-        fontSize: FontSize.default,
-        fontFamily: 'Inter-SemiBold'
-    }
-});
 
 export default NavMenuButton;

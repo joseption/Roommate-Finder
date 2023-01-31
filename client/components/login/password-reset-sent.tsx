@@ -100,27 +100,28 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
     <View
     style={props.style}>
       <_Text
-      style={[Style.textHuge, Style.boldFont]}
+      style={[Style(props.isDarkMode).textHuge, Style(props.isDarkMode).boldFont]}
       >
         Reset Link Sent
       </_Text>
       <_Text
-      style={[Style.textDefaultTertiary, LoginStyle.actionText]}
+      style={[Style(props.isDarkMode).textDefaultTertiary, LoginStyle(props.isDarkMode).actionText]}
       >
         Check your email for reset instructions
       </_Text>
       <View
-      style={LoginStyle.mainContent}
+      style={LoginStyle(props.isDarkMode).mainContent}
       >
         <_Text
-        style={[Style.textSmallSecondary, LoginStyle.resendText]}
+        style={[Style(props.isDarkMode).textSmallSecondary, LoginStyle(props.isDarkMode).resendText]}
         >
           Still haven't received an email yet?
         </_Text>
         <View
-        style={Style.alignRight}
+        style={Style(props.isDarkMode).alignRight}
         >
           <_Button
+          isDarkMode={props.isDarkMode}
           style={[props.btnStyle(disabled), styles.btn]}
           onPress={() => doResendEmail()}
           value={!disabled ? 'Resend Email' : 'Email Sent'}
@@ -130,26 +131,26 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
           </_Button>
       </View>
       <_Text
-        style={[Style.textTinyTertiary, LoginStyle.timerText]}
+        style={[Style(props.isDarkMode).textTinyTertiary, LoginStyle(props.isDarkMode).timerText]}
         >
           {counter}
         </_Text>
         <_Text
-        style={LoginStyle.errorMessage}
+        style={LoginStyle(props.isDarkMode).errorMessage}
         >
             {message}
       </_Text>
       </View>
         <View
-        style={LoginStyle.previousPageText}
+        style={LoginStyle(props.isDarkMode).previousPageText}
         >
         <_Text
-        style={Style.textDefaultTertiary}
+        style={Style(props.isDarkMode).textDefaultTertiary}
         >
           Go back to
         </_Text>
         <_Text
-        style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
+        style={[Style(props.isDarkMode).textDefaultDefault, Style(props.isDarkMode).boldFont, LoginStyle(props.isDarkMode).previousPageAction]}
         onPress={() => goBackForgotPwd()}
         >forgot password</_Text>
       </View>

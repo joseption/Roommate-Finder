@@ -11,7 +11,6 @@ import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
 import { env, getLocalStorage, authTokenHeader, NavTo, navProp, setLocalStorage } from '../helper';
 import { Style, Color, FontSize, Radius } from '../style';
-import { styles } from './login';
 
 const SurveyScreen = (props: any) => {
     /*
@@ -36,6 +35,7 @@ const SurveyScreen = (props: any) => {
     const [generating,setGenerating] = useState(false);
     const [complete,setComplete] = useState(false);
     const [isLoaded,setIsLoaded] = useState(false);
+    const [reviewMode,setReviewMode] = useState(false);
     const navigation = useNavigation<navProp>();
     
     useEffect(() => {
@@ -46,27 +46,17 @@ const SurveyScreen = (props: any) => {
     }, [questions, options, progress, questionId, totalNumber, currentNumber, complete]);
     const errorStyle = () => {
         var style = [];
-        style.push(Style.textDanger);
+        style.push(Style(props.isDarkMode).textDanger);
         if (props.mobile)
-          style.push(Style.errorText);        
-        return style;
-    }
-
-    const errorContainerStyle = () => {
-        var style = [];
-        if (props.mobile) {
-            style.push(Style.errorMsgMobile);
-        }
-        else {
-            style.push(Style.errorMsg);
-        }
+          style.push(Style(props.isDarkMode).errorText);        
         return style;
     }
 
     const containerStyle = () => {
+        var container = Color(props.isDarkMode).contentBackground;
         var padding = 20;
         var borderRadius = Radius.large;
-        var borderColor = Color.border;
+        var borderColor = Color(props.isDarkMode).border;
         var borderWidth = 1;
         var marginTop = 10;
         if (props.mobile) {
@@ -74,6 +64,7 @@ const SurveyScreen = (props: any) => {
             borderRadius = 0;
             borderWidth = 0;
             marginTop = 0
+            container = Color(props.isDarkMode).contentBackgroundSecondary;
         }
 
         return {
@@ -81,7 +72,8 @@ const SurveyScreen = (props: any) => {
             borderRadius: borderRadius,
             borderColor: borderColor,
             borderWidth: borderWidth,
-            marginTop: marginTop
+            marginTop: marginTop,
+            backgroundColor: container
         }
     }
 
@@ -133,6 +125,7 @@ const SurveyScreen = (props: any) => {
                 item={item}
                 key={key}
                 selected={item.id == responseId}
+                isDarkMode={props.isDarkMode}
                 >{item.response}</_SurveyOption>
             })
         }
@@ -150,7 +143,7 @@ const SurveyScreen = (props: any) => {
             setResponseId('');
         setHasLastQuestion(idx != 0);
         setCanGotoQuestion(question.ResponsesOnUsers.length > 0);
-        let next = (idx + 1 == total) ? 'Complete Survey' : 'Next Question';
+        let next = (idx + 1 == total) ? 'Complete Survey' : 'Next';
         setTotalNumber(total);
         setCurrentNumber(idx + 1);
         setNextButton(next);
@@ -190,14 +183,16 @@ const SurveyScreen = (props: any) => {
         if (res.length > 0) {
             let percent = Math.ceil((progressCnt / res.length) * 100);
             setProgress(percent);
-            if (init) {
+            if (percent == 100 && init) {
                 setComplete(true);
+                setReviewMode(true);
             }
         }
     }
 
     const getQuestions = async (goto: number, restart: boolean = false, init: boolean = false) => {
         let hasError = false;
+        setError('');
         try
         {   
             let data = await getLocalStorage();
@@ -237,6 +232,7 @@ const SurveyScreen = (props: any) => {
 
     const generateMatches = async () => {
         let hasError = false;
+        setError('');
         setGenerating(true);
         try
         {   
@@ -257,6 +253,9 @@ const SurveyScreen = (props: any) => {
                         hasError = true;
                     }
                     else {
+                        setReviewMode(true);
+                        setGenerating(false);
+                        setComplete(true);
                         navigation.navigate(NavTo.Search, {view: 'matches'} as never);
                     }
                 });
@@ -270,12 +269,10 @@ const SurveyScreen = (props: any) => {
             hasError = true;
         } 
         if (hasError) {
-            setError('A problem occurred while generating your matches, reload the page to try again');
+            setError('A problem occurred while generating your matches, press refresh to try again.');
         }
 
         setLoading(false);
-        setGenerating(false);
-        setComplete(true);
     }
 
     const goToMatches = () => {
@@ -286,6 +283,7 @@ const SurveyScreen = (props: any) => {
         await setLocalStorage(null);
         props.setIsLoggedIn(false);
         props.setIsSetup(false);
+        navigation.navigate(NavTo.Login);
         navigation.reset({
             index: 0,
             routes: [{name: NavTo.Login, params: {timeout: 'yes'} as never}],
@@ -293,6 +291,7 @@ const SurveyScreen = (props: any) => {
     }
 
     const submit = async (goto: number) => {
+        setError('');
         setLoading(true);
         let hasError = false;
         let obj = {questionId:questionId, responseId:responseId};
@@ -343,6 +342,159 @@ const SurveyScreen = (props: any) => {
             setLoading(false);
         }
     }
+
+    const promptMask = () => {
+        if (props.isMobile)
+            return Style(props.isDarkMode).maskPromptMobile;
+        else
+            return Style(props.isDarkMode).maskPrompt;
+    }
+
+    const _styles = StyleSheet.create({
+        finishButton: {
+            marginRight: 5,
+        },
+        error: {
+            paddingTop: 20,
+        },
+        containerStyle: {
+            backgroundColor: Color(props.isDarkMode).defaultLight,
+            padding: 30,
+            margin: 20,
+        },
+        reviewButton: {
+            marginLeft: 8,
+        },
+        reviewButtonContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'row',
+        },
+        doneContainer: {
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 20,
+            textAlign: 'center'
+        },
+        doneHeaderText: {
+            fontSize: FontSize.large,
+            fontWeight: 'bold',
+            color: Color(props.isDarkMode).text
+        },
+        doneSubHeaderText: {
+            fontSize: FontSize.default,
+            textAlign: 'center',
+            color: Color(props.isDarkMode).text
+        },
+        loading: {
+            padding: 20,
+            position: 'absolute',
+            right: 95,
+            top: 91,
+        },
+        refreshIconContainer: {
+            padding: 20,
+            position: 'absolute',
+            right: 98,
+            top: 93,
+        },
+        genTextContainer: {
+            position: 'absolute',
+            left: 120,
+            top: 117,
+        },
+        genText: {
+            fontWeight: 'bold'
+        },
+        questionContainer: {
+            minHeight: 300,
+            justifyContent: 'flex-start',
+        },
+        questionCountContainerStyle: {
+            width: '100%',
+            justifyContent: 'flex-end',
+        },
+        btmButtonContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        arrowContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            flexDirection: 'row'
+        },
+        backArrow: {
+            marginRight: 5,
+            ...Platform.select({
+                web: {
+                    outlineStyle: 'none'
+                }
+            })
+        },
+        refreshIcon: {
+            ...Platform.select({
+                web: {
+                    outlineStyle: 'none'
+                }
+            })
+        },
+        separator: {
+            width: "100%",
+            backgroundColor: Color(props.isDarkMode).separator,
+            height: 1,
+            marginTop: 40
+        },
+        groupContainer: {
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            alignItems: 'center',
+        },
+        titleContainer: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            flexDirection: 'row',
+            alignItems: 'center'
+        },
+        buttonContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            marginTop: 20,
+            marginBottom: 20
+        },
+        optionContainerStyle: {
+            marginTop: 10
+        },
+        title: {
+            fontFamily: 'Inter-SemiBold',
+            fontSize: FontSize.large,
+            color: Color(props.isDarkMode).titleText
+        },
+        questionText: {
+            color: Color(props.isDarkMode).text,
+            paddingBottom: 20,
+            fontSize: FontSize.default,
+            fontWeight: "bold"
+        },
+        questionTextMobile: {
+            fontSize: FontSize.default,
+        },
+        questionCntText: {
+            color: Color(props.isDarkMode).subTitleText,
+            fontSize: FontSize.default,
+            paddingBottom: 10,
+            fontWeight: 'bold'
+        },
+        questionCntTextMobile: {
+            fontSize: FontSize.default,
+            paddingTop: 10
+        }
+    });
     
     return (
     <View>
@@ -354,15 +506,16 @@ const SurveyScreen = (props: any) => {
             >
                 {title()}
             </_Text>
-            <_Progress progress={progress}></_Progress>
+            <_Progress isDarkMode={props.isDarkMode} progress={progress}></_Progress>
         </View>
+        <View
+        style={[containerStyle()]}
+        >
         {!complete ?
         <View>
         {!generating ?
         <View>
-            <View
-            style={[containerStyle(), _styles.container]}
-            >
+            <View>
                 {currentNumber > -1 ?
                 <_Text
                 style={questionCountTextStyle()}
@@ -398,15 +551,15 @@ const SurveyScreen = (props: any) => {
                     >
                         <FontAwesomeIcon 
                         size={20} 
-                        color={Color.textSecondary} 
+                        color={Color(props.isDarkMode).textSecondary} 
                         style={_styles.backArrow} 
                         icon="arrow-left"
                         >
                         </FontAwesomeIcon>
                         <_Text
-                        style={Style.textDefaultSecondary}
+                        style={Style(props.isDarkMode).textDefaultSecondary}
                         >
-                            Previous Question
+                            Go Back
                         </_Text>
                     </Pressable>
                     :
@@ -415,8 +568,23 @@ const SurveyScreen = (props: any) => {
                     <View
                     style={_styles.buttonContainer}
                     >
+                        {reviewMode && nextButton != 'Complete Survey' ?
                         <_Button
-                        style={Style.buttonGold}
+                        isDarkMode={props.isDarkMode}
+                        style={[Style(props.isDarkMode).buttonDefault, _styles.finishButton]}
+                        disabled={!canGotoQuestion}
+                        onPress={(e: any) => {
+                            submit(1);
+                            generateMatches();
+                            }
+                        }
+                        >
+                            Finish
+                        </_Button>
+                        : null }
+                        <_Button
+                        isDarkMode={props.isDarkMode}
+                        style={Style(props.isDarkMode).buttonGold}
                         disabled={!canGotoQuestion}
                         onPress={(e: any) => submit(1)}
                         loading={loading}
@@ -427,12 +595,12 @@ const SurveyScreen = (props: any) => {
                 </View>
                 {!isLoaded ?
                 <View
-                style={Style.maskPrompt}
+                style={promptMask()}
                 >
                     <ActivityIndicator
                     size="large"
-                    color={Color.gold}
-                    style={Style.maskLoading}
+                    color={Color(props.isDarkMode).gold}
+                    style={Style(props.isDarkMode).maskLoading}
                     />    
                 </View>
                 : null }
@@ -440,7 +608,7 @@ const SurveyScreen = (props: any) => {
         </View>
         :
         <View
-        style={[containerStyle(), _styles.container, _styles.doneContainer]}
+        style={_styles.doneContainer}
         >
             <_Text
             style={_styles.doneHeaderText}
@@ -452,22 +620,38 @@ const SurveyScreen = (props: any) => {
             >
                 You will be automatically redirected
             </_Text>
-            <View
-            style={_styles.genHolder}
-            >
+            <View>
                 <_Image
                     source={require('../assets/images/matches.png')}
-                    height={300}
+                    width={325}
                     containerStyle={_styles.containerStyle}
                 ></_Image>
-                <ActivityIndicator
-                    size="large"
-                    color={Color.white}
-                    style={_styles.loading}
-                />
+                <View
+                style={!error ? _styles.loading : _styles.refreshIconContainer}
+                >
+                    {!error ?
+                    <ActivityIndicator
+                        size="large"
+                        color={Color(props.isDarkMode).actualWhite}
+                    />
+                    :
+                    <Pressable
+                    onPress={(e: any) => generateMatches()}
+                    >
+                        <FontAwesomeIcon 
+                            size={30} 
+                            color={Color(props.isDarkMode).white} 
+                            icon="refresh"
+                            style={_styles.refreshIcon}
+                        >
+                        </FontAwesomeIcon>
+                    </Pressable>
+                    }
+                </View>
                 <_Text
-                containerStyle={_styles.genText}
-                >Hang tight...</_Text>
+                containerStyle={_styles.genTextContainer}
+                style={_styles.genText}
+                >{error ? 'Try again?' : 'Hang tight...'}</_Text>
             </View>
         </View>
         }
@@ -475,7 +659,7 @@ const SurveyScreen = (props: any) => {
         :
         <View>
             <View
-            style={[containerStyle(), _styles.container, _styles.doneContainer]}
+            style={_styles.doneContainer}
             >
                 <_Text
                 style={_styles.doneHeaderText}
@@ -489,20 +673,22 @@ const SurveyScreen = (props: any) => {
                 </_Text>
                 <_Image
                     source={require('../assets/images/checklist.png')}
-                    height={300}
+                    width={325}
                     containerStyle={_styles.containerStyle}
                 ></_Image>
                 <View
                 style={_styles.reviewButtonContainer}
                 >
                 <_Button
-                        style={Style.buttonDefault}
+                        isDarkMode={props.isDarkMode}
+                        style={Style(props.isDarkMode).buttonDefault}
                         onPress={(e: any) => goToMatches()}
                         >
                             Go to Matches
                 </_Button>
                 <_Button
-                        style={[Style.buttonGold, _styles.reviewButton]}
+                        isDarkMode={props.isDarkMode}
+                        style={[Style(props.isDarkMode).buttonGold, _styles.reviewButton]}
                         onPress={(e: any) => getQuestions(0, true)}
                         >
                             Review Answers
@@ -513,142 +699,16 @@ const SurveyScreen = (props: any) => {
         }
         {error || props.error ?
         <_Text 
-        containerStyle={errorContainerStyle()}
+        containerStyle={_styles.error}
         innerContainerStyle={{justifyContent: 'center'}} 
         style={errorStyle()}
         >
             {error}
             </_Text>
         : null}
+        </View>
     </View>
     );
 };
-
-const _styles = StyleSheet.create({
-    genHolder: {
-
-    },
-    containerStyle: {
-        backgroundColor: Color.defaultLight,
-        padding: 30,
-        margin: 20,
-    },
-    reviewButton: {
-        marginLeft: 8,
-    },
-    reviewButtonContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'row',
-    },
-    doneContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 20,
-        textAlign: 'center'
-    },
-    doneHeaderText: {
-        fontSize: FontSize.large,
-        fontWeight: 'bold'
-    },
-    doneSubHeaderText: {
-        fontSize: FontSize.default,
-        textAlign: 'center'
-    },
-    loading: {
-        padding: 20,
-        position: 'absolute',
-        right: 98,
-        top: 93,
-    },
-    genText: {
-        position: 'absolute',
-        left: 120,
-        top: 120,
-    },
-    questionContainer: {
-        minHeight: 300,
-        justifyContent: 'flex-start',
-    },
-    questionCountContainerStyle: {
-        width: '100%',
-        justifyContent: 'flex-end',
-    },
-    btmButtonContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    arrowContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        flexDirection: 'row'
-    },
-    backArrow: {
-        marginRight: 5,
-        ...Platform.select({
-            web: {
-                outlineStyle: 'none'
-            }
-        })
-    },
-    separator: {
-        width: "100%",
-        backgroundColor: Color.border,
-        height: 1,
-        marginTop: 40
-    },
-    groupContainer: {
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    titleContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    container: {
-        backgroundColor: Color.white,
-    },
-    buttonContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 20,
-        marginBottom: 20
-    },
-    optionContainerStyle: {
-        marginTop: 10
-    },
-    title: {
-        fontFamily: 'Inter-SemiBold',
-        fontSize: FontSize.large
-    },
-    questionText: {
-        color: Color.text,
-        paddingBottom: 20,
-        fontSize: FontSize.default,
-        fontWeight: "bold"
-    },
-    questionTextMobile: {
-        fontSize: FontSize.default,
-    },
-    questionCntText: {
-        color: Color.textSecondary,
-        fontSize: FontSize.default,
-        paddingBottom: 10,
-        fontWeight: 'bold'
-    },
-    questionCntTextMobile: {
-        fontSize: FontSize.default,
-        paddingTop: 10
-    }
-});
 
 export default SurveyScreen;

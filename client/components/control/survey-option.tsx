@@ -54,6 +54,55 @@ const _SurveyOption = (props: any) => {
         return style;
     }
 
+    const styles = StyleSheet.create({
+        text: {
+            color: Color(props.isDarkMode).text,
+            fontSize: FontSize.default,
+        },
+        textSelected: {
+            color: Color(props.isDarkMode).actualWhite,
+        },
+        contentContainer: {
+            display: 'flex',
+            flexDirection: 'row'
+        },
+        container: {
+            width: "100%"
+        },
+        surveyOption: {
+            paddingLeft: 8,
+            paddingRight: 8,
+            paddingTop: 8,
+            paddingBottom: 8,
+            borderRadius: Radius.default,
+            marginLeft:3,
+            display: 'flex',
+    
+        },
+        surveyOptionDefault: {
+            backgroundColor: Color(props.isDarkMode).holder,
+            ...Platform.select({
+                web: {
+                    shadowColor: Color(props.isDarkMode).holderSecondary,
+                    shadowOffset: {width: -3, height: 3},
+                    shadowOpacity: 1,
+                    shadowRadius: 0,
+                }
+            }),
+        },
+        surveyOptionSelected: {
+            backgroundColor: Color(props.isDarkMode).gold,
+            ...Platform.select({
+                web: {
+                    shadowColor: Color(props.isDarkMode).goldSecondary,
+                    shadowOffset: {width: -3, height: 3},
+                    shadowOpacity: 1,
+                    shadowRadius: 0,
+                }
+            }),
+        }
+    });
+
     return (
     <View
     style={containerStyle()}
@@ -77,54 +126,5 @@ const _SurveyOption = (props: any) => {
     </View>
     );
 };
-
-const styles = StyleSheet.create({
-    text: {
-        color: Color.text,
-        fontSize: FontSize.default,
-    },
-    textSelected: {
-        color: Color.white,
-    },
-    contentContainer: {
-        display: 'flex',
-        flexDirection: 'row'
-    },
-    container: {
-        width: "100%"
-    },
-    surveyOption: {
-        paddingLeft: 8,
-        paddingRight: 8,
-        paddingTop: 8,
-        paddingBottom: 8,
-        borderRadius: Radius.default,
-        marginLeft:3,
-        display: 'flex',
-
-    },
-    surveyOptionDefault: {
-        backgroundColor: Color.holder,
-        ...Platform.select({
-            web: {
-                shadowColor: Color.holderSecondary,
-                shadowOffset: {width: -3, height: 3},
-                shadowOpacity: 1,
-                shadowRadius: 0,
-            }
-        }),
-    },
-    surveyOptionSelected: {
-        backgroundColor: Color.gold,
-        ...Platform.select({
-            web: {
-                shadowColor: Color.goldSecondary,
-                shadowOffset: {width: -3, height: 3},
-                shadowOpacity: 1,
-                shadowRadius: 0,
-            }
-        }),
-    }
-});
 
 export default _SurveyOption;

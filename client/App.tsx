@@ -18,7 +18,8 @@ import LoginScreen from './screens/login';
 import _Text from './components/control/text';
 import * as DeepLinking from 'expo-linking';
 import { Params } from '@fortawesome/fontawesome-svg-core';
-
+import _Button from './components/control/button';
+export const ThemeContext = React.createContext(null);
 export const App = (props: any) => {
   const [navHeight,setNavHeight] = useState(0);
   const [navWidth,setNavWidth] = useState(0);
@@ -43,6 +44,7 @@ export const App = (props: any) => {
   const [isPasswordReset,setIsPasswordReset] = useState(false);
   const [pageVerified,setPageVerified] = useState(false);
   const [isBackPressed,setIsBackPressed] = useState(false);
+  const [isDarkMode,setIsDarkMode] = useState(false);
   const [backCount,setBackCount] = useState(0);
   const [backTimer,setBackTimer] = useState(0);
   const [loginViewChanged,setLoginViewChanged] = useState('');
@@ -52,8 +54,8 @@ export const App = (props: any) => {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
-
   useEffect(() => {
+    //setIsDarkMode(true); // ja temp need to implement user defined dark mode
     setMobile(isMobile());
     const dimsChanged = Dimensions.addEventListener("change", (e) => setMobile(isMobile()));
     const back = BackHandler.addEventListener('hardwareBackPress', onBackPress);
@@ -165,6 +167,7 @@ export const App = (props: any) => {
   }
 
   const logout = async () => {
+    let hasError = false;
     try
     {   
         let user = await getLocalStorage();
@@ -180,6 +183,9 @@ export const App = (props: any) => {
                   setIsLoggingOut(true);
                   setIsLoggedIn(false);
                   setIsSetup(false);
+              }
+              else {
+                hasError = true;
               }
           });
       }
@@ -232,7 +238,7 @@ export const App = (props: any) => {
 
   async function checkLoggedIn() {
     if (!isLoggingOut) {
-      let error = false;
+      let hasError = false;
       let data = await getLocalStorage();
       if (data) {
         let obj = {refreshToken:data.refreshToken, accessToken: data.accessToken};
@@ -245,7 +251,7 @@ export const App = (props: any) => {
               let res = JSON.parse(await ret.text());
               if (res.Error)
               {
-                error = true;
+                hasError = true;
               }
               else
               {
@@ -255,7 +261,7 @@ export const App = (props: any) => {
                   let res = JSON.parse(await ret.text());
                   if (res.Error)
                   {
-                    error = true;
+                    hasError = true;
                   }
                   else if (res.accessToken) {
                     aToken = res.accessToken;
@@ -277,17 +283,19 @@ export const App = (props: any) => {
         }
         catch(e)
         {
-          error = true;
+          hasError = true;
         }   
       }
       else {
-        error = true;
+        hasError = true;
       }
-      if (error) {
+      if (hasError) {
         if (ref && ref.current) {
           let route = ref.current.getCurrentRoute();
           if (route && route.name !== NavTo.Login) {
             await setLocalStorage(null);
+            setIsLoggedIn(false);
+            setIsSetup(false);
             ref.current.navigate(NavTo.Login, {timeout: 'yes'} as never);
               try {
                 ref.current.resetRoot();
@@ -320,10 +328,10 @@ export const App = (props: any) => {
   }
 
   function prepareStyle() {
-    var backgroundColor = Color.holder;
+    var backgroundColor = Color(isDarkMode).background;
     var marginTop = Platform.OS === 'web' ? navHeight : 0;
     if (mobile) {
-      backgroundColor = Color.white;
+      backgroundColor = Color(isDarkMode).contentBackgroundSecondary;
     }
 
     var overflow = 'auto';
@@ -366,6 +374,7 @@ export const App = (props: any) => {
       isLoggedIn={isLoggedIn}
       navSelector={navSelector}
       setNavSelector={setNavSelector}
+      isDarkMode={isDarkMode}
       />
     else
       return <View></View>;
@@ -375,13 +384,13 @@ export const App = (props: any) => {
     var style = [];
     style.push(styles.contentStyle);
     var paddingTop = (getRouteName() === NavTo.Login) ? 0 : 10;
-    var backgroundColor = Color.holder;
+    var backgroundColor = Color(isDarkMode).background;
     var paddingLeft = 0;
     var paddingRight = 0;
     var translate = !mobile ? adjustedPos : 0;
 
     if (mobile) {
-      backgroundColor = Color.white;
+      backgroundColor = Color(isDarkMode).contentBackgroundSecondary;
       paddingLeft = 10;
       paddingRight = 10;
 
@@ -424,10 +433,20 @@ export const App = (props: any) => {
       Keyboard.dismiss();
   }
 
+  const MyTheme = () => {
+    return {
+      dark: Color(isDarkMode),
+      colors: {
+        background: isMobile() ? Color(isDarkMode).contentBackgroundSecondary : Color(isDarkMode).background
+      },
+    }
+  };
+
   return (
     <NavigationContainer
     linking={linking}
     ref={ref}
+    theme={MyTheme()}
     >
       <KeyboardAvoidingView
       behavior='padding'
@@ -439,13 +458,15 @@ export const App = (props: any) => {
         onScroll={(e) => scroll(e)}
         scrollEventThrottle={100}
         onContentSizeChange={(w, h) => getScrollDims(w, h)}
+        keyboardShouldPersistTaps={'handled'}
         >
           <View
           style={styles.stack}
           >
+            {/* <_Button isDarkMode={isDarkMode} onPress={() => setIsDarkMode(!isDarkMode)}>Switch</_Button> */}
             <StatusBar
-              backgroundColor={Color.white}
-              barStyle="dark-content"
+              backgroundColor={Color(isDarkMode).statusBar}
+              barStyle={isDarkMode ? "light-content" : "dark-content"}
             />
             <Stack.Navigator
             screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle()}}
@@ -458,6 +479,7 @@ export const App = (props: any) => {
               {(props: any) => <HomeScreen
               {...props}
               mobile={mobile}
+              isDarkMode={isDarkMode}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -475,6 +497,7 @@ export const App = (props: any) => {
                   setIsPasswordReset={setIsPasswordReset}
                   loginViewChanged={loginViewChanged}
                   setLoginViewChanged={setLoginViewChanged}
+                  isDarkMode={isDarkMode}
                   />}
               </Stack.Screen>
               <Stack.Screen
@@ -492,6 +515,7 @@ export const App = (props: any) => {
               scrollY={scrollY}
               setIsLoggedIn={setIsLoggedIn}
               setIsSetup={setIsSetup}
+              isDarkMode={isDarkMode}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -501,6 +525,7 @@ export const App = (props: any) => {
               {(props: any) => <ProfileScreen
               {...props}
               mobile={mobile}
+              isDarkMode={isDarkMode}
               />}
               </Stack.Screen> 
               <Stack.Screen
@@ -512,6 +537,7 @@ export const App = (props: any) => {
               mobile={mobile}
               setIsLoggedIn={setIsLoggedIn}
               setIsSetup={setIsSetup}
+              isDarkMode={isDarkMode}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -523,6 +549,7 @@ export const App = (props: any) => {
               mobile={mobile}
               isMatches={isMatches}
               setIsMatches={setIsMatches}
+              isDarkMode={isDarkMode}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -532,6 +559,7 @@ export const App = (props: any) => {
               {(props: any) => <ListingsScreen
               {...props}
               mobile={mobile}
+              isDarkMode={isDarkMode}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -541,6 +569,7 @@ export const App = (props: any) => {
               {(props: any) => <MessagesScreen
               {...props}
               mobile={mobile}
+              isDarkMode={isDarkMode}
               />}
               </Stack.Screen> 
               <Stack.Screen
@@ -552,6 +581,7 @@ export const App = (props: any) => {
               mobile={mobile}
               setIsLoggedIn={setIsLoggedIn}
               setIsSetup={setIsSetup}
+              isDarkMode={isDarkMode}
               />}
               </Stack.Screen>
             </Stack.Navigator>
@@ -573,6 +603,7 @@ export const App = (props: any) => {
         isLoggedIn={isLoggedIn}
         navSelector={navSelector}
         setNavSelector={setNavSelector}
+        isDarkMode={isDarkMode}
         />
         
         : null} 

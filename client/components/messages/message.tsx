@@ -20,6 +20,30 @@ const Message = ({ message }: Props) => {
 
   const isMyMessage = () => message.userId === userInfo?.id;
 
+  const styles = StyleSheet.create({
+    myMessage: {
+      margin: 5,
+      padding: 10,
+      borderRadius: 10,
+      maxWidth: '80%',
+      backgroundColor: Color(message.isDarkMode).default,
+      alignSelf: 'flex-end',
+  
+      shadowColor: 'black',
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: .18,
+      shadowRadius: 1,
+    },
+    theirMessage: {
+      backgroundColor: Color(message.isDarkMode).grey,
+      alignSelf: 'flex-start',
+      color: Color(message.isDarkMode).black,
+    }
+  });
+
   return (
     <View
       style={[
@@ -27,33 +51,9 @@ const Message = ({ message }: Props) => {
         isMyMessage() ? null : styles.theirMessage,
       ]}
     >
-      <Text style={{color: isMyMessage() ? Color.white : undefined}}>{message.content}</Text>
+      <Text style={{color: isMyMessage() ? Color(message.isDarkMode).white : undefined}}>{message.content}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  myMessage: {
-    margin: 5,
-    padding: 10,
-    borderRadius: 10,
-    maxWidth: '80%',
-    backgroundColor: Color.default,
-    alignSelf: 'flex-end',
-
-    shadowColor: 'black',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: .18,
-    shadowRadius: 1,
-  },
-  theirMessage: {
-    backgroundColor: Color.grey,
-    alignSelf: 'flex-start',
-    color: Color.black,
-  }
-});
 
 export default Message;

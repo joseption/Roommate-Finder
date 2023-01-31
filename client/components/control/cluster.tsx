@@ -44,12 +44,47 @@ const _Cluster = (props: any) => {
     const mappedItems = () => {
         return props.options.map((item: any, key: any) => {
             return <_ClusterOption
+            isDarkMode={props.isDarkMode}
             selected={props.selected}
             onPress={toggle}
             key={key}
             item={item} />
         });
     }
+
+    const styles = StyleSheet.create({
+        count: {
+            color: Color(props.isDarkMode).textSecondary
+        },
+        header: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 5
+        },
+        cluster: {
+            backgroundColor: Color(props.isDarkMode).contentHolder,
+            display: 'flex',
+            flexWrap: 'wrap',
+            flexDirection: 'row',
+            borderRadius: Radius.default,
+            padding: 7.5,
+            shadowColor: Color(props.isDarkMode).contentHolderSecondary,
+            shadowOffset: {width: -3, height: 3},
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            marginLeft: 3,
+            ...Platform.select({
+                web: {
+                    width: 'calc(100% - 3px)'
+                },
+                android: {
+                    marginLeft: 0
+                }
+            })
+        },
+    });
 
   return (
     <View
@@ -61,6 +96,7 @@ const _Cluster = (props: any) => {
             {props.label ?
             <_Text
             required={props.required}
+            style={{color: Color(props.isDarkMode).text}}
             >
                 {props.label}
             </_Text>
@@ -81,39 +117,5 @@ const _Cluster = (props: any) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-    count: {
-        color: Color.textSecondary
-    },
-    header: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 5
-    },
-    cluster: {
-        backgroundColor: Color.holder,
-        display: 'flex',
-        flexWrap: 'wrap',
-        flexDirection: 'row',
-        borderRadius: Radius.default,
-        padding: 7.5,
-        shadowColor: Color.holderSecondary,
-        shadowOffset: {width: -3, height: 3},
-        shadowOpacity: 1,
-        shadowRadius: 0,
-        marginLeft: 3,
-        ...Platform.select({
-            web: {
-                width: 'calc(100% - 3px)'
-            },
-            android: {
-                marginLeft: 0
-            }
-        })
-    },
-});
 
 export default _Cluster;

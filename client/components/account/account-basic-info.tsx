@@ -6,7 +6,6 @@ import _Group from '../control/group';
 import _Text from '../control/text';
 import React, { useEffect, useState } from 'react';
 import { Color, FontSize, Radius, Style } from '../../style';
-import { styles } from '../../screens/login';
 import _Button from '../control/button';
 import _Image from '../control/image';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -31,7 +30,6 @@ const AccountInfo = (props: any) => {
     const [state,setState] = useState('');
     const [zipCode,setZipCode] = useState('');
     const [imageError,setImageError] = useState('');
-    const [dayOptions,setDayOptions] = useState([]);
     const [isLoading,setIsLoading] = useState(false);
     const [isPasswordLoading,setIsPasswordLoading] = useState(false);
     const [promptPassword,setPromptPassword] = useState(false);
@@ -42,7 +40,14 @@ const AccountInfo = (props: any) => {
     const [imageURL,setImageURL] = useState('');
     const [init,setInit] = useState(false);
     const [imageUri, setImageUri] = useState('');
+    const [email, setEmail] = useState('');
     const [isComplete,setIsComplete] = useState(false);
+    const lastNameRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const yearRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const phoneRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const zipRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const cityRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const stateRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
     useEffect(() => {
         if (!init) {
             onLoad();
@@ -56,36 +61,28 @@ const AccountInfo = (props: any) => {
     
     const errorStyle = () => {
         var style = [];
-        style.push(Style.textDanger);
+        style.push(Style(props.isDarkMode).textDanger);
         if (props.mobile)
-          style.push(Style.errorText);        
+          style.push(Style(props.isDarkMode).errorText);        
         return style;
-    }
-
-    const setMonthForm = (e: any) => {
-        getDayOptions(e, year);
-    }
-
-    const setYearForm = (e: any) => {
-        let m = getMonthOptions().find(x => x.value == month);
-        getDayOptions(m?.key, e);
     }
 
     const errorContainerStyle = () => {
         var style = [];
         if (props.mobile) {
-            style.push(Style.errorMsgMobile);
+            style.push(Style(props.isDarkMode).errorMsgMobile);
         }
         else {
-            style.push(Style.errorMsg);
+            style.push(Style(props.isDarkMode).errorMsg);
         }
         return style;
     }
 
     const containerStyle = () => {
+        var container = Color(props.isDarkMode).contentBackground;
         var padding = 20;
         var borderRadius = Radius.large;
-        var borderColor = Color.border;
+        var borderColor = Color(props.isDarkMode).border;
         var borderWidth = 1;
         var marginTop = 10;
         if (props.mobile) {
@@ -93,6 +90,7 @@ const AccountInfo = (props: any) => {
             borderRadius = 0;
             borderWidth = 0;
             marginTop = 0
+            container = Color(props.isDarkMode).contentBackgroundSecondary;
         }
 
         return {
@@ -100,7 +98,8 @@ const AccountInfo = (props: any) => {
             borderRadius: borderRadius,
             borderColor: borderColor,
             borderWidth: borderWidth,
-            marginTop: marginTop
+            marginTop: marginTop,
+            backgroundColor: container
         }
     }
 
@@ -123,6 +122,7 @@ const AccountInfo = (props: any) => {
     }
 
     const handleImage = (res: ImagePickerResponse) => {
+        setImageError('');
         if (res && res.assets) {
             if (Platform.OS === 'web') {
                 if (res.assets[0].uri) {
@@ -144,9 +144,8 @@ const AccountInfo = (props: any) => {
                 }
             }
         }
-        else {
+        else if (res.errorCode)
             setImageError("A problem occurred while attaching your photo, please try again");
-        }
 
         setIsSaved(false);
     }
@@ -186,19 +185,22 @@ const AccountInfo = (props: any) => {
         return [{key:'Male', value: 'Male'}, {key:'Female', value: 'Female'}, {key:'Other', value: 'Other'}];
     }
 
-    const getDayOptions = (sMonth: any, sYear: any) => {
+    const getDayOptions = () => {
         var days = [];
-        if (sMonth && sYear) {
-            var count = new Date(parseInt(sYear), parseInt(sMonth), 0).getDate();
-            for (var i = 1; i <= count; i++) {
-                days.push({key:i, value:i.toString()});
-            }
-            if (day && parseInt(day) > count) {
-                setDay('');
+        if (year && month) {
+            let m = getMonthOptions().find(x => x.value == month);
+            if (m) {
+                var count = new Date(parseInt(year), parseInt(m.key.toString()), 0).getDate();
+                for (var i = 1; i <= count; i++) {
+                    days.push({key:i, value:i.toString()});
+                }
+                if (day && parseInt(day) > count) {
+                    setDay('');
 
+                }
             }
         }
-        setDayOptions(days as never);
+        return days;
     }
 
     const triggerPrompt = () => {
@@ -215,6 +217,7 @@ const AccountInfo = (props: any) => {
 
     const passwordContainerStyle = () => {
         let style = [];
+        style.push({backgroundColor: !props.isDarkMode ? Color(props.isDarkMode).holderMask : Color(props.isDarkMode).promptMaskMobile});
         style.push(_styles.passwordPromptContainer);
         if (props.mobile) {
             style.push(_styles.passwordPromptContainerMobile);
@@ -302,7 +305,6 @@ const AccountInfo = (props: any) => {
                     setMonth(l_month.value);
 
                 if (l_month && l_year && l_day) {
-                    getDayOptions(l_month.key - 1, l_year);
                     setDay(l_day);
                 }
             }
@@ -399,6 +401,7 @@ const AccountInfo = (props: any) => {
         {   
             let data = await getLocalStorage();
             if (data && data.user) {
+                setEmail(data.user.email);
                 let userId = data.user.id;
                 let tokenHeader = await authTokenHeader();
                 await fetch(`${env.URL}/users/profile?userId=${userId}`,
@@ -452,6 +455,144 @@ const AccountInfo = (props: any) => {
             '';
     }
 
+    const _styles = StyleSheet.create({
+        photoButton: {
+            marginLeft: 5
+        },
+        photoButtonContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center'
+        },
+        passwordResetText: {
+            fontWeight: 'bold',
+            marginBottom: 10,
+            color: Color(props.isDarkMode).text
+        },
+        spacingLeft: {
+            marginLeft: 8,
+        },
+        passwordPromptContainer: {
+            height: '100%',
+            width: '100%',
+            position: 'absolute',
+            top:0,
+            left:0,
+            zIndex:99,
+            ...Platform.select({
+                android: {
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }
+            }),
+        },
+        passwordContainerContent: {
+            ...Platform.select({
+                web: {
+                    height: '100vh'
+                },
+            }),
+        },
+        passwordPromptContainerMobile: {
+            backgroundColor: Color(props.isDarkMode).whiteMask
+        },
+        passwordButtonContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+        },
+        passwordDialog: {
+            margin: 'auto',
+            backgroundColor: Color(props.isDarkMode).white,
+            padding: 20,
+            borderWidth: 1,
+            borderStyle: 'solid',
+            borderColor: Color(props.isDarkMode).border,
+            borderRadius: 20,
+            maxWidth: 400
+        },
+        imageError: {
+            marginBottom: 5,
+            height: 20
+        },
+        newUserIcon: {
+            ...Platform.select({
+                web: {
+                    outlineStyle: 'none'
+                }
+            })
+        },
+        passwordButton: {
+            marginRight: 5,
+        },
+        buttonContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            marginTop: 20,
+            marginBottom: 20
+        },
+        titleContainer: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            flexDirection: 'row',
+            alignItems: 'center'
+        },
+        defaultImage: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        imageContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 15,
+            marginBottom: 15,
+        },
+        image: {
+            width: 125,
+            height: 125,
+            backgroundColor: Color(props.isDarkMode).white,
+            borderColor: Color(props.isDarkMode).border,
+            borderWidth: 1,
+            borderRadius: Radius.round,
+            marginBottom: 5,
+        },
+        group: {
+            backgroundColor: Color(props.isDarkMode).default
+        },
+        groupFocus: {
+            zIndex: 1,
+            elevation: 1
+        },
+        title: {
+            fontFamily: 'Inter-SemiBold',
+            fontSize: FontSize.large,
+            color: Color(props.isDarkMode).titleText
+        },
+        subtitle: {
+            color: Color(props.isDarkMode).text,
+            paddingBottom: 20,
+            fontSize: FontSize.large
+        },
+        subTitleMobile: {
+            fontSize: FontSize.default
+        },
+        formGap: {
+            marginBottom: 15
+        },
+        checkbox: {
+            ...Platform.select({
+                android: {
+                    backgroundColor: Color(props.isDarkMode).black
+                }
+            }),
+        }
+    });
+
     return (
     <View>
         {promptPassword ?
@@ -475,15 +616,17 @@ const AccountInfo = (props: any) => {
                             style={_styles.passwordButtonContainer}
                             >
                                 <_Button
-                                style={Style.buttonDanger}
+                                style={Style(props.isDarkMode).buttonDanger}
                                 onPress={(e: any) => closePasswordPrompt()}
+                                isDarkMode={props.isDarkMode}
                                 >
                                     Cancel
                                 </_Button>
                                 <_Button
-                                style={[Style.buttonDefault, _styles.spacingLeft]}
+                                style={[Style(props.isDarkMode).buttonDefault, _styles.spacingLeft]}
                                 onPress={(e: any) => doSendEmail()}
                                 loading={isPasswordLoading}
+                                isDarkMode={props.isDarkMode}
                                 >
                                 Continue
                                 </_Button>
@@ -498,15 +641,17 @@ const AccountInfo = (props: any) => {
                             style={_styles.passwordButtonContainer}
                             >
                                 <_Button
-                                style={Style.buttonDanger}
+                                style={Style(props.isDarkMode).buttonDanger}
                                 onPress={(e: any) => closePasswordPrompt()}
+                                isDarkMode={props.isDarkMode}
                                 >
                                 Close
                                 </_Button>
                                 <_Button
-                                style={[Style.buttonGold, _styles.spacingLeft]}
+                                style={[Style(props.isDarkMode).buttonGold, _styles.spacingLeft]}
                                 onPress={(e: any) => doSendEmail()}
                                 loading={isPasswordLoading}
+                                isDarkMode={props.isDarkMode}
                                 >
                                 Resend Email
                             </_Button>
@@ -523,15 +668,17 @@ const AccountInfo = (props: any) => {
                     style={_styles.passwordButtonContainer}
                     >
                         <_Button
-                        style={Style.buttonDanger}
+                        style={Style(props.isDarkMode).buttonDanger}
                         onPress={(e: any) => closePasswordPrompt()}
+                        isDarkMode={props.isDarkMode}
                         >
                             Cancel
                         </_Button>
                         <_Button
-                        style={[Style.buttonGold, _styles.spacingLeft]}
+                        style={[Style(props.isDarkMode).buttonGold, _styles.spacingLeft]}
                         onPress={(e: any) => doSendEmail()}
                         loading={isPasswordLoading}
+                        isDarkMode={props.isDarkMode}
                         >
                         Try Again
                         </_Button>
@@ -543,7 +690,9 @@ const AccountInfo = (props: any) => {
             </View>
         </View>
         : null}
-        <ScrollView>
+        <ScrollView
+        keyboardShouldPersistTaps={'handled'}
+        >
             <View>
                 <View
                 style={_styles.titleContainer}
@@ -555,9 +704,10 @@ const AccountInfo = (props: any) => {
                     </_Text>
                     {props.isSetup ?
                     <_Button
-                    style={Style.buttonInverted}
-                    textStyle={Style.buttonInvertedText}
+                    style={Style(props.isDarkMode).buttonInverted}
+                    textStyle={Style(props.isDarkMode).buttonInvertedText}
                     onPress={(e: any) => props.setView(AccountScreenType.about)}
+                    isDarkMode={props.isDarkMode}
                     >
                         Edit Interests
                     </_Button>
@@ -565,7 +715,7 @@ const AccountInfo = (props: any) => {
                 </View>
             </View>
             <View
-            style={[containerStyle(), _styles.container]}
+            style={[containerStyle()]}
             >
                 <_Text
                 style={subTitleStyle()}
@@ -574,6 +724,7 @@ const AccountInfo = (props: any) => {
                 </_Text>
                 <View>
                 <_Group
+                isDarkMode={props.isDarkMode}
                 vertical={true}
                 style={_styles.imageContainer}
                 >
@@ -583,7 +734,7 @@ const AccountInfo = (props: any) => {
                     >
                         <FontAwesomeIcon
                         style={_styles.newUserIcon}
-                        size={40} color={Color.border}
+                        size={40} color={Color(props.isDarkMode).userIcon}
                         icon="user-plus"
                         >
                         </FontAwesomeIcon>
@@ -598,7 +749,7 @@ const AccountInfo = (props: any) => {
                     </_Image>
                     }
                     <_Text
-                    style={[Style.textSmallDanger, _styles.imageError]}
+                    style={[Style(props.isDarkMode).textSmallDanger, _styles.imageError]}
                     >
                         {imageError}
                     </_Text>
@@ -606,15 +757,17 @@ const AccountInfo = (props: any) => {
                     style={_styles.photoButtonContainer}
                     >
                         <_Button
+                        isDarkMode={props.isDarkMode}
                         onPress={(e: any) => uploadPhoto()}
-                        style={Style.buttonDefault}
+                        style={Style(props.isDarkMode).buttonDefault}
                         >
-                            {Platform.OS === 'web' ? 'Upload Photo' : 'Upload'}
+                            {Platform.OS === 'web' ? (imageUri || imageURL) ? 'Change Photo' : 'Upload Photo' : (imageUri || imageURL) ? 'Change' : 'Upload'}
                         </_Button>
                         {Platform.OS !== 'web' ?
                         <_Button
                         onPress={(e: any) => takePhoto()}
-                        style={[Style.buttonGold, _styles.photoButton]}
+                        style={[Style(props.isDarkMode).buttonGold, _styles.photoButton]}
+                        isDarkMode={props.isDarkMode}
                         >
                             Take Photo
                         </_Button>
@@ -623,6 +776,13 @@ const AccountInfo = (props: any) => {
                 </_Group>
                 </View>
                 <_TextInput
+                label="Email"
+                containerStyle={_styles.formGap}
+                value={email}
+                readonly={true}
+                isDarkMode={props.isDarkMode}
+                ></_TextInput>
+                <_TextInput
                 label="First Name"
                 required={true}
                 containerStyle={_styles.formGap}
@@ -630,6 +790,10 @@ const AccountInfo = (props: any) => {
                 value={firstName}
                 setValue={setFirstName}
                 onChangeText={(e: any) => setIsSaved(false)}
+                blurOnSubmit={false}
+                onSubmit={() => { lastNameRef.current?.focus(); }}
+                returnKeyType='next'
+                isDarkMode={props.isDarkMode}
                 ></_TextInput>
                 <_TextInput
                 label="Last Name"
@@ -639,34 +803,41 @@ const AccountInfo = (props: any) => {
                 value={lastName}
                 setValue={setLastName}
                 onChangeText={(e: any) => setIsSaved(false)}
+                blurOnSubmit={false}
+                onSubmit={() => { yearRef.current?.focus(); }}
+                returnKeyType='next'
+                innerRef={lastNameRef}
+                isDarkMode={props.isDarkMode}
                 ></_TextInput>
                 <_Group
+                isDarkMode={props.isDarkMode}
                 required={true}
                 style={_styles.formGap}
                 mobile={props.mobile}
                 label="Birthday"
                 >
                     <_Dropdown
+                    isDarkMode={props.isDarkMode}
                     label="Year"
                     selected={(e: any) =>
                         {
                             if (e)
                                 checkSaved();
-                            setYearForm(e);
                         }
                     }
                     options={getYearOptions()}
                     placeholder="Select..."
                     value={year}
                     setValue={setYear}
+                    innerRef={yearRef}
                     ></_Dropdown>
                     <_Dropdown
+                    isDarkMode={props.isDarkMode}
                     label="Month"
                     selected={(e: any) =>
                         {
                             if (e)
                                 checkSaved();
-                            setMonthForm(e);
                         }
                     }
                     options={getMonthOptions()}
@@ -675,8 +846,9 @@ const AccountInfo = (props: any) => {
                     setValue={setMonth}
                     ></_Dropdown>
                     <_Dropdown
+                    isDarkMode={props.isDarkMode}
                     label="Day"
-                    options={dayOptions}
+                    options={getDayOptions()}
                     placeholder="Select..."
                     value={day}
                     setValue={setDay}
@@ -689,6 +861,7 @@ const AccountInfo = (props: any) => {
                     ></_Dropdown>
                 </_Group>
                 <_Group
+                isDarkMode={props.isDarkMode}
                 mobile={props.mobile}
                 style={_styles.formGap}
                 noBackground={true}
@@ -701,6 +874,11 @@ const AccountInfo = (props: any) => {
                     value={phone}
                     setValue={setPhone}
                     onChangeText={(e: any) => setIsSaved(false)}
+                    blurOnSubmit={false}
+                    onSubmit={() => { zipRef.current?.focus(); }}
+                    returnKeyType='next'
+                    innerRef={phoneRef}
+                    isDarkMode={props.isDarkMode}
                     ></_TextInput>
                     {/* <_Checkbox
                     visible={false}
@@ -709,6 +887,7 @@ const AccountInfo = (props: any) => {
                     /> */}
                 </_Group>
                 <_Group
+                isDarkMode={props.isDarkMode}
                 label="Location"
                 mobile={props.mobile}
                 required={true}
@@ -721,20 +900,32 @@ const AccountInfo = (props: any) => {
                     value={zipCode}
                     setValue={setZipCode}
                     onChangeText={(e: any) => setIsSaved(false)}
+                    blurOnSubmit={false}
+                    onSubmit={() => { cityRef.current?.focus(); }}
+                    returnKeyType='next'
+                    innerRef={zipRef}
+                    isDarkMode={props.isDarkMode}
                     ></_TextInput>
                     <_TextInput
                     label="City"
                     value={city}
                     setValue={setCity}
                     onChangeText={(e: any) => setIsSaved(false)}
+                    blurOnSubmit={false}
+                    onSubmit={() => { stateRef.current?.focus(); }}
+                    returnKeyType='next'
+                    innerRef={cityRef}
+                    isDarkMode={props.isDarkMode}
                     ></_TextInput>
                     <_Dropdown
+                    isDarkMode={props.isDarkMode}
                     label="State"
                     options={getStateOptions()}
                     placeholder="Select..."
                     direction="top"
                     value={state}
                     setValue={setState}
+                    innerRef={stateRef}
                     selected={(e: any) => {
                         if (e)
                             checkSaved();
@@ -743,6 +934,7 @@ const AccountInfo = (props: any) => {
                     ></_Dropdown>
                 </_Group>
                 <_Dropdown
+                isDarkMode={props.isDarkMode}
                 label="Gender"
                 options={setGenderOptions()}
                 direction="top"
@@ -761,17 +953,19 @@ const AccountInfo = (props: any) => {
                 >
                     {props.isSetup ?
                     <_Button
-                    style={[Style.buttonDefault, _styles.passwordButton]}
+                    isDarkMode={props.isDarkMode}
+                    style={[Style(props.isDarkMode).buttonDefault, _styles.passwordButton]}
                     onPress={(e: any) => triggerPrompt()}
                     >
                         Update Password
                     </_Button>
                     : null }
                     <_Button
-                    style={Style.buttonGold}
+                    style={Style(props.isDarkMode).buttonGold}
                     loading={isLoading}
                     onPress={(e: any) => onSave()}
                     disabled={checkSubmitDisabled()}
+                    isDarkMode={props.isDarkMode}
                     >
                         {submitText()}
                     </_Button>
@@ -787,12 +981,12 @@ const AccountInfo = (props: any) => {
                 : null}
                 {!isLoaded ?
                 <View
-                style={Style.maskPrompt}
+                style={Style(props.isDarkMode).maskPrompt}
                 >
                     <ActivityIndicator
                     size="large"
-                    color={Color.gold}
-                    style={Style.maskLoading}
+                    color={Color(props.isDarkMode).gold}
+                    style={Style(props.isDarkMode).maskLoading}
                     />    
                 </View>
                 : null }
@@ -801,135 +995,5 @@ const AccountInfo = (props: any) => {
     </View>
     );
 };
-
-const _styles = StyleSheet.create({
-    photoButton: {
-        marginLeft: 5
-    },
-    photoButtonContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    passwordResetText: {
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    spacingLeft: {
-        marginLeft: 8,
-    },
-    passwordPromptContainer: {
-        backgroundColor: Color.holderMask,
-        height: '100%',
-        width: '100%',
-        position: 'absolute',
-        top:0,
-        left:0,
-        zIndex:99
-
-    },
-    passwordContainerContent: {
-        height: '100vh'
-    },
-    passwordPromptContainerMobile: {
-        backgroundColor: Color.whiteMask
-    },
-    passwordButtonContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-    },
-    passwordDialog: {
-        margin: 'auto',
-        backgroundColor: Color.white,
-        padding: 20,
-        borderWidth: 1,
-        borderStyle: 'solid',
-        borderColor: Color.border,
-        borderRadius: 20,
-        maxWidth: 400
-    },
-    imageError: {
-        marginBottom: 5,
-        height: 20
-    },
-    newUserIcon: {
-        ...Platform.select({
-            web: {
-                outlineStyle: 'none'
-            }
-        })
-    },
-    passwordButton: {
-        marginRight: 5,
-    },
-    buttonContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 20,
-        marginBottom: 20
-    },
-    titleContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    defaultImage: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    imageContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 15,
-        marginBottom: 15,
-    },
-    image: {
-        width: 125,
-        height: 125,
-        backgroundColor: Color.white,
-        borderColor: Color.border,
-        borderWidth: 1,
-        borderRadius: Radius.round,
-        marginBottom: 5,
-    },
-    group: {
-        backgroundColor: Color.default
-    },
-    groupFocus: {
-        zIndex: 1,
-        elevation: 1
-    },
-    container: {
-        backgroundColor: Color.white,
-    },
-    title: {
-        fontFamily: 'Inter-SemiBold',
-        fontSize: FontSize.large
-    },
-    subtitle: {
-        color: Color.textTertiary,
-        paddingBottom: 20,
-        fontSize: FontSize.large
-    },
-    subTitleMobile: {
-        fontSize: FontSize.default
-    },
-    formGap: {
-        marginBottom: 15
-    },
-    checkbox: {
-        ...Platform.select({
-            android: {
-                backgroundColor: Color.black
-            }
-        }),
-    }
-});
 
 export default AccountInfo;

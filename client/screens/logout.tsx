@@ -50,6 +50,7 @@ const LogoutScreen = (props: any) => {
         if (!error || !user) {
             props.setIsLoggedIn(false);
             props.setIsSetup(false);
+            navigation.navigate(NavTo.Login);
             navigation.reset({
                 index: 0,
                 routes: [{name: NavTo.Login}],
@@ -58,6 +59,17 @@ const LogoutScreen = (props: any) => {
         else
             setMessage("An error occurred while logging out, please reload the page and try again.");
     }
+
+    const styles = StyleSheet.create({
+        text: {
+            fontWeight: "bold",
+            color: Color(props.isDarkMode).textSecondary
+        },
+        textContainer: {
+            justifyContent: "center",
+            padding: 20
+        }
+    });
 
     return (
     <View>
@@ -70,16 +82,5 @@ const LogoutScreen = (props: any) => {
     </View>
     );
 };
-
-export const styles = StyleSheet.create({
-    text: {
-        fontWeight: "bold",
-        color: Color.textSecondary
-    },
-    textContainer: {
-        justifyContent: "center",
-        padding: 20
-    }
-});
 
 export default LogoutScreen;

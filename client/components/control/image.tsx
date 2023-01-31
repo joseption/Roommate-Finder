@@ -93,6 +93,20 @@ const _Image = (props: any) => {
         setStyle(_style);
     }
 
+    const styles = StyleSheet.create({
+        text: {
+            color: Color(props.isDarkMode).white,
+            fontSize: FontSize.default
+        },
+        textDisabled: {
+            color: Color(props.isDarkMode).textDisabled,
+            fontSize: FontSize.default
+        },
+        imageContainer: {
+            justifyContent: 'center',
+        },
+    });
+    
     return (
     <View
     style={[styles.imageContainer, props.containerStyle]}
@@ -116,19 +130,5 @@ const _Image = (props: any) => {
     </View>
     );
 };
-
-const styles = StyleSheet.create({
-    text: {
-        color: Color.white,
-        fontSize: FontSize.default
-    },
-    textDisabled: {
-        color: Color.textDisabled,
-        fontSize: FontSize.default
-    },
-    imageContainer: {
-        justifyContent: 'center',
-    },
-});
 
 export default _Image;

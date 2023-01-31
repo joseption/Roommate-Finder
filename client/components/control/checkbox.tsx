@@ -23,9 +23,9 @@ const _Checkbox = (props: any, {navigation}:any) => {
         var style = [];
         if (context.isGroup) {
             if (isMobile())
-                style.push(Style.verticalGroup);
+                style.push(Style(props.isDarkMode).verticalGroup);
             else
-                style.push(Style.horizontalGroup);
+                style.push(Style(props.isDarkMode).horizontalGroup);
         }
 
         return style;
@@ -41,18 +41,18 @@ const _Checkbox = (props: any, {navigation}:any) => {
     style={containerStyle()}
     >
         <Pressable
-        style={[Style.checkboxContainer, props.checkbox]}
+        style={[Style(props.isDarkMode).checkboxContainer, props.checkbox]}
         onPress={() => press()}
         >
         <View
-        style={Style.checkbox}
+        style={Style(props.isDarkMode).checkbox}
         >
             {checked ?
             <View
-            style={Style.checkboxMarkContainer}
+            style={Style(props.isDarkMode).checkboxMarkContainer}
             >
                 <View
-                style={Style.checkboxMark}
+                style={Style(props.isDarkMode).checkboxMark}
                 />
             </View>
             :
@@ -60,7 +60,7 @@ const _Checkbox = (props: any, {navigation}:any) => {
             }
         </View>
         <_Text
-        style={Style.checkboxLabel}
+        style={Style(props.isDarkMode).checkboxLabel}
         >
             {props.label}
         </_Text>

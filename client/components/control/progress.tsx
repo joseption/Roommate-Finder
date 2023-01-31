@@ -43,6 +43,43 @@ const _Progress = (props: any) => {
         return style;
     }
 
+    const styles = StyleSheet.create({
+        text: {
+            color: Color(props.isDarkMode).subTitleText,
+            fontSize: FontSize.default,
+            marginRight: 5
+        },
+        progressBar: {
+            height: 16,
+        },
+        contentContainer: {
+            display: 'flex',
+            flexDirection: 'row'
+        },
+        container: {
+            flexDirection: "row",
+            alignItems: "center"
+        },
+        progressBarContainer: {
+            backgroundColor: Color(props.isDarkMode).grey,
+            borderRadius: Radius.large,
+            width: 100,
+            height: "100%"
+        },
+        progressIndicator: {
+            backgroundColor: Color(props.isDarkMode).gold,
+            height: "100%",
+            position: "absolute",
+        },
+        progressComplete: {
+            borderRadius: Radius.large
+        },
+        progressInComplete: {
+            borderTopLeftRadius: Radius.large,
+            borderBottomLeftRadius: Radius.large
+        }
+    });
+
     return (
     <View
     style={containerStyle()}
@@ -67,42 +104,5 @@ const _Progress = (props: any) => {
     </View>
     );
 };
-
-const styles = StyleSheet.create({
-    text: {
-        color: Color.textSecondary,
-        fontSize: FontSize.default,
-        marginRight: 5
-    },
-    progressBar: {
-        height: 16,
-    },
-    contentContainer: {
-        display: 'flex',
-        flexDirection: 'row'
-    },
-    container: {
-        flexDirection: "row",
-        alignItems: "center"
-    },
-    progressBarContainer: {
-        backgroundColor: Color.grey,
-        borderRadius: Radius.large,
-        width: 100,
-        height: "100%"
-    },
-    progressIndicator: {
-        backgroundColor: Color.gold,
-        height: "100%",
-        position: "absolute",
-    },
-    progressComplete: {
-        borderRadius: Radius.large
-    },
-    progressInComplete: {
-        borderTopLeftRadius: Radius.large,
-        borderBottomLeftRadius: Radius.large
-    }
-});
 
 export default _Progress;

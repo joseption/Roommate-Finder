@@ -25,39 +25,40 @@ const _ClusterOption = (props: any) => {
         return style;
     }
 
+    const styles = StyleSheet.create({
+        selectedLabel: {
+            color: Color(props.isDarkMode).actualWhite
+        },
+        selected: {
+            borderColor: Color(props.isDarkMode).gold,
+            backgroundColor: Color(props.isDarkMode).gold
+        },
+        button: {
+            paddingTop: 7,
+            paddingBottom: 7,
+            paddingRight: 10,
+            paddingLeft: 10,
+            backgroundColor: Color(props.isDarkMode).white,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: Color(props.isDarkMode).border,
+            margin: 2.5
+        },
+    });
+
     return (
         <_Button
+        isDarkMode={props.isDarkMode}
         style={style()}
         onPress={() => props.onPress(props.item)}
         >
             <_Text
-            style={selected ? styles.selectedLabel : null}
+            style={selected ? styles.selectedLabel : {color: Color(props.isDarkMode).text}}
             >
                 {props.item}
             </_Text>
         </_Button>
     );
 };
-
-const styles = StyleSheet.create({
-    selectedLabel: {
-        color: Color.white
-    },
-    selected: {
-        borderColor: Color.gold,
-        backgroundColor: Color.gold
-    },
-    button: {
-        paddingTop: 5,
-        paddingBottom: 5,
-        paddingRight: 10,
-        paddingLeft: 10,
-        backgroundColor: Color.white,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: Color.border,
-        margin: 2.5
-    },
-});
 
 export default _ClusterOption;

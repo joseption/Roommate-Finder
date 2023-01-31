@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { acceptableSymbols, config, env, includesSymbol, includesUpperContains, isAtLeastEightChars, textMatches } from '../../helper';
@@ -19,6 +19,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
   const [pwdError,setPwdError] = useState(false);
   const [verifyPwdError,setVerifyPwdError] = useState(false);
   const [loading,setLoading] = useState(false);
+  const verifyPasswordRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
 
   useEffect(() => {
     checkDisabledBtn();
@@ -139,27 +140,44 @@ const UpdatePassword = (props: any, {navigation}:any) => {
     else
       return "Set Password";
   }
+
+  const styles = StyleSheet.create({
+    red: {
+      color: Color(props.isDarkMode).danger
+    },
+    green: {
+      color: Color(props.isDarkMode).success
+    },
+    requirements: {
+      marginTop: 15,
+      marginBottom: 40
+    }
+  });
   
   return (
     <View
     style={props.style}>
       <_Text
-      style={[Style.textHuge, Style.boldFont]}
+      style={[Style(props.isDarkMode).textHuge, Style(props.isDarkMode).boldFont]}
       >
         {title()}
       </_Text>
       <_Text
-      style={[Style.textDefaultTertiary, LoginStyle.actionText]}
+      style={[Style(props.isDarkMode).textDefaultTertiary, LoginStyle(props.isDarkMode).actionText]}
       >
         Enter a new account password
       </_Text>
       <_TextInput
       type="password"
       label="Password"
-      containerStyle={LoginStyle.inputStyle}
+      containerStyle={LoginStyle(props.isDarkMode).inputStyle}
       onChangeText={(e: any) => {handleChange(e)}}
       value={pValue}
       error={pwdError}
+      blurOnSubmit={false}
+      onSubmit={() => { verifyPasswordRef.current?.focus(); }}
+      returnKeyType='next'
+      isDarkMode={props.isDarkMode}
       />
     <_TextInput
       type="password"
@@ -168,12 +186,14 @@ const UpdatePassword = (props: any, {navigation}:any) => {
       value={verifyPValue}
       onSubmit={doPasswordUpdate}
       error={verifyPwdError}
+      innerRef={verifyPasswordRef}
+      isDarkMode={props.isDarkMode}
       />
       <View
       style={styles.requirements}
       >
         <View
-        style={LoginStyle.reqItem}
+        style={LoginStyle(props.isDarkMode).reqItem}
         >
           { hasCharLimit ? (
             <FontAwesomeIcon style={styles.green} icon="check" />
@@ -182,13 +202,13 @@ const UpdatePassword = (props: any, {navigation}:any) => {
             )
           }
           <_Text
-          style={[Style.textSmallDefault, getValidAttribute(hasCharLimit)]}
+          style={[Style(props.isDarkMode).textSmallDefault, getValidAttribute(hasCharLimit)]}
           >
             Includes at least 8 characters
           </_Text>
         </View>
         <View
-        style={LoginStyle.reqItem}
+        style={LoginStyle(props.isDarkMode).reqItem}
         >
           { hasSymbol ? (
             <FontAwesomeIcon style={styles.green} icon="check" />
@@ -197,13 +217,13 @@ const UpdatePassword = (props: any, {navigation}:any) => {
             )
           }
           <_Text
-          style={[Style.textSmallDefault, getValidAttribute(hasSymbol)]}
+          style={[Style(props.isDarkMode).textSmallDefault, getValidAttribute(hasSymbol)]}
           >
             Includes a symbol {acceptableSymbols()}
           </_Text>
         </View>
         <View
-        style={LoginStyle.reqItem}
+        style={LoginStyle(props.isDarkMode).reqItem}
         >
           { hasUpperCase ? (
             <FontAwesomeIcon style={styles.green} icon="check" />
@@ -212,13 +232,13 @@ const UpdatePassword = (props: any, {navigation}:any) => {
             )
           }
           <_Text
-          style={[Style.textSmallDefault, getValidAttribute(hasUpperCase)]}
+          style={[Style(props.isDarkMode).textSmallDefault, getValidAttribute(hasUpperCase)]}
           >
             Includes at least one uppercase letter
           </_Text>
         </View>
         <View
-        style={LoginStyle.reqItem}
+        style={LoginStyle(props.isDarkMode).reqItem}
         >
           { isMatching ? (
             <FontAwesomeIcon style={styles.green} icon="check" />
@@ -227,16 +247,17 @@ const UpdatePassword = (props: any, {navigation}:any) => {
             )
           }
           <_Text
-          style={[Style.textSmallDefault, getValidAttribute(isMatching)]}
+          style={[Style(props.isDarkMode).textSmallDefault, getValidAttribute(isMatching)]}
           >
             Passwords match
           </_Text>
         </View>
       </View>
       <View
-      style={Style.alignRight}
+      style={Style(props.isDarkMode).alignRight}
       >
         <_Button
+        isDarkMode={props.isDarkMode}
         style={props.btnStyle(disabled)}
         onPress={() => doPasswordUpdate()}
         disabled={disabled}
@@ -246,26 +267,26 @@ const UpdatePassword = (props: any, {navigation}:any) => {
         </_Button>
       </View>
       <_Text
-      style={LoginStyle.errorMessage}
+      style={LoginStyle(props.isDarkMode).errorMessage}
       >
         {message}
       </_Text>
         <View
-        style={LoginStyle.previousPageText}
+        style={LoginStyle(props.isDarkMode).previousPageText}
         >
         <_Text
-        style={Style.textDefaultTertiary}
+        style={Style(props.isDarkMode).textDefaultTertiary}
         >
           Go back to
         </_Text>
         {props.registerEmail ?
         <_Text
-        style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
+        style={[Style(props.isDarkMode).textDefaultDefault, Style(props.isDarkMode).boldFont, LoginStyle(props.isDarkMode).previousPageAction]}
         onPress={() => backToRegister()}
         >register</_Text>
         :
         <_Text
-        style={[Style.textDefaultDefault, Style.boldFont, LoginStyle.previousPageAction]}
+        style={[Style(props.isDarkMode).textDefaultDefault, Style(props.isDarkMode).boldFont, LoginStyle(props.isDarkMode).previousPageAction]}
         onPress={() => backToLogin()}
         >login</_Text>
         }
@@ -273,18 +294,5 @@ const UpdatePassword = (props: any, {navigation}:any) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  red: {
-    color: Color.danger
-  },
-  green: {
-    color: Color.success
-  },
-  requirements: {
-    marginTop: 15,
-    marginBottom: 40
-  }
-});
 
 export default UpdatePassword;

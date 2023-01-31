@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Animated, Platform } from 'react-native';
+import { StyleSheet, View, Animated, Platform, ActivityIndicator } from 'react-native';
 import _Button from '../components/control/button';
 import _Image from '../components/control/image';
 import _Text from '../components/control/text';
@@ -36,6 +36,7 @@ const LoginScreen = (props:any) => {
   const [registerEmail, setRegisterEmail] = useState('');
   const [token, setToken] = useState('');
   const [autoResend, setAutoResend] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [forgotError, setForgotError] = useState('');
   const navigation = useNavigation<navProp>();
 
@@ -51,6 +52,10 @@ const LoginScreen = (props:any) => {
     }
     let rt = route();
     if (rt && rt.name == NavTo.Login && rt.params && rt.params['view']) {
+      let email = rt.params['email'];
+      if (email) {
+        setEmailValue((email));
+      }
       let view = rt.params['view'];
       if (view as typeof LoginNavTo && currentScreen != view && view != LoginNavTo.Login) {
         updateVisibleScreen(view, false);
@@ -169,6 +174,7 @@ const LoginScreen = (props:any) => {
   }
 
   const gotoScreen = async () => {
+    setIsLoading(true);
     let rt = route();
     let timeout;
     if (rt && rt.name == NavTo.Login && rt.params) {
@@ -213,6 +219,7 @@ const LoginScreen = (props:any) => {
       updateVisibleScreen(LoginNavTo.Login);
 
     setInitScreen(true);
+    setIsLoading(false);
   }
 
   const updateVisibleScreen = (s: typeof LoginNavTo, delay = false) => {
@@ -252,28 +259,161 @@ const LoginScreen = (props:any) => {
 
   const btnStyle = (disabled: boolean) => {
     var style = [];
-    style.push(LoginStyle.submitButton);
+    //style.push(LoginStyle(props.isDarkMode).submitButton);
     if (disabled) {
-      style.push(Style.buttonDisabled);
+      style.push(Style(props.isDarkMode).buttonDisabled);
     }
     else {
-      style.push(Style.buttonGold);
+      style.push(Style(props.isDarkMode).buttonGold);
     }
 
     return style;
   }
 
+  const passwordContainerStyle = () => {
+    let style = [];
+    style.push(styles.passwordPromptContainer);
+    if (props.mobile) {
+        style.push(styles.passwordPromptContainerMobile);
+    }
+    return style;
+  }
+
+  const passwordContentStyle = () => {
+      let style = [];
+      style.push(styles.passwordContainerContent);
+      let top = props.scrollY ? props.scrollY : 0;
+      style.push({
+          top: top
+      });
+      return style;
+  }
+
+  const styles = StyleSheet.create({
+    passwordPromptContainer: {
+      backgroundColor: Color(props.isDarkMode).promptMaskMobile,
+      height: '100%',
+      width: '100%',
+      position: 'absolute',
+      top:0,
+      left:0,
+      zIndex:99,
+      ...Platform.select({
+          android: {
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+          }
+      }),
+  },
+  passwordContainerContent: {
+      ...Platform.select({
+          web: {
+              height: '100%'
+          },
+      }),
+  },
+  passwordPromptContainerMobile: {
+      backgroundColor: Color(props.isDarkMode).whiteMask
+  },
+  outerContainer: {
+    ...Platform.select({
+      web: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        height: '100%',
+      },
+    }),
+  },
+  container: {
+    backgroundColor: Color(props.isDarkMode).contentBackground,
+    margin:'auto',
+    overflow:'hidden',
+    height: '100%',
+    padding: 10,
+  },
+  containerMobile: {
+    backgroundColor: Color(props.isDarkMode).contentBackgroundSecondary,
+    paddingLeft:10,
+    paddingRight:10,
+    paddingTop: 40,
+    paddingBottom: 40,
+  },
+  dialog: {
+    opacity:.95,
+    minWidth:400,
+    minHeight:600,
+    maxWidth:400,
+    maxHeight:600,
+    borderRadius:Radius.large,
+    borderColor:Color(props.isDarkMode).contentBackground,
+    borderWidth: 1,
+    shadowColor: Color(props.isDarkMode).holderSecondary,
+    shadowOffset: {width: -3, height: 3},
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    padding: 40
+  },
+  full: {
+    width:'100%',
+    display: 'flex',
+    ...Platform.select({
+      web: {
+        justifyContent: 'space-between'
+      }
+    }),
+  },
+  content: {
+      display:'flex',
+      flexDirection: 'row',
+      width:'100%',
+      flex: 1,
+      marginLeft: -21
+  },
+  animateContent: {
+    ...Platform.select({
+      web: {
+        transition: 'transform .15s ease, opacity 2s ease', // JA this is temporary and needs to be replaced with animation
+      }
+    }),
+  },
+  panel: {
+      width:'100%',
+      marginLeft: 21,
+      marginRight: 21,
+  },
+  hidden: {
+    display: 'none'
+  }
+});
+
   return (
       <View
       style={styles.outerContainer}
       >
+        {isLoading ?
+        <View
+        style={passwordContainerStyle()}
+        >
+          <View
+          style={passwordContentStyle()}
+          >
+                <ActivityIndicator
+                size="large"
+                color={Color(props.isDarkMode).gold}
+                style={Style(props.isDarkMode).maskLoading}
+                />  
+          </View>
+        </View>
+        : null}
         <View
         style={style()}
         >
           {props.mobile ?
           <_Image
-          style={LoginStyle.logo}
-          source={require('../assets/images/logo.png')}
+          style={LoginStyle(props.isDarkMode).logo}
+          source={props.isDarkMode ? require('../assets/images/logo_w.png') : require('../assets/images/logo.png')}
           height={30}
           />
           : null
@@ -288,19 +428,20 @@ const LoginScreen = (props:any) => {
                 setEmail={setEmailValue}
                 email={emailValue}
                 registerPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.Register} as never);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.Register, email: emailValue} as never);
                     goRight(LoginNavTo.Register);
                   }
                 }
                 style={[styles.panel, activateEmailSent ? null : styles.hidden]}
                 autoResend={autoResend}
+                isDarkMode={props.isDarkMode}
               />
               <Register
                 btnStyle={btnStyle}
                 setEmail={setEmailValue}
                 email={emailValue}
                 sendEmailPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.ActivateEmailSent} as never);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.ActivateEmailSent, email: emailValue} as never);
                     goLeft(LoginNavTo.ActivateEmailSent);
                   }
                 }
@@ -314,6 +455,7 @@ const LoginScreen = (props:any) => {
                 }
                 style={[styles.panel, register ? null : styles.hidden]}
                 setPasswordUpdateType={setPasswordUpdateType}
+                isDarkMode={props.isDarkMode}
               />
               <Login
                 url={url}
@@ -332,13 +474,14 @@ const LoginScreen = (props:any) => {
                 setIsLoggedIn={props.setIsLoggedIn}
                 setIsSetup={props.setIsSetup}
                 setNavSelector={props.setNavSelector}
+                isDarkMode={props.isDarkMode}
               />
               <ForgotPassword
                 btnStyle={btnStyle}
                 setEmail={setEmailValue}
                 email={emailValue}
                 sendEmailPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.PasswordResetSent} as never);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.PasswordResetSent, email: emailValue} as never);
                     goRight(LoginNavTo.PasswordResetSent);
                   } 
                 }
@@ -352,18 +495,20 @@ const LoginScreen = (props:any) => {
                 }
                 style={[styles.panel, forgotPassword ? null : styles.hidden]}
                 forgotError={forgotError}
+                isDarkMode={props.isDarkMode}
               />
               <PasswordResetSent
                 btnStyle={btnStyle}
                 setStopInterval={setStopInterval}
                 stopInterval={stopInterval}
                 passwordPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.ForgotPassword} as never);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.ForgotPassword, email: emailValue} as never);
                     goLeft(LoginNavTo.ForgotPassword);
                   }
                 }
                 style={[styles.panel, passwordResetSent ? null : styles.hidden]}
                 email={emailValue}
+                isDarkMode={props.isDarkMode}
               />
               <UpdatePassword
                 setIsPasswordReset={props.setIsPasswordReset}
@@ -394,6 +539,7 @@ const LoginScreen = (props:any) => {
                 registerEmail={registerEmail}
                 token={token}
                 setAccountAction={props.setAccountAction}
+                isDarkMode={props.isDarkMode}
               />
               <PasswordUpdated
                 loginPressed={() => {
@@ -405,83 +551,12 @@ const LoginScreen = (props:any) => {
                   }
                 }
                 style={[styles.panel, passwordUpdated ? null : styles.hidden]}
+                isDarkMode={props.isDarkMode}
               />
             </Animated.View>
           </View>
       </View>
   );
 };
-
-export const styles = StyleSheet.create({
-    outerContainer: {
-      ...Platform.select({
-        web: {
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          height: '100%',
-        },
-      }),
-    },
-    container: {
-      backgroundColor: Color.white,
-      margin:'auto',
-      overflow:'hidden',
-      height: '100%',
-      padding: 10,
-    },
-    containerMobile: {
-      paddingLeft:10,
-      paddingRight:10,
-      paddingTop: 40,
-      paddingBottom: 40,
-    },
-    dialog: {
-      opacity:.95,
-      minWidth:400,
-      minHeight:600,
-      maxWidth:400,
-      maxHeight:600,
-      borderRadius:Radius.large,
-      borderColor:Color.border,
-      borderWidth: 1,
-      shadowColor: Color.borderSecondary,
-      shadowOffset: {width: -3, height: 3},
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      padding: 40
-    },
-    full: {
-      width:'100%',
-      display: 'flex',
-      ...Platform.select({
-        web: {
-          justifyContent: 'space-between'
-        }
-      }),
-    },
-    content: {
-        display:'flex',
-        flexDirection: 'row',
-        width:'100%',
-        flex: 1,
-        marginLeft: -21
-    },
-    animateContent: {
-      ...Platform.select({
-        web: {
-          transition: 'transform .15s ease, opacity 2s ease', // JA this is temporary and needs to be replaced with animation
-        }
-      }),
-    },
-    panel: {
-        width:'100%',
-        marginLeft: 21,
-        marginRight: 21,
-    },
-    hidden: {
-      display: 'none'
-    }
-  });
 
 export default LoginScreen;

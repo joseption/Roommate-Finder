@@ -44,9 +44,7 @@ const AccountScreen = (props: any) => {
             else
                 setView(AccountScreenType.info);
         }
-        else
-            setView(AccountScreenType.info);
-    }, [navigation, props.accountView, props.isLoggedIn, props.setupStep]);
+    }, [navigation, props.accountView, props.isLoggedIn, props.setupStep, props.isSetup]);
 
     const route = () => {
         if (navigation) {
@@ -72,6 +70,7 @@ const AccountScreen = (props: any) => {
         await setLocalStorage(null);
         props.setIsLoggedIn(false);
         props.setIsSetup(false);
+        navigation.navigate(NavTo.Login);
         navigation.reset({
             index: 0,
             routes: [{name: NavTo.Login, params: {timeout: 'yes'} as never}],
@@ -90,6 +89,7 @@ const AccountScreen = (props: any) => {
         setPrompt={props.setPrompt}
         scrollY={props.scrollY}
         unauthorized={unauthorized}
+        isDarkMode={props.isDarkMode}
         />
         :
         <View>
@@ -101,6 +101,7 @@ const AccountScreen = (props: any) => {
             setView={(e: any) => setView(e)}
             isSetup={props.isSetup}
             unauthorized={unauthorized}
+            isDarkMode={props.isDarkMode}
             />
             :
             <View>
@@ -111,7 +112,9 @@ const AccountScreen = (props: any) => {
                 setError={props.setError}
                 setView={(e: any) => setView(e)}
                 isSetup={props.isSetup}
+                setIsSetup={props.setIsSetup}
                 unauthorized={unauthorized}
+                isDarkMode={props.isDarkMode}
                 />
                 : null }
             </View>

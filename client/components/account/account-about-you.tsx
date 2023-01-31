@@ -71,27 +71,28 @@ const AccountAbout = (props: any) => {
 
     const errorStyle = () => {
         var style = [];
-        style.push(Style.textDanger);
+        style.push(Style(props.isDarkMode).textDanger);
         if (props.mobile)
-          style.push(Style.errorText);        
+          style.push(Style(props.isDarkMode).errorText);        
         return style;
     }
 
     const errorContainerStyle = () => {
         var style = [];
         if (props.mobile) {
-            style.push(Style.errorMsgMobile);
+            style.push(Style(props.isDarkMode).errorMsgMobile);
         }
         else {
-            style.push(Style.errorMsg);
+            style.push(Style(props.isDarkMode).errorMsg);
         }
         return style;
     }
 
     const containerStyle = () => {
+        var container = Color(props.isDarkMode).contentBackground;
         var padding = 20;
         var borderRadius = Radius.large;
-        var borderColor = Color.border;
+        var borderColor = Color(props.isDarkMode).border;
         var borderWidth = 1;
         var marginTop = 10;
         if (props.mobile) {
@@ -99,6 +100,7 @@ const AccountAbout = (props: any) => {
             borderRadius = 0;
             borderWidth = 0;
             marginTop = 0
+            container = Color(props.isDarkMode).contentBackgroundSecondary;
         }
 
         return {
@@ -106,7 +108,8 @@ const AccountAbout = (props: any) => {
             borderRadius: borderRadius,
             borderColor: borderColor,
             borderWidth: borderWidth,
-            marginTop: marginTop
+            marginTop: marginTop,
+            backgroundColor: container
         }
     }
 
@@ -151,10 +154,10 @@ const AccountAbout = (props: any) => {
     }
 
     const onSave = async (loc: string = '') => {
+        let hasError = false;
+        setError('');
         if (!checkSubmitDisabled()) {
-            setError('');
             setIsLoading(true);
-            let hasError = false;
             let setup_step = props.isSetup ? '' : 'survey';
             let obj = {bio:bioForm, tags:tagForm, setup_step:setup_step};
             let js = JSON.stringify(obj);
@@ -240,9 +243,64 @@ const AccountAbout = (props: any) => {
         }
     }
 
+    const _styles = StyleSheet.create({
+        formGap: {
+            marginBottom: 20
+        },
+        buttonContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            marginTop: 20,
+            marginBottom: 20
+        },
+        titleContainer: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            flexDirection: 'row',
+            alignItems: 'center'
+        },
+        title: {
+            fontFamily: 'Inter-SemiBold',
+            fontSize: FontSize.large,
+            color: Color(props.isDarkMode).titleText
+        },
+        subtitle: {
+            color: Color(props.isDarkMode).textTertiary,
+            paddingBottom: 20,
+            fontSize: FontSize.large
+        },
+        subTitleMobile: {
+            fontSize: FontSize.default
+        },
+        arrowContainer: {
+            display: 'flex',
+            justifyContent: 'center',
+            flexDirection: 'row'
+        },
+        backArrow: {
+            marginRight: 5,
+            ...Platform.select({
+                web: {
+                    outlineStyle: 'none'
+                }
+            })
+        },
+        options: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            flexDirection: 'row',
+            margin: 'auto',
+            alignItems: 'center',
+            width: '100%',
+        },
+    });
+
     return (
     <View>
-        <ScrollView>
+        <ScrollView
+        keyboardShouldPersistTaps={'handled'}
+        >
             <View>
                 <View
                 style={_styles.titleContainer}
@@ -254,9 +312,10 @@ const AccountAbout = (props: any) => {
                     </_Text>
                     {props.isSetup ?
                     <_Button
-                    style={Style.buttonInverted}
-                    textStyle={Style.buttonInvertedText}
+                    style={Style(props.isDarkMode).buttonInverted}
+                    textStyle={Style(props.isDarkMode).buttonInvertedText}
                     onPress={(e: any) => onSave('info')}
+                    isDarkMode={props.isDarkMode}
                     >
                         Edit Account
                     </_Button>
@@ -264,7 +323,7 @@ const AccountAbout = (props: any) => {
                 </View>
             </View>
             <View
-            style={[containerStyle(), _styles.container]}
+            style={[containerStyle()]}
             >
                 <_Text
                 style={subTitleStyle()}
@@ -281,10 +340,12 @@ const AccountAbout = (props: any) => {
                 maxLength={1000}
                 onChangeText={(e: any) => setBio(e)}
                 value={bioForm}
+                isDarkMode={props.isDarkMode}
                 >
 
                 </_TextInput>
                 <_Cluster
+                isDarkMode={props.isDarkMode}
                 label="Activities and Interests"
                 required={true}
                 minAmount={5}
@@ -307,13 +368,13 @@ const AccountAbout = (props: any) => {
                     >
                         <FontAwesomeIcon 
                         size={20} 
-                        color={Color.textSecondary} 
+                        color={Color(props.isDarkMode).textSecondary} 
                         style={_styles.backArrow} 
                         icon="arrow-left"
                         >
                         </FontAwesomeIcon>
                         <_Text
-                        style={Style.textDefaultSecondary}
+                        style={Style(props.isDarkMode).textDefaultSecondary}
                         >
                             Go Back
                         </_Text>
@@ -327,9 +388,10 @@ const AccountAbout = (props: any) => {
                     >
                         <_Button
                         loading={isLoading}
-                        style={Style.buttonGold}
+                        style={Style(props.isDarkMode).buttonGold}
                         disabled={checkSubmitDisabled()}
                         onPress={(e: any) => onSave('next')}
+                        isDarkMode={props.isDarkMode}
                         >
                             {submitText()}
                         </_Button>
@@ -346,12 +408,12 @@ const AccountAbout = (props: any) => {
                 : null}
                 {!isLoaded ?
                 <View
-                style={Style.maskPrompt}
+                style={Style(props.isDarkMode).maskPrompt}
                 >
                     <ActivityIndicator
                     size="large"
-                    color={Color.gold}
-                    style={Style.maskLoading}
+                    color={Color(props.isDarkMode).gold}
+                    style={Style(props.isDarkMode).maskLoading}
                     />    
                 </View>
                 : null }
@@ -360,60 +422,5 @@ const AccountAbout = (props: any) => {
     </View>
     );
 };
-
-const _styles = StyleSheet.create({
-    formGap: {
-        marginBottom: 20
-    },
-    buttonContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 20,
-        marginBottom: 20
-    },
-    titleContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    container: {
-        backgroundColor: Color.white,
-    },
-    title: {
-        fontFamily: 'Inter-SemiBold',
-        fontSize: FontSize.large
-    },
-    subtitle: {
-        color: Color.textTertiary,
-        paddingBottom: 20,
-        fontSize: FontSize.large
-    },
-    subTitleMobile: {
-        fontSize: FontSize.default
-    },
-    arrowContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        flexDirection: 'row'
-    },
-    backArrow: {
-        marginRight: 5,
-        ...Platform.select({
-            web: {
-                outlineStyle: 'none'
-            }
-        })
-    },
-    options: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        flexDirection: 'row',
-        margin: 'auto',
-        alignItems: 'center',
-        width: '100%',
-    },
-});
 
 export default AccountAbout;

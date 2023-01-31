@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, FlatList, TextInput, Button, StyleSheet } from 'react-native';
 import MessageTab from '../components/messages/message-tab';
 import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
-import { env, getLocalStorage } from '../helper';
+import { authTokenHeader, env, getLocalStorage } from '../helper';
+import io, { Socket } from 'socket.io-client'
+import { DefaultEventsMap } from '@socket.io/component-emitter';
+
+const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io(env.URL);
 
 const MessagesScreen = (props: any, {navigation}:any) => {
   const [showPanel, updateShowPanel] = useState(false);
   const [currentChat, setCurrentChat] = useState({});
   const [chats, setChats] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState<any>();
+  const chatsRef = useRef(chats)
 
   useEffect(() => {
     getUserInfo();
@@ -20,8 +25,49 @@ const MessagesScreen = (props: any, {navigation}:any) => {
     getChats();
   }, [userInfo])
 
+  useEffect(() => {
+    chatsRef.current = chats;
+  }, [chats])
+  
+  useEffect(() => {
+    socket.on('receive_message', (data: any) => {
+      updateTabs(data)
+    });
+  }, [socket])
+
+  const updateTabs = async (data: any) => {
+    if (chatsRef.current.length === 0) return;
+    let fetchedChat = await getChat(data.chatId)
+    let latestMessage = await getMessage(fetchedChat.latestMessage);
+    let newChat: any;
+    let newChats = chatsRef.current.filter((chat) => {
+      const condition = data.chatId !== chat.id; 
+      if (!condition) {
+        newChat = chat;
+      }
+      return condition;
+    })
+    newChat = {...newChat, latestMessage: latestMessage};
+    newChats = [newChat, ...newChats];
+    setChats(newChats);
+  }
+
   const getUserInfo = async () => {
     setUserInfo(await getLocalStorage().then((res) => {return res.user}));
+  }
+
+  const getChat = async (chatId: string) => {
+    return fetch(
+      `${env.URL}/chats/${chatId}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      }
+      else {
+        return res;
+      }
+    });
   }
 
   const getMessage = async (id: string) => {
@@ -45,8 +91,9 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }
 
   const getUser = async (id: string) => {
+    let tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
+      `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
@@ -54,6 +101,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       }
       else {
         let user = {
+          first_name: res.first_name,
           id: res.id,
           email: res.email,
           image: res.image,
@@ -61,6 +109,14 @@ const MessagesScreen = (props: any, {navigation}:any) => {
         return user;
       }
     });
+  }
+
+  const connectToChatRooms = async (chats: any) => {
+    if (chats.length === 0) return;
+    const rooms = await chats.map((chat: any) => {
+      return chat.id;
+    })
+    socket.emit('join_room', rooms)
   }
 
   const getChats = async () => {
@@ -95,6 +151,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
           };
           chatArray.push(chat);
         }
+        connectToChatRooms(chatArray);
         setChats(chatArray);
       }
     });
@@ -110,10 +167,11 @@ const MessagesScreen = (props: any, {navigation}:any) => {
             updateShowPanel={updateShowPanel}
             chat={item}
             setCurrentChat={setCurrentChat}
+            key={item.id}
           />
         }
       />
-      <MessagePanel showPanel={showPanel} updateShowPanel={updateShowPanel} chat={currentChat}/>
+      <MessagePanel showPanel={showPanel} socket={socket} updateShowPanel={updateShowPanel} chat={currentChat}/>
     </>
   );
 };

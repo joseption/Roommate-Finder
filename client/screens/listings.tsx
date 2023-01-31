@@ -52,12 +52,6 @@ const ListingsScreen = (props: any, {navigation}:any) => {
         }
     };
 
-    // function getListing, calls the database to get a singular listing
-    const getListing = () => {
-        let listing = {data:"Hello"};
-        setListingData(listing.data);
-    } 
-
     // need to change, builds the cards and returns all cards in listingView
     const getListings = () => {
         return {data:"Hello"};

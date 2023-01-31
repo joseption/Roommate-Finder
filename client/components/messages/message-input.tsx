@@ -54,7 +54,7 @@ const MessageInput = ({chat, socket}: Props) => {
       }
       else {
         const randomNum = () => {
-          (Math.floor(Math.random() * 20) + 1).toString()
+          return (Math.floor(Math.random() * 1000000) + 1).toString();
         }
 
         const data = {
@@ -98,7 +98,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'whitesmoke',
     padding: 5,
     paddingHorizontal: 10,
-    marginTop: 10,
     alignItems: 'center',
     minHeight: 55,
   },

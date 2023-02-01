@@ -68,13 +68,13 @@ const AccountScreen = (props: any) => {
 
     const unauthorized = async () => {
         await setLocalStorage(null);
-        props.setIsLoggedIn(false);
-        props.setIsSetup(false);
         navigation.navigate(NavTo.Login);
         navigation.reset({
             index: 0,
             routes: [{name: NavTo.Login, params: {timeout: 'yes'} as never}],
         });
+        props.setIsLoggedIn(false);
+        props.setIsSetup(false);
     }
 
     return (

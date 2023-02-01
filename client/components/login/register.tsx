@@ -58,7 +58,7 @@ const Register = (props: any, {navigation}:any) => {
           await fetch(`${env.URL}/auth/registerFast`,
           {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
-              if (res.Error)
+              if (res.error)
               {
                     setMessage(res.error);
                     hasError = true;

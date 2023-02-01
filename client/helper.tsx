@@ -56,6 +56,10 @@ export const Context = createContext({} as any);
 export type navProp = StackNavigationProp<Page>;
 export const NavTo = {
   Home: 'Home' as never,
+  Auth: 'Auth' as never,
+  ConfirmEmail: 'ConfirmEmail' as never,
+  ResetPassword: 'ResetPassword' as never,
+  UpdatePassword: 'UpdatePassword' as never,
   Login: 'Login' as never,
   Account: 'Account' as never,
   Profile: 'Profile' as never,
@@ -78,6 +82,10 @@ export const LoginNavTo = {
 
 export type Page = {
   Home: undefined;
+  Auth: undefined;
+  ConfirmEmail: undefined;
+  ResetPassword: undefined;
+  UpdatePassword: undefined;
   Login: undefined;
   Account: undefined;
   Profile: undefined;
@@ -91,6 +99,13 @@ export type Page = {
 export const config = {
   screens: {
     Home: '/',
+    Auth: {
+      screens: {
+        ConfirmEmail: '/auth/confirmEmail',
+        ResetPassword: '/auth/reset',
+        UpdatePassword: '/auth/update',
+      },
+    },
     Login: '/login',
     Account: '/account',
     Profile: '/profile',
@@ -105,7 +120,14 @@ export const config = {
 
 const prefix = DeepLinking.createURL('/');
 export const linking = {
-  prefixes: [prefix],
+  prefixes: [
+    prefix,
+    'roomfin://',
+    'https://roomfin.xyz',
+    'https://www.roomfin.xyz',
+    'http://roomfin.xyz',
+    'http://www.roomfin.xyz',
+  ],
   config,
 };
 

@@ -1,4 +1,4 @@
-import { NavigationContainer, NavigationContainerRef, StackRouter, useFocusEffect, useLinkProps, useNavigation } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import HomeScreen from './screens/home';
 import { useFonts } from 'expo-font';
 import Navigation from './components/navigation/navigation';
@@ -12,13 +12,12 @@ import ListingsScreen from './screens/listings';
 import MessagesScreen from './screens/messages';
 import SearchScreen from './screens/search';
 import { Color, Content } from './style';
-import { Context, env, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, navProp } from './helper';
+import { env, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, navProp } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
-import * as DeepLinking from 'expo-linking';
-import { Params } from '@fortawesome/fontawesome-svg-core';
 import _Button from './components/control/button';
+import AuthScreen from './screens/auth';
 export const ThemeContext = React.createContext(null);
 export const App = (props: any) => {
   const [navHeight,setNavHeight] = useState(0);
@@ -32,18 +31,13 @@ export const App = (props: any) => {
   const [isLoggedIn,setIsLoggedIn] = useState(false);
   const [isLoggingOut,setIsLoggingOut] = useState(false);
   const [accountAction,setAccountAction] = useState(false);
-  const [init,setInit] = useState(false);
-  const [initLink,setInitLink] = useState('');
   const [isSetup,setIsSetup] = useState(false);
   const [isLoaded,setIsLoaded] = useState(false);
   const [prompt,setPrompt] = useState(false);
   const [setupStep,setSetupStep] = useState('');
   const [scrollY,setScrollY] = useState(0);
   const [navSelector,setNavSelector] = useState('');
-  const [verifiedDeepLink,setVerifiedDeepLink] = useState(false);
-  const [isPasswordReset,setIsPasswordReset] = useState(false);
-  const [pageVerified,setPageVerified] = useState(false);
-  const [isBackPressed,setIsBackPressed] = useState(false);
+  const [route,setRoute] = useState('');
   const [isDarkMode,setIsDarkMode] = useState(false);
   const [backCount,setBackCount] = useState(0);
   const [backTimer,setBackTimer] = useState(0);
@@ -60,31 +54,19 @@ export const App = (props: any) => {
     const dimsChanged = Dimensions.addEventListener("change", (e) => setMobile(isMobile()));
     const back = BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
-    if (!isBackPressed) {
-      if (!verifiedDeepLink && !pageVerified) {
-        DeepLinking.getInitialURL().then(async (link: any) => {
-          if (!initLink) {
-            setInitLink(link);
-            checkDeepLink(link);
-          }
-          else
-            checkDeepLink(initLink);
-        });
-      }
-      else if (pageVerified) {
-        if (verifiedDeepLink)
-          setVerifiedDeepLink(false);
-        else {
-          checkSetup();
-        }
-      }
-      prepareStyle();   
-      setIsLoaded(true);
+    let rt = getRouteName();
+    setRoute(rt);
+    if (route != rt &&
+      rt != NavTo.Auth ||
+      rt != NavTo.ConfirmEmail ||
+      rt != NavTo.ResetPassword ||
+      rt != NavTo.UpdatePassword ||
+      rt != NavTo.Logout ||
+      rt != NavTo.Login) {
+      checkLoggedIn();
     }
-    else {
-      setIsBackPressed(false);
-    }
-  
+
+    prepareStyle(); 
     return () => {
       back.remove();
       dimsChanged?.remove();
@@ -96,7 +78,6 @@ export const App = (props: any) => {
   }
 
   const onBackPress = () => {
-    setIsBackPressed(true);
     let current = getRouteName();
     let name = getPreviousRouteName();
     if (name) {
@@ -139,8 +120,13 @@ export const App = (props: any) => {
     return false;
   };
 
-  const getRouteName = () => {
-    return ref.current?.getCurrentRoute()?.name;
+  function getRouteName() {
+    if (ref.current) {
+      let route = ref.current.getCurrentRoute();
+      if (route)
+        return route.name;
+    }
+    return '';
   }
 
   const getRouteView = () => {
@@ -164,70 +150,6 @@ export const App = (props: any) => {
       }
     }
     return NavTo.Profile;
-  }
-
-  const logout = async () => {
-    let hasError = false;
-    try
-    {   
-        let user = await getLocalStorage();
-        if (user && user.refreshToken) {
-          let obj = {refreshToken:user.refreshToken};
-          let js = JSON.stringify(obj);
-
-          await fetch(`${env.URL}/auth/logout`,
-          {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
-              let res = JSON.parse(await ret.text());
-              if (!res.Error) {
-                  await setLocalStorage(null);
-                  setIsLoggingOut(true);
-                  setIsLoggedIn(false);
-                  setIsSetup(false);
-              }
-              else {
-                hasError = true;
-              }
-          });
-      }
-    }
-    catch(e)
-    {
-      // Couldn't log out
-    } 
-  }
-
-  async function checkDeepLink(link: string) {
-    if (ref && ref.current) {
-      if (link && link.toLowerCase().includes('/auth')) {
-        if (!isPasswordReset) {
-          setIsPasswordReset(true);
-          var cRoute = DeepLinking.parse(link);
-          var path = cRoute.path?.substring(cRoute.path?.lastIndexOf('/') + 1);
-          if (cRoute?.queryParams)
-            cRoute.queryParams.path = path;
-          await logout();
-          if (!accountAction)
-            setAccountAction(true);
-
-          ref.current?.navigate(NavTo.Login, cRoute.queryParams as never);
-          return;
-        }
-        else {
-          setIsPasswordReset(false);
-        }
-      }
-      else if (!verifiedDeepLink && !pageVerified) {
-        setPageVerified(true);
-        checkSetup(true);
-      }
-      setVerifiedDeepLink(true);
-    }
-  }
-
-  function checkSetup(force: boolean = false) {
-    if (force || pageVerified) {
-      checkLoggedIn();
-    } 
   }
 
   const navigateToSetupStep = (step: string) => {
@@ -294,9 +216,9 @@ export const App = (props: any) => {
           let route = ref.current.getCurrentRoute();
           if (route && route.name !== NavTo.Login) {
             await setLocalStorage(null);
+            ref.current.navigate(NavTo.Login, {timeout: 'yes'} as never);
             setIsLoggedIn(false);
             setIsSetup(false);
-            ref.current.navigate(NavTo.Login, {timeout: 'yes'} as never);
               try {
                 ref.current.resetRoot();
               }
@@ -480,6 +402,20 @@ export const App = (props: any) => {
               {...props}
               mobile={mobile}
               isDarkMode={isDarkMode}
+              setNavSelector={setNavSelector}
+              />}
+              </Stack.Screen>
+              <Stack.Screen
+                  name={NavTo.Auth}
+                  options={{title: NavTo.Auth, animation: 'none'}}
+              >
+              {(props: any) => <AuthScreen
+              {...props}
+              mobile={mobile}
+              setIsLoggedIn={setIsLoggedIn}
+              setIsSetup={setIsSetup}
+              isDarkMode={isDarkMode}
+              setNavSelector={setNavSelector}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -494,7 +430,6 @@ export const App = (props: any) => {
                   accountAction={accountAction}
                   setAccountAction={setAccountAction}
                   setNavSelector={setNavSelector}
-                  setIsPasswordReset={setIsPasswordReset}
                   loginViewChanged={loginViewChanged}
                   setLoginViewChanged={setLoginViewChanged}
                   isDarkMode={isDarkMode}
@@ -516,6 +451,7 @@ export const App = (props: any) => {
               setIsLoggedIn={setIsLoggedIn}
               setIsSetup={setIsSetup}
               isDarkMode={isDarkMode}
+              setNavSelector={setNavSelector}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -538,6 +474,7 @@ export const App = (props: any) => {
               setIsLoggedIn={setIsLoggedIn}
               setIsSetup={setIsSetup}
               isDarkMode={isDarkMode}
+              setNavSelector={setNavSelector}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -550,6 +487,7 @@ export const App = (props: any) => {
               isMatches={isMatches}
               setIsMatches={setIsMatches}
               isDarkMode={isDarkMode}
+              setNavSelector={setNavSelector}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -560,6 +498,7 @@ export const App = (props: any) => {
               {...props}
               mobile={mobile}
               isDarkMode={isDarkMode}
+              setNavSelector={setNavSelector}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -570,6 +509,7 @@ export const App = (props: any) => {
               {...props}
               mobile={mobile}
               isDarkMode={isDarkMode}
+              setNavSelector={setNavSelector}
               />}
               </Stack.Screen> 
               <Stack.Screen
@@ -582,6 +522,7 @@ export const App = (props: any) => {
               setIsLoggedIn={setIsLoggedIn}
               setIsSetup={setIsSetup}
               isDarkMode={isDarkMode}
+              setNavSelector={setNavSelector}
               />}
               </Stack.Screen>
             </Stack.Navigator>

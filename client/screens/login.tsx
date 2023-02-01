@@ -129,7 +129,7 @@ const LoginScreen = (props:any) => {
       let isValid = false;
       try
       {    
-          if (type == "confirmEmail") {
+          if (type == NavTo.ConfirmEmail) {
             let obj = {emailToken:token};
             let js = JSON.stringify(obj);
             
@@ -141,7 +141,7 @@ const LoginScreen = (props:any) => {
                 }
             });
           }
-          else if (type == "reset" || type == "update" ) {
+          else if (type == NavTo.ResetPassword || type == NavTo.UpdatePassword) {
             let obj = {resetToken:token};
             let js = JSON.stringify(obj);  
                   
@@ -154,7 +154,8 @@ const LoginScreen = (props:any) => {
             });
           }
       }
-      catch(e) {}    
+      catch(e) {
+      }    
 
       return isValid;
   };
@@ -183,7 +184,7 @@ const LoginScreen = (props:any) => {
       if (!timeout) {
         let uToken = rt.params['token'];
         let uEmail = rt.params['email'];
-        let uPath = rt.params['path'];
+        let uPath = rt.params['type'];
         if (uToken) {
           setToken(uToken);
           if (uEmail) {
@@ -195,18 +196,25 @@ const LoginScreen = (props:any) => {
             updateVisibleScreen(LoginNavTo.UpdatePassword);
           }
           else {
-            if (uPath == "confirmEmail") {
+            if (uPath == NavTo.ConfirmEmail) {
               setEmailValue(uEmail as string);
               setAutoResend(true);
               updateVisibleScreen(LoginNavTo.ActivateEmailSent);
             }
-            else if (uPath == "reset") {
+            else if (uPath == NavTo.ResetPassword) {
               updateVisibleScreen(LoginNavTo.ForgotPassword);
-              setForgotError("Password reset failed, please enter your email and try again.");
+              setForgotError("Password reset failed, enter your email and try again.");
             }
-            else if (uPath == "update") {
+            else if (uPath == NavTo.UpdatePassword) {
               updateVisibleScreen(LoginNavTo.ForgotPassword);
-              setForgotError("Password update failed, please enter your email and try again.");
+              setForgotError("Password update failed, enter your email and try again.");
+            }
+            else {
+              navigation.navigate(NavTo.Login);
+              navigation.reset({
+                index: 0,
+                routes: [{name: NavTo.Login}],
+              });
             }
           }
         }
@@ -511,7 +519,6 @@ const LoginScreen = (props:any) => {
                 isDarkMode={props.isDarkMode}
               />
               <UpdatePassword
-                setIsPasswordReset={props.setIsPasswordReset}
                 btnStyle={btnStyle}
                 updatePasswordPressed={() => {
                     navigation.push(NavTo.Login, {view: LoginNavTo.PasswordUpdated} as never);

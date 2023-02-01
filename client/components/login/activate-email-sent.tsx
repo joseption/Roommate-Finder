@@ -119,6 +119,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
         Check your email to verify your account
       </_Text>
       <_Text
+      containerStyle={{marginLeft: 'auto', marginRight: 'auto'}}
       style={LoginStyle(props.isDarkMode).sentText}
       >
         {sentMsg}

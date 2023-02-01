@@ -21,30 +21,37 @@ const Dropdown = (props: any) => {
 };
 
 const styles = StyleSheet.create({
-  dropdownContainer: {
-    width: '80%',
-    height: 40,
-    borderRadius: 5,
-    backgroundColor: '#ffffff',
-    alignSelf: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-    paddingLeft: 10,
-    paddingRight: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    dropdownContainer: {
+      width: '80%',
+      height: 50,
+      borderRadius: 5,
+      backgroundColor: '#ffffff',
+      alignSelf: 'center',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 20,
+      paddingLeft: 10,
+      paddingRight: 10,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  dropdownText: {
-    fontSize: 16,
-    color: '#000000',
-  }
-});
+    dropdownText: {
+      fontSize: 16,
+      color: '#000000',
+    },
+    picker: {
+      width: '100%',
+      height: 50,
+      backgroundColor: '#ffffff',
+      borderRadius: 5,
+    },
+  });
+  
 
 export default Dropdown;

@@ -1,73 +1,103 @@
-import { useEffect, useState } from 'react';
-import { View, _Text } from 'react-native';
-import _Button from '../components/control/button';
-import _TextInput from '../components/control/text-input';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import AllListingsView from '../components/listings/all-listings';
-import ListingView from '../components/listings/listing';
 import { env } from '../helper';
+import BottomNavbar from '../components/listings/bottom-nav';
+import Dropdown from '../components/listings/drop-down';
+import FavoriteListings from '../components/listings/favorite-listings';
+import CreateListing from '../components/listings/create-listing';
+import { useLinkProps } from '@react-navigation/native';
+import { styles } from './login';
+export enum Listings_Screen {
+  all,
+  favorites,
+  create
+}
 
-const ListingsScreen = (props: any, {navigation}:any) => {
-    /*
-    Erick: Add all content for the single page view here,
-    If you need to make reusable components, create a folder
-    in the components folder named "listings" and add your component files there
-    */
-    const [isListing,setIsListing] = useState(false);
-    const [listingID,setListingID] = useState('');
-    const [listingData, setListingData] = useState({});
-    const [allListings, setAllListings] = useState([]);
-    const [init,setInit] = useState(false);
+const ListingsScreen = ({ navigation }: any, props: any) => {
+  const [isListing, setIsListing] = useState(false);
+  const [listingID, setListingID] = useState('');
+  const [allListings, setAllListings] = useState([]);
+  const [init, setInit] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [currentScreen, setCurrentScreen] = useState(Listings_Screen.all);
+  const [searchPressed, setSearchPressed] = useState(false);
 
-    // anytime page is rendered it will run this
-    useEffect(() => {
-        if(!init)
-        {
-           getAllListings();
-           setInit(true); 
-        }
-        else
-        //get rid later
-            getListing();
-        
-    },[listingID]);
+  useEffect(() => {
+    if (!init) {
+      getAllListings();
+      setInit(true);
+    }
+  }, [currentScreen]);
 
-    const getAllListings = async () => 
-    {
-        try
-        {
-            await fetch(`${env.URL}/listings/all`,
-          {method:'GET',headers:{'Content-Type': 'application/json'}}).then(async ret => {
-                let res = JSON.parse(await ret.text());
-                setAllListings(res);
-            });
-        }
-        catch(e)
-        {
-            return;
-        }
-    };
+  const getAllListings = async () => {
+    try {
+      await fetch(`${env.URL}/listings/all`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      })
+        .then(async (ret) => {
+          let res = JSON.parse(await ret.text());
+          setAllListings(res);
+        });
+    } catch (e) {
+      return;
+    }
+  };
 
-    // function getListing, calls the database to get a singular listing
-    const getListing = () => {
-        let listing = {data:"Hello"};
-        setListingData(listing.data);
-    } 
+  const handleNavigation = (screen: Listings_Screen) => {
+    setCurrentScreen(screen);
+    if (screen === Listings_Screen.all) {
+      setSelectedFilter('all');
+      setSearchPressed(false);
+    }
+  };
 
-    // need to change, builds the cards and returns all cards in listingView
-    const getListings = () => {
-        return {data:"Hello"};
-    } 
+  const styles = StyleSheet.create({
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
 
-    return (
-    <View>  
-        { /* If isListing is false it will show all listings else it will show a single listing */}
-        {!isListing?
-     <AllListingsView allListings={allListings} setListingID={setListingID} setIsListing={setIsListing}></AllListingsView>
-     :   
-     <ListingView listingData={listingData} setIsListing={setIsListing}></ListingView>
-        }
-     </View>
-    );
+    },
+    content: {
+      flex: 1,
+    }
+  });
+
+  return (
+    <View
+    style={styles.container}>
+      <View
+        style={styles.content}>
+      <Dropdown></Dropdown>
+      {currentScreen === Listings_Screen.all ?
+        <AllListingsView
+          allListings={allListings}
+          setListingID={setListingID}
+          setIsListing={setIsListing}
+          selectedFilter={selectedFilter}
+        />
+      :
+      <View> 
+      {currentScreen === Listings_Screen.favorites ?
+        <FavoriteListings/>
+      :
+      <CreateListing/>} 
+      </View>
+  }
+      <BottomNavbar
+        isDarkMode={props.isDarkMode}
+        setCurrentScreen={setCurrentScreen}
+        handleNavigation={handleNavigation}
+        disabled={currentScreen !== Listings_Screen.all || selectedFilter !== 'all'}
+        setSearchPressed={setSearchPressed}
+        currentScreen={currentScreen}
+      />
+      </View>
+    </View>
+  );
 };
 
 export default ListingsScreen;
+

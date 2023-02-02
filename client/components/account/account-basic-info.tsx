@@ -280,6 +280,7 @@ const AccountInfo = (props: any) => {
     const completeSave = () => {
         setIsLoading(false);
         setIsSaved(true);
+        props.setUpdatePicture(imageUri);
         if (!props.isSetup) {
             navigation.navigate(NavTo.Account, {view: 'about'} as never);
             props.setView(AccountScreenType.about);
@@ -590,6 +591,9 @@ const AccountInfo = (props: any) => {
                     backgroundColor: Color(props.isDarkMode).black
                 }
             }),
+        },
+        darkModeCheck: {
+            marginTop: 10
         }
     });
 
@@ -880,11 +884,6 @@ const AccountInfo = (props: any) => {
                     innerRef={phoneRef}
                     isDarkMode={props.isDarkMode}
                     ></_TextInput>
-                    {/* <_Checkbox
-                    visible={false}
-                    label="Make Phone Public"
-                    checked={(e: any) => setPublicPhoneForm(e)}
-                    /> */}
                 </_Group>
                 <_Group
                 isDarkMode={props.isDarkMode}
@@ -948,6 +947,14 @@ const AccountInfo = (props: any) => {
                     }
                 }
                 ></_Dropdown>
+                <_Checkbox
+                style={_styles.darkModeCheck}
+                visible={true}
+                label="Dark Mode"
+                checked={props.isDarkMode}
+                setChecked={props.setIsDarkMode}
+                isDarkMode={props.isDarkMode}
+                />
                 <View
                 style={_styles.buttonContainer}
                 >

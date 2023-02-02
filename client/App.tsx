@@ -39,6 +39,7 @@ export const App = (props: any) => {
   const [navSelector,setNavSelector] = useState('');
   const [route,setRoute] = useState('');
   const [isDarkMode,setIsDarkMode] = useState(false);
+  const [updatePicture,setUpdatePicture] = useState('');
   const [backCount,setBackCount] = useState(0);
   const [backTimer,setBackTimer] = useState(0);
   const [loginViewChanged,setLoginViewChanged] = useState('');
@@ -48,12 +49,21 @@ export const App = (props: any) => {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
+
   useEffect(() => {
-    //setIsDarkMode(true); // ja temp need to implement user defined dark mode
-    setMobile(isMobile());
     const dimsChanged = Dimensions.addEventListener("change", (e) => setMobile(isMobile()));
     const back = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => {
+      back.remove();
+      dimsChanged?.remove();
+    }
+  });
 
+  useEffect(() => {
+    prepareStyle(); 
+  }, [isDarkMode]);
+
+  useEffect(() => {
     let rt = getRouteName();
     setRoute(rt);
     if (route != rt &&
@@ -65,13 +75,12 @@ export const App = (props: any) => {
       rt != NavTo.Login) {
       checkLoggedIn();
     }
+  }, [navSelector, ref.current]);
 
+  useEffect(() => {
+    setMobile(isMobile());
     prepareStyle(); 
-    return () => {
-      back.remove();
-      dimsChanged?.remove();
-    }
-  }, [navHeight, adjustedPos, prompt, navSelector, ref.current, backTimer, backCount]);
+  }, [navHeight, adjustedPos, prompt, navSelector, ref.current]);
   
   if (!loaded) {
     return null;
@@ -297,6 +306,8 @@ export const App = (props: any) => {
       navSelector={navSelector}
       setNavSelector={setNavSelector}
       isDarkMode={isDarkMode}
+      setUpdatePicture={setUpdatePicture}
+      updatePicture={updatePicture}
       />
     else
       return <View></View>;
@@ -451,7 +462,9 @@ export const App = (props: any) => {
               setIsLoggedIn={setIsLoggedIn}
               setIsSetup={setIsSetup}
               isDarkMode={isDarkMode}
+              setIsDarkMode={setIsDarkMode}
               setNavSelector={setNavSelector}
+              setUpdatePicture={setUpdatePicture}
               />}
               </Stack.Screen>
               <Stack.Screen
@@ -545,6 +558,8 @@ export const App = (props: any) => {
         navSelector={navSelector}
         setNavSelector={setNavSelector}
         isDarkMode={isDarkMode}
+        setUpdatePicture={setUpdatePicture}
+        updatePicture={updatePicture}
         />
         
         : null} 

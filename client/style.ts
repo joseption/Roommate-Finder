@@ -294,8 +294,8 @@ export const LightStyle = StyleSheet.create({
   checkboxMark: {
     borderRightWidth: 3,
     borderBottomWidth: 3,
-    borderRightColor: Color(false).white,
-    borderBottomColor: Color(false).white,
+    borderRightColor: Color(false).actualWhite,
+    borderBottomColor: Color(false).actualWhite,
     transform: [{rotate: '45deg'}],
     height: 14,
     width: 7,
@@ -767,8 +767,8 @@ export const DarkStyle = StyleSheet.create({
   checkboxMark: {
     borderRightWidth: 3,
     borderBottomWidth: 3,
-    borderRightColor: Color(true).white,
-    borderBottomColor: Color(true).white,
+    borderRightColor: Color(true).actualWhite,
+    borderBottomColor: Color(true).actualWhite,
     transform: [{rotate: '45deg'}],
     height: 14,
     width: 7,

@@ -10,17 +10,14 @@ const _Checkbox = (props: any, {navigation}:any) => {
     Props: JA TODO 
     */
     const context = useContext(Context);
-    const [checked,setChecked] = useState(false);
-    const [init,setInit] = useState(false);
     useEffect(() => {
-        if (!init) {
-            setChecked(props.checked);
-            setInit(true);
-        }
-    }, [checked]);
+    }, [props.checked]);
 
     const containerStyle = () => {
         var style = [];
+        if (props.style) {
+            style.push(props.style);
+        }
         if (context.isGroup) {
             if (isMobile())
                 style.push(Style(props.isDarkMode).verticalGroup);
@@ -32,8 +29,8 @@ const _Checkbox = (props: any, {navigation}:any) => {
     }
 
     const press = () => {
-        setChecked(!checked);
-        props.checked(!checked);
+        if (props.setChecked)
+            props.setChecked(!props.checked);
     }
 
     return (
@@ -47,7 +44,7 @@ const _Checkbox = (props: any, {navigation}:any) => {
         <View
         style={Style(props.isDarkMode).checkbox}
         >
-            {checked ?
+            {props.checked ?
             <View
             style={Style(props.isDarkMode).checkboxMarkContainer}
             >

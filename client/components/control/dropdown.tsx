@@ -188,7 +188,8 @@ const _Dropdown = (props: any, {navigation}:any) => {
 
             var cnt = 0;
             var items = props.options.filter((x: any) => {
-                if (x && x.value && x.value.trim().toLowerCase().includes(value.trim().toLowerCase()) || !value) {
+                // Added !focus so that all options show when the menu is opened after being closed to show all options
+                if (x && x.value && x.value.trim().toLowerCase().includes(value.trim().toLowerCase()) || !value || !focus) {
                     if (cnt % 2 != 0)
                         x.background = Color(props.isDarkMode).holder;
                     else

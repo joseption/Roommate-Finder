@@ -26,7 +26,8 @@ const _TextInput = (props: any) => {
   const [phoneMask,setPhoneMask] = useState(false);
   const [phoneMaskLength,setPhoneMaskLength] = useState(0);
   useEffect(() => {
-  }, []);
+    setLength(props.value.length);
+  }, [props.value]);
 
   const labelStyle = () => {
     var style = [];

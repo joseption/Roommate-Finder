@@ -90,6 +90,8 @@ const AccountScreen = (props: any) => {
         scrollY={props.scrollY}
         unauthorized={unauthorized}
         isDarkMode={props.isDarkMode}
+        setIsDarkMode={props.setIsDarkMode}
+        setUpdatePicture={props.setUpdatePicture}
         />
         :
         <View>

@@ -14,24 +14,33 @@ import { useNavigation } from '@react-navigation/native';
 const Navigation = (props: any) => {
     const [showMenu,setShowMenu] = useState(false);
     const [visible,setVisible] = useState(false);
-    const [init,setInit] = useState(false);
     const [image,setImage] = useState('');
     const navigation = useNavigation<navProp>();
 
     useEffect(() => {
-        if (!props.mobile)
+    let rt = route();
+    if (rt && rt.name) {
+        setNavigation(rt.name);
+    }
+    }, []);
+
+    useEffect(() => {
+        if (!props.mobile) {
             setShowMenu(false);
-        let rt = route();
-        if (rt && rt.name && !init)
-            setNavigation(rt.name);
+        }        
+    }, [props.mobile]);
+
+    useEffect(() => {
         setVisible(props.isLoggedIn);
-        setInit(true);
-        if (props.isLoggedIn)
+
+        if (props.updatePicture)
+            setImage(props.updatePicture);
+        else if (props.isLoggedIn)
             profilePicture();
         else
             setImage('');
-        
-    }, [props.mobile, visible, props.isLoaded, props.isLoggedIn, props.isSetup, props.navSelector, image]);
+
+    }, [props.isLoggedIn, props.updatePicture]);
 
     const route = () => {
         if (navigation) {
@@ -210,7 +219,7 @@ const Navigation = (props: any) => {
         mobileContainer: {
             paddingTop: 10,
             backgroundColor: Color(props.isDarkMode).contentBackgroundSecondary,
-            borderBottomColor: Color(props.isDarkMode).border,
+            borderBottomColor: Color(props.isDarkMode).separator,
             borderBottomWidth: 1,
             display: 'flex',
             flexDirection: 'row',

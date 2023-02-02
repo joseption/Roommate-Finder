@@ -10,10 +10,11 @@ const _Cluster = (props: any) => {
     /*
     Props: JA TODO 
     */
-    const [init,setInit] = useState(false);
     useEffect(() => {
-
-    }, []);
+        if (props.selected) {
+            props.setAmount(props.selected.length);
+        }
+    }, [props.selected]);
 
     const toggle = (e: any) => {
         var options = [] as never[];

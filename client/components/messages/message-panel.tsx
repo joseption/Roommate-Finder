@@ -3,15 +3,17 @@ import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import _Button from '../control/button';
 import Messages from './messages';
 import MessageInput from './message-input';
+import MessageTopBar from './message-top-bar';
 
 interface Props {
   showPanel: boolean,
   updateShowPanel: Dispatch<SetStateAction<boolean>>,
+  userInfo: any,
   chat: any,
   socket: any,
 }
 
-const MessagePanel = ({ showPanel, updateShowPanel, chat, socket }: Props) => {
+const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Props) => {
   // These values are mapped to percentage of screen size.
   const PANEL_OUT_OF_SCREEN = Dimensions.get('window').width * 1.5;
   const PANEL_IN_SCREEN = 0;
@@ -49,8 +51,8 @@ const MessagePanel = ({ showPanel, updateShowPanel, chat, socket }: Props) => {
           ]}
         ]}
       >
-        <_Button onPress={() => updateShowPanel(!showPanel)}>Back</_Button>
-        <Messages chat={chat} socket={socket}/>
+        <MessageTopBar chat={chat} showPanel={showPanel} updateShowPanel={updateShowPanel}/>
+        <Messages chat={chat} userInfo={userInfo} socket={socket}/>
         <MessageInput chat={chat} socket={socket}/>
       </Animated.View>
     </>

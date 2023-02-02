@@ -1,23 +1,13 @@
-import { useEffect, useState } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { Color } from "../../style";
-import { getLocalStorage } from "../../helper";
 
 interface Props {
-  message: any
+  message: any,
+  userInfo: any
 }
 
-const Message = ({ message }: Props) => {
-  const [userInfo, setUserInfo] = useState<any>();
-
-  useEffect(() => {
-    getUserInfo();
-  }, [])
-
-  const getUserInfo = async () => {
-    setUserInfo(await getLocalStorage().then((res) => {return res.user}));
-  }
-
+const Message = ({ message, userInfo }: Props) => {
+  if (!userInfo) return <></>
   const isMyMessage = () => message.userId === userInfo?.id;
 
   const styles = StyleSheet.create({
@@ -43,16 +33,20 @@ const Message = ({ message }: Props) => {
       color: Color(message.isDarkMode).black,
     }
   });
-
+  
   return (
-    <View
-      style={[
-        styles.myMessage, 
-        isMyMessage() ? null : styles.theirMessage,
-      ]}
-    >
-      <Text style={{color: isMyMessage() ? Color(message.isDarkMode).white : undefined}}>{message.content}</Text>
-    </View>
+    <>
+      {
+        isMyMessage() ?
+          <View style={styles.myMessage}>
+            <Text style={{color: Color(message.isDarkMode).white}}>{message.content}</Text>
+          </View>
+        :
+        <View style={[styles.myMessage, styles.theirMessage]}>
+          <Text>{message.content}</Text>
+        </View>
+      }
+    </>
   );
 }
 

@@ -1,6 +1,6 @@
 import { FlatList } from "react-native";
 import Message from "./message";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { env } from "../../helper";
 import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter';
@@ -8,18 +8,24 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 interface Props {
   chat: any,
+  userInfo: any,
   socket: Socket<DefaultEventsMap, DefaultEventsMap>
 }
 
-const Messages = ({chat, socket}: Props) => {
+const Messages = ({chat, userInfo, socket}: Props) => {
   const [messages, setMessages] = useState<any[]>([]);
   const chatRef = useRef(chat);
+  const userInfoRef = useRef(userInfo);
   const messagesRef = useRef(messages);
   
   useEffect(() => {
     chatRef.current = chat
     getMessages(chat.id);
   }, [chat])
+
+  useEffect(() => {
+    userInfoRef.current = userInfo
+  }, [userInfo])
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -48,11 +54,15 @@ const Messages = ({chat, socket}: Props) => {
     });
   }
 
+  const renderItem = useCallback(({item}:any) => {return <Message message={item} userInfo={userInfoRef.current} key={item.id}/>}, []);
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <FlatList
         data={messages}
-        renderItem={({ item }) => <Message message={item} key={item.id}/>}
+        renderItem={renderItem}
+        initialNumToRender={14}
+        removeClippedSubviews
         inverted
       />
     </SafeAreaView>

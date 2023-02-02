@@ -15,7 +15,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   const [currentChat, setCurrentChat] = useState({});
   const [chats, setChats] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState<any>();
-  const chatsRef = useRef(chats)
+  const chatsRef = useRef(chats);
 
   useEffect(() => {
     getUserInfo();
@@ -171,7 +171,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
           />
         }
       />
-      <MessagePanel showPanel={showPanel} socket={socket} updateShowPanel={updateShowPanel} chat={currentChat}/>
+      <MessagePanel showPanel={showPanel} socket={socket} userInfo={userInfo} updateShowPanel={updateShowPanel} chat={currentChat}/>
     </>
   );
 };

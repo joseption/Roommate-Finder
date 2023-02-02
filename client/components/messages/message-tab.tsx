@@ -57,11 +57,9 @@ const styles = StyleSheet.create({
   touchable: {
     flex: 1,
     flexDirection: 'row',
-    marginHorizontal: 5,
     paddingHorizontal: 10,
     paddingVertical: 5,
     height: 70,
-    borderRadius: 10,
     alignItems: 'center',
   },
   content: {

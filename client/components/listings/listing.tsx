@@ -4,7 +4,6 @@ import _Button from '../control/button';
 import _Text from '../control/text';
 
 const ListingView = (props: any) => {
-  const navigation = useNavigation();
 
   return (
     <View>

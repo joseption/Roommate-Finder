@@ -1,30 +1,23 @@
 import { Pressable, View, StyleSheet, Image, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import _Text from '../control/text';
 
 const ListingCard = (props: any) => {
-    const navigation = useNavigation();
-  
-    const viewListing = () => {
-        navigation.navigate(ListingView);
-        props.setListingID(props.item.id);
-        props.setIsListing(true);
-      };
 
   return (
     <View style={styles.container}>
       <Image source={{ uri: props.item.images[0] }} style={styles.image} />
-      <Text style={styles.header}>{props.item.name}</Text>
-      <Text style={styles.subheader}>{props.item.city}</Text>
-      <Text style={styles.description}>{props.item.description}</Text>
-      <Text style={styles.price}>{props.item.price}</Text>
-      <Text style={styles.petsAllowed}>
+      <_Text style={styles.header}>{props.item.name}</_Text>
+      <_Text style={styles.subheader}>{props.item.city}</_Text>
+      <_Text style={styles.description}>{props.item.description}</_Text>
+      <_Text style={styles.price}>{props.item.price}</_Text>
+      <_Text style={styles.petsAllowed}>
         Pets Allowed: {props.item.petsAllowed ? 'Yes' : 'No'}
-      </Text>
+      </_Text>
       <Pressable
     style={styles.viewListingButton}
-    onPress={viewListing}
     >
-  <Text style={styles.viewListingButtonText}>View Listing</Text>
+  <_Text style={styles.viewListingButtonText}>View Listing</_Text>
 </Pressable>
     </View>
   );

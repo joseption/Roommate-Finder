@@ -6,16 +6,21 @@ import BottomNavbar from '../components/listings/bottom-nav';
 import Dropdown from '../components/listings/drop-down';
 import FavoriteListings from '../components/listings/favorite-listings';
 import CreateListing from '../components/listings/create-listing';
+import { useLinkProps } from '@react-navigation/native';
+import { styles } from './login';
+export enum Listings_Screen {
+  all,
+  favorites,
+  create
+}
 
-const ListingsScreen = ({ navigation }: any) => {
+const ListingsScreen = ({ navigation }: any, props: any) => {
   const [isListing, setIsListing] = useState(false);
   const [listingID, setListingID] = useState('');
-  const [listingData, setListingData] = useState({});
   const [allListings, setAllListings] = useState([]);
   const [init, setInit] = useState(false);
-  const [searchText, setSearchText] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const [currentScreen, setCurrentScreen] = useState('Listings');
+  const [currentScreen, setCurrentScreen] = useState(Listings_Screen.all);
   const [searchPressed, setSearchPressed] = useState(false);
 
   useEffect(() => {
@@ -23,7 +28,7 @@ const ListingsScreen = ({ navigation }: any) => {
       getAllListings();
       setInit(true);
     }
-  }, [init]);
+  }, [currentScreen]);
 
   const getAllListings = async () => {
     try {
@@ -40,31 +45,56 @@ const ListingsScreen = ({ navigation }: any) => {
     }
   };
 
-  const handleNavigation = (screen: string) => {
+  const handleNavigation = (screen: Listings_Screen) => {
     setCurrentScreen(screen);
-    if (screen === 'Listings') {
+    if (screen === Listings_Screen.all) {
       setSelectedFilter('all');
       setSearchPressed(false);
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+
+    },
+    content: {
+      flex: 1,
+    }
+  });
+
   return (
-    <View>
-      {currentScreen === 'Listings' && selectedFilter === 'all' && !searchPressed && (
+    <View
+    style={styles.container}>
+      <View
+        style={styles.content}>
+      <Dropdown></Dropdown>
+      {currentScreen === Listings_Screen.all ?
         <AllListingsView
           allListings={allListings}
           setListingID={setListingID}
           setIsListing={setIsListing}
           selectedFilter={selectedFilter}
         />
-      )}
-      {currentScreen === 'Favorites' && <FavoriteListings />}
-      {currentScreen === 'Create' && <CreateListing />}
+      :
+      <View> 
+      {currentScreen === Listings_Screen.favorites ?
+        <FavoriteListings/>
+      :
+      <CreateListing/>} 
+      </View>
+  }
       <BottomNavbar
+        isDarkMode={props.isDarkMode}
+        setCurrentScreen={setCurrentScreen}
         handleNavigation={handleNavigation}
-        disabled={currentScreen !== 'Listings' || selectedFilter !== 'all'}
+        disabled={currentScreen !== Listings_Screen.all || selectedFilter !== 'all'}
         setSearchPressed={setSearchPressed}
+        currentScreen={currentScreen}
       />
+      </View>
     </View>
   );
 };

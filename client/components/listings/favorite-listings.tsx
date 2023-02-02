@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import _Text from '../control/text';
 
 
 const FavoriteListings = (props: any, {navigation}:any) => {
@@ -11,9 +12,9 @@ const FavoriteListings = (props: any, {navigation}:any) => {
    
     return (
         <View>  
-            <Text>
+            <_Text>
                 yooo 
-            </Text>
+            </_Text>
          </View>
         );
 };

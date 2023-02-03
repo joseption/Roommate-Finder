@@ -1,7 +1,7 @@
 import { FlatList } from "react-native";
 import Message from "./message";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { env } from "../../helper";
+import { authTokenHeader, env } from "../../helper";
 import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -61,8 +61,9 @@ const Messages = ({chat, userInfo, socket}: Props) => {
   }, [socket]);
 
   const getMessages = async (id: string) => {
+    const tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/messages/${id}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
+      `${env.URL}/messages/${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {

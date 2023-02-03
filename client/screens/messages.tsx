@@ -37,8 +37,8 @@ const MessagesScreen = (props: any, {navigation}:any) => {
 
   const updateTabs = async (data: any) => {
     if (chatsRef.current.length === 0) return;
-    let fetchedChat = await getChat(data.chatId)
-    let latestMessage = await getMessage(fetchedChat.latestMessage);
+    const fetchedChat = await getChat(data.chatId)
+    const latestMessage = await getMessage(fetchedChat.latestMessage);
     let newChat: any;
     let newChats = chatsRef.current.filter((chat) => {
       const condition = data.chatId !== chat.id; 
@@ -57,10 +57,11 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }
 
   const getChat = async (chatId: string) => {
+    const tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/chats/${chatId}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
+      `${env.URL}/chats/${chatId}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
-      let res = JSON.parse(await ret.text());
+      const res = JSON.parse(await ret.text());
       if (res.Error) {
         console.warn("Error: ", res.Error);
       }
@@ -71,16 +72,17 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }
 
   const getMessage = async (id: string) => {
+    const tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/messages/getMessage?messageId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
+      `${env.URL}/messages/getMessage?messageId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
-      let res = JSON.parse(await ret.text());
+      const res = JSON.parse(await ret.text());
       if (res.Error) {
         console.warn("Error: ", res.Error);
         return {content: '', createdAt: '', userId: '',};
       }
       else {
-        let message = {
+        const message = {
           content: res.content,
           createdAt: res.createdAt,
           userId: res.userId,
@@ -91,16 +93,16 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }
 
   const getUser = async (id: string) => {
-    let tokenHeader = await authTokenHeader();
+    const tokenHeader = await authTokenHeader();
     return fetch(
       `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
-      let res = JSON.parse(await ret.text());
+      const res = JSON.parse(await ret.text());
       if (res.Error) {
         console.warn("Error: ", res.Error);
       }
       else {
-        let user = {
+        const user = {
           first_name: res.first_name,
           id: res.id,
           email: res.email,
@@ -120,26 +122,27 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }
 
   const getChats = async () => {
+    const tokenHeader = await authTokenHeader();
     fetch(
-      `${env.URL}/chats?userId=${userInfo?.id}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
+      `${env.URL}/chats?userId=${userInfo?.id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
-      let res = JSON.parse(await ret.text());
+      const res = JSON.parse(await ret.text());
       if (res.Error) {
         console.warn("Error: ", res.Error);
       }
       else {
-        let chatArray = [];
+        const chatArray = [];
         for (let i = 0; i < res.length; i++) {
-          let lastMessage = await getMessage(res[i].latestMessage);
-          let users = []
+          const lastMessage = await getMessage(res[i].latestMessage);
+          const users = []
           for (let j = 0; j < res[i].users.length; j++) {
             if (res[i].users[j] === userInfo?.id) {
               continue;
             }
-            let user = await getUser(res[i].users[j])
+            const user = await getUser(res[i].users[j])
             users.push(user);
           }
-          let chat = {
+          const chat = {
             chatName: res[i].chatName,
             createdAt: res[i].createdAt,
             groupAdmin: res[i].groupAdmin,

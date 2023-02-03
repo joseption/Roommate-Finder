@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TextInput, View, StyleSheet, Pressable, Text } from "react-native";
-import { env, getLocalStorage } from "../../helper";
+import { authTokenHeader, env, getLocalStorage } from "../../helper";
 import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Svg, Path } from "react-native-svg";
@@ -66,16 +66,16 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
     setUserInfo(await getLocalStorage().then((res) => {return res.user}));
   }
   
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (newMessage === '') {
       return;
     }
 
-    let obj = {content: newMessage, userId: userInfo.id, chatId: chat.id};
-    let js = JSON.stringify(obj);
-
+    const obj = {content: newMessage, userId: userInfo.id, chatId: chat.id};
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json'}}
+      `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {

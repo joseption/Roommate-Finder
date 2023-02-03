@@ -24,7 +24,7 @@ interface Props {
 }
 
 const MessageTopBar = ({showPanel, updateShowPanel, chat}: Props) => {
-  if (!chat?.users || !chat.chatName) return <></>;
+  if (!chat?.users) return <></>;
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
@@ -33,7 +33,7 @@ const MessageTopBar = ({showPanel, updateShowPanel, chat}: Props) => {
         </Pressable>
       </View>
       <Image style={styles.image} source={{ uri: (chat?.users[0]?.image != null) ? chat?.users[0]?.image : 'https://reactnative.dev/img/tiny_logo.png'}} />
-      <Text numberOfLines={1} style={styles.name}>{chat.chatName}</Text>
+      <Text numberOfLines={1} style={styles.name}>{chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}</Text>
     </View>
   );
 }

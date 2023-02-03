@@ -20,11 +20,12 @@ const sendIcon = (
 
 interface Props {
   chat: any,
-  socket: Socket<DefaultEventsMap, DefaultEventsMap>
+  socket: Socket<DefaultEventsMap, DefaultEventsMap>,
+  newMessage: string,
+  setNewMessage: any,
 }
 
-const MessageInput = ({chat, socket}: Props) => {
-  const [newMessage, setNewMessage] = useState('');
+const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
   const [userInfo, setUserInfo] = useState<any>();
   const [height, setHeight] = useState(0);
   const [hiddenTextWidth, setHiddenTextWidth] = useState(0);
@@ -36,7 +37,7 @@ const MessageInput = ({chat, socket}: Props) => {
   useEffect(() => {
     getUserInfo();
   }, [])
-
+  
   useEffect(() => {
     setTypingIndicator();
   }, [newMessage])
@@ -58,7 +59,7 @@ const MessageInput = ({chat, socket}: Props) => {
       await prepareTypingIndicatorData(false);
       return;
     };
-    await prepareTypingIndicatorData(newMessage.length !== 0);
+    await prepareTypingIndicatorData(newMessage?.length !== 0);
   }
   
   const getUserInfo = async () => {

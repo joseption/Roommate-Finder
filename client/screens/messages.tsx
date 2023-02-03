@@ -104,6 +104,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       else {
         const user = {
           first_name: res.first_name,
+          last_name: res.last_name,
           id: res.id,
           email: res.email,
           image: res.image,

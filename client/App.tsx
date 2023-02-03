@@ -55,7 +55,7 @@ export const App = (props: any) => {
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
   useEffect(() => {
-    //setIsDarkMode(true); // ja temp need to implement user defined dark mode
+    setIsDarkMode(true); // ja temp need to implement user defined dark mode
     setMobile(isMobile());
     const dimsChanged = Dimensions.addEventListener("change", (e) => setMobile(isMobile()));
     const back = BackHandler.addEventListener('hardwareBackPress', onBackPress);

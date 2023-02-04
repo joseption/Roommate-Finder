@@ -4,16 +4,18 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { type AppType } from "next/dist/shared/lib/utils";
 const queryClient = new QueryClient();
+import { useRouter } from "next/router";
 import { Toaster } from "react-hot-toast";
 
 import AuthRedirectWrapper from "../components/AuthRedirectWrapper";
 import Nav from "../components/nav";
 const MyApp: AppType = ({ Component, pageProps }) => {
+  const router = useRouter();
   return (
     <>
       <QueryClientProvider client={queryClient}>
         <AuthRedirectWrapper>
-          <Nav />
+          {!router.pathname.includes("/auth") && <Nav />}
           <Component {...pageProps} />
           <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
           <Toaster

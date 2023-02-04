@@ -32,7 +32,6 @@ router.get('/me', async (req: Request, res: Response, next: NextFunction) => {
     if (!user) {
       return res.status(400).json({ Error: 'User not found' });
     }
-    delete user.password;
     res.status(200).json(user);
   } catch (err) {
     console.log(err);
@@ -44,10 +43,13 @@ router.get('/profile', async (req: Request, res: Response, next: NextFunction) =
   try {
     const { userId } = req.query; 
     const user = await findUserById(userId);
-    delete user.password;
+    if (!user) {
+      return res.status(400).json({ Error: 'User not found' });
+    }
     res.json(user);
   } catch (err) {
-    next(err);
+    console.log(err);
+    return res.status(500).json({ Error: 'Server error' });
   }
 });
 

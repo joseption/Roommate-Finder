@@ -73,7 +73,7 @@ export default function TextField({
   if (!disabled && !error) {
     // Default Style
     inputStyle +=
-      " border-slate-500 group-hover:border-indigo-600 focus:border-indigo-600" +
+      " border-slate-500 group-hover:border-yellow-500 focus:border-yellow-500 " +
       " dark:border-slate-400 dark:group-hover:border-indigo-500 dark:focus:border-indigo-500";
   } else {
     if (disabled) {
@@ -111,6 +111,7 @@ export default function TextField({
           value={value}
           {...rest}
         />
+
         <AnimatePresence>
           {(endIcon || error) && (
             <motion.div

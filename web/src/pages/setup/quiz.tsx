@@ -25,16 +25,6 @@ export default function Quiz() {
             "flex w-full max-w-7xl flex-col justify-center gap-4 p-4 sm:p-6 lg:p-8"
           }
         >
-          <Link scroll={false} href={"/setup/profile"} className={"w-fit"}>
-            <IconButton className={"group gap-1"}>
-              <ChevronLeftIcon
-                className={
-                  "h-6 w-6 transition-transform group-hover:-translate-x-1"
-                }
-              />
-              Go Back to Bio & Hobbies
-            </IconButton>
-          </Link>
           <section
             className={"flex flex-col gap-4 sm:gap-6 lg:flex-row lg:gap-6"}
           >

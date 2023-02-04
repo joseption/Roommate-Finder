@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 
+import Button from "../components/Inputs/Button";
 import { login, register, reset } from "../request/mutate";
 import { storeAuthSession } from "../utils/storage";
 type Action = "login" | "register" | "reset";
@@ -88,6 +89,13 @@ export default function Login() {
       if (!emailInvalid && !passwordInvalid && !confirmPasswordInvalid) {
         mutateRegister();
       }
+      if (confirmPasswordInvalid) {
+        toast.error(confirmPasswordHelperText);
+      }
+      if (emailInvalid) {
+        toast.error(emailHelperText);
+      }
+      if (passwordInvalid) toast.error(passwordHelperText);
     }
     if (action === "reset") {
       if (!emailInvalid) {
@@ -187,7 +195,7 @@ export default function Login() {
                             autoComplete="First Name"
                             required
                             className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 sm:text-sm"
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => setName(e.target.value.trim())}
                           />
                         </div>
                       </div>
@@ -209,7 +217,7 @@ export default function Login() {
                             autoComplete="Last Name"
                             required
                             className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 sm:text-sm"
-                            onChange={(e) => setLastName(e.target.value)}
+                            onChange={(e) => setLastName(e.target.value.trim())}
                           />
                         </div>
                       </div>
@@ -230,7 +238,7 @@ export default function Login() {
                           autoComplete="email"
                           required
                           className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 sm:text-sm"
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={(e) => setEmail(e.target.value.trim())}
                         />
                       </div>
                     </div>
@@ -250,7 +258,7 @@ export default function Login() {
                             autoComplete="current-password"
                             required
                             className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 sm:text-sm"
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => setPassword(e.target.value.trim())}
                           />
                         </div>
                       </div>
@@ -271,7 +279,9 @@ export default function Login() {
                             autoComplete="current-password"
                             required
                             className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 sm:text-sm"
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onChange={(e) =>
+                              setConfirmPassword(e.target.value.trim())
+                            }
                           />
                         </div>
                       </div>
@@ -298,33 +308,18 @@ export default function Login() {
                     </div>
 
                     <div>
-                      {action === "login" && (
-                        <button
-                          type="submit"
-                          disabled={isLoggingIn}
-                          className="flex w-full justify-center rounded-md border border-transparent bg-black py-2 px-4 text-sm font-medium text-white shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                          Sign in
-                        </button>
-                      )}
-                      {action === "register" && (
-                        <button
-                          type="submit"
-                          disabled={isRegistering}
-                          className="flex w-full justify-center rounded-md border border-transparent bg-black py-2 px-4 text-sm font-medium text-white shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                          Sign up
-                        </button>
-                      )}
-                      {action === "reset" && (
-                        <button
-                          type="submit"
-                          disabled={isReseting}
-                          className="flex w-full justify-center rounded-md border border-transparent bg-black py-2 px-4 text-sm font-medium text-white shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                          Send me a recovery link
-                        </button>
-                      )}
+                      <Button
+                        type="submit"
+                        disabled={isLoggingIn || isRegistering || isReseting}
+                        loading={isLoggingIn || isRegistering || isReseting}
+                        overRideStyle="flex w-full justify-center rounded-md border border-transparent bg-black py-2 px-4 text-sm font-medium text-white shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      >
+                        {action === "login"
+                          ? "Sign in"
+                          : action === "register"
+                          ? "Sign up"
+                          : "Send me a recovery link"}
+                      </Button>
                     </div>
                   </form>
                 </div>

@@ -18,7 +18,7 @@ export default function SentReset() {
           <span className="font-medium text-yellow-600">{email}</span>.
         </p>
         <Link
-          href="/auth/login"
+          href="/auth"
           className="mt-3 inline-block w-96 rounded bg-black px-5 py-3 font-medium text-white shadow-md shadow-indigo-500/20"
         >
           Go back to login →

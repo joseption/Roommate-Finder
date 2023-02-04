@@ -42,13 +42,13 @@ export default function Button({
 
   let baseStyle =
     "flex select-none items-center justify-center rounded-full gap-2 px-4 py-2 transition duration-200 ease-out" +
-    " active:duration-300 focus-visible:ring-4 focus-visible:ring-indigo-300/90 ring-inset outline-none group" +
+    " active:duration-300 focus-visible:ring-4 focus-visible:ring-yellow-300/90 ring-inset outline-none group" +
     " dark:focus-visible:ring-indigo-600/90";
 
   if (isDisabled) {
     // Disabled Style
     baseStyle +=
-      " cursor-not-allowed text-slate-50 bg-indigo-900/80 dark:text-slate-900 dark:bg-indigo-100/80";
+      "cursor-not-allowed text-white bg-yellow-500/90 dark:text-slate-900 dark:bg-indigo-100/80";
   } else if (variant === "text") {
     // Text Style
     baseStyle +=
@@ -56,7 +56,7 @@ export default function Button({
   } else {
     // Contained Style
     baseStyle +=
-      " text-slate-50 bg-indigo-900 hover:bg-indigo-700 focus-visible:bg-indigo-700 active:scale-[96%]" +
+      " text-white bg-yellow-500/90 hover:bg-yellow-600 focus-visible:bg-yellow-600 active:scale-[96%]" +
       " dark:text-slate-900 dark:bg-indigo-200 dark:hover:bg-indigo-400 dark:focus-visible:bg-indigo-400";
   }
 

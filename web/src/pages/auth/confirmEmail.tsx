@@ -109,6 +109,7 @@ export default function ConfirmEmail() {
               <Button
                 onClick={() => mutateSendConfirmationEmail()}
                 loading={isSendingConfirmationEmail}
+                overRideStyle="bg-black py-2 px-4 text-xl font-medium text-white shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 disabled={waitBeforeResend > 0}
               >
                 {waitBeforeResend > 0

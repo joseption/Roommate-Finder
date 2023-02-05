@@ -2,6 +2,7 @@
  * Functions to mutate/change data on the API
  */
 import type { AuthSession } from "../types/auth.types";
+import { ListingInfo } from "../types/listings.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 
@@ -228,6 +229,39 @@ export async function CreateMatches() {
   return await doRequest<{ message: string }>(
     `${backend_api}/matches/create`,
     null,
+    "POST",
+    true
+  );
+}
+
+export async function MakeListings(
+  name: string,
+  description: string,
+  images: string[],
+  price: number,
+  city: string,
+  housing_type: string,
+  rooms: number | undefined,
+  bathrooms: number | undefined,
+  size: number | undefined,
+  address: string | undefined,
+  petsAllowed: boolean
+) {
+  return await doRequest<ListingInfo>(
+    `${backend_api}/listings`,
+    {
+      name,
+      description,
+      images,
+      price,
+      city,
+      housing_type,
+      rooms,
+      bathrooms,
+      size,
+      address,
+      petsAllowed,
+    },
     "POST",
     true
   );

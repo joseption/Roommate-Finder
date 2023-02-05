@@ -16,11 +16,11 @@ export default function Listings() {
       {isLoading || !data ? (
         <div>Loading...</div>
       ) : (
-        <div className="flex justify-center">
-          <ul className="">
+        <div className="flex">
+          <ul>
             {data.map((listing: ListingInfo) => {
               return (
-                <li key={listing.id} className="h-128 w-128">
+                <li key={listing.id}>
                   <ListingCard listing={listing} />
                 </li>
               );

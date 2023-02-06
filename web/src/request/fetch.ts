@@ -71,3 +71,12 @@ export async function GetListings() {
     true
   );
 }
+
+export async function GetListing(id: string) {
+  return await doRequest<ListingInfo>(
+    `${backend_api}/listings/${id}`,
+    null,
+    "GET",
+    true
+  );
+}

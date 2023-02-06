@@ -247,6 +247,8 @@ export async function MakeListings(
   address: string | undefined,
   petsAllowed: boolean
 ) {
+  console.log(bathrooms, "bathrooms ml");
+  console.log(size, "size ml");
   return await doRequest<ListingInfo>(
     `${backend_api}/listings`,
     {

@@ -13,10 +13,10 @@ export default function CreateListing() {
   const [price, setPrice] = useState<number>(0);
   const [city, setCity] = useState<string>("");
   const [housing_type, setHousingType] = useState<string>("Apartment");
-  const [rooms, setRooms] = useState<number>(0);
+  const [rooms, setRooms] = useState<number>(1);
   const [size, setSize] = useState<number>(0);
-  const [bathrooms, setBathrooms] = useState<number>(0);
-  const [zipcode, setZipcode] = useState<string>("");
+  const [bathrooms, setBathrooms] = useState<number>(1);
+  // const [zipcode, setZipcode] = useState<string>("");
   const [petsAllowed, setPetsAllowed] = useState<boolean>(true);
 
   const { mutate: mutateListing } = useMutation({
@@ -29,8 +29,8 @@ export default function CreateListing() {
         city,
         housing_type,
         rooms,
-        size,
         bathrooms,
+        size,
         fullAddress,
         petsAllowed
       ),
@@ -51,8 +51,11 @@ export default function CreateListing() {
     const city = document.getElementById("city") as HTMLInputElement;
     const state = document.getElementById("state") as HTMLInputElement;
     const zip = document.getElementById("zip") as HTMLInputElement;
-    setZipcode(zip.value);
+    // setZipcode(zip.value);
     const fullAddress = `${streetAddress.value}, ${city.value}, ${state.value} ${zip.value}`;
+    console.log(bathrooms, "bathrooms hs");
+    console.log(size, "size hs");
+
     mutateListing(fullAddress);
   };
 

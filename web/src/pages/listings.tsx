@@ -16,8 +16,11 @@ export default function Listings() {
       {isLoading || !data ? (
         <div>Loading...</div>
       ) : (
-        <div className="flex">
-          <ul>
+        <div>
+          <ul
+            role="list"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          >
             {data.map((listing: ListingInfo) => {
               return (
                 <li key={listing.id}>

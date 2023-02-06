@@ -57,7 +57,7 @@ const LogoutScreen = (props: any) => {
             setTimeout(() => {
                 props.setIsLoggedIn(false);
                 props.setIsSetup(false);
-            }, 10);
+            }, 50);
         }
         else
             setMessage("An error occurred while logging out, please reload the page and try again.");

@@ -42,6 +42,7 @@ const ListingsScreen = (props: any) => {
       })
         .then(async (ret) => {
           let res = JSON.parse(await ret.text());
+          //console.log(res);
           setAllListings(res);
         });
     } catch (e) {

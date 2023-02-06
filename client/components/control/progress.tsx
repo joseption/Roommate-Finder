@@ -1,6 +1,6 @@
-import { useLinkProps, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useRef } from 'react';
-import { ActivityIndicator, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { navProp } from '../../helper';
 import { Color, FontSize, Radius, Style } from '../../style';

@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { styles } from '../../screens/login';
 import { Context, isMobile } from '../../helper';
 import { Style } from '../../style';
 import _Text from './text';

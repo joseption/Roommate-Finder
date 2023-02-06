@@ -1,9 +1,9 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { Keyboard, StyleSheet, TextInput, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { acceptableSymbols, config, env, includesSymbol, includesUpperContains, isAtLeastEightChars, textMatches } from '../../helper';
+import { acceptableSymbols, env, includesSymbol, includesUpperContains, isAtLeastEightChars, textMatches } from '../../helper';
 import { Color, LoginStyle, Style } from '../../style';
 import _TextInput from '../control/text-input';
 
@@ -71,6 +71,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
 
   const doPasswordUpdate = async () => 
   {
+      Keyboard.dismiss();
       setLoading(true);
       setPwdError(false);
       setVerifyPwdError(false);
@@ -266,12 +267,15 @@ const UpdatePassword = (props: any, {navigation}:any) => {
           Save
         </_Button>
       </View>
+      {!props.keyboardVisible ?
       <_Text
       style={LoginStyle(props.isDarkMode).errorMessage}
       >
         {message}
       </_Text>
-        <View
+      : null }
+      {!props.keyboardVisible ?
+      <View
         style={LoginStyle(props.isDarkMode).previousPageText}
         >
         <_Text
@@ -291,6 +295,7 @@ const UpdatePassword = (props: any, {navigation}:any) => {
         >login</_Text>
         }
       </View>
+      : null }
     </View>
   );
 };

@@ -8,7 +8,7 @@ import _Image from '../control/image';
 import _Cluster from '../control/cluster';
 import _ClusterOption from '../control/cluster-option';
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { AccountScreenType, authTokenHeader, env, getLocalStorage, navProp, NavTo, setLocalStorage } from '../../helper';
+import { AccountScreenType, authTokenHeader, env, navProp, NavTo } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 

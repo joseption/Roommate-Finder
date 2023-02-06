@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { navProp, NavTo } from '../../helper';
@@ -35,7 +35,8 @@ const PasswordUpdated = (props: any) => {
         >
             <_Button
             isDarkMode={props.isDarkMode}
-            style={[Style(props.isDarkMode).buttonDefault, LoginStyle(props.isDarkMode).submitButton]}
+            style={[Style(props.isDarkMode).buttonDefault]}
+            containerStyle={LoginStyle(props.isDarkMode).submitButton}
             onPress={() => loginPressed()}
             >
             Back to Login

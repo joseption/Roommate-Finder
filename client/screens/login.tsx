@@ -67,6 +67,8 @@ const LoginScreen = (props:any) => {
         uView = '';
       updateVisibleScreen(uView, false);
       props.setLoginViewChanged('');
+      props.setIsLoggedIn(false);
+      props.setIsSetup(false);
     }
   }, [left, init, navigation, props.accountAction, currentScreen, props.loginViewChanged]);
 
@@ -483,6 +485,8 @@ const LoginScreen = (props:any) => {
                 setIsSetup={props.setIsSetup}
                 setNavSelector={props.setNavSelector}
                 isDarkMode={props.isDarkMode}
+                setIsDarkMode={props.setIsDarkMode}
+                keyboardVisible={props.keyboardVisible}
               />
               <ForgotPassword
                 btnStyle={btnStyle}
@@ -547,6 +551,7 @@ const LoginScreen = (props:any) => {
                 token={token}
                 setAccountAction={props.setAccountAction}
                 isDarkMode={props.isDarkMode}
+                keyboardVisible={props.keyboardVisible}
               />
               <PasswordUpdated
                 loginPressed={() => {

@@ -7,7 +7,7 @@ import StartSurvey from '../components/account/start-survey';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
-import { AccountScreenType, getLocalStorage, navProp, NavTo, setLocalStorage } from '../helper';
+import { AccountScreenType, navProp, NavTo, setLocalStorage } from '../helper';
 
 const AccountScreen = (props: any) => {
     const navigation = useNavigation<navProp>();
@@ -77,8 +77,17 @@ const AccountScreen = (props: any) => {
         props.setIsSetup(false);
     }
 
+    const containerStyle = () => {
+        if (!props.mobile) {
+            return {paddingBottom: 20};
+        }
+        return {};
+    }
+
     return (
-    <View>
+    <View
+    style={containerStyle()}
+    >
         {props.accountView === AccountScreenType.info ?
         <AccountInfo
         mobile={props.mobile}

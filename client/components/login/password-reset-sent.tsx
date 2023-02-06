@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { config, env } from '../../helper';
+import { env } from '../../helper';
 import { LoginStyle, Style } from '../../style';
 import _TextInput from '../control/text-input';
 

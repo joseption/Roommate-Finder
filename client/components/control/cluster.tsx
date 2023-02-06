@@ -1,8 +1,6 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Context, navProp } from '../../helper';
-import { Color, Radius, Style } from '../../style';
+import React, { useEffect } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Color, Radius } from '../../style';
 import _ClusterOption from './cluster-option';
 import _Text from './text';
 

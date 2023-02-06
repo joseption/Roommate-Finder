@@ -1,11 +1,9 @@
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, Pressable, TouchableHighlight } from 'react-native';
-import { Color, FontSize, Radius, Style } from '../../style';
+import { StyleSheet, TouchableHighlight } from 'react-native';
+import { Color, FontSize } from '../../style';
 import Text from './text';
 import _Text from './text';
 
-const _DropdownOption = (props: any, {navigation}:any) => {
+const _DropdownOption = (props: any) => {
     /*
     Props: JA TODO 
     */

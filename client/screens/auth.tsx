@@ -1,5 +1,4 @@
 import { useNavigation } from '@react-navigation/native';
-import { userInfo } from 'os';
 import { useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import _Button from '../components/control/button';

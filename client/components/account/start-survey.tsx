@@ -6,12 +6,10 @@ import _Group from '../control/group';
 import _Text from '../control/text';
 import React, { useEffect, useState } from 'react';
 import { Color, Content, FontSize, Radius, Style } from '../../style';
-import { styles } from '../../screens/login';
 import _Button from '../control/button';
 import _Image from '../control/image';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import DocumentPicker, {DirectoryPickerResponse, DocumentPickerResponse, isInProgress, types} from 'react-native-document-picker'
-import { AccountScreenType, authTokenHeader, env, navProp, NavTo, setLocalStorage } from '../../helper';
+import { AccountScreenType, authTokenHeader, env, navProp, NavTo } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 
 const StartSurvey = (props: any) => {

@@ -5,9 +5,9 @@ import { createContext } from "react";
 import { Dimensions } from "react-native";
 import { Content } from "./style";
 import * as DeepLinking from 'expo-linking';
-import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut, faUserPlus, faArrowLeft, faRefresh } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut, faUserPlus, faArrowLeft, faRefresh, faLock, faPowerOff, faKey } from '@fortawesome/free-solid-svg-icons'
 import AsyncStorage from "@react-native-async-storage/async-storage";
-library.add(faRefresh, faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
+library.add(faPowerOff, faKey, faRefresh, faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
 
 export const Stack = createNativeStackNavigator<Page>();
 
@@ -188,10 +188,65 @@ export const isSetup = async () => {
   }
 }
 
+export const userId = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@user_data');
+    const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+    if (data && data.user) {
+      return data.user.id;
+    }
+    else {
+      return '';
+    }
+  }
+  catch {
+    return '';
+  }
+}
+
 export const authTokenHeader = async () => {
   let data = await getLocalStorage();
   if (data) {
     return `token ${data.accessToken}`;
   }
   return '';
+}
+
+// For use with dark mode and other non-session based settings
+export const getLocalAppSettings = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@app_data');
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  }
+  catch {
+    return null;
+  }
+}
+
+// For use with dark mode and other non-session based settings
+export const setLocalAppSettings = async (data: Object | null) => {
+  try {
+    const jsonValue = !data ? '' : JSON.stringify(data);
+    await AsyncStorage.setItem('@app_data', jsonValue);
+    return true;
+  }
+  catch {
+    return false;
+  }
+}
+
+export const isDarkMode = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@app_data');
+    const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+    if (data) {
+      return data.is_darkmode ? true : false;
+    }
+    else {
+      return false;
+    }
+  }
+  catch {
+    return false;
+  }
 }

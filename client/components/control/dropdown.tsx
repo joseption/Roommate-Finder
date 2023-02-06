@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, TextInput, StyleSheet, Pressable, Platform, ScrollView, Modal, Text } from 'react-native';
 import { Context, isMobile } from '../../helper';
 import { Color, FontSize, Radius, Style } from '../../style';

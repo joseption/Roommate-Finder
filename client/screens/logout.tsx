@@ -1,5 +1,4 @@
 import { useNavigation } from '@react-navigation/native';
-import { userInfo } from 'os';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../components/control/button';
@@ -48,13 +47,17 @@ const LogoutScreen = (props: any) => {
         } 
 
         if (!error || !user) {
-            props.setIsLoggedIn(false);
-            props.setIsSetup(false);
             navigation.navigate(NavTo.Login);
             navigation.reset({
                 index: 0,
                 routes: [{name: NavTo.Login}],
             });
+
+            // Set delay so rendering occurs properly to hide navigation
+            setTimeout(() => {
+                props.setIsLoggedIn(false);
+                props.setIsSetup(false);
+            }, 10);
         }
         else
             setMessage("An error occurred while logging out, please reload the page and try again.");

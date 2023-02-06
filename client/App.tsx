@@ -12,12 +12,13 @@ import ListingsScreen from './screens/listings';
 import MessagesScreen from './screens/messages';
 import SearchScreen from './screens/search';
 import { Color, Content } from './style';
-import { env, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, navProp } from './helper';
+import { env, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, isDarkMode as isDarkModeHelper, navProp } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
 import _Button from './components/control/button';
 import AuthScreen from './screens/auth';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 export const ThemeContext = React.createContext(null);
 export const App = (props: any) => {
   const [navHeight,setNavHeight] = useState(0);
@@ -39,6 +40,7 @@ export const App = (props: any) => {
   const [navSelector,setNavSelector] = useState('');
   const [route,setRoute] = useState('');
   const [isDarkMode,setIsDarkMode] = useState(false);
+  const [keyboardVisible,setKeyboardVisible] = useState(false);
   const [updatePicture,setUpdatePicture] = useState('');
   const [backCount,setBackCount] = useState(0);
   const [backTimer,setBackTimer] = useState(0);
@@ -49,6 +51,27 @@ export const App = (props: any) => {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
+
+  useEffect(() => {
+    checkDarkMode();
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const dimsChanged = Dimensions.addEventListener("change", (e) => setMobile(isMobile()));
@@ -110,7 +133,9 @@ export const App = (props: any) => {
     let time = new Date().getTime();
     if (backTimer == 0 || (time - backTimer) < 250) {
       if (backCount == 1) {
-        ref.current?.navigate(NavTo.Logout);
+        if (ref && ref.current) {
+          ref.current.navigate(NavTo.Logout);
+        }
         setBackCount(0);
         setBackTimer(0);
       }
@@ -128,6 +153,11 @@ export const App = (props: any) => {
 
     return false;
   };
+
+  async function checkDarkMode() { 
+    let darkMode = await isDarkModeHelper();
+    setIsDarkMode(darkMode);
+  }
 
   function getRouteName() {
     if (ref.current) {
@@ -376,198 +406,212 @@ export const App = (props: any) => {
   };
 
   return (
-    <NavigationContainer
-    linking={linking}
-    ref={ref}
-    theme={MyTheme()}
-    >
-      <KeyboardAvoidingView
-      behavior='padding'
-      style={styles.avoidContainer}>
-      <TouchableWithoutFeedback onPress={(e:any) => checkKeyboardDismiss()}>
-        <ScrollView
-        contentContainerStyle={scrollParentContainerStyle()}
-        style={getMainStyle()}
-        onScroll={(e) => scroll(e)}
-        scrollEventThrottle={100}
-        onContentSizeChange={(w, h) => getScrollDims(w, h)}
-        keyboardShouldPersistTaps={'handled'}
+    <SafeAreaProvider>
+      <SafeAreaView
+      style={styles.safe}
+      >
+        <View
+        style={styles.safe}
         >
-          <View
-          style={styles.stack}
-          >
-            {/* <_Button isDarkMode={isDarkMode} onPress={() => setIsDarkMode(!isDarkMode)}>Switch</_Button> */}
-            <StatusBar
-              backgroundColor={Color(isDarkMode).statusBar}
-              barStyle={isDarkMode ? "light-content" : "dark-content"}
-            />
-            <Stack.Navigator
-            screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle()}}
-            initialRouteName={NavTo.Login}
+        <NavigationContainer
+        linking={linking}
+        ref={ref}
+        theme={MyTheme()}
+        >
+          <KeyboardAvoidingView
+          behavior='padding'
+          style={styles.avoidContainer}>
+          <TouchableWithoutFeedback onPress={(e:any) => checkKeyboardDismiss()}>
+            <ScrollView
+            contentContainerStyle={scrollParentContainerStyle()}
+            style={getMainStyle()}
+            onScroll={(e) => scroll(e)}
+            scrollEventThrottle={100}
+            onContentSizeChange={(w, h) => getScrollDims(w, h)}
+            keyboardShouldPersistTaps={'handled'}
             >
-              <Stack.Screen
-                  name={NavTo.Home}
-                  options={{title: NavTo.Home, animation: 'none'}}
+              <View
+              style={styles.stack}
               >
-              {(props: any) => <HomeScreen
-              {...props}
-              mobile={mobile}
-              isDarkMode={isDarkMode}
-              setNavSelector={setNavSelector}
-              />}
-              </Stack.Screen>
-              <Stack.Screen
-                  name={NavTo.Auth}
-                  options={{title: NavTo.Auth, animation: 'none'}}
-              >
-              {(props: any) => <AuthScreen
-              {...props}
-              mobile={mobile}
-              setIsLoggedIn={setIsLoggedIn}
-              setIsSetup={setIsSetup}
-              isDarkMode={isDarkMode}
-              setNavSelector={setNavSelector}
-              />}
-              </Stack.Screen>
-              <Stack.Screen
-                  name={NavTo.Login}
-                  options={{title: NavTo.Login, animation: 'none'}}
-              >
-                  {(props: any) => <LoginScreen
+                <StatusBar
+                  backgroundColor={Color(isDarkMode).statusBar}
+                  barStyle={isDarkMode ? "light-content" : "dark-content"}
+                />
+                <Stack.Navigator
+                screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle(), navigationBarColor: Color(isDarkMode).statusBar}}
+                initialRouteName={NavTo.Login}
+                >
+                  <Stack.Screen
+                      name={NavTo.Home}
+                      options={{title: NavTo.Home, animation: 'none'}}
+                  >
+                  {(props: any) => <HomeScreen
+                  {...props}
+                  mobile={mobile}
+                  isDarkMode={isDarkMode}
+                  setNavSelector={setNavSelector}
+                  />}
+                  </Stack.Screen>
+                  <Stack.Screen
+                      name={NavTo.Auth}
+                      options={{title: NavTo.Auth, animation: 'none'}}
+                  >
+                  {(props: any) => <AuthScreen
                   {...props}
                   mobile={mobile}
                   setIsLoggedIn={setIsLoggedIn}
                   setIsSetup={setIsSetup}
-                  accountAction={accountAction}
-                  setAccountAction={setAccountAction}
+                  isDarkMode={isDarkMode}
                   setNavSelector={setNavSelector}
-                  loginViewChanged={loginViewChanged}
-                  setLoginViewChanged={setLoginViewChanged}
+                  />}
+                  </Stack.Screen>
+                  <Stack.Screen
+                      name={NavTo.Login}
+                      options={{title: NavTo.Login, animation: 'none'}}
+                  >
+                      {(props: any) => <LoginScreen
+                      {...props}
+                      mobile={mobile}
+                      setIsLoggedIn={setIsLoggedIn}
+                      setIsSetup={setIsSetup}
+                      accountAction={accountAction}
+                      setAccountAction={setAccountAction}
+                      setNavSelector={setNavSelector}
+                      loginViewChanged={loginViewChanged}
+                      setLoginViewChanged={setLoginViewChanged}
+                      isDarkMode={isDarkMode}
+                      setIsDarkMode={setIsDarkMode}
+                      keyboardVisible={keyboardVisible}
+                      />}
+                  </Stack.Screen>
+                  <Stack.Screen
+                      name={NavTo.Account}
+                      options={{title: NavTo.Account, animation: 'none'}}
+                  >
+                  {(props: any) => <AccountScreen
+                  {...props}
+                  accountView={accountView}
+                  setAccountView={setAccountView}
+                  mobile={mobile}
+                  isSetup={isSetup}
+                  setupStep={setupStep}
+                  setPrompt={setPrompt}
+                  scrollY={scrollY}
+                  setIsLoggedIn={setIsLoggedIn}
+                  setIsSetup={setIsSetup}
+                  isDarkMode={isDarkMode}
+                  setIsDarkMode={setIsDarkMode}
+                  setNavSelector={setNavSelector}
+                  setUpdatePicture={setUpdatePicture}
+                  />}
+                  </Stack.Screen>
+                  <Stack.Screen
+                      name={NavTo.Profile}
+                      options={{title: NavTo.Profile, animation: 'none'}}
+                  >
+                  {(props: any) => <ProfileScreen
+                  {...props}
+                  mobile={mobile}
                   isDarkMode={isDarkMode}
                   />}
-              </Stack.Screen>
-              <Stack.Screen
-                  name={NavTo.Account}
-                  options={{title: NavTo.Account, animation: 'none'}}
-              >
-              {(props: any) => <AccountScreen
-              {...props}
-              accountView={accountView}
-              setAccountView={setAccountView}
-              mobile={mobile}
-              isSetup={isSetup}
-              setupStep={setupStep}
-              setPrompt={setPrompt}
-              scrollY={scrollY}
-              setIsLoggedIn={setIsLoggedIn}
-              setIsSetup={setIsSetup}
-              isDarkMode={isDarkMode}
-              setIsDarkMode={setIsDarkMode}
-              setNavSelector={setNavSelector}
-              setUpdatePicture={setUpdatePicture}
-              />}
-              </Stack.Screen>
-              <Stack.Screen
-                  name={NavTo.Profile}
-                  options={{title: NavTo.Profile, animation: 'none'}}
-              >
-              {(props: any) => <ProfileScreen
-              {...props}
-              mobile={mobile}
-              isDarkMode={isDarkMode}
-              />}
-              </Stack.Screen> 
-              <Stack.Screen
-                  name={NavTo.Survey}
-                  options={{title: NavTo.Survey, animation: 'none'}}
-              >
-              {(props: any) => <SurveyScreen
-              {...props}
-              mobile={mobile}
-              setIsLoggedIn={setIsLoggedIn}
-              setIsSetup={setIsSetup}
-              isDarkMode={isDarkMode}
-              setNavSelector={setNavSelector}
-              />}
-              </Stack.Screen>
-              <Stack.Screen
-                  name={NavTo.Search}
-                  options={{title: NavTo.Search, animation: 'none'}}
-              > 
-              {(props: any) => <SearchScreen
-              {...props}
-              mobile={mobile}
-              isMatches={isMatches}
-              setIsMatches={setIsMatches}
-              isDarkMode={isDarkMode}
-              setNavSelector={setNavSelector}
-              />}
-              </Stack.Screen>
-              <Stack.Screen
-                  name={NavTo.Listings}
-                  options={{title: NavTo.Listings, animation: 'none'}}
-              >
-              {(props: any) => <ListingsScreen
-              {...props}
-              mobile={mobile}
-              isDarkMode={isDarkMode}
-              setNavSelector={setNavSelector}
-              />}
-              </Stack.Screen>
-              <Stack.Screen
-                  name={NavTo.Messages}
-                  options={{title: NavTo.Messages, animation: 'none'}}
-              >
-              {(props: any) => <MessagesScreen
-              {...props}
-              mobile={mobile}
-              isDarkMode={isDarkMode}
-              setNavSelector={setNavSelector}
-              />}
-              </Stack.Screen> 
-              <Stack.Screen
-                  name={NavTo.Logout}
-                  options={{title: NavTo.Logout, animation: 'none'}}
-              >
-              {(props: any) => <LogoutScreen
-              {...props}
-              mobile={mobile}
-              setIsLoggedIn={setIsLoggedIn}
-              setIsSetup={setIsSetup}
-              isDarkMode={isDarkMode}
-              setNavSelector={setNavSelector}
-              />}
-              </Stack.Screen>
-            </Stack.Navigator>
-          </View>
-        </ScrollView>
-        </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-        {Platform.OS === 'web' ?
-        <Navigation
-        setAccountView={setAccountView}
-        height={navHeight}
-        setHeight={setNavHeight}
-        width={navWidth}
-        setWidth={setNavWidth}
-        setIsMatches={setIsMatches}
-        mobile={mobile}
-        isLoaded={isLoaded}
-        isSetup={isSetup}
-        isLoggedIn={isLoggedIn}
-        navSelector={navSelector}
-        setNavSelector={setNavSelector}
-        isDarkMode={isDarkMode}
-        setUpdatePicture={setUpdatePicture}
-        updatePicture={updatePicture}
-        />
-        
-        : null} 
-    </NavigationContainer>
+                  </Stack.Screen> 
+                  <Stack.Screen
+                      name={NavTo.Survey}
+                      options={{title: NavTo.Survey, animation: 'none'}}
+                  >
+                  {(props: any) => <SurveyScreen
+                  {...props}
+                  mobile={mobile}
+                  setIsLoggedIn={setIsLoggedIn}
+                  setIsSetup={setIsSetup}
+                  isDarkMode={isDarkMode}
+                  setNavSelector={setNavSelector}
+                  />}
+                  </Stack.Screen>
+                  <Stack.Screen
+                      name={NavTo.Search}
+                      options={{title: NavTo.Search, animation: 'none'}}
+                  > 
+                  {(props: any) => <SearchScreen
+                  {...props}
+                  mobile={mobile}
+                  isMatches={isMatches}
+                  setIsMatches={setIsMatches}
+                  isDarkMode={isDarkMode}
+                  setNavSelector={setNavSelector}
+                  />}
+                  </Stack.Screen>
+                  <Stack.Screen
+                      name={NavTo.Listings}
+                      options={{title: NavTo.Listings, animation: 'none'}}
+                  >
+                  {(props: any) => <ListingsScreen
+                  {...props}
+                  mobile={mobile}
+                  isDarkMode={isDarkMode}
+                  setNavSelector={setNavSelector}
+                  />}
+                  </Stack.Screen>
+                  <Stack.Screen
+                      name={NavTo.Messages}
+                      options={{title: NavTo.Messages, animation: 'none'}}
+                  >
+                  {(props: any) => <MessagesScreen
+                  {...props}
+                  mobile={mobile}
+                  isDarkMode={isDarkMode}
+                  setNavSelector={setNavSelector}
+                  />}
+                  </Stack.Screen> 
+                  <Stack.Screen
+                      name={NavTo.Logout}
+                      options={{title: NavTo.Logout, animation: 'none'}}
+                  >
+                  {(props: any) => <LogoutScreen
+                  {...props}
+                  mobile={mobile}
+                  setIsLoggedIn={setIsLoggedIn}
+                  setIsSetup={setIsSetup}
+                  isDarkMode={isDarkMode}
+                  setNavSelector={setNavSelector}
+                  />}
+                  </Stack.Screen>
+                </Stack.Navigator>
+              </View>
+            </ScrollView>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+            {Platform.OS === 'web' ?
+            <Navigation
+            setAccountView={setAccountView}
+            height={navHeight}
+            setHeight={setNavHeight}
+            width={navWidth}
+            setWidth={setNavWidth}
+            setIsMatches={setIsMatches}
+            mobile={mobile}
+            isLoaded={isLoaded}
+            isSetup={isSetup}
+            isLoggedIn={isLoggedIn}
+            navSelector={navSelector}
+            setNavSelector={setNavSelector}
+            isDarkMode={isDarkMode}
+            setUpdatePicture={setUpdatePicture}
+            updatePicture={updatePicture}
+            />
+            
+            : null} 
+        </NavigationContainer>
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
 const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+  },
   avoidContainer: {
     flex: 1,
   },

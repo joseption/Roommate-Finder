@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -10,8 +11,14 @@ interface Props {
 const ListingCard = ({ listing }: Props) => {
   return (
     <div className="m-10 max-w-sm overflow-hidden rounded shadow-lg">
-      <Link href="">
-        <img className="w-full" src={listing.images[0]} />
+      <Link href={`/listings/${listing.id}`}>
+        <img
+          className="w-full"
+          src={listing.images[0] as string}
+          width="120"
+          height="120"
+          alt="listing image"
+        />
         <div className="px-6 py-4">
           <div className="mb-2 text-xl font-bold">{listing.name}</div>
           <p className="text-base text-gray-700">

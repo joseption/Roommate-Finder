@@ -53,6 +53,27 @@ export function findUserById(id: any) {
     where: {
       id,
     },
+    select: {
+      id: true,
+      bio: true,
+      first_name: true,
+      last_name: true,
+      is_verified: true,
+      is_active: true,
+      is_superuser: true,
+      is_setup: true,
+      setup_step: true,
+      birthday: true,
+      tags: true,
+      image: true,
+      Listings: true,
+      phone_number: true,
+      zip_code: true,
+      city: true,
+      state: true,
+      gender: true,
+      email: true,
+    }
   });
 }
 

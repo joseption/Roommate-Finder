@@ -15,6 +15,18 @@ export async function GetCurrentUserInfo() {
   return await doRequest<user>(`${backend_api}/users/me`, null, "GET", true);
 }
 
+export async function GetProfile({ userId = "" }) {
+  const params = new URLSearchParams({
+    userId,
+  });
+  return await doRequest<user>(
+    `${backend_api}/users/profile?${params.toString()}`,
+    null,
+    "GET",
+    true
+  );
+}
+
 export async function GetSurveryInfo() {
   return await doRequest<SurveyInfo[]>(
     `${backend_api}/survey/info`,
@@ -54,6 +66,15 @@ export async function GetAllUsers() {
 export async function GetListings() {
   return await doRequest<ListingInfo[]>(
     `${backend_api}/listings/all`,
+    null,
+    "GET",
+    true
+  );
+}
+
+export async function GetListing(id: string) {
+  return await doRequest<ListingInfo>(
+    `${backend_api}/listings/${id}`,
     null,
     "GET",
     true

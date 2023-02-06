@@ -1,6 +1,98 @@
-export default function createListing() {
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
+import { toast } from "react-hot-toast";
+
+import { MakeListings } from "../request/mutate";
+
+export default function CreateListing() {
+  const router = useRouter();
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [images, setImages] = useState<string[]>([]);
+  const [price, setPrice] = useState<number>(0);
+  const [city, setCity] = useState<string>("");
+  const [housing_type, setHousingType] = useState<string>("Apartment");
+  const [rooms, setRooms] = useState<number>(1);
+  const [size, setSize] = useState<number>(0);
+  const [bathrooms, setBathrooms] = useState<number>(1);
+  // const [zipcode, setZipcode] = useState<string>("");
+  const [petsAllowed, setPetsAllowed] = useState<boolean>(true);
+
+  const { mutate: mutateListing } = useMutation({
+    mutationFn: (fullAddress: string) =>
+      MakeListings(
+        name,
+        description,
+        images,
+        price,
+        city,
+        housing_type,
+        rooms,
+        bathrooms,
+        size,
+        fullAddress,
+        petsAllowed
+      ),
+    onSuccess: () => {
+      void router.push("/listings");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+      console.log(err);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const streetAddress = document.getElementById(
+      "street-address"
+    ) as HTMLInputElement;
+    const city = document.getElementById("city") as HTMLInputElement;
+    const state = document.getElementById("state") as HTMLInputElement;
+    const zip = document.getElementById("zip") as HTMLInputElement;
+    // setZipcode(zip.value);
+    const fullAddress = `${streetAddress.value}, ${city.value}, ${state.value} ${zip.value}`;
+    console.log(bathrooms, "bathrooms hs");
+    console.log(size, "size hs");
+
+    mutateListing(fullAddress);
+  };
+
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files as FileList;
+    if (!files) {
+      return;
+    }
+    const res = await fileListToBase64(files);
+    setImages(res);
+    console.log(images);
+  };
+
+  const fileListToBase64 = (fileList: FileList): Promise<string[]> => {
+    const files = Array.from(fileList);
+    const promises = files.map((file) => {
+      if (file.type !== "image/jpeg" && file.type !== "image/png") {
+        return toast.error("Invalid image type. Only jpg and png are allowed.");
+      }
+      if (file.size > 8 * 1024 * 1024) {
+        return toast.error("Image size is too large. Max size is 8MB.");
+      }
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (error) => reject(error);
+      });
+    });
+    return Promise.all<string>(promises);
+  };
+
   return (
-    <form className="space-y-8 divide-y divide-gray-200 p-10">
+    <form
+      className="space-y-8 divide-y divide-gray-200 p-10"
+      onSubmit={handleSubmit}
+    >
       <div className="space-y-8 divide-y divide-gray-200">
         <div>
           <div>
@@ -23,6 +115,7 @@ export default function createListing() {
                   name="title"
                   id="listing-title"
                   className="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
             </div>
@@ -41,6 +134,7 @@ export default function createListing() {
                   rows={3}
                   className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   defaultValue={""}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
             </div>
@@ -78,14 +172,15 @@ export default function createListing() {
                         id="file-upload"
                         name="file-upload"
                         type="file"
+                        multiple
                         className="sr-only"
+                        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                        onChange={handleFiles}
                       />
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">
-                    PNG, JPG, GIF up to 10MB
-                  </p>
+                  <p className="text-xs text-gray-500">PNG, JPG, up to 8MB</p>
                 </div>
               </div>
             </div>
@@ -116,6 +211,7 @@ export default function createListing() {
                   name="square-feet"
                   id="square-feet"
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  onChange={(e) => setSize(Number(e.target.value))}
                 />
               </div>
             </div>
@@ -132,6 +228,7 @@ export default function createListing() {
                   name="housing_type"
                   autoComplete="housing_type"
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  onChange={(e) => setHousingType(e.target.value)}
                 >
                   <option>Apartment</option>
                   <option>House</option>
@@ -152,6 +249,7 @@ export default function createListing() {
                   name="number-of-rooms"
                   autoComplete="number-of-rooms"
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  onChange={(e) => setRooms(Number(e.target.value))}
                 >
                   <option>1</option>
                   <option>2</option>
@@ -163,19 +261,22 @@ export default function createListing() {
 
             <div className="sm:col-span-3">
               <label
-                htmlFor="private-bathrooms-boolean"
+                htmlFor="num-bathrooms"
                 className="block text-sm font-medium text-gray-700"
               >
-                Do you get a private bathroom
+                Number of bathrooms
               </label>
               <div className="mt-1">
                 <select
-                  id="private-bathrooms-boolean"
-                  name="private-bathrooms-boolean"
+                  id="num-bathrooms"
+                  name="num-bathrooms"
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  onChange={(e) => setBathrooms(Number(e.target.value))}
                 >
-                  <option>Yes</option>
-                  <option>No</option>
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4+</option>
                 </select>
               </div>
             </div>
@@ -212,6 +313,7 @@ export default function createListing() {
                   id="city"
                   autoComplete="address-level2"
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  onChange={(e) => setCity(e.target.value)}
                 />
               </div>
             </div>
@@ -227,7 +329,7 @@ export default function createListing() {
                 <input
                   type="text"
                   name="region"
-                  id="region"
+                  id="state"
                   autoComplete="address-level1"
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
@@ -245,10 +347,32 @@ export default function createListing() {
                 <input
                   type="text"
                   name="postal-code"
-                  id="postal-code"
+                  id="zip"
                   autoComplete="postal-code"
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
+              </div>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label
+                htmlFor="pets-allowed"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Pets allowed?
+              </label>
+              <div className="mt-1">
+                <select
+                  id="pets-allowed"
+                  name="pets-allowed"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  onChange={(e) => {
+                    setPetsAllowed(e.target.value === "Yes" ? true : false);
+                  }}
+                >
+                  <option>Yes</option>
+                  <option>No</option>
+                </select>
               </div>
             </div>
 
@@ -265,6 +389,7 @@ export default function createListing() {
                   name="price"
                   id="price"
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  onChange={(e) => setPrice(Number(e.target.value))}
                 />
               </div>
             </div>
@@ -331,6 +456,7 @@ export default function createListing() {
           <button
             type="button"
             className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            onClick={() => void router.push("/listings")}
           >
             Cancel
           </button>

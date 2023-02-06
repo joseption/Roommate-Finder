@@ -116,7 +116,7 @@ export default function ProfileDialog({
             <h1 className="px-1 text-left text-5xl font-bold">
               {authorName}, 21
             </h1>
-            <p className="overflow-y-auto px-1 text-left text-lg sm:text-xl md:text-xl lg:text-2xl">
+            <p className="overflow-y-auto px-1 text-left text-lg line-clamp-6 sm:text-xl md:text-xl lg:text-2xl">
               {bio}
             </p>
             <h1 className="px-1 pt-5 text-left text-3xl font-semibold">

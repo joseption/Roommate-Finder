@@ -328,7 +328,6 @@ router.post('/checkAuth', async (req:Request, res:Response, next:NextFunction) =
       return res.status(401).json({"Error": "Refresh token is not valid."});
     }
     const user = await findUserById((<any>payload).userId);
-    delete user.password;
     try {
       const CheckAccess = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
       return res.status(200).json(

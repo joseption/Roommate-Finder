@@ -66,6 +66,7 @@ const Messages = ({chat, userInfo, socket}: Props) => {
   }, [socket]);
 
   const getMessages = async (id: string) => {
+    if (!id) return;
     const tokenHeader = await authTokenHeader();
     return fetch(
       `${env.URL}/messages/${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}

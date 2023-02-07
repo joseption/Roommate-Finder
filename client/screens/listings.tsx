@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import AllListingsView from '../components/listings/all-listings';
-import { env } from '../helper';
+import { authTokenHeader, env } from '../helper';
 import BottomNavbar from '../components/listings/bottom-nav';
 import FavoriteListings from '../components/listings/favorite-listings';
 import CreateListing from '../components/listings/create-listing';
@@ -38,7 +38,10 @@ const ListingsScreen = (props: any) => {
     try {
       await fetch(`${env.URL}/listings/all`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'authorization': await authTokenHeader(),
+      },
       })
         .then(async (ret) => {
           let res = JSON.parse(await ret.text());

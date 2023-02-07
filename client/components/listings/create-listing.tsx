@@ -268,14 +268,14 @@ const CreateListing = (props: any) => {
         <_Text style={styles.label}>Price</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('price', text)}
+          onChangeText={(text) => handleChange('price', parseFloat(text))}
           value={String(formData.price)}
           keyboardType="numeric"
         />
         <_Text style={styles.label}>Pets Allowed</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('petsAllowed', text)}
+          onChangeText={(text) => handleChange('petsAllowed', Boolean(text))}
           value={String(formData.petsAllowed)}
         />
         <_Text style={styles.label}>Address</_Text>
@@ -287,21 +287,21 @@ const CreateListing = (props: any) => {
         <_Text style={styles.label}>Bathrooms</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('bathrooms', text)}
+          onChangeText={(text) => handleChange('bathrooms', parseInt(text))}
           value={String(formData.bathrooms)}
           keyboardType="numeric"
         />
         <_Text style={styles.label}>Rooms</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('rooms', text)}
+          onChangeText={(text) => handleChange('rooms', parseInt(text))}
           value={String(formData.rooms)}
           keyboardType="numeric"
         />
         <_Text style={styles.label}>Size</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('size', text)}
+          onChangeText={(text) => handleChange('size', parseInt(text))}
           value={String(formData.size)}
           keyboardType="numeric"
         />
@@ -314,7 +314,7 @@ const CreateListing = (props: any) => {
         <_Text style={styles.label}>Distance</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('distanceToUcf', text)}
+          onChangeText={(text) => handleChange('distanceToUcf', parseInt(text))}
           value={formData.distanceToUcf}
         />
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>

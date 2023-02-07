@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, FlatList, TextInput, Button, StyleSheet } from 'react-native';
+import { View, FlatList, StyleSheet, Text } from 'react-native';
 import MessageTab from '../components/messages/message-tab';
 import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
@@ -7,6 +7,7 @@ import _TextInput from '../components/control/text-input';
 import { authTokenHeader, env, getLocalStorage } from '../helper';
 import io, { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter';
+import WavingHand from '../assets/images/waving_hand_svg';
 
 const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io(env.URL);
 
@@ -15,6 +16,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   const [currentChat, setCurrentChat] = useState({});
   const [chats, setChats] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState<any>();
+  const [chatsHaveLoaded, setChatsHaveLoaded] = useState<boolean>(false);
   const chatsRef = useRef(chats);
 
   useEffect(() => {
@@ -53,7 +55,8 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }
 
   const getUserInfo = async () => {
-    setUserInfo(await getLocalStorage().then((res) => {return res.user}));
+    const userInfo = await getLocalStorage().then((res) => {return res.user});
+    setUserInfo(userInfo);
   }
 
   const getChat = async (chatId: string) => {
@@ -123,6 +126,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }
 
   const getChats = async () => {
+    if (!userInfo?.id) return;
     const tokenHeader = await authTokenHeader();
     fetch(
       `${env.URL}/chats?userId=${userInfo?.id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
@@ -157,8 +161,35 @@ const MessagesScreen = (props: any, {navigation}:any) => {
         }
         connectToChatRooms(chatArray);
         setChats(chatArray);
+        setChatsHaveLoaded(true);
       }
     });
+  }
+
+  const styles = StyleSheet.create({
+    noMessagesContainer: {
+      display: 'flex',
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    textStyle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginHorizontal: 40,
+      textAlign: 'center',
+    },
+  });
+
+  if (chatsHaveLoaded && chats.length === 0) {
+    return (
+      <View style={styles.noMessagesContainer}>
+          <WavingHand width={200} height={200}/>
+          <Text style={styles.textStyle}>
+            Find your next roommate by starting a chat through their profile!
+          </Text>
+      </View>
+    );
   }
 
   return (

@@ -21,6 +21,10 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
       socket.nsp.to(data.chatId).emit('receive_message', data);
     })
 
+    socket.on('send_typing', (data: any) => {
+      socket.to(data.chatId).emit('receive_typing', data);
+    })
+
     socket.on('disconnect', () =>  {
       console.log('User disconnected', socket.id);
     });

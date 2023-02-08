@@ -32,12 +32,33 @@ const Messages = ({chat, userInfo, socket}: Props) => {
   }, [messages])
   
   useEffect(() => {
+    // Listen for messages being sent over socket
     socket.on('receive_message', (data: any) => {
-      if (data.chatId === chatRef.current.id) {
-        setMessages([data, ...messagesRef.current]);
-      }
+      if (data.chatId !== chatRef.current.id) return;
+      setMessages([data, ...messagesRef.current]);
     });
-  }, [socket])
+
+    // Listen for typing indicator socket
+    socket.on('receive_typing', (data: any) => {
+      if (data.chatId !== chatRef.current.id) return;
+
+      const typingIndicatorExists = () => {
+        return messagesRef.current.length !== 0 && messagesRef.current[0].typingIndicator;
+      }
+
+      if (data.isTyping) {
+        if (!typingIndicatorExists()) {
+          setMessages([data, ...messagesRef.current])
+        }
+      } else {
+        if (typingIndicatorExists()) {
+          let newMessages = [...messagesRef.current]
+          newMessages.shift();
+          setMessages(newMessages);
+        }
+      }
+    })
+  }, [socket]);
 
   const getMessages = async (id: string) => {
     return fetch(
@@ -54,7 +75,16 @@ const Messages = ({chat, userInfo, socket}: Props) => {
     });
   }
 
-  const renderItem = useCallback(({item}:any) => {return <Message message={item} userInfo={userInfoRef.current} key={item.id}/>}, []);
+  const renderItem = useCallback(({item}:any) => {
+    return (
+      <Message
+        message={item}
+        userInfo={userInfoRef.current}
+        key={item.id}
+        isTypingIndicator={item?.typingIndicator}
+      />
+    )
+  }, []);
 
   return (
     <SafeAreaView style={{flex: 1}}>

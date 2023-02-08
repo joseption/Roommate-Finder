@@ -1,13 +1,15 @@
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, Image } from "react-native";
 import { Color } from "../../style";
 
 interface Props {
   message: any,
   userInfo: any
+  isTypingIndicator: boolean,
 }
 
-const Message = ({ message, userInfo }: Props) => {
+const Message = ({ message, userInfo, isTypingIndicator }: Props) => {
   if (!userInfo) return <></>
+  
   const isMyMessage = () => message.userId === userInfo?.id;
 
   const styles = StyleSheet.create({
@@ -31,8 +33,20 @@ const Message = ({ message, userInfo }: Props) => {
       backgroundColor: Color(message.isDarkMode).grey,
       alignSelf: 'flex-start',
       color: Color(message.isDarkMode).black,
+    },
+    typingIndicatorImage: {
+      width: 28,
+      height: 18,
     }
   });
+
+  if (isTypingIndicator) {
+    return (
+      <View style={[styles.myMessage, styles.theirMessage,]}>
+        <Image style={styles.typingIndicatorImage} source={require('./../../assets/images/loading_indicator.gif')}/>
+      </View>
+    )
+  }
   
   return (
     <>

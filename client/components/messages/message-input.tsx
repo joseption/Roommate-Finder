@@ -29,9 +29,37 @@ const MessageInput = ({chat, socket}: Props) => {
   const [height, setHeight] = useState(0);
   const [hiddenTextWidth, setHiddenTextWidth] = useState(0);
 
+  const randomNum = () => {
+    return (Math.floor(Math.random() * 20) + 1).toString();
+  }
+
   useEffect(() => {
     getUserInfo();
   }, [])
+
+  useEffect(() => {
+    setTypingIndicator();
+  }, [newMessage])
+
+  const prepareTypingIndicatorData = async (isTyping: boolean) => {
+    const data = {
+      chatId: chat.id,
+      typingIndicator: true,
+      isTyping: isTyping,
+      // id is temporary for rendering purposes. 
+      // It provides no value otherwise.
+      id: randomNum(),
+    }
+    socket.emit('send_typing', data);
+  }
+
+  const setTypingIndicator = async (remove?: boolean) => {
+    if (remove) {
+      await prepareTypingIndicatorData(false);
+      return;
+    };
+    await prepareTypingIndicatorData(newMessage.length !== 0);
+  }
   
   const getUserInfo = async () => {
     setUserInfo(await getLocalStorage().then((res) => {return res.user}));
@@ -53,10 +81,6 @@ const MessageInput = ({chat, socket}: Props) => {
         console.warn("Error: ", res.Error);
       }
       else {
-        const randomNum = () => {
-          return (Math.floor(Math.random() * 1000000) + 1).toString();
-        }
-
         const data = {
           chatId: chat.id,
           content: newMessage,
@@ -65,6 +89,7 @@ const MessageInput = ({chat, socket}: Props) => {
           // It provides no value otherwise.
           id: randomNum(),
         }
+        await setTypingIndicator(true);
         await socket.emit('send_message', data);
         setNewMessage('');
       }

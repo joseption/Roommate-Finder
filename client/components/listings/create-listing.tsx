@@ -1,30 +1,35 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList } from 'react-native';
 import _Text from '../control/text';
-import { Color, Style } from '../../style';
+import { Color, Radius, Style } from '../../style';
 import { env } from '../../helper';
 import { authTokenHeader, getLocalStorage } from '../../helper';
 import _Button from '../control/button';
 import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import _Image from '../control/image';
 
 const CreateListing = (props: any) => {
 
   const [userInfo, setUserInfo] = useState<any>();
-  const [imageURL,setImageURL] = useState('');
-  const [imageUri, setImageUri] = useState('');
-  const [imageError,setImageError] = useState('');
-
+  const [imageURLArray, setImageURLArray] = useState<string[]>([]);
+  const [imageUriArray, setImageUriArray] = useState<string[]>([]);
+  const [imageErrorArray, setImageErrorArray] = useState<string[]>([]);
+  
   useEffect(() => {
     getUserInfo();
-  }, [])
-  
+    setFormData({
+      ...formData,
+      userId: userInfo?.id,
+    }); 
+  }, [userInfo?.id])
+
   const getUserInfo = async () => {
     setUserInfo(await getLocalStorage().then((res) => {return res.user}));
-  }
+  };
 
   const [formData, setFormData] = useState({
     name: '',
-    images: [''],
+    images: [],
     city: '',
     housing_type: '',
     description: '',
@@ -41,62 +46,106 @@ const CreateListing = (props: any) => {
 
   
   const handleImage = (res: ImagePickerResponse) => {
-    setImageError('');
+    setImageErrorArray([]);
     if (res && res.assets) {
+      res.assets.forEach((asset) => {
+        setImageErrorArray((prev) => {
+          const newArray = [...prev, ''];
+          return newArray.filter(Boolean) as string[];
+        });
         if (Platform.OS === 'web') {
-            if (res.assets[0].uri) {
-                setImageUri(res.assets[0].uri);
+          if (asset.uri) {
+            setImageUriArray((prev) => {
+              const newArray = [...prev, asset.uri];
+              return newArray.filter(Boolean) as string[];
+            });
+            handleChange('images', asset.uri);
+          } else {
+            setImageErrorArray((prev) => {
+              const newArray = [...prev, "Photo could not be attached"];
+              return newArray.filter(Boolean) as string[];
+            });
+          }
+        } else {
+          if (asset.base64) {
+            if (asset.uri) {
+              setImageURLArray((prev) => {
+                const newArray = [...prev, asset.uri];
+                return newArray.filter(Boolean) as string[];
+              });
             }
-            else {
-                setImageError("Photo could not be attached");
-            }
+            setImageUriArray((prev) => {
+              const newArray = [...prev, "data:image/jpeg;base64," + asset.base64];
+              return newArray.filter(Boolean) as string[];
+            });
+            handleChange('images', asset.uri);
+          } else {
+            setImageErrorArray((prev) => {
+              const newArray = [...prev, "Photo could not be attached"];
+              return newArray.filter(Boolean) as string[];
+            });
+          }
         }
-        else {
-            if (res.assets[0].base64) {
-                if (res.assets[0].uri) {
-                    setImageURL(res.assets[0].uri);
-                }
-                setImageUri("data:image/jpeg;base64," + res.assets[0].base64);
-            }
-            else {
-                setImageError("Photo could not be attached");
-            }
-        }
-    }
-    else if (res.errorCode)
-        setImageError("A problem occurred while attaching your photo, please try again");
-  }
-
-  const uploadPhoto = async () => {
-      launchImageLibrary({mediaType: 'photo', maxHeight: 1000, maxWidth: 1000, includeBase64: true}, (res) => {
-          handleImage(res);
       });
-  }
+    } else if (res.errorCode) {
+      setImageErrorArray((prev) => {
+        const newArray = [...prev, "A problem occurred while attaching your photo, please try again"];
+        return newArray.filter(Boolean) as string[];
+      });
+    }
+  };
+  
 
-  const handleChange = (key: string, value: any) => {
-    setFormData({
-      ...formData,
-      [key]: value,
+  const uploadPhotos = async () => {
+    launchImageLibrary({ mediaType: 'photo', maxHeight: 1000, maxWidth: 1000, includeBase64: true, multiple: true }, (res) => {
+      handleImage(res);
     });
   };
 
-  const handleSubmit = async () => {   
+  const getPhotos = () => {
+    if (Platform.OS === 'web') {
+      return imageUriArray;
+    } else {
+      return imageURLArray;
+    }
+  };
+
+  const handleChange = (key: string, value: any) => {
+    if (key === 'images') {
+      setFormData({
+        ...formData,
+        [key]: [...formData[key], value],
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [key]: value,
+      });
+    }
+  };
+
+
+  const handleSubmit = async () => { 
     try {
-      await fetch(`${env.URL}/listings/`, {
+
+      const response = await fetch(`${env.URL}/listings/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'authorization': await authTokenHeader(),
         },
         body: JSON.stringify(formData),
-      })
-        .then(async (ret) => {
-          let res = await ret.json();
-          console.log(res);
-        });
+      });
+      
+        const createdListing = await response.json();
+        console.log(createdListing)
+        console.log(formData)
+        return createdListing;
+
     } catch (err) {
       console.error(err);
     }
+    
   };  
 
   const styles = StyleSheet.create({
@@ -132,6 +181,9 @@ const CreateListing = (props: any) => {
       formContainer: {
         padding: 20,
       },
+      imagesContainer: {
+        padding: 20,
+      },
       label: {
         fontSize: 16,
         marginBottom: 10,
@@ -155,22 +207,39 @@ const CreateListing = (props: any) => {
       photoButton: {
         marginLeft: 5
       },
+      image: {
+        width: 125,
+        height: 125,
+        backgroundColor: Color(props.isDarkMode).white,
+        borderColor: Color(props.isDarkMode).border,
+        borderWidth: 1,
+        marginBottom: 5,
+    },
   });
 
   return (
     <View style={styles.container}>
       <_Text style={styles.title}>Create Listing</_Text>
       <View style={styles.formContainer}>
+        <View style={styles.imagesContainer}>
+          {getPhotos().map((photo, index) => (
+            <_Image
+              key={index}
+              style={styles.image}
+              source={Platform.OS === 'web' ? photo : { uri: photo }}
+              height={125}
+              width={125}
+            />
+          ))}
+        </View>
         <View style={styles.photoButtonContainer}>
-          <_Button
-            isDarkMode={props.isDarkMode}
-            onPress={(e: any) => uploadPhoto()}
-            style={Style(props.isDarkMode).buttonDefault}
-            //value={formData.images}
-            >
-              {Platform.OS === 'web' ? (imageUri || imageURL) ? 'Change Photo' : 'Upload Photo' : (imageUri || imageURL) ? 'Change' : 'Upload'}
-              {/*handleChange('images', imageUri)*/}
-          </_Button> 
+        <_Button
+          isDarkMode={props.isDarkMode}
+          onPress={(e: any) => { uploadPhotos() }}
+          style={Style(props.isDarkMode).buttonDefault}
+        >
+          {'Upload Photos'}
+        </_Button>           
         </View>
         <_Text style={styles.label}>Name</_Text>
         <TextInput
@@ -199,14 +268,14 @@ const CreateListing = (props: any) => {
         <_Text style={styles.label}>Price</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('price', text)}
+          onChangeText={(text) => handleChange('price', parseFloat(text))}
           value={String(formData.price)}
           keyboardType="numeric"
         />
         <_Text style={styles.label}>Pets Allowed</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('petsAllowed', text)}
+          onChangeText={(text) => handleChange('petsAllowed', Boolean(text))}
           value={String(formData.petsAllowed)}
         />
         <_Text style={styles.label}>Address</_Text>
@@ -218,21 +287,21 @@ const CreateListing = (props: any) => {
         <_Text style={styles.label}>Bathrooms</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('bathrooms', text)}
+          onChangeText={(text) => handleChange('bathrooms', parseInt(text))}
           value={String(formData.bathrooms)}
           keyboardType="numeric"
         />
         <_Text style={styles.label}>Rooms</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('rooms', text)}
+          onChangeText={(text) => handleChange('rooms', parseInt(text))}
           value={String(formData.rooms)}
           keyboardType="numeric"
         />
         <_Text style={styles.label}>Size</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('size', text)}
+          onChangeText={(text) => handleChange('size', parseInt(text))}
           value={String(formData.size)}
           keyboardType="numeric"
         />
@@ -245,7 +314,7 @@ const CreateListing = (props: any) => {
         <_Text style={styles.label}>Distance</_Text>
         <TextInput
           style={styles.input}
-          onChangeText={(text) => handleChange('distanceToUcf', text)}
+          onChangeText={(text) => handleChange('distanceToUcf', parseInt(text))}
           value={formData.distanceToUcf}
         />
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>

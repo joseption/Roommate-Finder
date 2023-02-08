@@ -110,7 +110,7 @@ const Messages = ({chat, userInfo, socket}: Props) => {
   }
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1, zIndex: 1}}>
       <FlatList
         data={messages}
         renderItem={renderItem}

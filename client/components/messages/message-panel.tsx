@@ -43,7 +43,7 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Pr
         This view prevents user from reclicking tab when panel
         animates in screen.
       */}
-      <View style={(showPanel) ? styles.hiddenContainer : null}/>
+      <View style={(showPanel) ? styles.hiddenContainer : {display: 'none'}}/>
       <Animated.View 
         style={[
           styles.container,

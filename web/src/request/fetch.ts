@@ -2,14 +2,17 @@
  * Functions to Fetch data from the API
  */
 
+import { log } from "console";
+
 import { user } from "../types/auth.types";
-import { chatInfo } from "../types/chat.types";
+import { chat } from "../types/chat.types";
 import { ListingInfo } from "../types/listings.types";
 import { SurveyInfo } from "../types/survey.types";
 import { BioAndTags } from "../types/tags.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
-const backend_api = "https://api.roomfin.xyz";
+// const backend_api = "https://api.roomfin.xyz";
+const backend_api = "http://localhost:8080";
 
 export async function GetCurrentUserInfo() {
   return await doRequest<user>(`${backend_api}/users/me`, null, "GET", true);
@@ -79,4 +82,12 @@ export async function GetListing(id: string) {
     "GET",
     true
   );
+}
+
+export async function GetChats(userId: string) {
+  const params = new URLSearchParams({
+    userId,
+  });
+  const endpoint = `${backend_api}/chats?${params.toString()}`;
+  return await doRequest<chat[]>(endpoint, null, "GET", true);
 }

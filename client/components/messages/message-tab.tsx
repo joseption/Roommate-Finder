@@ -33,10 +33,15 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
     return '';
   }
 
+  const getContent = (content: string) => {
+    if (!content) return '';
+    return content;
+  }
+
   function displayChatData(blocked: boolean) {
     if (blocked) return <></>;
     return (
-      <Text numberOfLines={2}>{getPrefix(chat.latestMessage.userId) + chat.latestMessage.content}</Text>
+      <Text numberOfLines={2}>{getPrefix(chat.latestMessage?.userId) + getContent(chat.latestMessage?.content)}</Text>
     );
   }
 

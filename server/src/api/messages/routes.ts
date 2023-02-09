@@ -3,6 +3,7 @@ import { isAuthenticated } from '../../middleware';
 import db from '../../utils/db';
 const router = express.Router();
 import payload from '../../global'
+import { blockedChat } from './messagesHelper';
 
 // router.use(isAuthenticated);
 
@@ -10,18 +11,31 @@ import payload from '../../global'
 router.post('/', async (req: Request, res: Response) => {
   try {
     // todo: replace userid in content with user from refresh token
-    const { content, userId, chatId } = req.body;
+    const { content, sender, receiver, chatId } = req.body;
 
     if (!content || !chatId) {
       return res.status(400).json('missing parameters');
     }
     const newMessage = await db.message.create({
       data: {
-        userId: userId as string, // * the sender of the message
+        userId: sender as string, // * the sender of the message
+        copyOfUserId: sender as string,
         content: content as string,
         chatId: chatId as string,
       },
     });
+    const receiverBlockedChat = await blockedChat(receiver, chatId);
+    if (!receiverBlockedChat) {
+      await db.message.create({
+        data: {
+          userId: sender as string, // * the sender of the message
+          copyOfUserId: receiver as string, // * the receiver of the message
+          content: content as string,
+          chatId: chatId as string,
+          messageReference: newMessage.id as string,
+        },
+      });
+    }
     // update latest message in chat
     await db.chat.update({
       where: {
@@ -53,13 +67,14 @@ router.get('/getMessage', async (req: Request, res: Response) => {
   }
 });
 
-// fetch all messages in a given chat
-router.get('/:chatId', async (req: Request, res: Response) => {
+// fetch all messages in a given chat for a user
+router.get('/:chatId/:userId', async (req: Request, res: Response) => {
   try {
-    const { chatId } = req.params;
+    const { chatId, userId } = req.params;
     const messages = await db.message.findMany({
       where: {
         chatId: chatId,
+        copyOfUserId: userId,
       },
       orderBy: {
         createdAt: 'desc',

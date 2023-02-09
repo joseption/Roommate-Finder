@@ -33,7 +33,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   
   useEffect(() => {
     socket.on('receive_message', (data: any) => {
-      updateTabs(data)
+      updateTabs(data);
     });
   }, [socket])
 
@@ -75,6 +75,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }
 
   const getMessage = async (id: string) => {
+    if (!id) return;
     const tokenHeader = await authTokenHeader();
     return fetch(
       `${env.URL}/messages/getMessage?messageId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}

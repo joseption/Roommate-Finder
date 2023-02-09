@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import { isAuthenticated } from '../../middleware';
 import db from '../../utils/db';
+import { insertionSortLastMessage } from './chatsHelper';
+import { Chat } from '@prisma/client';
 const router = express.Router();
 
 // router.use(isAuthenticated);
@@ -37,7 +39,8 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-// get all chats for a logged in user, sorted by newest
+// get all chats for a logged in user, sorted by latest message
+// sent time
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { userId } = req.query;
@@ -51,7 +54,22 @@ router.get('/', async (req: Request, res: Response) => {
         updatedAt: 'desc',
       },
     });
-    return res.status(200).json(chats);
+    const newChats: Chat[] = [];
+    for (let i = 0; i < chats.length; i++) {
+      const message = await db.message.findFirst({
+        where: {
+          chatId: chats[i].id,
+          copyOfUserId: userId as string,
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+      newChats.push({ ...chats[i], latestMessage: message.id, updatedAt: message.createdAt });
+    }
+    // Not very inefficient at small scale and it is stable
+    insertionSortLastMessage(newChats);
+    return res.status(200).json(newChats);
   } catch (err) {
     res.status(400).json(err);
   }

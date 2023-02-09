@@ -71,7 +71,7 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
       return;
     }
 
-    const obj = {content: newMessage, userId: userInfo.id, chatId: chat.id};
+    const obj = {content: newMessage, sender: userInfo.id, receiver: chat?.users[0].id, chatId: chat.id};
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
     return fetch(

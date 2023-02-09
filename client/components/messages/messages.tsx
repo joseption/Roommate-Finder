@@ -69,10 +69,13 @@ const Messages = ({chat, userInfo, socket}: Props) => {
     if (!id) return;
     const tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/messages/${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      `${env.URL}/messages/${id}/${userInfoRef.current.id}`, {
+        method:'GET',
+        headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}
+      }
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
-      if (res.Error) {
+      if (res?.Error) {
         console.warn("Error: ", res.Error);
         return {};
       }

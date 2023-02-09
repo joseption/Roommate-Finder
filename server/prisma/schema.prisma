@@ -131,14 +131,21 @@ model Chat {
   Message       Message[]
 }
 
+// There will exist copy of messages one for the sender,
+// and the other for the receiver. This helps with
+// adequately blocking.
 model Message {
-  id              String   @id @default(uuid())
-  userId          String
-  content         String
-  chatId          String
-  createdAt       DateTime @default(now())
-  chatItBelongsTo Chat     @relation(fields: [chatId], references: [id])
-  sender          User     @relation(fields: [userId], references: [id])
+  id               String   @id @default(uuid())
+  userId           String
+  copyOfUserId     String
+  content          String
+  chatId           String
+  createdAt        DateTime @default(now())
+  messageReference String?
+  chatItBelongsTo  Chat     @relation(fields: [chatId], references: [id])
+  receiver         User     @relation(fields: [copyOfUserId], references: [id])
+
+  @@index([chatId, copyOfUserId])
 }
 
 model Matches {
@@ -148,4 +155,24 @@ model Matches {
   User            User?  @relation(fields: [userOneId], references: [id])
 
   @@unique([userOneId, userTwoId])
+}
+
+model Notifications {
+  id     String @id @default(uuid())
+  userId String
+  chatId String
+}
+
+model Blocked {
+  userId        String
+  chatId        String
+
+  @@id([userId, chatId])
+}
+
+model Muted {
+  userId String
+  chatId String
+
+  @@id([userId, chatId])
 }

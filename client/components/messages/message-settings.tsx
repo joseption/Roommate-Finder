@@ -1,15 +1,17 @@
 import { View, StyleSheet, Pressable, Dimensions, Text } from "react-native";
 import BlockChat from "../../assets/images/block_chat_svg";
 import UnblockChat from "../../assets/images/unblock_chat_svg";
-import { TouchableHighlight } from "react-native-gesture-handler";
+import { authTokenHeader, env } from "../../helper";
 
 interface Props {
   chat: any,
+  userInfo: any,
   showPopUp: boolean,
   setShowPopUp: any,
+  updateBlocked: any
 }
 
-const MessageSettings = ({ chat, showPopUp, setShowPopUp }: Props) => {
+const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, updateBlocked }: Props) => {
   const dim = Dimensions.get('window')
 
   const styles = StyleSheet.create({
@@ -52,26 +54,41 @@ const MessageSettings = ({ chat, showPopUp, setShowPopUp }: Props) => {
     }
   });
 
-  const BlockedTab = (block: any) => {
+  const blockAction = async () => {
+    const obj = { chatId: chat.id, userId: userInfo.id };
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
+    const method = (chat.blocked) ? 'DELETE' : 'POST';
+    return fetch(
+      `${env.URL}/block`, {method: method, body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      } else {
+        updateBlocked(chat.id);
+      }
+    });
+  }
+
+  const BlockedTab = ({ block }: any) => {
     return (
-      <TouchableHighlight underlayColor="gainsboro" style={styles.tabContainer} onPress={() => {console.log('block'); setShowPopUp(false)}}>
+      <Pressable style={styles.tabContainer} onPress={() => {blockAction(); setShowPopUp(false)}}>
         <>
           <View style={styles.blockChatImage}>
             {(block) ? <UnblockChat/> : <BlockChat/>}
           </View>
           {<Text style={styles.tabText}>{(block) ? 'Unblock Chat' : 'Block Chat'}</Text>}
         </>
-      </TouchableHighlight>
+      </Pressable>
     )
   }
-
-  const blocked = false;
   
   return (
     <>
       <Pressable onPress={() => setShowPopUp(false)} style={showPopUp ? styles.popUpBackground : {display: 'none'}}/>
       <View style={showPopUp ? styles.popUp : {display: 'none'}}>
-        <BlockedTab block={blocked}/>
+        <BlockedTab block={chat.blocked}/>
       </View>
     </>
   );

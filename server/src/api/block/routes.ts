@@ -8,13 +8,11 @@ const router = express.Router();
 // Block a chat for user
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { chatId, userId, latestMessage, updatedAt } = req.body;
+    const { chatId, userId } = req.body;
     const block = await db.blocked.create({
       data: {
         chatId: chatId,
         userId: userId,
-        latestMessage: latestMessage,
-        updatedAt: updatedAt,
       },
     });
     res.status(200).json(block);
@@ -27,10 +25,9 @@ router.post('/', async (req: Request, res: Response) => {
 router.delete('/', async (req: Request, res: Response) => {
   try {
     const { userId, chatId } = req.body;
-
     const deleted = await db.blocked.delete({
       where: {
-        userId_chatId: userId + chatId
+        userId_chatId: {userId: userId, chatId: chatId}
       }
     })
     res.status(200).json(deleted)
@@ -38,3 +35,5 @@ router.delete('/', async (req: Request, res: Response) => {
     res.status(500).json(err);
   }
 });
+
+export default router;

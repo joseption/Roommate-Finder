@@ -31,7 +31,7 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
   const [hiddenTextWidth, setHiddenTextWidth] = useState(0);
 
   const randomNum = () => {
-    return (Math.floor(Math.random() * 20) + 1).toString();
+    return (Math.floor(Math.random() * 999999) + 1).toString();
   }
 
   useEffect(() => {
@@ -97,8 +97,14 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
     });
   };
 
-  return (
-    <View style={styles.container}>
+  const blockedBox = (
+    <Text style={styles.blockedInput}>
+      This chat has been blocked
+    </Text>
+  )
+
+  const inputBox = (
+    <>
       <TextInput
         value={newMessage}
         onChangeText={setNewMessage}
@@ -115,6 +121,12 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
       <Text style={[styles.hidden, {width: hiddenTextWidth}]} onLayout={(e) => {setHeight(e.nativeEvent.layout.height)}}>
         {newMessage}
       </Text>
+    </>
+  )
+
+  return (
+    <View style={styles.container}>
+      {(chat.blocked) ? blockedBox : inputBox}
     </View>
   );
 }
@@ -137,6 +149,12 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderColor: 'lightgray',
     borderWidth: StyleSheet.hairlineWidth,
+  },
+  blockedInput: {
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: 'grey'
   },
   buttonContainer: {
     display: 'flex',

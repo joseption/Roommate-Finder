@@ -54,7 +54,7 @@ router.get('/', async (req: Request, res: Response) => {
         updatedAt: 'desc',
       },
     });
-    const newChats: Chat[] = [];
+    let newChats: (Chat & {blocked: boolean})[] = [];
     for (let i = 0; i < chats.length; i++) {
       const message = await db.message.findFirst({
         where: {
@@ -65,7 +65,17 @@ router.get('/', async (req: Request, res: Response) => {
           createdAt: 'desc'
         }
       });
-      newChats.push({ ...chats[i], latestMessage: message.id, updatedAt: message.createdAt });
+      const blocked = await db.blocked.findUnique({
+        where: {
+          userId_chatId: {userId: userId as string, chatId: chats[i].id},
+        }
+      })
+      newChats.push({ 
+        ...chats[i],
+        latestMessage: message.id,
+        updatedAt: message.createdAt,
+        blocked: (blocked) ? true : false,
+      });
     }
     // Not very inefficient at small scale and it is stable
     insertionSortLastMessage(newChats);

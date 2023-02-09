@@ -22,11 +22,13 @@ const returnIcon = (
 
 interface Props {
   chat: any,
+  userInfo: any,
   showPanel: any,
   updateShowPanel: any,
+  updateBlocked: any,
 }
 
-const MessageTopBar = ({showPanel, updateShowPanel, chat}: Props) => {
+const MessageTopBar = ({showPanel, userInfo, updateShowPanel, chat, updateBlocked}: Props) => {
   if (!chat?.users) return <></>;
 
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
@@ -47,7 +49,7 @@ const MessageTopBar = ({showPanel, updateShowPanel, chat}: Props) => {
           </Pressable>
         </View>
       </View>
-      <MessageSettings chat={chat} showPopUp={showPopUp} setShowPopUp={setShowPopUp}/>
+      <MessageSettings chat={chat} userInfo={userInfo} showPopUp={showPopUp} setShowPopUp={setShowPopUp} updateBlocked={updateBlocked}/>
     </>
   );
 }

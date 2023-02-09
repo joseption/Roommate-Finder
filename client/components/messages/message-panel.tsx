@@ -12,9 +12,10 @@ interface Props {
   userInfo: any,
   chat: any,
   socket: any,
+  updateBlocked: any
 }
 
-const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Props) => {
+const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked }: Props) => {
   const [newMessage, setNewMessage] = useState('');
 
   // These values are mapped to percentage of screen size.
@@ -38,8 +39,6 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Pr
     }
   }, [showPanel, slideAnimation]);
 
-  const blocked = false;
-
   return (
     <>
       {/*
@@ -56,20 +55,15 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Pr
           ]}
         ]}
       >
-        <MessageTopBar chat={chat} showPanel={showPanel} updateShowPanel={updateShowPanel}/>
-          {(blocked) ? (
-            <View style={styles.noMessagesContainer}>
-              <BlockedChat />
-              <Text style={styles.textStyle}>
-                This chat is blocked. Unblock it by changing the chat settings.
-              </Text>
-            </View>
-           ) : (
-            <>
-              <Messages chat={chat} userInfo={userInfo} socket={socket}/>
-              <MessageInput chat={chat} socket={socket} newMessage={newMessage} setNewMessage={setNewMessage}/>
-            </>
-           )}
+        <MessageTopBar
+          chat={chat}
+          userInfo={userInfo}
+          showPanel={showPanel}
+          updateShowPanel={updateShowPanel}
+          updateBlocked={updateBlocked}
+        />
+        <Messages chat={chat} userInfo={userInfo} socket={socket}/>
+        <MessageInput chat={chat} socket={socket} newMessage={newMessage} setNewMessage={setNewMessage}/>
       </Animated.View>
     </>
   );

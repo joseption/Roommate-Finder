@@ -13,7 +13,7 @@ const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io(env.URL);
 
 const MessagesScreen = (props: any, {navigation}:any) => {
   const [showPanel, updateShowPanel] = useState(false);
-  const [currentChat, setCurrentChat] = useState({});
+  const [currentChat, setCurrentChat] = useState<any>({});
   const [chats, setChats] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState<any>();
   const [chatsHaveLoaded, setChatsHaveLoaded] = useState<boolean>(false);
@@ -33,6 +33,8 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   
   useEffect(() => {
     socket.on('receive_message', (data: any) => {
+      const chats = chatsRef.current.filter(chat => chat.id === data.chatId);
+      if (chats.length !== 0 && chats[0].blocked) return;
       updateTabs(data);
     });
   }, [socket])
@@ -52,6 +54,17 @@ const MessagesScreen = (props: any, {navigation}:any) => {
     newChat = {...newChat, latestMessage: latestMessage};
     newChats = [newChat, ...newChats];
     setChats(newChats);
+  }
+
+  const updateBlocked = (chatId: string) => {
+    const newChats = chatsRef.current.map((chat) => {
+      if (chat.id === chatId) {
+        return { ...chat, blocked: !chat.blocked }
+      }
+      return chat;
+    });
+    setChats(newChats);
+    setCurrentChat({...currentChat, blocked: !currentChat.blocked})
   }
 
   const getUserInfo = async () => {
@@ -157,6 +170,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
             latestMessage: lastMessage,
             updatedAt: res.updatedAt,
             users: users,
+            blocked: res[i].blocked
           };
           chatArray.push(chat);
         }
@@ -207,7 +221,14 @@ const MessagesScreen = (props: any, {navigation}:any) => {
           />
         }
       />
-      <MessagePanel showPanel={showPanel} socket={socket} userInfo={userInfo} updateShowPanel={updateShowPanel} chat={currentChat}/>
+      <MessagePanel
+        showPanel={showPanel}
+        socket={socket}
+        userInfo={userInfo}
+        updateShowPanel={updateShowPanel}
+        chat={currentChat}
+        updateBlocked={updateBlocked}
+      />
     </>
   );
 };

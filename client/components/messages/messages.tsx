@@ -40,16 +40,19 @@ const Messages = ({chat, userInfo, socket}: Props) => {
     // Listen for messages being sent over socket
     socket.on('receive_message', (data: any) => {
       if (data.chatId !== chatRef.current.id) return;
+      if (chatRef.current.blocked) return;
       setMessages([data, ...messagesRef.current]);
     });
+
+    const typingIndicatorExists = () => {
+      return messagesRef.current.length !== 0 && messagesRef.current[0].typingIndicator;
+    }
+
 
     // Listen for typing indicator socket
     socket.on('receive_typing', (data: any) => {
       if (data.chatId !== chatRef.current.id) return;
-
-      const typingIndicatorExists = () => {
-        return messagesRef.current.length !== 0 && messagesRef.current[0].typingIndicator;
-      }
+      if (chatRef.current.blocked) return;
 
       if (data.isTyping) {
         if (!typingIndicatorExists()) {
@@ -62,7 +65,15 @@ const Messages = ({chat, userInfo, socket}: Props) => {
           setMessages(newMessages);
         }
       }
-    })
+    });
+
+    socket.on("connect_error", (err) => {
+      if (typingIndicatorExists()) {
+        let newMessages = [...messagesRef.current]
+        newMessages.shift();
+        setMessages(newMessages);
+      }
+    });
   }, [socket]);
 
   const getMessages = async (id: string) => {

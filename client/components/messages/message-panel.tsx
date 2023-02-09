@@ -1,9 +1,10 @@
 import { useRef, useEffect, Dispatch, SetStateAction, useState } from 'react';
-import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
+import { View, StyleSheet, Animated, Easing, Dimensions, Text } from 'react-native';
 import _Button from '../control/button';
 import Messages from './messages';
 import MessageInput from './message-input';
 import MessageTopBar from './message-top-bar';
+import BlockedChat from '../../assets/images/blocked_chat_svg';
 
 interface Props {
   showPanel: boolean,
@@ -37,6 +38,8 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Pr
     }
   }, [showPanel, slideAnimation]);
 
+  const blocked = false;
+
   return (
     <>
       {/*
@@ -54,8 +57,19 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Pr
         ]}
       >
         <MessageTopBar chat={chat} showPanel={showPanel} updateShowPanel={updateShowPanel}/>
-        <Messages chat={chat} userInfo={userInfo} socket={socket}/>
-        <MessageInput chat={chat} socket={socket} newMessage={newMessage} setNewMessage={setNewMessage}/>
+          {(blocked) ? (
+            <View style={styles.noMessagesContainer}>
+              <BlockedChat />
+              <Text style={styles.textStyle}>
+                This chat is blocked. Unblock it by changing the chat settings.
+              </Text>
+            </View>
+           ) : (
+            <>
+              <Messages chat={chat} userInfo={userInfo} socket={socket}/>
+              <MessageInput chat={chat} socket={socket} newMessage={newMessage} setNewMessage={setNewMessage}/>
+            </>
+           )}
       </Animated.View>
     </>
   );
@@ -74,6 +88,19 @@ const styles = StyleSheet.create({
     height: '100%',
 
     backgroundColor: 'white',
+  },
+  noMessagesContainer: {
+    display: 'flex',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f4f4f4',
+  },
+  textStyle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginHorizontal: 40,
+    textAlign: 'center',
   },
 });
 

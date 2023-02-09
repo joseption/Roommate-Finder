@@ -122,7 +122,6 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: 'whitesmoke',
     padding: 5,
     paddingHorizontal: 10,
     alignItems: 'center',

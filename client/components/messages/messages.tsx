@@ -102,7 +102,7 @@ const Messages = ({chat, userInfo, socket}: Props) => {
 
   if (loading) {
     return (
-      <View style={{flex: 1}}>
+      <View style={{flex: 1, backgroundColor: '#f4f4f4'}}>
         {/* Edit to include dark mode */}
         <ActivityIndicator style={styles.loading} color={Color(false).gold} size="large"/>
       </View>
@@ -110,7 +110,7 @@ const Messages = ({chat, userInfo, socket}: Props) => {
   }
 
   return (
-    <SafeAreaView style={{flex: 1, zIndex: 1}}>
+    <SafeAreaView style={{flex: 1, zIndex: 1, backgroundColor: '#f4f4f4'}}>
       <FlatList
         data={messages}
         renderItem={renderItem}

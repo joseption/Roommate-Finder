@@ -64,12 +64,14 @@ const MessageSettings = ({ chat, showPopUp, setShowPopUp }: Props) => {
       </TouchableHighlight>
     )
   }
+
+  const blocked = false;
   
   return (
     <>
       <Pressable onPress={() => setShowPopUp(false)} style={showPopUp ? styles.popUpBackground : {display: 'none'}}/>
       <View style={showPopUp ? styles.popUp : {display: 'none'}}>
-        <BlockedTab block={true}/>
+        <BlockedTab block={blocked}/>
       </View>
     </>
   );

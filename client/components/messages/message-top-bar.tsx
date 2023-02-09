@@ -31,7 +31,6 @@ const MessageTopBar = ({showPanel, updateShowPanel, chat}: Props) => {
 
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
 
-
   return (
     <>
       <View style={styles.container}>

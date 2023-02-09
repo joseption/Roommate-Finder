@@ -33,6 +33,15 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
     return '';
   }
 
+  function displayChatData(blocked: boolean) {
+    if (blocked) return <></>;
+    return (
+      <Text numberOfLines={2}>{getPrefix(chat.latestMessage.userId) + chat.latestMessage.content}</Text>
+    );
+  }
+
+  const blocked = false;
+
   return (
     <TouchableHighlight
       style={styles.touchable}
@@ -46,7 +55,7 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
         <Image style={styles.image} source={{ uri: (chat?.users[0]?.image != null) ? chat?.users[0]?.image : 'https://reactnative.dev/img/tiny_logo.png'}} />
         <View style={styles.text}>
             <Text numberOfLines={1} style={styles.name}>{chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}</Text>
-            <Text numberOfLines={2}>{getPrefix(chat.latestMessage.userId) + chat.latestMessage.content}</Text>
+            {displayChatData(blocked)}
         </View>
       </View>
     </TouchableHighlight>
@@ -73,6 +82,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   text: {
+    display: 'flex',
+    justifyContent: 'center',
     flex: 1,
     marginRight: 45,
   },

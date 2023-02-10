@@ -6,7 +6,8 @@ import { ListingInfo } from "../types/listings.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 
-const backend_api = "https://api.roomfin.xyz";
+// const backend_api = "https://api.roomfin.xyz";
+const backend_api = "http://localhost:8080";
 
 export async function login(email: string, password: string) {
   return await doRequest<AuthSession>(
@@ -268,3 +269,9 @@ export async function MakeListings(
     true
   );
 }
+
+export async function SendMessage(
+  messageContent: string,
+  chatId: string,
+  senderId: string
+) {}

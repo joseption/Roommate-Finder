@@ -91,3 +91,12 @@ export async function GetChats(userId: string) {
   const endpoint = `${backend_api}/chats?${params.toString()}`;
   return await doRequest<chat[]>(endpoint, null, "GET", true);
 }
+
+export async function GetUserInfo(userId: string) {
+  return await doRequest<user>(
+    `${backend_api}/users/profile/${userId}`,
+    null,
+    "GET",
+    true
+  );
+}

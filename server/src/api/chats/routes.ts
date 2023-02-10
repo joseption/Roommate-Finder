@@ -168,6 +168,21 @@ router.put('/removeFromGroup', async (req: Request, res: Response) => {
   }
 });
 
+router.delete('/delete/:chatId', async (req: Request, res: Response) => {
+  try {
+    const { chatId } = req.params;
+    console.log(chatId, 'hit delete route');
+    await db.chat.delete({
+      where: {
+        id: chatId as string,
+      },
+    });
+    return res.status(202).json('Chat deleted');
+  } catch (err) {
+    return res.status(500).json({ Error: err.message });
+  }
+});
+
 // given a chatId return info on the chat /chats/chatId
 // * honestly didnt need this in my original design but added just incase front end might need it
 router.get('/:chatId', async (req: Request, res: Response) => {
@@ -190,7 +205,7 @@ router.put('/block', async (req: Request, res: Response) => {
     let chat = await db.chat.findUnique({
       where: {
         id: chatId as string,
-      }
+      },
     });
     if (!chat.blocked) {
       chat = await db.chat.update({
@@ -199,13 +214,13 @@ router.put('/block', async (req: Request, res: Response) => {
         },
         where: {
           id: chatId,
-        }
+        },
       });
       await db.notification.deleteMany({
         where: {
           chatId: chatId,
-        }
-      })
+        },
+      });
       res.status(200).json(chat);
     }
   } catch (err) {
@@ -215,11 +230,11 @@ router.put('/block', async (req: Request, res: Response) => {
 
 router.put('/unblock', async (req: Request, res: Response) => {
   try {
-    const { chatId, userId }: { chatId: string, userId: string} = req.body;
+    const { chatId, userId }: { chatId: string; userId: string } = req.body;
     let chat = await db.chat.findUnique({
       where: {
         id: chatId as string,
-      }
+      },
     });
     if (chat.blocked && chat.blocked === userId) {
       chat = await db.chat.update({
@@ -228,7 +243,7 @@ router.put('/unblock', async (req: Request, res: Response) => {
         },
         where: {
           id: chatId,
-        }
+        },
       });
       res.status(200).json(chat);
     }

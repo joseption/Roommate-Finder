@@ -180,7 +180,8 @@ const MessagesScreen = (props: any, {navigation}:any) => {
             latestMessage: lastMessage,
             updatedAt: res.updatedAt,
             users: users,
-            blocked: res[i].blocked
+            blocked: res[i].blocked,
+            notifications: res[i].notifications
           };
           chatArray.push(chat);
         }

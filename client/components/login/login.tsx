@@ -1,10 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
-import { perPlatformTypes } from 'react-native-document-picker/lib/typescript/fileTypes';
+import React, { SyntheticEvent, useEffect, useState } from 'react';
+import { Keyboard, TextInput, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { config, env, getLocalStorage, navProp, NavTo, setLocalStorage, validateEmail } from '../../helper';
+import { env, getLocalStorage, navProp, NavTo, setLocalStorage, validateEmail } from '../../helper';
 import { LoginStyle, Style } from '../../style';
 import _Checkbox from '../control/checkbox';
 import _TextInput from '../control/text-input';
@@ -18,6 +17,7 @@ const Login = (props: any) => {
   const [passwordError,setPasswordError] = useState(false);
   const [init,setInit] = useState(false);
   const [loading,setLoading] = useState(false);
+  const [emailErrorMsg,setEmailErrorMsg] = useState('');
   const navigation = useNavigation<navProp>();
   const passwordRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
 
@@ -71,13 +71,20 @@ const Login = (props: any) => {
   const handleChange = (value: string, isEmail: boolean) => {
     let eValue = isEmail ? value : email;
     let pValue = !isEmail ? value : password;
-    //let emailError = !(validateEmail(eValue)); // ja temp
+    //let emailError = !(validateEmail(eValue)); // ja temp for testing
     let passwordError = pValue.length == 0;
     setPassword(pValue);
     setEmail(eValue);
 
     setDisabled(emailError || passwordError);
   };
+
+  const emailBlur = (e: any) => {
+    return; // ja temp for testing
+    let emailError = !(validateEmail(email))
+    setEmailError(emailError);
+    setEmailErrorMsg(emailError ? 'must be a UCF Knights address' : '');
+  }
 
   const goRegister = () => {
     setMessage('');
@@ -123,6 +130,7 @@ const Login = (props: any) => {
 
   const doLogin = async () => 
   {
+    Keyboard.dismiss();
     setLoading(true);
     setEmailError(false);
     setPasswordError(false);
@@ -186,6 +194,8 @@ const Login = (props: any) => {
       onSubmit={() => { passwordRef.current?.focus(); }}
       returnKeyType='next'
       isDarkMode={props.isDarkMode}
+      onBlur={(e: any) => emailBlur(e)}
+      errorMessage={emailErrorMsg}
       />
       <_TextInput
       type="password"
@@ -217,12 +227,15 @@ const Login = (props: any) => {
           Login
         </_Button>
       </View>
+      {!props.keyboardVisible ?
       <_Text
       style={LoginStyle(props.isDarkMode).errorMessage}
       >
         {!message && expired() ? "Your session has expired, please login" : message}
       </_Text>
-        <View
+      : null}
+      {!props.keyboardVisible ?
+      <View
         style={LoginStyle(props.isDarkMode).previousPageText}
         >
           <_Text
@@ -237,6 +250,7 @@ const Login = (props: any) => {
             Sign up
           </_Text>
       </View>
+      : null}
     </View>
   );
 };

@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import _Text from '../../components/control/text';
-import { Color, FontSize, Radius, Style } from '../../style';
+import { Color, FontSize, Radius } from '../../style';
 
 const NavMenuButton = (props: any) => {
     /* Props

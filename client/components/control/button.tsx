@@ -1,9 +1,8 @@
-import { useLinkProps, useNavigation } from '@react-navigation/native';
-import React, { useRef } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { ActivityIndicator, Pressable, StyleSheet, TouchableHighlight, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { navProp } from '../../helper';
-import { Color, FontSize, Style } from '../../style';
+import { Color, FontSize, Radius, Style } from '../../style';
 
 const _Button = (props: any) => {
     /* Props
@@ -87,6 +86,7 @@ const _Button = (props: any) => {
         disabled={props.disabled || props.loading}
         onPress={() => press()}
         underlayColor={Color(props.isDarkMode).white}
+        style={[{borderRadius: Radius.default, margin: 0, padding: 0}, props.containerStyle]}
         >
             <View
                 style={[styles.contentContainer, style()]}

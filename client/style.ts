@@ -261,7 +261,8 @@ export const LightStyle = StyleSheet.create({
     marginLeft:3,
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    minHeight: 40
   },
   labelDefault: {
     fontSize: FontSize.default,
@@ -294,8 +295,8 @@ export const LightStyle = StyleSheet.create({
   checkboxMark: {
     borderRightWidth: 3,
     borderBottomWidth: 3,
-    borderRightColor: Color(false).white,
-    borderBottomColor: Color(false).white,
+    borderRightColor: Color(false).actualWhite,
+    borderBottomColor: Color(false).actualWhite,
     transform: [{rotate: '45deg'}],
     height: 14,
     width: 7,
@@ -485,7 +486,7 @@ function LightColor() {
     disabledButton: '#D2D4D9',
     disabledButtonSecondary: '#B3B4B9',
     promptMask: '#FFFFFFBF',
-    promptMaskMobile: '#F0F2F5BF',
+    promptMaskMobile: '#FFFFFFBF',
     contentHolder: '#F0F2F5',
     contentHolderSecondary: '#E4E6E9',
     disabledText: '#4B4B4B',
@@ -734,7 +735,8 @@ export const DarkStyle = StyleSheet.create({
     marginLeft:3,
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    minHeight: 40
   },
   labelDefault: {
     fontSize: FontSize.default,
@@ -767,8 +769,8 @@ export const DarkStyle = StyleSheet.create({
   checkboxMark: {
     borderRightWidth: 3,
     borderBottomWidth: 3,
-    borderRightColor: Color(true).white,
-    borderBottomColor: Color(true).white,
+    borderRightColor: Color(true).actualWhite,
+    borderBottomColor: Color(true).actualWhite,
     transform: [{rotate: '45deg'}],
     height: 14,
     width: 7,

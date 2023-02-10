@@ -9,12 +9,9 @@ import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
 import _Image from '../control/image';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import DocumentPicker, {DirectoryPickerResponse, DocumentPickerResponse, isInProgress} from 'react-native-document-picker'
-import { AccountScreenType, authTokenHeader, env, getLocalStorage, isMobile, navProp, NavTo, setLocalStorage } from '../../helper';
-import { color } from 'react-native-reanimated';
+import { AccountScreenType, authTokenHeader, env, getLocalStorage, navProp, NavTo, setLocalAppSettings } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { rmSync } from 'fs';
 
 const AccountInfo = (props: any) => {
     const navigation = useNavigation<navProp>();
@@ -280,6 +277,7 @@ const AccountInfo = (props: any) => {
     const completeSave = () => {
         setIsLoading(false);
         setIsSaved(true);
+        props.setUpdatePicture(imageUri);
         if (!props.isSetup) {
             navigation.navigate(NavTo.Account, {view: 'about'} as never);
             props.setView(AccountScreenType.about);
@@ -309,6 +307,10 @@ const AccountInfo = (props: any) => {
                 }
             }
         }
+    }
+
+    const logout = () => {
+        navigation.navigate(NavTo.Logout);
     }
 
     const setupPage = (data: any) => {
@@ -522,7 +524,10 @@ const AccountInfo = (props: any) => {
                 web: {
                     outlineStyle: 'none'
                 }
-            })
+            }),
+            alignItems: 'center',
+            justifyContent: 'center',
+            display: 'flex'
         },
         passwordButton: {
             marginRight: 5,
@@ -556,7 +561,7 @@ const AccountInfo = (props: any) => {
             width: 125,
             height: 125,
             backgroundColor: Color(props.isDarkMode).white,
-            borderColor: Color(props.isDarkMode).border,
+            borderColor: Color(props.isDarkMode).separator,
             borderWidth: 1,
             borderRadius: Radius.round,
             marginBottom: 5,
@@ -590,8 +595,17 @@ const AccountInfo = (props: any) => {
                     backgroundColor: Color(props.isDarkMode).black
                 }
             }),
+        },
+        darkModeCheck: {
+            marginTop: 10
         }
     });
+
+    const toggleDarkMode = async (e: any) => {
+        props.setIsDarkMode(e);
+        let settings = {is_darkmode: e};
+        await setLocalAppSettings(settings);
+    }
 
     return (
     <View>
@@ -880,11 +894,6 @@ const AccountInfo = (props: any) => {
                     innerRef={phoneRef}
                     isDarkMode={props.isDarkMode}
                     ></_TextInput>
-                    {/* <_Checkbox
-                    visible={false}
-                    label="Make Phone Public"
-                    checked={(e: any) => setPublicPhoneForm(e)}
-                    /> */}
                 </_Group>
                 <_Group
                 isDarkMode={props.isDarkMode}
@@ -948,16 +957,51 @@ const AccountInfo = (props: any) => {
                     }
                 }
                 ></_Dropdown>
+                <_Checkbox
+                style={_styles.darkModeCheck}
+                visible={true}
+                label="Dark Mode"
+                checked={props.isDarkMode}
+                setChecked={toggleDarkMode}
+                isDarkMode={props.isDarkMode}
+                />
                 <View
                 style={_styles.buttonContainer}
                 >
+                    {props.mobile ?
+                    <_Button
+                    isDarkMode={props.isDarkMode}
+                    style={[Style(props.isDarkMode).buttonDanger, _styles.passwordButton]}
+                    onPress={(e: any) => logout()}
+                    >
+                        <FontAwesomeIcon
+                        style={_styles.newUserIcon}
+                        size={20} color={Color(props.isDarkMode).actualWhite}
+                        icon="power-off"
+                        >
+                        </FontAwesomeIcon>
+                    </_Button>
+                    : null }
                     {props.isSetup ?
                     <_Button
                     isDarkMode={props.isDarkMode}
                     style={[Style(props.isDarkMode).buttonDefault, _styles.passwordButton]}
                     onPress={(e: any) => triggerPrompt()}
                     >
-                        Update Password
+                        {props.mobile ?
+                        <FontAwesomeIcon
+                        style={_styles.newUserIcon}
+                        size={20} color={Color(props.isDarkMode).actualWhite}
+                        icon="key"
+                        >
+                        </FontAwesomeIcon>
+                        :
+                        <_Text
+                        style={{color: Color(props.isDarkMode).actualWhite}}
+                        >
+                            Update Password
+                        </_Text>
+                        }
                     </_Button>
                     : null }
                     <_Button

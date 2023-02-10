@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { config, env } from '../../helper';
-import { Color, FontSize, LoginStyle, Style } from '../../style';
+import { env } from '../../helper';
+import { LoginStyle, Style } from '../../style';
 import _TextInput from '../control/text-input';
 
 const ActivateEmailSent = (props: any, {navigation}:any) => {
@@ -119,6 +119,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
         Check your email to verify your account
       </_Text>
       <_Text
+      containerStyle={{marginLeft: 'auto', marginRight: 'auto'}}
       style={LoginStyle(props.isDarkMode).sentText}
       >
         {sentMsg}

@@ -3,7 +3,7 @@ import _TextInput from '../control/text-input';
 import _Dropdown from '../control/dropdown';
 import _Checkbox from '../control/checkbox';
 import _Text from '../control/text';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Color, Radius } from '../../style';
 import { Context } from '../../helper';
 

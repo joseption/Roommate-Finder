@@ -5,7 +5,6 @@ import { Color, FontSize } from '../../style';
 import { useNavigation } from '@react-navigation/native';
 import { navProp } from '../../helper';
 
-
 const _Image = (props: any) => {
     /* Props
     onPress: Trigger your function

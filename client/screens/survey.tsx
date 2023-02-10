@@ -1,8 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useNavigation } from '@react-navigation/native';
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SectionList } from 'react-navigation';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, View } from 'react-native';
 import _Button from '../components/control/button';
 import _Image from '../components/control/image';
 import _Progress from '../components/control/progress';
@@ -276,18 +275,19 @@ const SurveyScreen = (props: any) => {
     }
 
     const goToMatches = () => {
+        props.setNavSelector(NavTo.Search);
         navigation.navigate(NavTo.Search, {view: 'matches'} as never);
     }
 
     const unauthorized = async () => {
         await setLocalStorage(null);
-        props.setIsLoggedIn(false);
-        props.setIsSetup(false);
         navigation.navigate(NavTo.Login);
         navigation.reset({
             index: 0,
             routes: [{name: NavTo.Login, params: {timeout: 'yes'} as never}],
         });
+        props.setIsLoggedIn(false);
+        props.setIsSetup(false);
     }
 
     const submit = async (goto: number) => {
@@ -344,7 +344,7 @@ const SurveyScreen = (props: any) => {
     }
 
     const promptMask = () => {
-        if (props.isMobile)
+        if (props.mobile)
             return Style(props.isDarkMode).maskPromptMobile;
         else
             return Style(props.isDarkMode).maskPrompt;

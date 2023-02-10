@@ -1,8 +1,6 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Context, navProp } from '../../helper';
-import { Color, Style } from '../../style';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { Color } from '../../style';
 import _Button from './button';
 import _Text from './text';
 

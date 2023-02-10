@@ -1,9 +1,8 @@
-import { userInfo } from 'os';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
-import { config, env, validateEmail } from '../../helper';
+import { env, validateEmail } from '../../helper';
 import { LoginStyle, Style } from '../../style';
 import _TextInput from '../control/text-input';
 
@@ -58,7 +57,7 @@ const Register = (props: any, {navigation}:any) => {
           await fetch(`${env.URL}/auth/registerFast`,
           {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
-              if (res.Error)
+              if (res.error)
               {
                     setMessage(res.error);
                     hasError = true;

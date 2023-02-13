@@ -26,9 +26,10 @@ interface Props {
   showPanel: any,
   updateShowPanel: any,
   updateBlocked: any,
+  socket: any,
 }
 
-const MessageTopBar = ({showPanel, userInfo, updateShowPanel, chat, updateBlocked}: Props) => {
+const MessageTopBar = ({showPanel, userInfo, updateShowPanel, chat, socket, updateBlocked}: Props) => {
   if (!chat?.users) return <></>;
 
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
@@ -49,7 +50,14 @@ const MessageTopBar = ({showPanel, userInfo, updateShowPanel, chat, updateBlocke
           </Pressable>
         </View>
       </View>
-      <MessageSettings chat={chat} userInfo={userInfo} showPopUp={showPopUp} setShowPopUp={setShowPopUp} updateBlocked={updateBlocked}/>
+      <MessageSettings
+        chat={chat}
+        userInfo={userInfo}
+        showPopUp={showPopUp}
+        setShowPopUp={setShowPopUp}
+        updateBlocked={updateBlocked}
+        socket={socket}
+      />
     </>
   );
 }

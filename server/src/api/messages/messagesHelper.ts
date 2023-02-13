@@ -1,9 +1,10 @@
 import db from '../../utils/db';
 
-export async function blockedChat(userId: string, chatId: string) {
-  return db.blocked.findUnique({
+export async function blockedChat(chatId: string) {
+  const chat = await db.chat.findUnique({
     where: {
-      userId_chatId: {userId: userId, chatId: chatId}
+      id: chatId
     }
   });
+  return chat.blocked;
 }

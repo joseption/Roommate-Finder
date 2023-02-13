@@ -8,11 +8,12 @@ interface Props {
   userInfo: any,
   showPopUp: boolean,
   setShowPopUp: any,
-  updateBlocked: any
+  updateBlocked: any,
+  socket: any,
 }
 
-const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, updateBlocked }: Props) => {
-  const dim = Dimensions.get('window')
+const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, updateBlocked }: Props) => {
+  const dim = Dimensions.get('window');
 
   const styles = StyleSheet.create({
     popUpBackground: {
@@ -58,22 +59,42 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, updateBlocke
     const obj = { chatId: chat.id, userId: userInfo.id };
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
-    const method = (chat.blocked) ? 'DELETE' : 'POST';
+    const blockType = (chat.blocked) ? 'unblock' : 'block';
     return fetch(
-      `${env.URL}/block`, {method: method, body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      `${env.URL}/chats/${blockType}`, {method: 'PUT', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
         console.warn("Error: ", res.Error);
       } else {
-        updateBlocked(chat.id);
+        const data = {
+          chatId: chat.id,
+          chat: {
+            id: chat.id,
+            blocked: res.blocked,
+          }
+        };
+        await socket.emit('send_block', data);
+        updateBlocked(res);
       }
     });
   }
 
+  const isDisabled = (block: any) => {
+    if (!block) return false;
+    return block !== userInfo.id;
+  }
+
   const BlockedTab = ({ block }: any) => {
+    if (isDisabled(block)) return <></>;
     return (
-      <Pressable style={styles.tabContainer} onPress={() => {blockAction(); setShowPopUp(false)}}>
+      <Pressable 
+        style={styles.tabContainer}
+        onPress={() => {
+          blockAction();
+          setShowPopUp(false);
+        }}
+      >
         <>
           <View style={styles.blockChatImage}>
             {(block) ? <UnblockChat/> : <BlockChat/>}

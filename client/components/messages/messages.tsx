@@ -40,7 +40,6 @@ const Messages = ({chat, userInfo, socket}: Props) => {
     // Listen for messages being sent over socket
     socket.on('receive_message', (data: any) => {
       if (data.chatId !== chatRef.current.id) return;
-      if (chatRef.current.blocked) return;
       setMessages([data, ...messagesRef.current]);
     });
 
@@ -80,7 +79,7 @@ const Messages = ({chat, userInfo, socket}: Props) => {
     if (!id) return;
     const tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/messages/${id}/${userInfoRef.current.id}`, {
+      `${env.URL}/messages/${id}`, {
         method:'GET',
         headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}
       }

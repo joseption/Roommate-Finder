@@ -18,6 +18,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   const [userInfo, setUserInfo] = useState<any>();
   const [chatsHaveLoaded, setChatsHaveLoaded] = useState<boolean>(false);
   const chatsRef = useRef(chats);
+  const currentChatRef = useRef(currentChat);
 
   useEffect(() => {
     getUserInfo();
@@ -28,6 +29,10 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }, [userInfo])
 
   useEffect(() => {
+    currentChatRef.current = currentChat;
+  }, [currentChat]);
+
+  useEffect(() => {
     chatsRef.current = chats;
   }, [chats])
   
@@ -36,6 +41,9 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       const chats = chatsRef.current.filter(chat => chat.id === data.chatId);
       if (chats.length !== 0 && chats[0].blocked) return;
       updateTabs(data);
+    });
+    socket.on('receive_block', (data: any) => {
+      updateBlocked(data.chat);
     });
   }, [socket])
 
@@ -56,15 +64,17 @@ const MessagesScreen = (props: any, {navigation}:any) => {
     setChats(newChats);
   }
 
-  const updateBlocked = (chatId: string) => {
+  function updateBlocked(c: any) {
+    if (!c) return;
     const newChats = chatsRef.current.map((chat) => {
-      if (chat.id === chatId) {
-        return { ...chat, blocked: !chat.blocked }
+      if (chat.id === c.id) {
+        return { ...chat, blocked: c.blocked }
       }
       return chat;
     });
     setChats(newChats);
-    setCurrentChat({...currentChat, blocked: !currentChat.blocked})
+    console.log(currentChatRef.current, c.blocked);
+    setCurrentChat({...currentChatRef.current, blocked: c.blocked})
   }
 
   const getUserInfo = async () => {

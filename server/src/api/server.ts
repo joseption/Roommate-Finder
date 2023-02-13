@@ -7,7 +7,6 @@ import auth from './auth/routes';
 import users from './users/routes';
 import chats from './chats/routes';
 import messages from './messages/routes';
-import block from './block/routes'
 import listings from './listings/routes';
 import matches from './matches/routes';
 import bodyParser from 'body-parser';
@@ -43,7 +42,6 @@ app.use('/auth', auth);
 app.use('/users', users);
 app.use('/chats', chats);
 app.use('/messages', messages);
-app.use('/block', block);
 app.use('/listings', listings);
 app.use('/survey', survey);
 app.use('/matches', matches);

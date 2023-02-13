@@ -1,9 +1,8 @@
 import express, { Request, Response } from 'express';
 import { isAuthenticated } from '../../middleware';
 import db from '../../utils/db';
-const router = express.Router();
-import payload from '../../global'
 import { blockedChat } from './messagesHelper';
+const router = express.Router();
 
 // router.use(isAuthenticated);
 
@@ -11,41 +10,32 @@ import { blockedChat } from './messagesHelper';
 router.post('/', async (req: Request, res: Response) => {
   try {
     // todo: replace userid in content with user from refresh token
-    const { content, sender, receiver, chatId } = req.body;
+    const { content, userId, chatId } = req.body;
 
     if (!content || !chatId) {
       return res.status(400).json('missing parameters');
     }
-    const newMessage = await db.message.create({
-      data: {
-        userId: sender as string, // * the sender of the message
-        copyOfUserId: sender as string,
-        content: content as string,
-        chatId: chatId as string,
-      },
-    });
-    const receiverBlockedChat = await blockedChat(receiver, chatId);
-    if (!receiverBlockedChat) {
-      await db.message.create({
+    const blocked = await blockedChat(chatId);
+    if (!blocked) {
+      const newMessage = await db.message.create({
         data: {
-          userId: sender as string, // * the sender of the message
-          copyOfUserId: receiver as string, // * the receiver of the message
+          userId: userId as string, // * the sender of the message
           content: content as string,
           chatId: chatId as string,
-          messageReference: newMessage.id as string,
         },
       });
+      // update latest message in chat
+      await db.chat.update({
+        where: {
+          id: chatId as string,
+        },
+        data: {
+          latestMessage: newMessage.id as string, // * the content here really doesnt matter I'm just updating it so I can sort by updatedAt later
+        },
+      });
+      res.status(200).json(newMessage);
     }
-    // update latest message in chat
-    await db.chat.update({
-      where: {
-        id: chatId as string,
-      },
-      data: {
-        latestMessage: newMessage.id as string, // * the content here really doesnt matter I'm just updating it so I can sort by updatedAt later
-      },
-    });
-    res.status(200).json(newMessage);
+    res.status(200);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -67,14 +57,13 @@ router.get('/getMessage', async (req: Request, res: Response) => {
   }
 });
 
-// fetch all messages in a given chat for a user
-router.get('/:chatId/:userId', async (req: Request, res: Response) => {
+// fetch all messages in a given chat
+router.get('/:chatId', async (req: Request, res: Response) => {
   try {
-    const { chatId, userId } = req.params;
+    const { chatId } = req.params;
     const messages = await db.message.findMany({
       where: {
         chatId: chatId,
-        copyOfUserId: userId,
       },
       orderBy: {
         createdAt: 'desc',

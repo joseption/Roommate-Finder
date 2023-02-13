@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
 import { isAuthenticated } from '../../middleware';
 import db from '../../utils/db';
-import { insertionSortLastMessage } from './chatsHelper';
 import { Chat } from '@prisma/client';
 const router = express.Router();
 
@@ -39,8 +38,7 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-// get all chats for a logged in user, sorted by latest message
-// sent time
+// get all chats for a logged in user, sorted by newest
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { userId } = req.query;
@@ -54,32 +52,7 @@ router.get('/', async (req: Request, res: Response) => {
         updatedAt: 'desc',
       },
     });
-    let newChats: (Chat & {blocked: boolean})[] = [];
-    for (let i = 0; i < chats.length; i++) {
-      const message = await db.message.findFirst({
-        where: {
-          chatId: chats[i].id,
-          copyOfUserId: userId as string,
-        },
-        orderBy: {
-          createdAt: 'desc'
-        }
-      });
-      const blocked = await db.blocked.findUnique({
-        where: {
-          userId_chatId: {userId: userId as string, chatId: chats[i].id},
-        }
-      })
-      newChats.push({ 
-        ...chats[i],
-        latestMessage: message.id,
-        updatedAt: message.createdAt,
-        blocked: (blocked) ? true : false,
-      });
-    }
-    // Not very inefficient at small scale and it is stable
-    insertionSortLastMessage(newChats);
-    return res.status(200).json(newChats);
+    return res.status(200).json(chats);
   } catch (err) {
     res.status(400).json(err);
   }
@@ -208,6 +181,55 @@ router.get('/:chatId', async (req: Request, res: Response) => {
     return res.status(200).json(chatInfo);
   } catch (err) {
     res.status(400).json(err);
+  }
+});
+
+router.put('/block', async (req: Request, res: Response) => {
+  try {
+    const { chatId, userId } = req.body;
+    let chat = await db.chat.findUnique({
+      where: {
+        id: chatId as string,
+      }
+    });
+    if (!chat.blocked) {
+      chat = await db.chat.update({
+        data: {
+          blocked: userId as string,
+        },
+        where: {
+          id: chatId,
+        }
+      });
+      console.log(chat)
+      res.status(200).json(chat);
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+router.put('/unblock', async (req: Request, res: Response) => {
+  try {
+    const { chatId, userId }: { chatId: string, userId: string} = req.body;
+    let chat = await db.chat.findUnique({
+      where: {
+        id: chatId as string,
+      }
+    });
+    if (chat.blocked && chat.blocked === userId) {
+      chat = await db.chat.update({
+        data: {
+          blocked: null,
+        },
+        where: {
+          id: chatId,
+        }
+      });
+      res.status(200).json(chat);
+    }
+  } catch (err) {
+    res.status(500).json(err);
   }
 });
 

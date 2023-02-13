@@ -61,6 +61,7 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket, upda
           showPanel={showPanel}
           updateShowPanel={updateShowPanel}
           updateBlocked={updateBlocked}
+          socket={socket}
         />
         <Messages chat={chat} userInfo={userInfo} socket={socket}/>
         <MessageInput chat={chat} socket={socket} newMessage={newMessage} setNewMessage={setNewMessage}/>

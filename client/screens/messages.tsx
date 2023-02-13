@@ -19,6 +19,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   const [chatsHaveLoaded, setChatsHaveLoaded] = useState<boolean>(false);
   const chatsRef = useRef(chats);
   const currentChatRef = useRef(currentChat);
+  const showPanelRef = useRef(showPanel);
 
   useEffect(() => {
     getUserInfo();
@@ -37,7 +38,11 @@ const MessagesScreen = (props: any, {navigation}:any) => {
 
   useEffect(() => {
     chatsRef.current = chats;
-  }, [chats])
+  }, [chats]);
+
+  useEffect(() => {
+    showPanelRef.current = showPanel;
+  }, [showPanel]);
   
   useEffect(() => {
     socket.on('receive_message', (data: any) => {
@@ -48,10 +53,23 @@ const MessagesScreen = (props: any, {navigation}:any) => {
     socket.on('receive_block', (data: any) => {
       updateBlocked(data.chat);
     });
+    socket.on('receive_notification', (data: any) => {
+      const chats = chatsRef.current.map((chat) => {
+        if (chat.id === data.chatId) {
+          if (currentChatRef.current.id === chat.id && showPanelRef.current) {
+            deleteNotifications();
+            return chat;
+          };
+          return {...chat, notifCount: (chat.notifCount + 1)};
+        }
+        return chat;
+      });
+      setChats(chats);
+    });
   }, [socket])
 
   const deleteNotifications = async () => {
-    const obj = {userId: userInfo.id, chatId: currentChatRef.current.id};
+    const obj = {userId: userInfo?.id, chatId: currentChatRef.current?.id};
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
     return fetch(
@@ -60,6 +78,14 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
         console.warn("Error: ", res.Error);
+      } else {
+        const chats = chatsRef.current.map((chat) => {
+          if (chat.id === currentChatRef.current.id) {
+            return {...chat, notifCount: 0};
+          }
+          return chat;
+        });
+        setChats(chats);
       }
     });
   };
@@ -90,7 +116,6 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       return chat;
     });
     setChats(newChats);
-    console.log(currentChatRef.current, c.blocked);
     setCurrentChat({...currentChatRef.current, blocked: c.blocked})
   }
 

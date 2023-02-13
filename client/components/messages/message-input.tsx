@@ -76,6 +76,11 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
         console.warn("Error: ", res.Error);
+      } else {
+        const data = {
+          chatId: chat.id,
+        };
+        socket.emit('send_notification', data);
       }
     });
   };

@@ -41,8 +41,13 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
 
   const displayNotification = (count: number) => {
     if (count === 0) return <></>
-    if (count > 9) return <Text style={styles.notification}>{'9+'}</Text>
-    return <Text style={styles.notification}>{count}</Text>
+    return (
+      <View style={styles.notification}>
+        <Text style={styles.notificationText}>
+          {(count > 9) ? '9+' : count}
+        </Text>
+      </View>
+    );
   };
 
   return (
@@ -58,7 +63,7 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
         <Image style={styles.image} source={{ uri: (chat?.users[0]?.image != null) ? chat?.users[0]?.image : 'https://reactnative.dev/img/tiny_logo.png'}} />
         <View style={styles.text}>
             <Text numberOfLines={1} style={styles.name}>{chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}</Text>
-            <Text numberOfLines={2}>{getPrefix(chat.latestMessage?.userId) + getContent(chat.latestMessage?.content)}</Text>
+            <Text numberOfLines={1}>{getPrefix(chat.latestMessage?.userId) + getContent(chat.latestMessage?.content)}</Text>
         </View>
         <View style={styles.notificationContainer}>
           {displayNotification(chat.notifCount)}
@@ -100,6 +105,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     marginHorizontal: 20,
+    minWidth: 30,
   },
   notification: {
     display: 'flex',
@@ -107,10 +113,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 30,
     width: 30,
-    backgroundColor: Color(false).default,
+    backgroundColor: Color(false).danger,
     borderRadius: 15,
-    color: 'white',
   },
+  notificationText: {
+    color: 'white',
+  }
 });
 
 export default MessageTab;

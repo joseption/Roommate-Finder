@@ -201,7 +201,11 @@ router.put('/block', async (req: Request, res: Response) => {
           id: chatId,
         }
       });
-      console.log(chat)
+      await db.notification.deleteMany({
+        where: {
+          chatId: chatId,
+        }
+      })
       res.status(200).json(chat);
     }
   } catch (err) {

@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
 import { getLocalStorage } from '../../helper';
+import { Color } from '../../style';
 
 interface Props {
   chat: any,
@@ -38,6 +39,12 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
     return content;
   }
 
+  const displayNotification = (count: number) => {
+    if (count === 0) return <></>
+    if (count > 9) return <Text style={styles.notification}>{'9+'}</Text>
+    return <Text style={styles.notification}>{count}</Text>
+  };
+
   return (
     <TouchableHighlight
       style={styles.touchable}
@@ -52,6 +59,9 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
         <View style={styles.text}>
             <Text numberOfLines={1} style={styles.name}>{chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}</Text>
             <Text numberOfLines={2}>{getPrefix(chat.latestMessage?.userId) + getContent(chat.latestMessage?.content)}</Text>
+        </View>
+        <View style={styles.notificationContainer}>
+          {displayNotification(chat.notifCount)}
         </View>
       </View>
     </TouchableHighlight>
@@ -81,12 +91,26 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     flex: 1,
-    marginRight: 45,
   },
   name: {
     fontSize: 18,
     fontWeight: 'bold',
-  }
+  },
+  notificationContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+  },
+  notification: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 30,
+    width: 30,
+    backgroundColor: Color(false).default,
+    borderRadius: 15,
+    color: 'white',
+  },
 });
 
 export default MessageTab;

@@ -77,13 +77,6 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
       if (res.Error) {
         console.warn("Error: ", res.Error);
       }
-      else {
-        const data = {
-          chatId: chat.id,
-          userId: userInfo.id,
-        }
-        // await socket.emit('send_message', data);
-      }
     });
   };
   
@@ -113,8 +106,8 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
         }
         await setTypingIndicator(true);
         await socket.emit('send_message', data);
-        await sendNotification();
         setNewMessage('');
+        sendNotification();
       }
     });
   };

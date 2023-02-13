@@ -10,7 +10,7 @@ const router = express.Router();
 router.post('/', async (req: Request, res: Response) => {
   try {
     const { userId, chatId } = req.body;
-    const userBlockedChat = await blockedChat(userId, chatId);
+    const userBlockedChat = await blockedChat(chatId);
     if (!userBlockedChat) {
       await db.notification.create({
         data: {

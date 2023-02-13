@@ -30,6 +30,9 @@ const MessagesScreen = (props: any, {navigation}:any) => {
 
   useEffect(() => {
     currentChatRef.current = currentChat;
+    if (currentChatRef.current && currentChatRef.current?.id) {
+      deleteNotifications();
+    }
   }, [currentChat]);
 
   useEffect(() => {
@@ -46,6 +49,20 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       updateBlocked(data.chat);
     });
   }, [socket])
+
+  const deleteNotifications = async () => {
+    const obj = {userId: userInfo.id, chatId: currentChatRef.current.id};
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${env.URL}/notifications`, {method:'DELETE', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      }
+    });
+  };
 
   const updateTabs = async (data: any) => {
     if (chatsRef.current.length === 0) return;

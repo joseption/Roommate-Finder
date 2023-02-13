@@ -136,6 +136,23 @@ const MessagesScreen = (props: any, {navigation}:any) => {
     });
   }
 
+  const getNotifs = async (userId: string, chatId: string) => {
+    if (!userId || !chatId) return;
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${env.URL}/notifications?userId=${userId}&chatId=${chatId}`,
+      {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      const res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+        return 0;
+      } else {
+        return res;
+      }
+    });
+  }
+
   const getUser = async (id: string) => {
     const tokenHeader = await authTokenHeader();
     return fetch(
@@ -180,6 +197,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
         const chatArray = [];
         for (let i = 0; i < res.length; i++) {
           const lastMessage = await getMessage(res[i].latestMessage);
+          const notifCount = await getNotifs(userInfo.id, res[i].id);
           const users = []
           for (let j = 0; j < res[i].users.length; j++) {
             if (res[i].users[j] === userInfo?.id) {
@@ -198,7 +216,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
             updatedAt: res.updatedAt,
             users: users,
             blocked: res[i].blocked,
-            notifications: res[i].notifications
+            notifCount: notifCount,
           };
           chatArray.push(chat);
         }

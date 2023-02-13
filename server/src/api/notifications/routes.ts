@@ -25,6 +25,22 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
+// get all notifications for a user
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    const { userId, chatId } = req.query;
+    const notifCount = await db.notification.count({
+      where: {
+        userId: userId as string,
+        chatId: chatId as string,
+      }
+    });
+    res.status(200).json(notifCount);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 // delete all notifications for a given chat
 router.delete('/', async (req: Request, res: Response) => {
   try {

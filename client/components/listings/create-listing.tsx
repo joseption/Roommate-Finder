@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList} from 'react-native';
 import _Text from '../control/text';
 import { Color, Radius, Style } from '../../style';
 import { env } from '../../helper';
@@ -7,6 +7,8 @@ import { authTokenHeader, getLocalStorage } from '../../helper';
 import _Button from '../control/button';
 import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import _Image from '../control/image';
+import { ScrollView } from 'react-native-gesture-handler';
+import _Dropdown from '../control/dropdown';
 
 const CreateListing = (props: any) => {
 
@@ -148,181 +150,289 @@ const CreateListing = (props: any) => {
     
   };  
 
+  const getOptions = () => {
+    return [
+      { key: 1, value: '1' },
+      { key: 2, value: '2' },
+      { key: 3, value: '3' },
+      { key: 4, value: '4' },
+    ];
+  };
+
+  const getHousingType = () => {
+    return [
+      { key: 1, value: 'Apartment' },
+      { key: 2, value: 'House' },
+      { key: 3, value: 'Condo' },
+    ];
+  };
+
+  const getYesNo = () => {
+    return [
+      { key: true, value: 'Yes' },
+      { key: false, value: 'No' },
+    ];
+  };
+
+  const handleDeletePhoto = (index: number) => {
+    let updatedImages = [...formData.images];
+    updatedImages.splice(index, 1);
+    setFormData({
+      ...formData,
+      images: updatedImages,
+    });
+  
+    let updatedImageURLArray = [...imageURLArray];
+    updatedImageURLArray.splice(index, 1);
+    setImageURLArray(updatedImageURLArray);
+  
+    let updatedImageUriArray = [...imageUriArray];
+    updatedImageUriArray.splice(index, 1);
+    setImageUriArray(updatedImageUriArray);
+  };
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
       padding: 16,
       backgroundColor: Color(props.isDarkMode).white,
     },
-    input: {
-      height: 50,
-      marginVertical: 8,
-      padding: 8,
+    inputContainer: {
       backgroundColor: Color(props.isDarkMode).grey,
       borderRadius: 8,
+      marginVertical: 8,
+      padding: 8,
+    },
+    input: {
       fontSize: 16,
+      height: 50,
     },
     button: {
-      backgroundColor: Color(props.isDarkMode).gold,
-      height: 50,
-      marginTop: 16,
-      borderRadius: 8,
       alignItems: 'center',
+      backgroundColor: Color(props.isDarkMode).gold,
+      borderRadius: 8,
+      height: 50,
       justifyContent: 'center',
+      marginTop: 16,
     },
     buttonText: {
       color: Color(props.isDarkMode).white,
       fontSize: 16,
     },
     title: {
-        fontSize: 16,
-        marginVertical: 8,
-      },
-      formContainer: {
-        padding: 20,
-      },
-      imagesContainer: {
-        padding: 20,
-      },
-      label: {
-        fontSize: 16,
-        marginBottom: 10,
-      },
-      submitButton: {
-        backgroundColor: Color(props.isDarkMode).gold,
-        paddingVertical: 15,
-        borderRadius: 5,
-      },
-      submitButtonText: {
-        color: Color(props.isDarkMode).white,
-        textAlign: 'center',
-        fontWeight: 'bold',
-      },
-      photoButtonContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center'
-      },
-      photoButton: {
-        marginLeft: 5
-      },
-      image: {
-        width: 125,
-        height: 125,
-        backgroundColor: Color(props.isDarkMode).white,
-        borderColor: Color(props.isDarkMode).border,
-        borderWidth: 1,
-        marginBottom: 5,
+      fontSize: 20,
+      marginBottom: 16,
+      textAlign: 'center',
+      color: Color(props.isDarkMode).black,
+    },
+    imagesContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginVertical: 16,
+    },
+    image: {
+      backgroundColor: Color(props.isDarkMode).white,
+      borderColor: Color(props.isDarkMode).border,
+      borderWidth: 1,
+      height: 125,
+      marginRight: 8,
+      width: 125,
+    },
+    formContainer: {
+      padding: 20,
+    },
+    label: {
+      fontSize: 16,
+      marginTop: 10,
+      color: Color(props.isDarkMode).black,
+    },
+    submitButton: {
+      backgroundColor: Color(props.isDarkMode).gold,
+      borderRadius: 5,
+      paddingVertical: 15,
+      textAlign: 'center',
+    },
+    submitButtonText: {
+      color: Color(props.isDarkMode).white,
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
+    deleteButton: {
+      backgroundColor: Color(props.isDarkMode).black,
+      padding: 8,
+      borderRadius: 8,
+      alignSelf: 'flex-end',
+    },
+    deleteButtonText: {
+      color: Color(props.isDarkMode).white,
+      fontSize: 16,
+    },
+    photoContainer: {
+      position: 'relative',
     },
   });
 
   return (
     <View style={styles.container}>
       <_Text style={styles.title}>Create Listing</_Text>
-      <View style={styles.formContainer}>
-        <View style={styles.imagesContainer}>
-          {getPhotos().map((photo, index) => (
-            <_Image
-              key={index}
-              style={styles.image}
-              source={Platform.OS === 'web' ? photo : { uri: photo }}
-              height={125}
-              width={125}
+      <ScrollView>
+        <View style={styles.formContainer}>
+          <View style={styles.imagesContainer}>
+            {getPhotos().map((photo, index) => (
+              <View key={index} style={styles.photoContainer}>
+                <_Image
+                  style={styles.image}
+                  source={Platform.OS === 'web' ? photo : { uri: photo }}
+                  height={125}
+                  width={125}
+                />
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDeletePhoto(index)}
+                >
+                  <_Text style={styles.deleteButtonText}>Delete</_Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+          <_Button
+            isDarkMode={props.isDarkMode}
+            onPress={(e: any) => { uploadPhotos() }}
+            style={Style(props.isDarkMode).buttonDefault}
+          >
+            {'Upload Photos'}
+          </_Button>
+          <_Text style={styles.label}>Title</_Text>
+          <View style={styles.inputContainer}>
+            
+            <TextInput
+              style={styles.input}
+              onChangeText={(text) => handleChange('name', text)}
+              value={formData.name}
             />
-          ))}
+          </View>
+
+          <_Text style={styles.label}>Description</_Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              onChangeText={(text) => handleChange('description', text)}
+              value={formData.description}
+            />
+          </View>
+
+          <_Text style={styles.label}>City</_Text>
+          <View style={styles.inputContainer}>
+          
+          <TextInput
+            style={styles.input}
+            onChangeText={(text) => handleChange('city', text)}
+            value={formData.city}
+          />
         </View>
-        <View style={styles.photoButtonContainer}>
+        <_Text style={styles.label}>Housing Type</_Text>
+
+          <_Dropdown
+            isDarkMode={props.isDarkMode}
+            options={getHousingType()}
+            value={formData.housing_type}
+            setValue={(text: string) => handleChange('housing_type', text)}
+          />
+
+        <_Text style={styles.label}>Price</_Text>
+        <View style={styles.inputContainer}>
+          
+          <TextInput
+            style={styles.input}
+            onChangeText={(text) => handleChange('price', parseFloat(text))}
+            value={String(formData.price)}
+            keyboardType="numeric"
+          />
+        </View>
+
+
+        <_Text style={styles.label}>Address</_Text>
+        <View style={styles.inputContainer}>
+          
+          <TextInput
+            style={styles.input}
+            onChangeText={(text) => handleChange('address', text)}
+            value={formData.address}
+          />
+        </View>
+
+        <_Text style={styles.label}>Pets Allowed</_Text>
+
+        
+        <_Dropdown
+            isDarkMode={props.isDarkMode}
+            options={getYesNo()}
+            value={formData.petsAllowed}
+            setValue={(text: string) => handleChange('petsAllowed', text === 'Yes' ? true : false)}
+          />
+        
+
+        <_Text style={styles.label}>Rooms</_Text>
+        
+          
+          <_Dropdown
+            isDarkMode={props.isDarkMode}
+            options={getOptions()}
+            value={formData.rooms}
+            setValue={(text: string) => handleChange('rooms', parseInt(text))}
+          />
+
+        <_Text style={styles.label}>Bathrooms</_Text>
+        
+            <_Dropdown
+              isDarkMode={props.isDarkMode}
+              options={getOptions()}
+              value={formData.bathrooms}
+              setValue={(text: string) => handleChange('bathrooms', parseInt(text))}
+            />
+
+        <_Text style={styles.label}>Size</_Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            onChangeText={(text) => handleChange('size', parseInt(text))}
+            value={String(formData.size)}
+            keyboardType="numeric"
+          />
+        </View>
+          <_Text style={styles.label}>Zipcode</_Text>
+        <View style={styles.inputContainer}>
+          
+          <TextInput
+            style={styles.input}
+            onChangeText={(text) => handleChange('zipcode', text)}
+            value={formData.zipcode}
+          />
+        </View>
+          <_Text style={styles.label}>Distance</_Text>
+        <View style={styles.inputContainer}>
+          
+          <TextInput
+            style={styles.input}
+            onChangeText={(text) => handleChange('distanceToUcf', parseInt(text))}
+            value={formData.distanceToUcf}
+          />
+        </View>
         <_Button
           isDarkMode={props.isDarkMode}
-          onPress={(e: any) => { uploadPhotos() }}
-          style={Style(props.isDarkMode).buttonDefault}
+          onPress={() => {
+            handleSubmit();
+            props.onClose();
+          }}
+          style={Style(props.isDarkMode).buttonGold}
         >
-          {'Upload Photos'}
-        </_Button>           
-        </View>
-        <_Text style={styles.label}>Name</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('name', text)}
-          value={formData.name}
-        />
-        <_Text style={styles.label}>City</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('city', text)}
-          value={formData.city}
-        />
-        <_Text style={styles.label}>Housing Type</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('housing_type', text)}
-          value={formData.housing_type}
-        />
-        <_Text style={styles.label}>Description</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('description', text)}
-          value={formData.description}
-        />
-        <_Text style={styles.label}>Price</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('price', parseFloat(text))}
-          value={String(formData.price)}
-          keyboardType="numeric"
-        />
-        <_Text style={styles.label}>Pets Allowed</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('petsAllowed', Boolean(text))}
-          value={String(formData.petsAllowed)}
-        />
-        <_Text style={styles.label}>Address</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('address', text)}
-          value={formData.address}
-        />
-        <_Text style={styles.label}>Bathrooms</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('bathrooms', parseInt(text))}
-          value={String(formData.bathrooms)}
-          keyboardType="numeric"
-        />
-        <_Text style={styles.label}>Rooms</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('rooms', parseInt(text))}
-          value={String(formData.rooms)}
-          keyboardType="numeric"
-        />
-        <_Text style={styles.label}>Size</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('size', parseInt(text))}
-          value={String(formData.size)}
-          keyboardType="numeric"
-        />
-        <_Text style={styles.label}>Zipcode</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('zipcode', text)}
-          value={formData.zipcode}
-        />
-        <_Text style={styles.label}>Distance</_Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => handleChange('distanceToUcf', parseInt(text))}
-          value={formData.distanceToUcf}
-        />
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <_Text style={styles.submitButtonText}>Submit</_Text>
-        </TouchableOpacity>
-        </View>
+          {'Submit'}
+        </_Button>
+      </View>
+    </ScrollView>
   </View>
-  
-)};
+  )
+};
 
 export default CreateListing;

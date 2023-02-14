@@ -1,4 +1,4 @@
-import { useRef, useEffect, Dispatch, SetStateAction } from 'react';
+import { useRef, useEffect, Dispatch, SetStateAction, useState } from 'react';
 import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import _Button from '../control/button';
 import Messages from './messages';
@@ -14,6 +14,8 @@ interface Props {
 }
 
 const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Props) => {
+  const [newMessage, setNewMessage] = useState('');
+
   // These values are mapped to percentage of screen size.
   const PANEL_OUT_OF_SCREEN = Dimensions.get('window').width * 1.5;
   const PANEL_IN_SCREEN = 0;
@@ -31,7 +33,7 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Pr
     if (showPanel) {
       Animated.timing(slideAnimation, {...animationConfig, toValue: PANEL_IN_SCREEN}).start();
     } else {
-      Animated.timing(slideAnimation, {...animationConfig}).start();
+      Animated.timing(slideAnimation, {...animationConfig}).start((() => setNewMessage('')));
     }
   }, [showPanel, slideAnimation]);
 
@@ -53,7 +55,7 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Pr
       >
         <MessageTopBar chat={chat} showPanel={showPanel} updateShowPanel={updateShowPanel}/>
         <Messages chat={chat} userInfo={userInfo} socket={socket}/>
-        <MessageInput chat={chat} socket={socket}/>
+        <MessageInput chat={chat} socket={socket} newMessage={newMessage} setNewMessage={setNewMessage}/>
       </Animated.View>
     </>
   );

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TextInput, View, StyleSheet, Pressable, Text } from "react-native";
-import { env, getLocalStorage } from "../../helper";
+import { authTokenHeader, env, getLocalStorage } from "../../helper";
 import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Svg, Path } from "react-native-svg";
@@ -20,11 +20,12 @@ const sendIcon = (
 
 interface Props {
   chat: any,
-  socket: Socket<DefaultEventsMap, DefaultEventsMap>
+  socket: Socket<DefaultEventsMap, DefaultEventsMap>,
+  newMessage: string,
+  setNewMessage: any,
 }
 
-const MessageInput = ({chat, socket}: Props) => {
-  const [newMessage, setNewMessage] = useState('');
+const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
   const [userInfo, setUserInfo] = useState<any>();
   const [height, setHeight] = useState(0);
   const [hiddenTextWidth, setHiddenTextWidth] = useState(0);
@@ -36,7 +37,7 @@ const MessageInput = ({chat, socket}: Props) => {
   useEffect(() => {
     getUserInfo();
   }, [])
-
+  
   useEffect(() => {
     setTypingIndicator();
   }, [newMessage])
@@ -58,23 +59,23 @@ const MessageInput = ({chat, socket}: Props) => {
       await prepareTypingIndicatorData(false);
       return;
     };
-    await prepareTypingIndicatorData(newMessage.length !== 0);
+    await prepareTypingIndicatorData(newMessage?.length !== 0);
   }
   
   const getUserInfo = async () => {
     setUserInfo(await getLocalStorage().then((res) => {return res.user}));
   }
   
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (newMessage === '') {
       return;
     }
 
-    let obj = {content: newMessage, userId: userInfo.id, chatId: chat.id};
-    let js = JSON.stringify(obj);
-
+    const obj = {content: newMessage, userId: userInfo.id, chatId: chat.id};
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json'}}
+      `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {

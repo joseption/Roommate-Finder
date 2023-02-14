@@ -184,6 +184,7 @@ router.get('/:chatId', async (req: Request, res: Response) => {
   }
 });
 
+// block a chat
 router.put('/block', async (req: Request, res: Response) => {
   try {
     const { chatId, userId } = req.body;
@@ -213,6 +214,7 @@ router.put('/block', async (req: Request, res: Response) => {
   }
 });
 
+// unblock a chat
 router.put('/unblock', async (req: Request, res: Response) => {
   try {
     const { chatId, userId }: { chatId: string, userId: string} = req.body;
@@ -232,6 +234,65 @@ router.put('/unblock', async (req: Request, res: Response) => {
       });
       res.status(200).json(chat);
     }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// mute a chat
+router.put('/mute', async (req: Request, res: Response) => {
+  try {
+    const { chatId, userId } = req.body;
+    let chat = await db.chat.findUnique({
+      where: {
+        id: chatId as string,
+      }
+    });
+    if (!chat.blocked && !chat.muted.includes(userId)) {
+      chat = await db.chat.update({
+        data: {
+          muted: {
+            push: userId
+          },
+        },
+        where: {
+          id: chatId,
+        }
+      });
+      await db.notification.deleteMany({
+        where: {
+          userId: userId,
+          chatId: chatId,
+        }
+      })
+      res.status(200).json(chat);
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// unmute a chat
+router.put('/unmute', async (req: Request, res: Response) => {
+  try {
+    const { chatId, userId }: { chatId: string, userId: string} = req.body;
+    let chat = await db.chat.findUnique({
+      where: {
+        id: chatId as string,
+      }
+    });
+    if (chat.muted.length > 0) {
+      chat.muted = chat.muted.filter((user) => user !== userId);
+      chat = await db.chat.update({
+        data: {
+          muted: chat.muted,
+        },
+        where: {
+          id: chatId,
+        }
+      });
+    }
+    res.status(200).json(chat);
   } catch (err) {
     res.status(500).json(err);
   }

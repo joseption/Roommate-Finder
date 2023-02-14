@@ -2,8 +2,8 @@ import { NavigationContainer, NavigationContainerRef } from '@react-navigation/n
 import HomeScreen from './screens/home';
 import { useFonts } from 'expo-font';
 import Navigation from './components/navigation/navigation';
-import React, { useEffect, useState } from 'react';
-import { BackHandler, Dimensions, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { AppState, BackHandler, Button, Dimensions, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import 'react-native-gesture-handler';
 import AccountScreen from './screens/account';
 import ProfileScreen from './screens/profile';
@@ -12,15 +12,32 @@ import ListingsScreen from './screens/listings';
 import MessagesScreen from './screens/messages';
 import SearchScreen from './screens/search';
 import { Color, Content } from './style';
-import { env, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, isDarkMode as isDarkModeHelper, navProp } from './helper';
+import { env as environ, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, isDarkMode as isDarkModeHelper, navProp, authTokenHeader, userId, setLocalAppSettingsPushMessageToken, getPushMessageToken, getCurrentChat, setLocalAppSettingsCurrentChat } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
 import _Button from './components/control/button';
 import AuthScreen from './screens/auth';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import * as Notifications from 'expo-notifications';
+import { env } from 'process';
+import { io, Socket } from "socket.io-client";
+import { DefaultEventsMap } from '@socket.io/component-emitter';
+
 export const ThemeContext = React.createContext(null);
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => {
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true
+    };
+  },
+});
+
 export const App = (props: any) => {
+  const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io(environ.URL);
   const [navHeight,setNavHeight] = useState(0);
   const [navWidth,setNavWidth] = useState(0);
   const [containerStyle,setContainerStyle] = useState({});
@@ -45,6 +62,10 @@ export const App = (props: any) => {
   const [backCount,setBackCount] = useState(0);
   const [backTimer,setBackTimer] = useState(0);
   const [loginViewChanged,setLoginViewChanged] = useState('');
+  const [messageCount,setMessageCount] = useState(0);
+  const [messageData,setMessageData] = useState({});
+  const [currentChat,setCurrentChat] = useState('');
+  const appState = useRef(AppState.currentState);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
@@ -53,24 +74,164 @@ export const App = (props: any) => {
   });
 
   useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextAppState) => {
+      if (appState.current === 'active' && nextAppState !== 'active') {
+        let data = await getCurrentChat();
+        if (data) {
+          data.disabled = true;
+        }
+        setLocalAppSettingsCurrentChat(data);
+      }
+      else if (nextAppState === 'active') {
+        let data = await getCurrentChat();
+        if (data) {
+          data.disabled = false;
+          if (data.id && data.is_showing) {
+            checkDismissNotifications(data.id);
+          }
+          else {
+            data = null;
+          }  
+          
+          setLocalAppSettingsCurrentChat(data);
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
     checkDarkMode();
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        setKeyboardVisible(true);
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setKeyboardVisible(false);
-      }
-    );
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
 
     return () => {
       keyboardDidHideListener.remove();
       keyboardDidShowListener.remove();
     };
+  }, []);
+
+  useEffect(() => {
+    checkDismissNotifications(currentChat);
+  }, [currentChat]);
+
+  useEffect(() => {
+    updateNavForPushNotifications();
+  }, [navSelector]);
+
+  // Get device push notification permissions when the app launches
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      Notifications.getPermissionsAsync()
+      .then((statusObj) => {
+        if (statusObj.status !== "granted") {
+          return Notifications.requestPermissionsAsync();
+        }
+        return statusObj;
+      })
+      .then((statusObj) => {
+        if (statusObj.status !== "granted") {
+          throw new Error("Permission not granted.");
+        }
+      })
+      .then(() => {
+        return Notifications.getDevicePushTokenAsync();
+      })
+      .then((response) => {
+        const token = response.data;
+        setLocalAppSettingsPushMessageToken(token);
+        storePushTokenToUser(token);
+      })
+      .catch((err) => {
+        return null;
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const backgroundSubscription =
+      Notifications.addNotificationResponseReceivedListener(async (response: Notifications.NotificationResponse) => {
+        if (response.userText) {
+          let identifier = response.notification.request.identifier;
+          let idx = identifier.lastIndexOf("-");
+          let id = identifier.substring(0, idx);
+          sendMessage(id, response.userText, true);
+          Notifications.dismissNotificationAsync(response.notification.request.identifier);
+        }
+      });
+  
+      const foregroundSubscription =
+        Notifications.addNotificationReceivedListener(async (notification) => {
+          let idx = notification.request.identifier.lastIndexOf("-");
+          let id = notification.request.identifier.substring(0, idx);
+          let data = await getCurrentChat();
+          if (data && data.id === id && data.is_showing === true && data.current_page === NavTo.Messages) {
+            console.log(data);
+            await Notifications.dismissNotificationAsync(notification.request.identifier);
+            return;
+          }
+
+          await Notifications.getPresentedNotificationsAsync().then(async (res: Notifications.Notification[]) => {
+            let ids = [];
+            let count = 0;
+            let body = notification.request.content.body + "\n";
+            if (res.length > 0) {
+              for (let i = res.length - 1; i >= 0; i--) {
+                if (res[i].request.identifier.startsWith(id) &&
+                    res[i].request.identifier != notification.request.identifier) {
+                  body += res[i].request.content.body;
+                  if (i > 0)
+                    body += "\n";
+                  ids.push(res[i].request.identifier);
+                  count++;
+                }
+              }
+            }
+
+            if (count > 0) {
+              let identifier = id + new Date().getTime();
+              let data = notification.request.content;
+              for (let i = 0; i < ids.length; i++) {
+                await Notifications.dismissNotificationAsync(ids[i]);
+              }
+
+              await Notifications.dismissNotificationAsync(notification.request.identifier);
+              await updateGroupedPushNotification(data.title, body, identifier)
+            }
+          });
+      });
+
+      Notifications.setNotificationChannelAsync('Messaging', {
+        name: 'Messaging',
+        importance: Notifications.AndroidImportance.MAX,
+      });
+
+      Notifications.setNotificationCategoryAsync('New Message', [
+        {
+          buttonTitle: 'Reply',
+          identifier: 'reply',
+          textInput: {
+            submitButtonTitle: 'Send'
+            /*
+            Breaks with placeholder, leave out (known bug)
+            Issue: https://github.com/expo/expo/issues/20500
+            */
+          },
+          options: {
+            opensAppToForeground: false
+          }
+        },
+      ])
+
+      return () => {
+        backgroundSubscription.remove();
+        foregroundSubscription.remove();
+      };
+    }
   }, []);
 
   useEffect(() => {
@@ -104,6 +265,120 @@ export const App = (props: any) => {
     setMobile(isMobile());
     prepareStyle(); 
   }, [navHeight, adjustedPos, prompt, navSelector, ref.current]);
+
+  // Store the push token to the user
+  async function storePushTokenToUser(token: string) {
+    let hasError = false;
+    try
+    {   
+      let obj = {pushToken: token};
+      let js = JSON.stringify(obj);
+      let tokenHeader = await authTokenHeader();
+      await fetch(`${environ.URL}/users/updatePushToken`,
+      {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
+        let res = JSON.parse(await ret.text());
+        if (res.Error)
+        {
+          hasError = true;
+        }
+      });
+    }
+    catch(e)
+    {
+      hasError = true;
+    }  
+  }
+
+  // Resend all combined unread messages as one to the current user
+  const updateGroupedPushNotification = async (title: any, message: any, tag: string) => {
+    let hasError = false;
+    try
+    {   
+      let msgToken = await getPushMessageToken();
+      if (!msgToken) {
+        await Notifications.getDevicePushTokenAsync().then((response) => {
+          const token = response.data;
+          setLocalAppSettingsPushMessageToken(token);
+          storePushTokenToUser(token);
+          msgToken = token;
+        })
+      }
+      let obj = {message: message, title: title, tag: tag, pushToken: msgToken};
+      let js = JSON.stringify(obj);
+      let tokenHeader = await authTokenHeader();
+      await fetch(`${environ.URL}/messages/sendUpdatedPushNotification`,
+      {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
+        let res = JSON.parse(await ret.text());
+        if (res.Error)
+        {
+          hasError = true;
+        }
+      });
+    }
+    catch(e)
+    {
+      hasError = true;
+    } 
+
+    return !hasError;
+  }
+
+  const randomNum = () => {
+    return (Math.floor(Math.random() * 100000) + 1).toString();
+  }
+
+  async function sendMessage(chatId: string, reply: any, update: boolean) {
+    let user = await userId();
+    let hasError = false;
+    if (user) {
+      try
+      {       
+        let id = randomNum();
+        let obj = {content:reply, userId:user, chatId: chatId, id: id};
+        let js = JSON.stringify(obj);
+        let tokenHeader = await authTokenHeader();
+        await fetch(`${environ.URL}/messages`,
+            {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
+                let res = JSON.parse(await ret.text());
+                if (res.Error)
+                {
+                  hasError = true;
+                }
+                else if (update) {
+                  setMessageData(obj);
+                }
+            });
+      }
+      catch(e)
+      {
+        hasError = true;
+      }  
+    }  
+  }
+
+  async function updateNavForPushNotifications() {
+    let data = await getCurrentChat();
+    if (data) {
+      data.current_page = navSelector;
+      setLocalAppSettingsCurrentChat(data);
+      checkDismissNotifications(data.id);
+    }
+  }
+
+  function checkDismissNotifications(chatId: string) {
+    if (chatId) {
+      Notifications.getPresentedNotificationsAsync().then(async (res: Notifications.Notification[]) => {
+        res.forEach(msg => {
+          let identifier = msg.request.identifier;
+          let idx = identifier.lastIndexOf("-");
+          let id = identifier.substring(0, idx);
+          if (id === chatId) {
+            Notifications.dismissNotificationAsync(identifier);
+          }
+        })
+      });
+    }
+  }
   
   if (!loaded) {
     return null;
@@ -207,7 +482,7 @@ export const App = (props: any) => {
 
         try
         {   
-            await fetch(`${env.URL}/auth/checkAuth`,
+            await fetch(`${environ.URL}/auth/checkAuth`,
             {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
               if (res.Error)
@@ -217,7 +492,7 @@ export const App = (props: any) => {
               else
               {
                 let aToken;
-                await fetch(`${env.URL}/auth/refreshToken`,
+                await fetch(`${environ.URL}/auth/refreshToken`,
                 {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
                   let res = JSON.parse(await ret.text());
                   if (res.Error)
@@ -338,6 +613,7 @@ export const App = (props: any) => {
       isDarkMode={isDarkMode}
       setUpdatePicture={setUpdatePicture}
       updatePicture={updatePicture}
+      messageCount={messageCount}
       />
     else
       return <View></View>;
@@ -431,11 +707,12 @@ export const App = (props: any) => {
             keyboardShouldPersistTaps={'handled'}
             >
               <View
-              style={styles.stack}
+                style={styles.stack}
               >
                 <StatusBar
                   backgroundColor={Color(isDarkMode).statusBar}
                   barStyle={isDarkMode ? "light-content" : "dark-content"}
+                  
                 />
                 <Stack.Navigator
                 screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle(), navigationBarColor: Color(isDarkMode).statusBar}}
@@ -561,6 +838,10 @@ export const App = (props: any) => {
                   mobile={mobile}
                   isDarkMode={isDarkMode}
                   setNavSelector={setNavSelector}
+                  socket={socket}
+                  setMessageCount={setMessageCount}
+                  messageData={messageData}
+                  setCurrentChat={setCurrentChat}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen
@@ -598,8 +879,8 @@ export const App = (props: any) => {
             isDarkMode={isDarkMode}
             setUpdatePicture={setUpdatePicture}
             updatePicture={updatePicture}
-            />
-            
+            messageCount={messageCount}
+            />    
             : null} 
         </NavigationContainer>
         </View>

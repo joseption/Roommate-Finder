@@ -66,6 +66,7 @@ const Messages = ({chat, userInfo, socket}: Props) => {
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
+        console.log(res);
         console.warn("Error: ", res.Error);
         return {};
       }

@@ -10,7 +10,7 @@ interface Props {
   updateShowPanel: Dispatch<SetStateAction<boolean>>,
   userInfo: any,
   chat: any,
-  socket: any,
+  socket: any
 }
 
 const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket }: Props) => {

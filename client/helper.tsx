@@ -235,6 +235,80 @@ export const setLocalAppSettings = async (data: Object | null) => {
   }
 }
 
+// Set push message token
+export const setLocalAppSettingsPushMessageToken = async (token: string) => {
+  try {
+    let allData = await getLocalAppSettings();
+    if (allData) {
+      allData.pushMessageToken = token;
+      const jsonValue = JSON.stringify(allData);
+      await AsyncStorage.setItem('@app_data', jsonValue);
+    }
+    else {
+      const jsonValue = !token ? '' : JSON.stringify({pushMessageToken: token});
+      await AsyncStorage.setItem('@app_data', jsonValue);
+    }
+
+    return true;
+  }
+  catch {
+    return false;
+  }
+}
+
+export const getPushMessageToken = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@app_data');
+    const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+    if (data) {
+      return data.pushMessageToken;
+    }
+    else {
+      return '';
+    }
+  }
+  catch {
+    return '';
+  }
+}
+
+// Set current open chat id
+export const setLocalAppSettingsCurrentChat = async (data: Object | null) => {
+  try {
+    let allData = await getLocalAppSettings();
+    if (allData) {
+      allData.currentChat = data;
+      const jsonValue = JSON.stringify(allData);
+      await AsyncStorage.setItem('@app_data', jsonValue);
+    }
+    else {
+      const jsonValue = !data ? '' : JSON.stringify({currentChat: data});
+      await AsyncStorage.setItem('@app_data', jsonValue);
+    }
+
+    return true;
+  }
+  catch {
+    return false;
+  }
+}
+
+export const getCurrentChat = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@app_data');
+    const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+    if (data) {
+      return data.currentChat;
+    }
+    else {
+      return '';
+    }
+  }
+  catch {
+    return '';
+  }
+}
+
 export const isDarkMode = async () => {
   try {
     const jsonValue = await AsyncStorage.getItem('@app_data');

@@ -4,11 +4,9 @@ import MessageTab from '../components/messages/message-tab';
 import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
-import { authTokenHeader, env, getLocalStorage } from '../helper';
+import { authTokenHeader, env, getLocalStorage, NavTo, setLocalAppSettingsCurrentChat } from '../helper';
 import io, { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter';
-
-const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io(env.URL);
 
 const MessagesScreen = (props: any, {navigation}:any) => {
   const [showPanel, updateShowPanel] = useState(false);
@@ -30,10 +28,26 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }, [chats])
   
   useEffect(() => {
-    socket.on('receive_message', (data: any) => {
+    props.socket.on('receive_message', (data: any) => {
       updateTabs(data)
     });
-  }, [socket])
+  }, [props.socket])
+
+  // Start - Added by Joseph for push notifications
+  useEffect(() => {
+    props.socket.emit('send_message', props.messageData);
+  }, [props.messageData]);
+
+  useEffect(() => {
+    let chatId = '';
+    if (currentChat) {
+      chatId = (currentChat as any).id
+    }
+    let data = {id: chatId, is_showing: showPanel, disabled: false, current_page: NavTo.Messages};
+    setLocalAppSettingsCurrentChat(data);
+    props.setCurrentChat(chatId);
+  }, [currentChat, showPanel]);
+  // End
 
   const updateTabs = async (data: any) => {
     if (chatsRef.current.length === 0) return;
@@ -75,17 +89,22 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       `${env.URL}/messages/getMessage?messageId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json'}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
-      if (res.Error) {
-        console.warn("Error: ", res.Error);
-        return {content: '', createdAt: '', userId: '',};
+      if (res) {
+        if (res.Error) {
+          console.warn("Error: ", res.Error);
+          return {content: '', createdAt: '', userId: '',};
+        }
+        else {
+          let message = {
+            content: res.content,
+            createdAt: res.createdAt,
+            userId: res.userId,
+          };
+          return message;
+        }
       }
       else {
-        let message = {
-          content: res.content,
-          createdAt: res.createdAt,
-          userId: res.userId,
-        };
-        return message;
+        return {content: '', createdAt: '', userId: '',};
       }
     });
   }
@@ -116,7 +135,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
     const rooms = await chats.map((chat: any) => {
       return chat.id;
     })
-    socket.emit('join_room', rooms)
+    props.socket.emit('join_room', rooms)
   }
 
   const getChats = async () => {
@@ -171,7 +190,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
           />
         }
       />
-      <MessagePanel showPanel={showPanel} socket={socket} userInfo={userInfo} updateShowPanel={updateShowPanel} chat={currentChat}/>
+      <MessagePanel showPanel={showPanel} socket={props.socket} userInfo={userInfo} updateShowPanel={updateShowPanel} chat={currentChat}/>
     </>
   );
 };

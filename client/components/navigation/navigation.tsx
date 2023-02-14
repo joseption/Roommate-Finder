@@ -275,7 +275,7 @@ const Navigation = (props: any) => {
                     <_Image
                     source={props.isDarkMode ? require('../../assets/images/logo_w.png') : require('../../assets/images/logo.png')}
                     height={30}
-                    onPress={() => navigate(NavTo.Home)}
+                    onPress={() => navigate(NavTo.Login)}
                     pressStyle={styles.logoContainer}
                     containerStyle={styles.logoContainerStyle}
                     />
@@ -294,12 +294,14 @@ const Navigation = (props: any) => {
                             style={styles.message}
                             icon="message"
                             />
+                            {props.messageCount ?
                             <_Text
                             containerStyle={styles.countContainer}
                             style={styles.count}
                             >
-                                7
+                                {props.messageCount}
                             </_Text>
+                            : null }
                         </Pressable>
                         : null }
                         <Pressable
@@ -448,7 +450,7 @@ const Navigation = (props: any) => {
                     icon="message"
                     currentNav={props.navSelector}
                     navTo={NavTo.Messages}
-                    count={7}
+                    count={props.messageCount}
                     isDarkMode={props.isDarkMode}
                     />
                 </View>

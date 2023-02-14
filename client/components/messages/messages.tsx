@@ -43,13 +43,15 @@ const Messages = ({chat, userInfo, socket}: Props) => {
       setMessages([data, ...messagesRef.current]);
     });
 
+    const typingIndicatorExists = () => {
+      return messagesRef.current.length !== 0 && messagesRef.current[0].typingIndicator;
+    }
+
+
     // Listen for typing indicator socket
     socket.on('receive_typing', (data: any) => {
       if (data.chatId !== chatRef.current.id) return;
-
-      const typingIndicatorExists = () => {
-        return messagesRef.current.length !== 0 && messagesRef.current[0].typingIndicator;
-      }
+      if (chatRef.current.blocked) return;
 
       if (data.isTyping) {
         if (!typingIndicatorExists()) {
@@ -62,17 +64,28 @@ const Messages = ({chat, userInfo, socket}: Props) => {
           setMessages(newMessages);
         }
       }
-    })
+    });
+
+    socket.on("connect_error", (err) => {
+      if (typingIndicatorExists()) {
+        let newMessages = [...messagesRef.current]
+        newMessages.shift();
+        setMessages(newMessages);
+      }
+    });
   }, [socket]);
 
   const getMessages = async (id: string) => {
     if (!id) return;
     const tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/messages/${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      `${env.URL}/messages/${id}`, {
+        method:'GET',
+        headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}
+      }
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
-      if (res.Error) {
+      if (res?.Error) {
         console.warn("Error: ", res.Error);
         return {};
       }
@@ -102,7 +115,7 @@ const Messages = ({chat, userInfo, socket}: Props) => {
 
   if (loading) {
     return (
-      <View style={{flex: 1}}>
+      <View style={{flex: 1, backgroundColor: '#f4f4f4'}}>
         {/* Edit to include dark mode */}
         <ActivityIndicator style={styles.loading} color={Color(false).gold} size="large"/>
       </View>
@@ -110,7 +123,7 @@ const Messages = ({chat, userInfo, socket}: Props) => {
   }
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1, zIndex: 1, backgroundColor: '#f4f4f4'}}>
       <FlatList
         data={messages}
         renderItem={renderItem}

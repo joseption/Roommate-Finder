@@ -1,6 +1,9 @@
 import { View, StyleSheet, Pressable, Text, Image } from "react-native";
 import _Button from "../control/button";
 import Svg, { Path } from "react-native-svg"
+import Dots from "../../assets/images/dots_popup_svg";
+import { useState } from "react";
+import MessageSettings from "./message-settings";
 
 
 const returnIcon = (
@@ -19,22 +22,42 @@ const returnIcon = (
 
 interface Props {
   chat: any,
+  userInfo: any,
   showPanel: any,
   updateShowPanel: any,
+  updateBlocked: any,
+  socket: any,
 }
 
-const MessageTopBar = ({showPanel, updateShowPanel, chat}: Props) => {
+const MessageTopBar = ({showPanel, userInfo, updateShowPanel, chat, socket, updateBlocked}: Props) => {
   if (!chat?.users) return <></>;
+
+  const [showPopUp, setShowPopUp] = useState<boolean>(false);
   return (
-    <View style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <Pressable onPress={() => updateShowPanel(!showPanel)}>
-          {returnIcon}
-        </Pressable>
+    <>
+      <View style={styles.container}>
+        <View style={styles.buttonContainer}>
+          <Pressable onPress={() => updateShowPanel(!showPanel)}>
+            {returnIcon}
+          </Pressable>
+        </View>
+        <Image style={styles.image} source={{ uri: (chat?.users[0]?.image != null) ? chat?.users[0]?.image : 'https://reactnative.dev/img/tiny_logo.png'}} />
+        <Text numberOfLines={1} style={styles.name}>{chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}</Text>
+        <View style={styles.buttonContainer}>
+          <Pressable onPress={() => setShowPopUp(!showPopUp)}>
+            <Dots width={18} height={18}/>
+          </Pressable>
+        </View>
       </View>
-      <Image style={styles.image} source={{ uri: (chat?.users[0]?.image != null) ? chat?.users[0]?.image : 'https://reactnative.dev/img/tiny_logo.png'}} />
-      <Text numberOfLines={1} style={styles.name}>{chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}</Text>
-    </View>
+      <MessageSettings
+        chat={chat}
+        userInfo={userInfo}
+        showPopUp={showPopUp}
+        setShowPopUp={setShowPopUp}
+        updateBlocked={updateBlocked}
+        socket={socket}
+      />
+    </>
   );
 }
 
@@ -48,6 +71,7 @@ const styles = StyleSheet.create({
     minHeight: 55,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'lightgray',
+    zIndex: 2,
   },
   buttonContainer: {
     display: 'flex',
@@ -63,9 +87,10 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   name: {
+    flex: 1,
     fontSize: 18,
     fontWeight: '600',
-  }
+  },
 });
 
 export default MessageTopBar;

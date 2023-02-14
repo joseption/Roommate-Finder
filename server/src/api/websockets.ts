@@ -11,19 +11,21 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
   })
   
   io.on('connection', (socket: any) => {
-    console.log('User connected', socket.id);
-
     socket.on('join_room', (data: any) => {
       socket.join(data);
-    })
+    });
 
     socket.on('send_message', (data: any) => {
       socket.nsp.to(data.chatId).emit('receive_message', data);
-    })
+    });
 
     socket.on('send_typing', (data: any) => {
       socket.to(data.chatId).emit('receive_typing', data);
-    })
+    });
+
+    socket.on('send_block', (data: any) => {
+      socket.to(data.chatId).emit('receive_block', data);
+    });
 
     socket.on('disconnect', () =>  {
       console.log('User disconnected', socket.id);

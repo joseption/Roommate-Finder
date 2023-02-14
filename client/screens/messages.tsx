@@ -13,11 +13,12 @@ const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io(env.URL);
 
 const MessagesScreen = (props: any, {navigation}:any) => {
   const [showPanel, updateShowPanel] = useState(false);
-  const [currentChat, setCurrentChat] = useState({});
+  const [currentChat, setCurrentChat] = useState<any>({});
   const [chats, setChats] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState<any>();
   const [chatsHaveLoaded, setChatsHaveLoaded] = useState<boolean>(false);
   const chatsRef = useRef(chats);
+  const currentChatRef = useRef(currentChat);
 
   useEffect(() => {
     getUserInfo();
@@ -28,12 +29,21 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }, [userInfo])
 
   useEffect(() => {
+    currentChatRef.current = currentChat;
+  }, [currentChat]);
+
+  useEffect(() => {
     chatsRef.current = chats;
   }, [chats])
   
   useEffect(() => {
     socket.on('receive_message', (data: any) => {
-      updateTabs(data)
+      const chats = chatsRef.current.filter(chat => chat.id === data.chatId);
+      if (chats.length !== 0 && chats[0].blocked) return;
+      updateTabs(data);
+    });
+    socket.on('receive_block', (data: any) => {
+      updateBlocked(data.chat);
     });
   }, [socket])
 
@@ -52,6 +62,19 @@ const MessagesScreen = (props: any, {navigation}:any) => {
     newChat = {...newChat, latestMessage: latestMessage};
     newChats = [newChat, ...newChats];
     setChats(newChats);
+  }
+
+  function updateBlocked(c: any) {
+    if (!c) return;
+    const newChats = chatsRef.current.map((chat) => {
+      if (chat.id === c.id) {
+        return { ...chat, blocked: c.blocked }
+      }
+      return chat;
+    });
+    setChats(newChats);
+    console.log(currentChatRef.current, c.blocked);
+    setCurrentChat({...currentChatRef.current, blocked: c.blocked})
   }
 
   const getUserInfo = async () => {
@@ -75,6 +98,8 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }
 
   const getMessage = async (id: string) => {
+    if (!id) return;
+    
     const tokenHeader = await authTokenHeader();
     return fetch(
       `${env.URL}/messages/getMessage?messageId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
@@ -156,6 +181,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
             latestMessage: lastMessage,
             updatedAt: res.updatedAt,
             users: users,
+            blocked: res[i].blocked
           };
           chatArray.push(chat);
         }
@@ -206,7 +232,14 @@ const MessagesScreen = (props: any, {navigation}:any) => {
           />
         }
       />
-      <MessagePanel showPanel={showPanel} socket={socket} userInfo={userInfo} updateShowPanel={updateShowPanel} chat={currentChat}/>
+      <MessagePanel
+        showPanel={showPanel}
+        socket={socket}
+        userInfo={userInfo}
+        updateShowPanel={updateShowPanel}
+        chat={currentChat}
+        updateBlocked={updateBlocked}
+      />
     </>
   );
 };

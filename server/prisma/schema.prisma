@@ -34,12 +34,13 @@ model User {
   password         String
   updatedAt        DateTime           @updatedAt
   bio              String?
+  push_token       String?
   Listings         Listings[]
+  matches          Matches[]
   Message          Message[]
   refreshTokens    RefreshToken[]
   ResponsesOnUsers ResponsesOnUsers[]
   tags             tags[]
-  matches          Matches[]
 }
 
 model RefreshToken {
@@ -129,6 +130,7 @@ model Chat {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime? @updatedAt
   Message       Message[]
+  blocked       String?
 }
 
 model Message {
@@ -145,7 +147,15 @@ model Matches {
   userOneId       String
   userTwoId       String
   matchPercentage Float
-  User            User?  @relation(fields: [userOneId], references: [id])
+  User            User   @relation(fields: [userOneId], references: [id])
 
   @@unique([userOneId, userTwoId])
+}
+
+model Notification {
+  id     String @id @default(uuid())
+  userId String
+  chatId String
+
+  @@index([userId, chatId])
 }

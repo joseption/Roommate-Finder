@@ -62,7 +62,7 @@ router.post('/', async (req: Request, res: Response) => {
   if (!price) {
     return res.status(400).json({ Error: 'Price is required' });
   }
-  if (!petsAllowed) {
+  if (petsAllowed === undefined) {
     return res.status(400).json({ Error: 'Pets allowed is required' });
   }
   if (!address) {

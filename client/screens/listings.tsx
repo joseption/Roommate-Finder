@@ -8,6 +8,8 @@ import CreateListing from '../components/listings/create-listing';
 import { useLinkProps } from '@react-navigation/native';
 import _Dropdown from '../components/control/dropdown';
 import ListingView from '../components/listings/listing';
+import _Text from '../components/control/text';
+import { Color } from '../style';
 
 export enum Listings_Screen {
   all,
@@ -61,17 +63,6 @@ const ListingsScreen = (props: any) => {
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-    },
-    content: {
-      flex: 1,
-    },
-  });
-
   const getDistanceOptions = () => {
     return [
       { key: 1, value: 'Less than 1 mile' },
@@ -80,54 +71,83 @@ const ListingsScreen = (props: any) => {
     ];
   };
 
+  const styles = StyleSheet.create({
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  },
+  content: {
+    flex: 1,
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    padding: 10,
+    backgroundColor: 'white',
+  },
+  title: {
+    fontSize: 20,
+    marginBottom: 16,
+    textAlign: 'center',
+    color: Color(props.isDarkMode).black,
+  },
+});
+
   return (
     <View style={styles.container}>
-      {!currentListing ?
-      <View style={styles.content}>
-        <_Dropdown
-          isDarkMode={props.isDarkMode}
-          options={getDistanceOptions()}
-          placeholder="Select..."
-          value={distance}
-          setValue={setDistance}
-        />
-        {currentScreen === Listings_Screen.all ? (
-          <AllListingsView
+      {!currentListing ? (
+        <View style={styles.content}>
+          {currentScreen === Listings_Screen.all ? (
+            <>
+              <_Dropdown
+                isDarkMode={props.isDarkMode}
+                options={getDistanceOptions()}
+                placeholder="Select..."
+                value={distance}
+                setValue={setDistance}
+              />
+              <AllListingsView
+                isDarkMode={props.isDarkMode}
+                setCurrentListing={setCurrentListing}
+                allListings={allListings}
+                setListingID={setListingID}
+                setIsListing={setIsListing}
+                selectedFilter={selectedFilter}
+              />
+            </>
+          ) : currentScreen === Listings_Screen.favorites ? (
+            <FavoriteListings 
+              allListings={allListings} 
+              isDarkMode={props.isDarkMode} 
+              />
+          ) : (
+            <CreateListing 
+              isDarkMode={props.isDarkMode} 
+              onClose={() => handleNavigation(Listings_Screen.all)}
+              />
+          )}
+          <BottomNavbar
             isDarkMode={props.isDarkMode}
-            setCurrentListing={setCurrentListing}
-            allListings={allListings}
-            setListingID={setListingID}
-            setIsListing={setIsListing}
-            selectedFilter={selectedFilter}
+            setCurrentScreen={setCurrentScreen}
+            handleNavigation={handleNavigation}
+            disabled={currentScreen !== Listings_Screen.all || selectedFilter !== 'all'}
+            setSearchPressed={setSearchPressed}
+            currentScreen={currentScreen}
           />
-        ) : (
-          <View>
-            {currentScreen === Listings_Screen.favorites ? (
-              <FavoriteListings allListings={allListings} isDarkMode={props.isDarkMode} />
-            ) : (
-              <CreateListing isDarkMode={props.isDarkMode} />
-            )}
-          </View>
-        )}
-        <BottomNavbar
+        </View>
+      ) : (
+        <ListingView
           isDarkMode={props.isDarkMode}
-          setCurrentScreen={setCurrentScreen}
-          handleNavigation={handleNavigation}
-          disabled={currentScreen !== Listings_Screen.all || selectedFilter !== 'all'}
-          setSearchPressed={setSearchPressed}
-          currentScreen={currentScreen}
+          setCurrentListing={setCurrentListing}
+          currentListing={currentListing}
         />
-      </View>
-      : <ListingView
-        isDarkMode={props.isDarkMode}
-        setCurrentListing={setCurrentListing}
-        currentListing={currentListing}
-      >
-        
-      </ListingView>
-    }
+      )}
     </View>
   );
+  
+  
   };
   
   export default ListingsScreen;

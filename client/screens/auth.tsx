@@ -1,24 +1,65 @@
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
 import { env, getLocalStorage, navProp, NavTo, setLocalStorage } from '../helper';
 import { Color } from '../style';
 
-const LogoutScreen = (props: any) => {
+const AuthScreen = (props: any) => {
     /*
     Joseph
     */
     const navigation = useNavigation<navProp>();
-    const [message, setMessage] = useState('Logging out...');
+    const [message, setMessage] = useState('Redirecting...');
 
     useEffect(() => {
-        logout();
+        let rt = route();
+        let params = rt?.params as any;
+        if (Platform.OS !== 'web') {
+            if (params?.params) { // App open already
+                params.params.type = params.screen;
+                params = params.params;
+            }
+            else if (rt?.name) { // App not open
+                params.type = rt.name;
+            }
+        }
+        else if (params) { // Web only
+            let name = rt?.name ? rt.name : '';
+            Object.defineProperty(params, 'type', {value: name});
+        }
+        logout(params);
     },[props.isSetup, props.isLoggedIn]);
 
-    const logout = async () => {
+    const route = () => {
+        if (navigation) {
+          let state = navigation.getState();
+          if (state && state.routes) {
+            let idx = state.index;
+            if (!idx) {
+                idx = state.routes.length - 1;
+            }
+            let cState = state.routes[idx];
+            let pState = cState.state;
+            if (cState && pState) {
+                // Web
+                if (pState && pState.routes[0]) {
+                    return pState.routes[0]
+                }
+            }
+            else {
+                // Mobile
+                return cState;
+            }
+          }
+        }
+    
+        return null;
+    }
+
+    const logout = async (params: any) => {
         let error = false;
         let user;
         try
@@ -47,20 +88,16 @@ const LogoutScreen = (props: any) => {
         } 
 
         if (!error || !user) {
-            navigation.navigate(NavTo.Login);
             navigation.reset({
                 index: 0,
                 routes: [{name: NavTo.Login}],
             });
-
-            // Set delay so rendering occurs properly to hide navigation
-            setTimeout(() => {
-                props.setIsLoggedIn(false);
-                props.setIsSetup(false);
-            }, 50);
+            navigation.navigate(NavTo.Login, params as never);
+            props.setIsLoggedIn(false);
+            props.setIsSetup(false);
         }
         else
-            setMessage("An error occurred while logging out, please reload the page and try again.");
+            setMessage("An error occurred while preparing account setup, reload the app and try again.");
     }
 
     const styles = StyleSheet.create({
@@ -86,4 +123,4 @@ const LogoutScreen = (props: any) => {
     );
 };
 
-export default LogoutScreen;
+export default AuthScreen;

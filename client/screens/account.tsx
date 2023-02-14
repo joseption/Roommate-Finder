@@ -7,7 +7,7 @@ import StartSurvey from '../components/account/start-survey';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
-import { AccountScreenType, getLocalStorage, navProp, NavTo, setLocalStorage } from '../helper';
+import { AccountScreenType, navProp, NavTo, setLocalStorage } from '../helper';
 
 const AccountScreen = (props: any) => {
     const navigation = useNavigation<navProp>();
@@ -68,17 +68,26 @@ const AccountScreen = (props: any) => {
 
     const unauthorized = async () => {
         await setLocalStorage(null);
-        props.setIsLoggedIn(false);
-        props.setIsSetup(false);
         navigation.navigate(NavTo.Login);
         navigation.reset({
             index: 0,
             routes: [{name: NavTo.Login, params: {timeout: 'yes'} as never}],
         });
+        props.setIsLoggedIn(false);
+        props.setIsSetup(false);
+    }
+
+    const containerStyle = () => {
+        if (!props.mobile) {
+            return {paddingBottom: 20};
+        }
+        return {};
     }
 
     return (
-    <View>
+    <View
+    style={containerStyle()}
+    >
         {props.accountView === AccountScreenType.info ?
         <AccountInfo
         mobile={props.mobile}
@@ -90,6 +99,8 @@ const AccountScreen = (props: any) => {
         scrollY={props.scrollY}
         unauthorized={unauthorized}
         isDarkMode={props.isDarkMode}
+        setIsDarkMode={props.setIsDarkMode}
+        setUpdatePicture={props.setUpdatePicture}
         />
         :
         <View>

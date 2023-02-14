@@ -1,9 +1,9 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import _Text from '../../components/control/text';
 import { NavTo } from '../../helper';
-import { Color, FontSize, Radius, Style } from '../../style';
+import { Color, FontSize, Radius } from '../../style';
 
 const NavMobileButton = (props: any) => {
     /* Props

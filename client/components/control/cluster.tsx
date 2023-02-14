@@ -1,8 +1,6 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Context, navProp } from '../../helper';
-import { Color, Radius, Style } from '../../style';
+import React, { useEffect } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Color, Radius } from '../../style';
 import _ClusterOption from './cluster-option';
 import _Text from './text';
 
@@ -10,10 +8,11 @@ const _Cluster = (props: any) => {
     /*
     Props: JA TODO 
     */
-    const [init,setInit] = useState(false);
     useEffect(() => {
-
-    }, []);
+        if (props.selected) {
+            props.setAmount(props.selected.length);
+        }
+    }, [props.selected]);
 
     const toggle = (e: any) => {
         var options = [] as never[];

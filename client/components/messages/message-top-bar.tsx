@@ -33,7 +33,6 @@ const MessageTopBar = ({showPanel, userInfo, updateShowPanel, chat, socket, upda
   if (!chat?.users) return <></>;
 
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
-
   return (
     <>
       <View style={styles.container}>

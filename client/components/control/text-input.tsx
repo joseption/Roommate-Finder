@@ -1,6 +1,4 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { setStatusBarStyle } from 'expo-status-bar';
-import React, { forwardRef, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Context, isMobile } from '../../helper';
 import { Color, Radius, Style } from '../../style';
@@ -26,7 +24,8 @@ const _TextInput = (props: any) => {
   const [phoneMask,setPhoneMask] = useState(false);
   const [phoneMaskLength,setPhoneMaskLength] = useState(0);
   useEffect(() => {
-  }, []);
+    setLength(props.value.length);
+  }, [props.value]);
 
   const labelStyle = () => {
     var style = [];
@@ -74,6 +73,9 @@ const _TextInput = (props: any) => {
     if (props.readonly) 
       style.push(styles.disabled);
 
+    if (props.error)
+      style.push({borderColor: Color(props.isDarkMode).danger});
+
     return style;
   }
 
@@ -104,7 +106,7 @@ const _TextInput = (props: any) => {
   const errorMessage = () => {
     if (props.error == true) {
       if (!props.errorMessage) {
-        return " is required"
+        return "is required"
       }
       else {
         return props.errorMessage;
@@ -314,6 +316,8 @@ const _TextInput = (props: any) => {
         editable={props.readonly}
         caretHidden={props.readonly}
         blurOnSubmit={props.blurOnSubmit}
+        onBlur={props.onBlur}
+        onFocus={props.onFocus}
         />
       </View>
     </View>

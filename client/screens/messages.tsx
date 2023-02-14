@@ -119,6 +119,18 @@ const MessagesScreen = (props: any, {navigation}:any) => {
     setCurrentChat({...currentChatRef.current, blocked: c.blocked})
   }
 
+  function updateMuted(c: any) {
+    if (!c) return;
+    const newChats = chatsRef.current.map((chat) => {
+      if (chat.id === c.id) {
+        return { ...chat, muted: c.muted }
+      }
+      return chat;
+    });
+    setChats(newChats);
+    setCurrentChat({...currentChatRef.current, muted: c.muted})
+  }
+
   const getUserInfo = async () => {
     const userInfo = await getLocalStorage().then((res) => {return res.user});
     setUserInfo(userInfo);
@@ -242,6 +254,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
             updatedAt: res.updatedAt,
             users: users,
             blocked: res[i].blocked,
+            muted: res[i].muted,
             notifCount: notifCount,
           };
           chatArray.push(chat);
@@ -300,6 +313,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
         updateShowPanel={updateShowPanel}
         chat={currentChat}
         updateBlocked={updateBlocked}
+        updateMuted={updateMuted}
       />
     </>
   );

@@ -14,12 +14,14 @@ router.post('/', async (req: Request, res: Response) => {
     const userBlockedChat = await blockedChat(chatId);
     const userMutedChat = await mutedChat(chatId, userId);
     if (!userBlockedChat && !userMutedChat) {
-      await db.notification.create({
+      const notif = await db.notification.create({
         data: {
           userId: userId as string,
           chatId: chatId as string,
         }
       });
+      res.status(200).json(notif);
+      return;
     }
     res.status(200).json({});
   } catch (err) {

@@ -27,6 +27,10 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
       socket.to(data.chatId).emit('receive_block', data);
     });
 
+    socket.on('send_notification', (data: any) => {
+      socket.to(data.chatId).emit('receive_notification', data);
+    });
+
     socket.on('disconnect', () =>  {
       console.log('User disconnected', socket.id);
     });

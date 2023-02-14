@@ -65,6 +65,25 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
   const getUserInfo = async () => {
     setUserInfo(await getLocalStorage().then((res) => {return res.user}));
   }
+
+  const sendNotification = async () => {
+    const obj = {userId: chat?.users[0].id, chatId: chat.id};
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${env.URL}/notifications`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      } else {
+        const data = {
+          chatId: chat.id,
+        };
+        socket.emit('send_notification', data);
+      }
+    });
+  };
   
   const sendMessage = async () => {
     if (newMessage === '') {
@@ -93,6 +112,7 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
         await setTypingIndicator(true);
         await socket.emit('send_message', data);
         setNewMessage('');
+        sendNotification();
       }
     });
   };

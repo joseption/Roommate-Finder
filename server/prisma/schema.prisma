@@ -41,6 +41,7 @@ model User {
   refreshTokens    RefreshToken[]
   ResponsesOnUsers ResponsesOnUsers[]
   tags             tags[]
+  Notification     Notification[]
 }
 
 model RefreshToken {
@@ -131,6 +132,7 @@ model Chat {
   updatedAt     DateTime? @updatedAt
   Message       Message[]
   blocked       String?
+  Notification  Notification[]
 }
 
 model Message {
@@ -153,9 +155,11 @@ model Matches {
 }
 
 model Notification {
-  id     String @id @default(uuid())
-  userId String
-  chatId String
+  userId          String
+  chatId          String
+  id              String @id @default(uuid())
+  chatIdBelongsTo Chat   @relation(fields: [chatId], references: [id])
+  receiver        User   @relation(fields: [userId], references: [id])
 
   @@index([userId, chatId])
 }

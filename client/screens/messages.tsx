@@ -19,6 +19,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   const [chatsHaveLoaded, setChatsHaveLoaded] = useState<boolean>(false);
   const chatsRef = useRef(chats);
   const currentChatRef = useRef(currentChat);
+  const showPanelRef = useRef(showPanel);
 
   useEffect(() => {
     getUserInfo();
@@ -30,11 +31,18 @@ const MessagesScreen = (props: any, {navigation}:any) => {
 
   useEffect(() => {
     currentChatRef.current = currentChat;
+    if (currentChatRef.current && currentChatRef.current?.id) {
+      deleteNotifications();
+    }
   }, [currentChat]);
 
   useEffect(() => {
     chatsRef.current = chats;
-  }, [chats])
+  }, [chats]);
+
+  useEffect(() => {
+    showPanelRef.current = showPanel;
+  }, [showPanel]);
   
   useEffect(() => {
     socket.on('receive_message', (data: any) => {
@@ -45,7 +53,42 @@ const MessagesScreen = (props: any, {navigation}:any) => {
     socket.on('receive_block', (data: any) => {
       updateBlocked(data.chat);
     });
+    socket.on('receive_notification', (data: any) => {
+      const chats = chatsRef.current.map((chat) => {
+        if (chat.id === data.chatId) {
+          if (currentChatRef.current.id === chat.id && showPanelRef.current) {
+            deleteNotifications();
+            return chat;
+          };
+          return {...chat, notifCount: (chat.notifCount + 1)};
+        }
+        return chat;
+      });
+      setChats(chats);
+    });
   }, [socket])
+
+  const deleteNotifications = async () => {
+    const obj = {userId: userInfo?.id, chatId: currentChatRef.current?.id};
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${env.URL}/notifications`, {method:'DELETE', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      } else {
+        const chats = chatsRef.current.map((chat) => {
+          if (chat.id === currentChatRef.current.id) {
+            return {...chat, notifCount: 0};
+          }
+          return chat;
+        });
+        setChats(chats);
+      }
+    });
+  };
 
   const updateTabs = async (data: any) => {
     if (chatsRef.current.length === 0) return;
@@ -73,7 +116,6 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       return chat;
     });
     setChats(newChats);
-    console.log(currentChatRef.current, c.blocked);
     setCurrentChat({...currentChatRef.current, blocked: c.blocked})
   }
 
@@ -116,6 +158,23 @@ const MessagesScreen = (props: any, {navigation}:any) => {
           userId: res.userId,
         };
         return message;
+      }
+    });
+  }
+
+  const getNotifs = async (userId: string, chatId: string) => {
+    if (!userId || !chatId) return;
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${env.URL}/notifications?userId=${userId}&chatId=${chatId}`,
+      {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      const res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+        return 0;
+      } else {
+        return res;
       }
     });
   }
@@ -164,6 +223,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
         const chatArray = [];
         for (let i = 0; i < res.length; i++) {
           const lastMessage = await getMessage(res[i].latestMessage);
+          const notifCount = await getNotifs(userInfo.id, res[i].id);
           const users = []
           for (let j = 0; j < res[i].users.length; j++) {
             if (res[i].users[j] === userInfo?.id) {
@@ -181,7 +241,8 @@ const MessagesScreen = (props: any, {navigation}:any) => {
             latestMessage: lastMessage,
             updatedAt: res.updatedAt,
             users: users,
-            blocked: res[i].blocked
+            blocked: res[i].blocked,
+            notifCount: notifCount,
           };
           chatArray.push(chat);
         }

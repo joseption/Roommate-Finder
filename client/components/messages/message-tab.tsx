@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
 import { getLocalStorage } from '../../helper';
+import { Color } from '../../style';
 
 interface Props {
   chat: any,
@@ -38,6 +39,17 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
     return content;
   }
 
+  const displayNotification = (count: number) => {
+    if (count === 0) return <></>
+    return (
+      <View style={styles.notification}>
+        <Text style={styles.notificationText}>
+          {(count > 9) ? '9+' : count}
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <TouchableHighlight
       style={styles.touchable}
@@ -51,7 +63,10 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
         <Image style={styles.image} source={{ uri: (chat?.users[0]?.image != null) ? chat?.users[0]?.image : 'https://reactnative.dev/img/tiny_logo.png'}} />
         <View style={styles.text}>
             <Text numberOfLines={1} style={styles.name}>{chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}</Text>
-            <Text numberOfLines={2}>{getPrefix(chat.latestMessage?.userId) + getContent(chat.latestMessage?.content)}</Text>
+            <Text numberOfLines={1}>{getPrefix(chat.latestMessage?.userId) + getContent(chat.latestMessage?.content)}</Text>
+        </View>
+        <View style={styles.notificationContainer}>
+          {displayNotification(chat.notifCount)}
         </View>
       </View>
     </TouchableHighlight>
@@ -81,11 +96,28 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     flex: 1,
-    marginRight: 45,
   },
   name: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  notificationContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    minWidth: 30,
+  },
+  notification: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 30,
+    width: 30,
+    backgroundColor: Color(false).danger,
+    borderRadius: 15,
+  },
+  notificationText: {
+    color: 'white',
   }
 });
 

@@ -7,7 +7,8 @@ import { message } from "../types/message.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 
-const backend_api = "https://api.roomfin.xyz";
+// const backend_api = "https://api.roomfin.xyz";
+const backend_api = "http://localhost:8080";
 
 export async function login(email: string, password: string) {
   return await doRequest<AuthSession>(
@@ -248,8 +249,6 @@ export async function MakeListings(
   address: string | undefined,
   petsAllowed: boolean
 ) {
-  console.log(bathrooms, "bathrooms ml");
-  console.log(size, "size ml");
   return await doRequest<ListingInfo>(
     `${backend_api}/listings`,
     {
@@ -279,6 +278,50 @@ export async function SendMessage(
     `${backend_api}/messages`,
     { content, chatId, userId },
     "POST",
+    true
+  );
+}
+
+export async function UpdateListing(
+  name: string,
+  description: string,
+  images: string[],
+  price: number,
+  city: string,
+  housing_type: string,
+  rooms: number | undefined,
+  bathrooms: number | undefined,
+  size: number | undefined,
+  address: string | undefined,
+  petsAllowed: boolean,
+  listingId: string
+) {
+  // console.log(listingId);
+  return await doRequest<ListingInfo>(
+    `${backend_api}/listings/${listingId}`,
+    {
+      name,
+      description,
+      images,
+      price,
+      city,
+      housing_type,
+      rooms,
+      bathrooms,
+      size,
+      address,
+      petsAllowed,
+    },
+    "PUT",
+    true
+  );
+}
+
+export async function DeleteListing(listingId: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/listings/${listingId}`,
+    null,
+    "DELETE",
     true
   );
 }

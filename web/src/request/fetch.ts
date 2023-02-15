@@ -3,8 +3,9 @@
  */
 
 import { user } from "../types/auth.types";
-import { chatInfo } from "../types/chat.types";
+import { chat } from "../types/chat.types";
 import { ListingInfo } from "../types/listings.types";
+import { message } from "../types/message.types";
 import { SurveyInfo } from "../types/survey.types";
 import { BioAndTags } from "../types/tags.types";
 import { getAuthSession } from "../utils/storage";
@@ -75,6 +76,29 @@ export async function GetListings() {
 export async function GetListing(id: string) {
   return await doRequest<ListingInfo>(
     `${backend_api}/listings/${id}`,
+    null,
+    "GET",
+    true
+  );
+}
+
+export async function GetChats() {
+  const endpoint = `${backend_api}/chats`;
+  return await doRequest<chat[]>(endpoint, null, "GET", true);
+}
+
+export async function GetUserInfo(userId: string) {
+  return await doRequest<user>(
+    `${backend_api}/users/profile/${userId}`,
+    null,
+    "GET",
+    true
+  );
+}
+
+export async function GetMessages(chatId: string) {
+  return await doRequest<message[]>(
+    `${backend_api}/messages/${chatId}`,
     null,
     "GET",
     true

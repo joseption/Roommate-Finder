@@ -27,11 +27,12 @@ interface Props {
   showPanel: any,
   updateShowPanel: any,
   updateBlocked: any,
+  updateMuted: any,
   socket: any,
   isDarkMode: boolean
 }
 
-const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, socket, updateBlocked}: Props) => {
+const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, socket, updateBlocked, updateMuted}: Props) => {
   if (!chat?.users) return <></>;
 
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
@@ -90,6 +91,7 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
         showPopUp={showPopUp}
         setShowPopUp={setShowPopUp}
         updateBlocked={updateBlocked}
+        updateMuted={updateMuted}
         socket={socket}
       />
     </>

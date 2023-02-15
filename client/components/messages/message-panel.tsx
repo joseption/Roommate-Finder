@@ -11,12 +11,13 @@ interface Props {
   updateShowPanel: Dispatch<SetStateAction<boolean>>,
   userInfo: any,
   chat: any,
-  socket: any
+  socket: any,
   updateBlocked: any,
+  updateMuted: any,
   isDarkMode: boolean
 }
 
-const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked }: Props) => {
+const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked, updateMuted }: Props) => {
   const [newMessage, setNewMessage] = useState('');
 
   // These values are mapped to percentage of screen size.
@@ -62,6 +63,7 @@ const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, 
           showPanel={showPanel}
           updateShowPanel={updateShowPanel}
           updateBlocked={updateBlocked}
+          updateMuted={updateMuted}
           socket={socket}
           isDarkMode={isDarkMode}
         />

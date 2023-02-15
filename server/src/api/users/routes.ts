@@ -23,6 +23,27 @@ router.use(isAuthenticated); // ! Do this instead of adding isAuthenticated to e
 
 // ! changed the duplicate function to work using query params
 
+ 
+router.get("/profile/:userId", async (req: Request, res: Response) => {
+  try {
+    const { userId} = req.params;
+    console.log(userId);
+    const user = await db.user.findFirst({
+      where: {
+        id: userId
+      }
+    });
+    if (!user) {
+      return res.status(400).json({ Error: "User not found" });
+    }
+    return res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ Error: err});
+  }
+});
+
+
+
 //Get current user profile
 
 router.get('/me', async (req: Request, res: Response, next: NextFunction) => {

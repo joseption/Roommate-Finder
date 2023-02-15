@@ -4,7 +4,7 @@ import db from '../../utils/db';
 import { Chat } from '@prisma/client';
 const router = express.Router();
 
-// router.use(isAuthenticated);
+router.use(isAuthenticated);
 
 // todo: verify how to extract userId from logged in user from faiz.
 // * For now just include userId from query params
@@ -41,7 +41,9 @@ router.post('/', async (req: Request, res: Response) => {
 // get all chats for a logged in user, sorted by newest
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { userId } = req.query;
+    // const { userId } = req.query;
+    const payload: payload = req.body[0];
+    const userId = payload.userId;
     const chats = await db.chat.findMany({
       where: {
         users: {
@@ -168,6 +170,21 @@ router.put('/removeFromGroup', async (req: Request, res: Response) => {
   }
 });
 
+router.delete('/delete/:chatId', async (req: Request, res: Response) => {
+  try {
+    const { chatId } = req.params;
+    console.log(chatId, 'hit delete route');
+    await db.chat.delete({
+      where: {
+        id: chatId as string,
+      },
+    });
+    return res.status(202).json('Chat deleted');
+  } catch (err) {
+    return res.status(500).json({ Error: err.message });
+  }
+});
+
 // given a chatId return info on the chat /chats/chatId
 // * honestly didnt need this in my original design but added just incase front end might need it
 router.get('/:chatId', async (req: Request, res: Response) => {
@@ -184,13 +201,14 @@ router.get('/:chatId', async (req: Request, res: Response) => {
   }
 });
 
+// block a chat
 router.put('/block', async (req: Request, res: Response) => {
   try {
     const { chatId, userId } = req.body;
     let chat = await db.chat.findUnique({
       where: {
         id: chatId as string,
-      }
+      },
     });
     if (!chat.blocked) {
       chat = await db.chat.update({
@@ -199,10 +217,68 @@ router.put('/block', async (req: Request, res: Response) => {
         },
         where: {
           id: chatId,
+        },
+      });
+      await db.notification.deleteMany({
+        where: {
+          chatId: chatId,
+        },
+      });
+      res.status(200).json(chat);
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// unblock a chat
+router.put('/unblock', async (req: Request, res: Response) => {
+  try {
+    const { chatId, userId }: { chatId: string; userId: string } = req.body;
+    let chat = await db.chat.findUnique({
+      where: {
+        id: chatId as string,
+      },
+    });
+    if (chat.blocked && chat.blocked === userId) {
+      chat = await db.chat.update({
+        data: {
+          blocked: null,
+        },
+        where: {
+          id: chatId,
+        },
+      });
+      res.status(200).json(chat);
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// mute a chat
+router.put('/mute', async (req: Request, res: Response) => {
+  try {
+    const { chatId, userId } = req.body;
+    let chat = await db.chat.findUnique({
+      where: {
+        id: chatId as string,
+      }
+    });
+    if (!chat.blocked && !chat.muted.includes(userId)) {
+      chat = await db.chat.update({
+        data: {
+          muted: {
+            push: userId
+          },
+        },
+        where: {
+          id: chatId,
         }
       });
       await db.notification.deleteMany({
         where: {
+          userId: userId,
           chatId: chatId,
         }
       })
@@ -213,7 +289,8 @@ router.put('/block', async (req: Request, res: Response) => {
   }
 });
 
-router.put('/unblock', async (req: Request, res: Response) => {
+// unmute a chat
+router.put('/unmute', async (req: Request, res: Response) => {
   try {
     const { chatId, userId }: { chatId: string, userId: string} = req.body;
     let chat = await db.chat.findUnique({
@@ -221,17 +298,18 @@ router.put('/unblock', async (req: Request, res: Response) => {
         id: chatId as string,
       }
     });
-    if (chat.blocked && chat.blocked === userId) {
+    if (chat.muted.length > 0) {
+      chat.muted = chat.muted.filter((user) => user !== userId);
       chat = await db.chat.update({
         data: {
-          blocked: null,
+          muted: chat.muted,
         },
         where: {
           id: chatId,
         }
       });
-      res.status(200).json(chat);
     }
+    res.status(200).json(chat);
   } catch (err) {
     res.status(500).json(err);
   }

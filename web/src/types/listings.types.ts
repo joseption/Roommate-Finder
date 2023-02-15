@@ -13,6 +13,7 @@ export interface ListingInfo {
   size?: number;
   description: string;
   distanceToUcf?: number;
+  zipcode?: number;
 }
 
 export interface ListingData {

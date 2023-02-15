@@ -1,56 +1,15 @@
-import { Disclosure, Tab } from "@headlessui/react";
-import { useQuery } from "@tanstack/react-query";
+import { Tab } from "@headlessui/react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { toast } from "react-hot-toast";
+import { AiFillEdit } from "react-icons/ai";
+import { FaTrashAlt } from "react-icons/fa";
 
-import { GetListing } from "../../request/fetch";
+import { GetCurrentUserInfo, GetListing } from "../../request/fetch";
+import { DeleteListing } from "../../request/mutate";
 import { ListingInfo } from "../../types/listings.types";
-
-const product = {
-  name: "Zip Tote Basket",
-  price: "$140",
-  rating: 4,
-  images: [
-    {
-      id: 1,
-      name: "Angled view",
-      src: "https://tailwindui.com/img/ecommerce-images/product-page-03-product-01.jpg",
-      alt: "Angled front view with bag zipped and handles upright.",
-    },
-    // More images...
-  ],
-  colors: [
-    {
-      name: "Washed Black",
-      bgColor: "bg-gray-700",
-      selectedColor: "ring-gray-700",
-    },
-    { name: "White", bgColor: "bg-white", selectedColor: "ring-gray-400" },
-    {
-      name: "Washed Gray",
-      bgColor: "bg-gray-500",
-      selectedColor: "ring-gray-500",
-    },
-  ],
-  description: `
-      <p>The Zip Tote Basket is the perfect midpoint between shopping tote and comfy backpack. With convertible straps, you can hand carry, should sling, or backpack this convenient and spacious bag. The zip top and durable canvas construction keeps your goods protected for all-day use.</p>
-    `,
-  details: [
-    {
-      name: "More Details",
-      items: [
-        "Multiple strap configurations",
-        "Spacious interior with top zip",
-        "Leather handle and tabs",
-        "Interior dividers",
-        "Stainless strap loops",
-        "Double stitched construction",
-        "Water-resistant",
-      ],
-    },
-    // More sections...
-  ],
-};
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -63,15 +22,41 @@ export default function Example() {
     queryKey: ["listing", id],
     queryFn: () => GetListing(id as string),
     onSuccess: (data) => {
-      console.log(data);
+      // console.log(data);
+    },
+    onError: (err) => {
+      console.log(err);
+    },
+  });
+  const { data: userData, isLoading: userLoading } = useQuery({
+    queryKey: ["userInfo"],
+    queryFn: () => GetCurrentUserInfo(),
+    onSuccess: (data) => {
+      // console.log(data);
     },
     onError: (err) => {
       console.log(err);
     },
   });
 
+  const { mutate: deleteListing } = useMutation({
+    mutationFn: () => DeleteListing(id as string),
+    onSuccess: () => {
+      void router.push("/listings");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+  function handleDelete() {
+    if (confirm("Are you sure you want to delete this listing?")) {
+      // delete listing
+      deleteListing();
+    }
+  }
+
   return (
-    <div className="bg-white">
+    <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
           {/* Image gallery */}
@@ -130,9 +115,33 @@ export default function Example() {
 
           {/* Listing info */}
           <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
-              {data ? data.name : "Loading..."}
-            </h1>
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
+                {data ? data.name : "Loading..."}
+              </h1>
+              <div
+                // className="flex"
+                style={
+                  data?.userId === userData?.id
+                    ? { display: "flex" }
+                    : { display: "none" }
+                }
+              >
+                <Link
+                  href={`../editListing?listingId=${
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                    Array.isArray(id) ? id.join(",") : id
+                  }`}
+                >
+                  <AiFillEdit className="" size={42} />
+                </Link>
+                <FaTrashAlt
+                  size={36}
+                  className="mx-4 self-center"
+                  onClick={handleDelete}
+                />
+              </div>
+            </div>
 
             <div className="mt-3">
               <h2 className="sr-only">Listing information</h2>
@@ -152,7 +161,7 @@ export default function Example() {
               />
             </div>
 
-            <div className="sm:flex-col1 mt-10 flex">
+            <div className="mt-10 flex sm:flex-col">
               <button className="flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full">
                 Message Owner
               </button>

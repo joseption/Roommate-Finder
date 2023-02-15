@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import AllListingsView from '../components/listings/all-listings';
-import { authTokenHeader, env } from '../helper';
+import { authTokenHeader, env, Listings_Screen } from '../helper';
 import BottomNavbar from '../components/listings/bottom-nav';
 import FavoriteListings from '../components/listings/favorite-listings';
 import CreateListing from '../components/listings/create-listing';
@@ -10,12 +10,6 @@ import _Dropdown from '../components/control/dropdown';
 import ListingView from '../components/listings/listing';
 import _Text from '../components/control/text';
 import { Color } from '../style';
-
-export enum Listings_Screen {
-  all,
-  favorites,
-  create
-}
 
 const ListingsScreen = (props: any) => {
   const [isListing, setIsListing] = useState(false);

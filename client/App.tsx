@@ -125,6 +125,11 @@ export const App = (props: any) => {
   }, [currentChat, showingMessagePanel]);
 
   useEffect(() => {
+    if (Platform.OS === 'android' && !showingMessagePanel)
+      Keyboard.dismiss()
+  }, [showingMessagePanel]);
+
+  useEffect(() => {
     if (Platform.OS === 'android')
       updateNavForPushNotifications();
   }, [navSelector]);
@@ -412,6 +417,7 @@ export const App = (props: any) => {
   }
 
   const onBackPress = () => {
+    setShowingMessagePanel(false);
     let current = getRouteName();
     let name = getPreviousRouteName();
     if (name) {
@@ -724,6 +730,7 @@ export const App = (props: any) => {
         theme={MyTheme()}
         >
           <KeyboardAvoidingView
+          keyboardVerticalOffset={StatusBar.currentHeight}
           behavior='padding'
           style={styles.avoidContainer}>
           <TouchableWithoutFeedback onPress={(e:any) => checkKeyboardDismiss()}>
@@ -742,7 +749,6 @@ export const App = (props: any) => {
                 <StatusBar
                   backgroundColor={Color(isDarkMode).statusBar}
                   barStyle={isDarkMode ? "light-content" : "dark-content"}
-                  
                 />
                 <Stack.Navigator
                 screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle(), navigationBarColor: Color(isDarkMode).statusBar}}

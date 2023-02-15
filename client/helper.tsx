@@ -52,6 +52,12 @@ export const textMatches = (text1: string, text2: string) => {
     return text1 === text2 && text1.length > 0 && text2.length > 0;
 }
 
+export enum Listings_Screen {
+  all,
+  favorites,
+  create
+}
+
 export const Context = createContext({} as any); 
 export type navProp = StackNavigationProp<Page>;
 export const NavTo = {

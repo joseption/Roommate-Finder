@@ -2,13 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../middleware';
 import { uploadImage } from 'utils/uploadImage';
-
+ 
 const prisma = new PrismaClient();
-
+ 
 const router = require('express').Router();
-
-router.use(isAuthenticated);
-
+ 
+// router.use(isAuthenticated);
+ 
 // listings REST API everything is under /listings
 // create listing
 router.post('/', async (req: Request, res: Response) => {
@@ -44,12 +44,12 @@ router.post('/', async (req: Request, res: Response) => {
         return res.status(400).json({ Error: 'Image should be a base64 image!' });
       }
       const uploadedImage = await uploadImage(image);
-
+ 
       if (!uploadedImage) return res.status(400).json({ Error: 'Failed to upload image' });
       uploadImages.push(uploadedImage);
     }
   }
-
+ 
   if (!city) {
     return res.status(400).json({ Error: 'City is required' });
   }
@@ -71,7 +71,7 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const payload: payload = req.body[0];
     const userId = payload.userId;
-
+ 
     const listing = await prisma.listings.create({
       data: {
         name: name as string,
@@ -95,31 +95,78 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(500).json({ Error: err.message });
   }
 });
-
+ 
 // * update a listing
-router.put('/:listingId', isAuthenticated, async (req: Request, res: Response) => {
+router.put('/:listingId', async (req: Request, res: Response) => {
   try {
+    const {
+      name,
+      images,
+      city,
+      housing_type,
+      description,
+      price,
+      petsAllowed,
+      address,
+      bathrooms,
+      rooms,
+      size,
+      zipcode,
+      distanceToUcf,
+    } = req.body;
+
+  const uploadImages = [];
+  //check if images is an array
+  
+  //check if images are base64 string
+  //upload images to s3 bucket
+  //add image urls to uploadImages array
+    if(images && Array.isArray(images)) {
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        if (!/^data:image\/[a-z]+;base64,/.test(image)) {
+          return res.status(400).json({ Error: 'Image should be a base64 image!' });
+        }
+        const uploadedImage = await uploadImage(image);
+   
+        if (!uploadedImage) return res.status(400).json({ Error: 'Failed to upload image' });
+        uploadImages.push(uploadedImage);
+      }
+    }
+  
+    const listing = await prisma.listings.findFirst({
+      where: {
+        id: req.params.listingId as string,
+      }
+    })
+    // console.log('listing images', listing.images, 'images uploaded', uploadImages, 'images variable', images);
+    uploadImages.push(...listing.images);
     const updatedListing = await prisma.listings.update({
       where: {
-        id: req.params.listingId,
+        id: req.params.listingId as string,
       },
       data: {
-        name: req.body.name || undefined,
-        images: req.body.images || undefined,
-        city: req.body.city || undefined,
-        housing_type: req.body.housing_type || undefined,
-        description: req.body.description || undefined,
-        price: req.body.price || undefined,
-        petsAllowed: req.body.petsAllowed || undefined,
-        address: req.body.address || undefined,
+        name: name || undefined,
+        images: !images ? listing.images : uploadImages,
+        city: city || undefined,
+        housing_type: housing_type || undefined,
+        description: description || undefined,
+        price: price || undefined,
+        petsAllowed: petsAllowed || undefined,
+        address: address || undefined,
+        bathrooms: bathrooms || undefined,
+        rooms: rooms || undefined,
+        size: size || undefined,
+        zipcode: zipcode || undefined,
+        distanceToUcf: distanceToUcf || undefined,
       },
     });
     res.status(200).json(updatedListing);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({ Error: err.message });
   }
 });
-
+ 
 // * delete a listing
 router.delete('/:listingId', async (req: Request, res: Response) => {
   try {
@@ -133,7 +180,7 @@ router.delete('/:listingId', async (req: Request, res: Response) => {
     res.status(500).json(err);
   }
 });
-
+ 
 // * get all listings
 router.get('/all', async (req: Request, res: Response) => {
   try {
@@ -143,7 +190,7 @@ router.get('/all', async (req: Request, res: Response) => {
     res.status(500).json(err);
   }
 });
-
+ 
 // * get one listing
 router.get('/:listingId', async (req: Request, res: Response) => {
   try {
@@ -157,5 +204,5 @@ router.get('/:listingId', async (req: Request, res: Response) => {
     res.status(500).json(err);
   }
 });
-
+ 
 export default router;

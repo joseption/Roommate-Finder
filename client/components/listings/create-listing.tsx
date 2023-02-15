@@ -9,16 +9,17 @@ import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-nat
 import _Image from '../control/image';
 import { ScrollView } from 'react-native-gesture-handler';
 import _Dropdown from '../control/dropdown';
+import axios from 'axios';
 import _TextInput from '../control/text-input';
 import _Group from '../control/group';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-
 const CreateListing = (props: any) => {
 
   const [userInfo, setUserInfo] = useState<any>();
   const [imageURLArray, setImageURLArray] = useState<string[]>([]);
   const [imageUriArray, setImageUriArray] = useState<string[]>([]);
   const [imageErrorArray, setImageErrorArray] = useState<string[]>([]);
+  const [isCalculating, setIsCalculating] = useState(false);
   
   useEffect(() => {
     getUserInfo();
@@ -119,7 +120,7 @@ const CreateListing = (props: any) => {
     if (key === 'images') {
       setFormData({
         ...formData,
-        [key]: [...formData[key], value],
+        [key]: [...formData[key], value as never],
       });
     } else {
       setFormData({
@@ -192,6 +193,53 @@ const CreateListing = (props: any) => {
     let updatedImageUriArray = [...imageUriArray];
     updatedImageUriArray.splice(index, 1);
     setImageUriArray(updatedImageUriArray);
+  };
+
+  useEffect(() => {
+    calculateDistance();
+  },[formData.address, formData.zipcode, formData.city]);
+
+  const compareDistances = (UCF_latitude: number, UCF_longitude: number, listing_latitude: number, listing_longitude: number) => {
+    
+    const earth_radius = 3963; 
+    const UCF_latitude_radians = UCF_latitude * Math.PI / 180;
+    const listing_latitude_radians = listing_latitude * Math.PI / 180;
+    const change_in_latitude = (listing_latitude - UCF_latitude) * Math.PI / 180;
+    const change_in_longitude = (listing_longitude - UCF_longitude) * Math.PI / 180;
+
+    /* Used something called Haversine Formula, basically it finds the distance of two points on a sphere */
+    const math = Math.pow(Math.sin(change_in_latitude / 2), 2) +
+      Math.cos(UCF_latitude_radians) * Math.cos(listing_latitude_radians) *
+      Math.pow(Math.sin(change_in_longitude / 2), 2);
+
+    const result = 2 * Math.asin(Math.sqrt(math));
+    const distance = earth_radius * result;
+
+    return distance;
+  }
+
+  const calculateDistance = async () => {
+
+    if (!formData.address || !formData.zipcode || !formData.city || isCalculating) {
+      return;
+    }
+    setIsCalculating(true);
+    const address = formData.address.replace(/\s/g, "%20")
+    const response = await axios.get(`https://www.mapquestapi.com/geocoding/v1/address?key=UM9XiqmIBZmifAAiq32yTgaLbUDWJGBS&location=${address},${formData.city},${formData.zipcode}`);
+    console.log(response)
+    const listingData = response.data.results[0].locations[0].latLng;
+    const UCF = { lat: 28.602427, lng: -81.200058 };
+    let distanceToUcf;
+    if (!listingData) {
+      console.error("Location not found");
+      setFormData({ ...formData, distanceToUcf: 0 });
+      setIsCalculating(false);
+      return;
+    }
+    distanceToUcf = Math.round(compareDistances(UCF.lat, UCF.lng, listingData.lat, listingData.lng));
+    console.log(distanceToUcf)
+    setFormData({ ...formData, distanceToUcf });
+    setIsCalculating(false);
   };
 
   const styles = StyleSheet.create({
@@ -466,7 +514,7 @@ const CreateListing = (props: any) => {
             height={100}
             isDarkMode={props.isDarkMode}
           />
-
+          
           <_TextInput
             containerStyle={styles.inputContainerStyle}
             onChangeText={(text: any) => handleChange('city', text)}

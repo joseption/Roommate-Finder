@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, TouchableHighlight, Platform } from 'react-native';
 import FavoriteListings from '../listings/favorite-listings';
 import CreateListing from '../listings/create-listing';
-import ListingsScreen, { Listings_Screen } from '../../screens/listings';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSearch, faStar, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { Color, Radius } from '../../style';
+import { Listings_Screen } from '../../helper';
 
 const BottomNavbar = (props: any) => {
   const [isListingScreenOpen, setIsListingScreenOpen] = React.useState(false);

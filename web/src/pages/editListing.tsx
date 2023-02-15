@@ -393,20 +393,13 @@ export default function EditListing() {
                   id="pets-allowed"
                   name="pets-allowed"
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  value={data?.petsAllowed ? "Yes" : "No"}
                   onChange={(e) => {
                     setPetsAllowed(e.target.value === "Yes" ? true : false);
                   }}
                 >
-                  {data?.petsAllowed ? (
-                    <option selected>Yes</option>
-                  ) : (
-                    <option>Yes</option>
-                  )}
-                  {!data?.petsAllowed ? (
-                    <option selected>No</option>
-                  ) : (
-                    <option>No</option>
-                  )}
+                  <option>Yes</option>
+                  <option>No</option>
                 </select>
               </div>
             </div>

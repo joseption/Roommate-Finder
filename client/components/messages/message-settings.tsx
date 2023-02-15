@@ -62,9 +62,9 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, upda
     const obj = { chatId: chat.id, userId: userInfo.id };
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
-    const muteType = (chat.blocked) ? 'unmute' : 'mute';
+    const blockType = (chat.blocked) ? 'unblock' : 'block';
     return fetch(
-      `${env.URL}/chats/${muteType}`, {method: 'PUT', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      `${env.URL}/chats/${blockType}`, {method: 'PUT', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
@@ -87,9 +87,9 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, upda
     const obj = { chatId: chat.id, userId: userInfo.id };
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
-    const blockType = (chat.muted.includes(userInfo.id)) ? 'unmute' : 'mute';
+    const muteType = (chat.muted.includes(userInfo.id)) ? 'unmute' : 'mute';
     return fetch(
-      `${env.URL}/chats/${blockType}`, {method: 'PUT', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      `${env.URL}/chats/${muteType}`, {method: 'PUT', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {

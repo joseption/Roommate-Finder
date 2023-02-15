@@ -302,3 +302,12 @@ export async function UpdateListing(
     true
   );
 }
+
+export async function DeleteListing(listingId: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/listings/${listingId}`,
+    null,
+    "DELETE",
+    true
+  );
+}

@@ -1,12 +1,14 @@
 import { Tab } from "@headlessui/react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { toast } from "react-hot-toast";
 import { AiFillEdit } from "react-icons/ai";
 import { FaTrashAlt } from "react-icons/fa";
 
 import { GetListing } from "../../request/fetch";
+import { DeleteListing } from "../../request/mutate";
 import { ListingInfo } from "../../types/listings.types";
 
 function classNames(...classes: string[]) {
@@ -27,10 +29,19 @@ export default function Example() {
     },
   });
 
+  const { mutate: deleteListing } = useMutation({
+    mutationFn: () => DeleteListing(id as string),
+    onSuccess: () => {
+      void router.push("/listings");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
   function handleDelete() {
     if (confirm("Are you sure you want to delete this listing?")) {
       // delete listing
-      console.log("delete listing");
+      deleteListing();
     }
   }
 

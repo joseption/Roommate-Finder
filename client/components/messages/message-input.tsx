@@ -20,23 +20,19 @@ const sendIcon = (
 
 interface Props {
   chat: any,
+  userInfo: any,
   socket: Socket<DefaultEventsMap, DefaultEventsMap>,
   newMessage: string,
   setNewMessage: any,
 }
 
-const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
-  const [userInfo, setUserInfo] = useState<any>();
+const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage}: Props) => {
   const [height, setHeight] = useState(0);
   const [hiddenTextWidth, setHiddenTextWidth] = useState(0);
 
   const randomNum = () => {
     return (Math.floor(Math.random() * 999999) + 1).toString();
   }
-
-  useEffect(() => {
-    getUserInfo();
-  }, [])
   
   useEffect(() => {
     setTypingIndicator();
@@ -47,6 +43,7 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
       chatId: chat.id,
       typingIndicator: true,
       isTyping: isTyping,
+      userId: userInfo?.id,
       // id is temporary for rendering purposes. 
       // It provides no value otherwise.
       id: randomNum(),
@@ -60,10 +57,6 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
       return;
     };
     await prepareTypingIndicatorData(newMessage?.length !== 0);
-  }
-  
-  const getUserInfo = async () => {
-    setUserInfo(await getLocalStorage().then((res) => {return res.user}));
   }
 
   const sendNotification = async () => {

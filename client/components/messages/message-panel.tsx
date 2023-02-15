@@ -67,8 +67,18 @@ const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, 
           socket={socket}
           isDarkMode={isDarkMode}
         />
-        <Messages chat={chat} userInfo={userInfo} socket={socket}/>
-        <MessageInput chat={chat} socket={socket} newMessage={newMessage} setNewMessage={setNewMessage}/>
+        <Messages
+          chat={chat}
+          userInfo={userInfo}
+          socket={socket}
+        />
+        <MessageInput
+          chat={chat}
+          userInfo={userInfo}
+          socket={socket}
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
+        />
       </Animated.View>
     </>
   );

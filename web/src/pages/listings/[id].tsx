@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 import { AiFillEdit } from "react-icons/ai";
 import { FaTrashAlt } from "react-icons/fa";
 
-import { GetListing } from "../../request/fetch";
+import { GetCurrentUserInfo, GetListing } from "../../request/fetch";
 import { DeleteListing } from "../../request/mutate";
 import { ListingInfo } from "../../types/listings.types";
 
@@ -21,6 +21,16 @@ export default function Example() {
   const { data, isLoading } = useQuery({
     queryKey: ["listing", id],
     queryFn: () => GetListing(id as string),
+    onSuccess: (data) => {
+      // console.log(data);
+    },
+    onError: (err) => {
+      console.log(err);
+    },
+  });
+  const { data: userData, isLoading: userLoading } = useQuery({
+    queryKey: ["userInfo"],
+    queryFn: () => GetCurrentUserInfo(),
     onSuccess: (data) => {
       // console.log(data);
     },
@@ -109,7 +119,14 @@ export default function Example() {
               <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
                 {data ? data.name : "Loading..."}
               </h1>
-              <div className="flex">
+              <div
+                // className="flex"
+                style={
+                  data?.userId === userData?.id
+                    ? { display: "flex" }
+                    : { display: "none" }
+                }
+              >
                 <Link
                   href={`../editListing?listingId=${
                     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

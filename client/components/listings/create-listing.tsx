@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList} from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList, Pressable} from 'react-native';
 import _Text from '../control/text';
-import { Color, Radius, Style } from '../../style';
+import { Color, FontSize, Radius, Style } from '../../style';
 import { env } from '../../helper';
 import { authTokenHeader, getLocalStorage } from '../../helper';
 import _Button from '../control/button';
@@ -9,6 +9,9 @@ import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-nat
 import _Image from '../control/image';
 import { ScrollView } from 'react-native-gesture-handler';
 import _Dropdown from '../control/dropdown';
+import _TextInput from '../control/text-input';
+import _Group from '../control/group';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 const CreateListing = (props: any) => {
 
@@ -194,14 +197,16 @@ const CreateListing = (props: any) => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      padding: 16,
-      backgroundColor: Color(props.isDarkMode).white,
     },
     inputContainer: {
       backgroundColor: Color(props.isDarkMode).grey,
       borderRadius: 8,
       marginVertical: 8,
       padding: 8,
+    },
+    inputContainerStyle: {
+      paddingTop: 5,
+      paddingBottom: 5
     },
     input: {
       fontSize: 16,
@@ -220,10 +225,11 @@ const CreateListing = (props: any) => {
       fontSize: 16,
     },
     title: {
-      fontSize: 20,
-      marginBottom: 16,
+      margin: 10,
       textAlign: 'center',
-      color: Color(props.isDarkMode).black,
+      fontFamily: 'Inter-SemiBold',
+      fontSize: FontSize.large,
+      color: Color(props.isDarkMode).titleText
     },
     imagesContainer: {
       alignItems: 'center',
@@ -232,15 +238,17 @@ const CreateListing = (props: any) => {
       marginVertical: 16,
     },
     image: {
-      backgroundColor: Color(props.isDarkMode).white,
-      borderColor: Color(props.isDarkMode).border,
+      backgroundColor: Color(props.isDarkMode).actualWhite,
+      borderColor: Color(props.isDarkMode).separator,
       borderWidth: 1,
       height: 125,
-      marginRight: 8,
       width: 125,
+      borderRadius: Radius.default
     },
     formContainer: {
-      padding: 20,
+      paddingLeft: 10,
+      paddingRight: 10,
+      paddingBottom: 10
     },
     label: {
       fontSize: 16,
@@ -270,7 +278,81 @@ const CreateListing = (props: any) => {
     },
     photoContainer: {
       position: 'relative',
+      margin: 5
     },
+    imageContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingTop: 10,
+      paddingBottom: 15,
+      paddingLeft: 5,
+      paddingRight: 5,
+      marginBottom: 15,
+    },
+    photoContent: {
+      flexWrap: 'wrap',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    deleteIcon: {
+      ...Platform.select({
+          web: {
+              outlineStyle: 'none'
+          }
+      }),
+      position: 'absolute',
+      top: 0,
+      right: 0
+    },
+    deleteButtonContainer: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      padding: 1
+    },
+    defaultImage: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    holderImage: {
+        width: 100,
+        height: 100,
+        backgroundColor: Color(props.isDarkMode).white,
+        borderColor: Color(props.isDarkMode).separator,
+        borderWidth: 1,
+        borderRadius: Radius.default,
+        margin: 5
+      },
+      holderImageIcon: {
+        ...Platform.select({
+            web: {
+                outlineStyle: 'none'
+            }
+        }),
+        alignItems: 'center',
+        justifyContent: 'center',
+        display: 'flex'
+      },
+      holderImages: {
+        flexDirection: 'row',
+        flexWrap: 'wrap'
+      },
+      photoHoldingContainer: {
+        marginBottom: 10
+      },
+      deleteIconShadow: {
+        right: -2,
+      },
+      submitContainer: {
+        paddingTop: 10,
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        paddingBottom: 5
+      }
   });
 
   return (
@@ -278,157 +360,218 @@ const CreateListing = (props: any) => {
       <_Text style={styles.title}>Create Listing</_Text>
       <ScrollView>
         <View style={styles.formContainer}>
-          <View style={styles.imagesContainer}>
-            {getPhotos().map((photo, index) => (
-              <View key={index} style={styles.photoContainer}>
-                <_Image
-                  style={styles.image}
-                  source={Platform.OS === 'web' ? photo : { uri: photo }}
-                  height={125}
-                  width={125}
-                />
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleDeletePhoto(index)}
+          <_Group
+                isDarkMode={props.isDarkMode}
+                vertical={true}
+                style={styles.imageContainer}
                 >
-                  <_Text style={styles.deleteButtonText}>Delete</_Text>
-                </TouchableOpacity>
+            <View
+            style={styles.photoHoldingContainer}
+            >
+              {!getPhotos() || getPhotos().length == 0 ?
+              <View
+              style={styles.holderImages}
+              >
+                <View
+                style={[styles.holderImage, styles.defaultImage]}
+                >
+                    <FontAwesomeIcon
+                    style={styles.holderImageIcon}
+                    size={40} color={Color(props.isDarkMode).userIcon}
+                    icon="bed"
+                    >
+                    </FontAwesomeIcon>
+                </View>
+                <View
+                style={[styles.holderImage, styles.defaultImage]}
+                >
+                    <FontAwesomeIcon
+                    style={styles.holderImageIcon}
+                    size={40} color={Color(props.isDarkMode).userIcon}
+                    icon="tree-city"
+                    >
+                    </FontAwesomeIcon>
+                </View>
+                <View
+                style={[styles.holderImage, styles.defaultImage]}
+                >
+                    <FontAwesomeIcon
+                    style={styles.holderImageIcon}
+                    size={40} color={Color(props.isDarkMode).userIcon}
+                    icon="sink"
+                    >
+                    </FontAwesomeIcon>
+                </View>
               </View>
-            ))}
-          </View>
-          <_Button
+              :
+              <View
+              style={styles.photoContent}
+              >
+              {getPhotos().map((photo, index) => (
+                <View key={index} style={styles.photoContainer}>
+                  <_Image
+                    style={styles.image}
+                    source={Platform.OS === 'web' ? photo : { uri: photo }}
+                    height={100}
+                    width={100}
+                  />
+                  <Pressable
+                  style={styles.deleteButtonContainer}
+                  onPress={(e: any) => handleDeletePhoto(index)}
+                  >
+                      <View>
+                        <FontAwesomeIcon 
+                        size={26} 
+                        color={Color(props.isDarkMode).actualBlack} 
+                        icon="close"
+                        style={[styles.deleteIcon, styles.deleteIconShadow]}
+                        >
+                        </FontAwesomeIcon>
+                        <FontAwesomeIcon 
+                        size={25} 
+                        color={Color(props.isDarkMode).actualWhite} 
+                        icon="close"
+                        style={styles.deleteIcon}
+                        >
+                        </FontAwesomeIcon>
+                      </View>
+                  </Pressable>
+                </View>
+              ))}
+              </View>
+            }
+            </View>
+            <_Button
             isDarkMode={props.isDarkMode}
             onPress={(e: any) => { uploadPhotos() }}
             style={Style(props.isDarkMode).buttonDefault}
-          >
+            >
             {'Upload Photos'}
           </_Button>
-          <_Text style={styles.label}>Title</_Text>
-          <View style={styles.inputContainer}>
-            
-            <TextInput
-              style={styles.input}
-              onChangeText={(text) => handleChange('name', text)}
-              value={formData.name}
-            />
-          </View>
-
-          <_Text style={styles.label}>Description</_Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              onChangeText={(text) => handleChange('description', text)}
-              value={formData.description}
-            />
-          </View>
-
-          <_Text style={styles.label}>City</_Text>
-          <View style={styles.inputContainer}>
-          
-          <TextInput
-            style={styles.input}
-            onChangeText={(text) => handleChange('city', text)}
-            value={formData.city}
+          </_Group>
+          <_TextInput
+            containerStyle={styles.inputContainerStyle}
+            onChangeText={(text: any) => handleChange('name', text)}
+            value={formData.name}
+            label="Title"
+            isDarkMode={props.isDarkMode}
           />
-        </View>
-        <_Text style={styles.label}>Housing Type</_Text>
+
+          <_TextInput
+            containerStyle={styles.inputContainerStyle}
+            onChangeText={(text: any) => handleChange('description', text)}
+            value={formData.description}
+            multiline={true}
+            label="Description"
+            height={100}
+            isDarkMode={props.isDarkMode}
+          />
+
+          <_TextInput
+            containerStyle={styles.inputContainerStyle}
+            onChangeText={(text: any) => handleChange('city', text)}
+            value={formData.city}
+            label="City"
+            isDarkMode={props.isDarkMode}
+          />
 
           <_Dropdown
+            containerStyle={styles.inputContainerStyle}
             isDarkMode={props.isDarkMode}
             options={getHousingType()}
             value={formData.housing_type}
             setValue={(text: string) => handleChange('housing_type', text)}
+            label="Housing Type"
           />
-
-        <_Text style={styles.label}>Price</_Text>
-        <View style={styles.inputContainer}>
           
-          <TextInput
+          <_TextInput
+            containerStyle={styles.inputContainerStyle}
             style={styles.input}
-            onChangeText={(text) => handleChange('price', parseFloat(text))}
+            onChangeText={(text: any) => handleChange('price', parseFloat(text))}
             value={String(formData.price)}
             keyboardType="numeric"
+            label="Price"
+            isDarkMode={props.isDarkMode}
           />
-        </View>
-
-
-        <_Text style={styles.label}>Address</_Text>
-        <View style={styles.inputContainer}>
-          
-          <TextInput
+          <_TextInput
+            containerStyle={styles.inputContainerStyle}
             style={styles.input}
-            onChangeText={(text) => handleChange('address', text)}
+            onChangeText={(text: any) => handleChange('address', text)}
             value={formData.address}
+            label="Address"
+            isDarkMode={props.isDarkMode}
           />
-        </View>
 
-        <_Text style={styles.label}>Pets Allowed</_Text>
-
-        
-        <_Dropdown
+          <_Dropdown
+            containerStyle={styles.inputContainerStyle}
             isDarkMode={props.isDarkMode}
             options={getYesNo()}
             value={formData.petsAllowed}
             setValue={(text: string) => handleChange('petsAllowed', text === 'Yes' ? true : false)}
+            label="Pets Allowed"
           />
-        
-
-        <_Text style={styles.label}>Rooms</_Text>
-        
           
           <_Dropdown
+            containerStyle={styles.inputContainerStyle}
             isDarkMode={props.isDarkMode}
             options={getOptions()}
             value={formData.rooms}
             setValue={(text: string) => handleChange('rooms', parseInt(text))}
+            label="Rooms"
           />
 
-        <_Text style={styles.label}>Bathrooms</_Text>
-        
-            <_Dropdown
-              isDarkMode={props.isDarkMode}
-              options={getOptions()}
-              value={formData.bathrooms}
-              setValue={(text: string) => handleChange('bathrooms', parseInt(text))}
-            />
+          <_Dropdown
+            containerStyle={styles.inputContainerStyle}
+            isDarkMode={props.isDarkMode}
+            options={getOptions()}
+            value={formData.bathrooms}
+            setValue={(text: string) => handleChange('bathrooms', parseInt(text))}
+            label="Bathrooms"
+          />
 
-        <_Text style={styles.label}>Size</_Text>
-        <View style={styles.inputContainer}>
-          <TextInput
+          <_TextInput
+            containerStyle={styles.inputContainerStyle}
             style={styles.input}
-            onChangeText={(text) => handleChange('size', parseInt(text))}
+            onChangeText={(text: any) => handleChange('size', parseInt(text))}
             value={String(formData.size)}
             keyboardType="numeric"
+            label="Size"
+            isDarkMode={props.isDarkMode}
           />
-        </View>
-          <_Text style={styles.label}>Zipcode</_Text>
-        <View style={styles.inputContainer}>
-          
-          <TextInput
+
+          <_TextInput
+            containerStyle={styles.inputContainerStyle}
             style={styles.input}
-            onChangeText={(text) => handleChange('zipcode', text)}
+            onChangeText={(text: any) => handleChange('zipcode', text)}
+            keyboardType="numeric"
             value={formData.zipcode}
+            isDarkMode={props.isDarkMode}
+            label="Zip Code"
           />
-        </View>
-          <_Text style={styles.label}>Distance</_Text>
-        <View style={styles.inputContainer}>
-          
-          <TextInput
-            style={styles.input}
-            onChangeText={(text) => handleChange('distanceToUcf', parseInt(text))}
+ 
+          <_TextInput
+             containerStyle={styles.inputContainerStyle}
+            onChangeText={(text: any) => handleChange('distanceToUcf', parseInt(text))}
             value={formData.distanceToUcf}
+            label="Distance"
+            isDarkMode={props.isDarkMode}
+            keyboardType="numeric"
           />
-        </View>
-        <_Button
-          isDarkMode={props.isDarkMode}
-          onPress={() => {
-            handleSubmit();
-            props.onClose();
-          }}
-          style={Style(props.isDarkMode).buttonGold}
+
+        <View
+        style={styles.submitContainer}
         >
-          {'Submit'}
-        </_Button>
+          <_Button
+            isDarkMode={props.isDarkMode}
+            onPress={() => {
+              handleSubmit();
+              props.onClose();
+            }}
+            style={[Style(props.isDarkMode).buttonGold]}
+          >
+            {'Add New Listing'}
+          </_Button>
+        </View>
       </View>
     </ScrollView>
   </View>

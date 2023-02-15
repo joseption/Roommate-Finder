@@ -36,11 +36,10 @@ const BottomNavbar = (props: any) => {
       backgroundColor: Color(props.isDarkMode).contentBackgroundSecondary,
       borderTopWidth: 1,
       borderTopColor: Color(props.isDarkMode).separator,
-      
     },
     button: {
       alignItems: 'center',
-      padding: 10,
+      padding: 5,
       borderRadius: Radius.default,
       width: '33%',
     },

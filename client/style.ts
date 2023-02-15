@@ -438,6 +438,7 @@ export const LightLoginStyle = StyleSheet.create({
 function LightColor() {
   return {
     actualWhite: '#FFFFFF',
+    actualBlack: '#000000',
     white:'#FFFFFF',
     black:'#000000',
     blackMask: '#00000075',
@@ -497,7 +498,8 @@ function LightColor() {
     contentDialogBackground: '#F0F2F5',
     contentDialogBackgroundSecondary: '#E4E6E9',
     userIcon: '#D2D4D9',
-    statusBar: '#FFFFFF'
+    statusBar: '#FFFFFF',
+    holderUnderlay: '#0000001a',
   }
 }
 
@@ -912,6 +914,7 @@ export const DarkLoginStyle = StyleSheet.create({
 function DarkColor() {
   return {
     actualWhite: '#FFFFFF',
+    actualBlack: '#000000',
     white:'#242526',
     black:'#ffffff',
     blackMask: '#00000075',
@@ -971,7 +974,8 @@ function DarkColor() {
     contentDialogBackground: '#242526',
     contentDialogBackgroundSecondary: '#202122',
     userIcon: '#D2D4D9',
-    statusBar: '#141414'
+    statusBar: '#141414',
+    holderUnderlay: '#FFFFFF1a',
   }
 }
 

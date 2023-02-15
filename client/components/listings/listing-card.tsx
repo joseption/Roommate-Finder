@@ -2,11 +2,12 @@ import { Pressable, View, StyleSheet, Image, Text, TouchableHighlight, Platform 
 import { useNavigation } from '@react-navigation/native';
 import _Text from '../control/text';
 import _Group from '../control/group';
-import { Color, Style } from '../../style';
+import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useEffect, useState } from 'react';
 import { faStar } from '@fortawesome/free-solid-svg-icons';
+import _Image from '../control/image';
 
 const ListingCard = (props: any) => {
 
@@ -17,45 +18,35 @@ const ListingCard = (props: any) => {
   }, [props.item.isFavorite]);
 
   const styles = StyleSheet.create({
-    container: {
-      padding: 10,
-      backgroundColor: Color(props.isDarkMode).white,
-      borderRadius: 10,
-      marginBottom: 40,
-      shadowColor: '#000',
-      shadowOpacity: 0.2,
-      shadowRadius: 5,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
-    },
     image: {
       width: '100%',
-      height: 200,
-      borderTopLeftRadius: 10,
-      borderTopRightRadius: 10,
+      height: 175,
+      borderTopLeftRadius: Radius.default,
+      borderTopRightRadius: Radius.default,
     },
     header: {
-      fontSize: 22,
+      fontSize: FontSize.large,
       fontWeight: 'bold',
       marginTop: 10,
+      color: Color(props.isDarkMode).text
     },
     subheader: {
-      fontSize: 16,
-      color: 'gray',
-      marginTop: 5,
+      fontSize: FontSize.default,
+      color: Color(props.isDarkMode).textTertiary,
+      fontStyle: 'italic'
     },
     description: {
-      fontSize: 16,
+      fontSize: FontSize.default,
+      color: Color(props.isDarkMode).text,
       marginTop: 10,
     },
     price: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginTop: 10,
+      fontSize: FontSize.default,
+      color: Color(props.isDarkMode).text,
     },
     petsAllowed: {
-      fontSize: 16,
-      marginTop: 10,
+      fontSize: FontSize.default,
+      color: Color(props.isDarkMode).text,
     },
     viewListingButton: {
       backgroundColor: Color(props.isDarkMode).black,
@@ -92,6 +83,30 @@ const ListingCard = (props: any) => {
     }
   });
 
+  const containerStyle = () => {
+    return {
+      padding: 10,
+      shadowColor: Color(props.isDarkMode).contentHolderSecondary,
+      shadowOffset: {width: -3, height: 3},
+      shadowOpacity: 1,
+      shadowRadius: 0,
+      marginLeft: 3,
+      ...Platform.select({
+          web: {
+              width: 'calc(100% - 3px)'
+          },
+          android: {
+              marginLeft: 0
+          }
+      }),
+      marginBottom: 10,
+      elevation: 2,
+      backgroundColor: Color(props.isDarkMode).contentHolder,
+      display: 'flex',
+      borderRadius: Radius.default,
+    }
+  }
+
   const viewListing = () => {
     props.setCurrentListing(props.item)
   };
@@ -105,23 +120,28 @@ const ListingCard = (props: any) => {
   }
 
   return (
-    <View style={styles.container}>
+    <TouchableHighlight
+    underlayColor={Color(props.isDarkMode).holderUnderlay}
+    onPress = {() => viewListing()}
+    style={containerStyle()}
+    >
       <View>
-      <Image source={{ uri: props.item.images[0] }} style={styles.image} />
-      <Pressable style = {styles.favorite} onPress = {() => sendFavorite()}>
-        <FontAwesomeIcon  style = {styles.icon} icon={faStar} size={30} color={favoriteColor()}/>
-        <FontAwesomeIcon  style = {styles.iconBorder} icon={faStar} size={32} color='#000000b3'/>
-      </Pressable>
+        <View>
+        <Image source={{ uri: props.item.images[0] }} style={styles.image} />
+        <Pressable style = {styles.favorite} onPress = {() => sendFavorite()}>
+          <FontAwesomeIcon  style = {styles.iconBorder} icon={faStar} size={32} color='#000000b3'/>
+          <FontAwesomeIcon  style = {styles.icon} icon={faStar} size={30} color={favoriteColor()}/>
+        </Pressable>
+        </View>
+        <_Text isDarkMode={props.isDarkMode} style={styles.header}>{props.item.name}</_Text>
+        <_Text isDarkMode={props.isDarkMode} style={styles.subheader}>{props.item.city}</_Text>
+        <_Text isDarkMode={props.isDarkMode} style={styles.description}>{props.item.description}</_Text>
+        <_Text isDarkMode={props.isDarkMode} style={styles.price}>{props.item.price}</_Text>
+        <_Text isDarkMode={props.isDarkMode} style={styles.petsAllowed}>
+          Pets Allowed: {props.item.petsAllowed ? 'Yes' : 'No'}
+        </_Text>
       </View>
-      <_Text isDarkMode={props.isDarkMode} style={styles.header}>{props.item.name}</_Text>
-      <_Text isDarkMode={props.isDarkMode} style={styles.subheader}>{props.item.city}</_Text>
-      <_Text isDarkMode={props.isDarkMode} style={styles.description}>{props.item.description}</_Text>
-      <_Text isDarkMode={props.isDarkMode} style={styles.price}>{props.item.price}</_Text>
-      <_Text isDarkMode={props.isDarkMode} style={styles.petsAllowed}>
-        Pets Allowed: {props.item.petsAllowed ? 'Yes' : 'No'}
-      </_Text>
-      <_Button onPress = {() => viewListing()} style = {Style(props.isDarkMode).buttonGold}> View Listing </_Button> 
-    </View>
+    </TouchableHighlight>
   );
 };
 

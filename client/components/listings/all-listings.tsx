@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Color } from '../../style';
 import ListingCard from './listing-card';
 
@@ -35,6 +35,8 @@ const AllListingsView = (props: any) => {
         }
       }),
       backgroundColor: Color(props.isDarkMode).contentBackgroundSecondary,
+      paddingLeft: 10,
+      paddingRight: 10
     },
   });
 

@@ -1,6 +1,10 @@
 import { View, StyleSheet, Pressable, Text, Image } from "react-native";
 import _Button from "../control/button";
 import Svg, { Path } from "react-native-svg"
+import Dots from "../../assets/images/dots_popup_svg";
+import { useState } from "react";
+import MessageSettings from "./message-settings";
+import { Color } from "../../style";
 
 
 const returnIcon = (
@@ -19,53 +23,77 @@ const returnIcon = (
 
 interface Props {
   chat: any,
+  userInfo: any,
   showPanel: any,
   updateShowPanel: any,
+  updateBlocked: any,
+  socket: any,
+  isDarkMode: boolean
 }
 
-const MessageTopBar = ({showPanel, updateShowPanel, chat}: Props) => {
-  if (!chat?.users || !chat.chatName) return <></>;
+const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, socket, updateBlocked}: Props) => {
+  if (!chat?.users) return <></>;
+
+  const [showPopUp, setShowPopUp] = useState<boolean>(false);
+
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      backgroundColor: 'white',
+      padding: 5,
+      paddingHorizontal: 10,
+      alignItems: 'center',
+      minHeight: 55,
+      borderBottomWidth: 1,
+      borderColor: Color(isDarkMode).separator,
+      zIndex: 2,
+    },
+    buttonContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: 30,
+      height: 40,
+    },
+    image: {
+      height: 40,
+      width: 40,
+      borderRadius: 20,
+      marginRight: 10,
+    },
+    name: {
+      flex: 1,
+      fontSize: 18,
+      fontWeight: '600',
+    },
+  });
+
   return (
-    <View style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <Pressable onPress={() => updateShowPanel(!showPanel)}>
-          {returnIcon}
-        </Pressable>
+    <>
+      <View style={styles.container}>
+        <View style={styles.buttonContainer}>
+          <Pressable onPress={() => updateShowPanel(!showPanel)}>
+            {returnIcon}
+          </Pressable>
+        </View>
+        <Image style={styles.image} source={{ uri: (chat?.users[0]?.image != null) ? chat?.users[0]?.image : 'https://reactnative.dev/img/tiny_logo.png'}} />
+        <Text numberOfLines={1} style={styles.name}>{chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}</Text>
+        <View style={styles.buttonContainer}>
+          <Pressable onPress={() => setShowPopUp(!showPopUp)}>
+            <Dots width={18} height={18}/>
+          </Pressable>
+        </View>
       </View>
-      <Image style={styles.image} source={{ uri: (chat?.users[0]?.image != null) ? chat?.users[0]?.image : 'https://reactnative.dev/img/tiny_logo.png'}} />
-      <Text numberOfLines={1} style={styles.name}>{chat.chatName}</Text>
-    </View>
+      <MessageSettings
+        chat={chat}
+        userInfo={userInfo}
+        showPopUp={showPopUp}
+        setShowPopUp={setShowPopUp}
+        updateBlocked={updateBlocked}
+        socket={socket}
+      />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    padding: 5,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    minHeight: 55,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'lightgray',
-  },
-  buttonContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: 30,
-    height: 40,
-  },
-  image: {
-    height: 40,
-    width: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: '600',
-  }
-});
 
 export default MessageTopBar;

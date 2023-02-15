@@ -3,7 +3,7 @@ import HomeScreen from './screens/home';
 import { useFonts } from 'expo-font';
 import Navigation from './components/navigation/navigation';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppState, BackHandler, Button, Dimensions, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { Animated, AppState, BackHandler, Button, Dimensions, Easing, Keyboard, KeyboardAvoidingView, Linking, Platform, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import 'react-native-gesture-handler';
 import AccountScreen from './screens/account';
 import ProfileScreen from './screens/profile';
@@ -12,7 +12,7 @@ import ListingsScreen from './screens/listings';
 import MessagesScreen from './screens/messages';
 import SearchScreen from './screens/search';
 import { Color, Content } from './style';
-import { env as environ, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, isDarkMode as isDarkModeHelper, navProp, authTokenHeader, userId, setLocalAppSettingsPushMessageToken, getPushMessageToken, getCurrentChat, setLocalAppSettingsCurrentChat } from './helper';
+import { env as environ, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, isDarkMode as isDarkModeHelper, navProp, authTokenHeader, userId, setLocalAppSettingsPushMessageToken, getPushMessageToken, getCurrentChat, setLocalAppSettingsCurrentChat, setLocalAppSettingsOpenPushChat, getOpenPushChat } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
@@ -65,6 +65,8 @@ export const App = (props: any) => {
   const [messageCount,setMessageCount] = useState(0);
   const [messageData,setMessageData] = useState({});
   const [currentChat,setCurrentChat] = useState('');
+  const [showingMessagePanel,setShowingMessagePanel] = useState(false);
+  const [openChatFromPush,setOpenChatFromPush] = useState('');
   const appState = useRef(AppState.currentState);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
@@ -74,33 +76,35 @@ export const App = (props: any) => {
   });
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', async (nextAppState) => {
-      if (appState.current === 'active' && nextAppState !== 'active') {
-        let data = await getCurrentChat();
-        if (data) {
-          data.disabled = true;
-        }
-        setLocalAppSettingsCurrentChat(data);
-      }
-      else if (nextAppState === 'active') {
-        let data = await getCurrentChat();
-        if (data) {
-          data.disabled = false;
-          if (data.id && data.is_showing) {
-            checkDismissNotifications(data.id);
+    if (Platform.OS === 'android') {
+      const subscription = AppState.addEventListener('change', async (nextAppState) => {
+        if (appState.current === 'active' && nextAppState !== 'active') {
+          let data = await getCurrentChat();
+          if (data) {
+            data.disabled = true;
           }
-          else {
-            data = null;
-          }  
-          
           setLocalAppSettingsCurrentChat(data);
         }
-      }
-    });
+        else if (nextAppState === 'active') {
+          let data = await getCurrentChat();
+          if (data) {
+            data.disabled = false;
+            if (data.id && data.is_showing) {
+              checkDismissNotifications(data.id);
+            }
+            else {
+              data = null;
+            }  
+            
+            setLocalAppSettingsCurrentChat(data);
+          }
+        }
+      });
 
-    return () => {
-      subscription.remove();
-    };
+      return () => {
+        subscription.remove();
+      };
+    }
   }, []);
 
   useEffect(() => {
@@ -115,11 +119,13 @@ export const App = (props: any) => {
   }, []);
 
   useEffect(() => {
-    checkDismissNotifications(currentChat);
-  }, [currentChat]);
+    if (Platform.OS === 'android')
+      checkDismissNotifications(currentChat);
+  }, [currentChat, showingMessagePanel]);
 
   useEffect(() => {
-    updateNavForPushNotifications();
+    if (Platform.OS === 'android')
+      updateNavForPushNotifications();
   }, [navSelector]);
 
   // Get device push notification permissions when the app launches
@@ -153,14 +159,29 @@ export const App = (props: any) => {
 
   useEffect(() => {
     if (Platform.OS === 'android') {
+      if (loaded && ref && ref.current && openChatFromPush) {
+        setTimeout(() => {
+          if (ref && ref.current)
+            ref.current.navigate(NavTo.Messages);
+        }, 500);
+      }
+    }
+  }, [openChatFromPush, ref.current])
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
       const backgroundSubscription =
       Notifications.addNotificationResponseReceivedListener(async (response: Notifications.NotificationResponse) => {
+        let identifier = response.notification.request.identifier;
+        let idx = identifier.lastIndexOf("-");
+        let id = identifier.substring(0, idx);
+
         if (response.userText) {
-          let identifier = response.notification.request.identifier;
-          let idx = identifier.lastIndexOf("-");
-          let id = identifier.substring(0, idx);
           sendMessage(id, response.userText, true);
           Notifications.dismissNotificationAsync(response.notification.request.identifier);
+        }
+        else if (response.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER) {
+          setOpenChatFromPush(id);
         }
       });
   
@@ -170,7 +191,6 @@ export const App = (props: any) => {
           let id = notification.request.identifier.substring(0, idx);
           let data = await getCurrentChat();
           if (data && data.id === id && data.is_showing === true && data.current_page === NavTo.Messages) {
-            console.log(data);
             await Notifications.dismissNotificationAsync(notification.request.identifier);
             return;
           }
@@ -193,7 +213,7 @@ export const App = (props: any) => {
             }
 
             if (count > 0) {
-              let identifier = id + new Date().getTime();
+              let identifier = id + "-" + new Date().getTime();
               let data = notification.request.content;
               for (let i = 0; i < ids.length; i++) {
                 await Notifications.dismissNotificationAsync(ids[i]);
@@ -289,6 +309,12 @@ export const App = (props: any) => {
     }  
   }
 
+  async function getPushChatId() {
+    let id = await getOpenPushChat();
+    console.log(id);
+    //setOpenChatFromPush(id);
+  }
+
   // Resend all combined unread messages as one to the current user
   const updateGroupedPushNotification = async (title: any, message: any, tag: string) => {
     let hasError = false;
@@ -366,7 +392,7 @@ export const App = (props: any) => {
   }
 
   function checkDismissNotifications(chatId: string) {
-    if (chatId) {
+    if (chatId && showingMessagePanel) {
       Notifications.getPresentedNotificationsAsync().then(async (res: Notifications.Notification[]) => {
         res.forEach(msg => {
           let identifier = msg.request.identifier;
@@ -614,6 +640,7 @@ export const App = (props: any) => {
       setUpdatePicture={setUpdatePicture}
       updatePicture={updatePicture}
       messageCount={messageCount}
+      showingMessagePanel={showingMessagePanel}
       />
     else
       return <View></View>;
@@ -705,6 +732,7 @@ export const App = (props: any) => {
             scrollEventThrottle={100}
             onContentSizeChange={(w, h) => getScrollDims(w, h)}
             keyboardShouldPersistTaps={'handled'}
+            scrollEnabled={navSelector !== NavTo.Messages}
             >
               <View
                 style={styles.stack}
@@ -842,6 +870,9 @@ export const App = (props: any) => {
                   setMessageCount={setMessageCount}
                   messageData={messageData}
                   setCurrentChat={setCurrentChat}
+                  setShowingMessagePanel={setShowingMessagePanel}
+                  openChatFromPush={openChatFromPush}
+                  setOpenChatFromPush={setOpenChatFromPush}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen
@@ -880,6 +911,7 @@ export const App = (props: any) => {
             setUpdatePicture={setUpdatePicture}
             updatePicture={updatePicture}
             messageCount={messageCount}
+            showingMessagePanel={showingMessagePanel}
             />    
             : null} 
         </NavigationContainer>

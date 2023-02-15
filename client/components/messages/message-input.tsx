@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TextInput, View, StyleSheet, Pressable, Text } from "react-native";
-import { env, getLocalStorage } from "../../helper";
+import { authTokenHeader, env, getLocalStorage } from "../../helper";
 import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Svg, Path } from "react-native-svg";
@@ -20,23 +20,24 @@ const sendIcon = (
 
 interface Props {
   chat: any,
-  socket: Socket<DefaultEventsMap, DefaultEventsMap>
+  socket: Socket<DefaultEventsMap, DefaultEventsMap>,
+  newMessage: string,
+  setNewMessage: any,
 }
 
-const MessageInput = ({chat, socket}: Props) => {
-  const [newMessage, setNewMessage] = useState('');
+const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
   const [userInfo, setUserInfo] = useState<any>();
   const [height, setHeight] = useState(0);
   const [hiddenTextWidth, setHiddenTextWidth] = useState(0);
 
   const randomNum = () => {
-    return (Math.floor(Math.random() * 20) + 1).toString();
+    return (Math.floor(Math.random() * 999999) + 1).toString();
   }
 
   useEffect(() => {
     getUserInfo();
   }, [])
-
+  
   useEffect(() => {
     setTypingIndicator();
   }, [newMessage])
@@ -58,23 +59,42 @@ const MessageInput = ({chat, socket}: Props) => {
       await prepareTypingIndicatorData(false);
       return;
     };
-    await prepareTypingIndicatorData(newMessage.length !== 0);
+    await prepareTypingIndicatorData(newMessage?.length !== 0);
   }
   
   const getUserInfo = async () => {
     setUserInfo(await getLocalStorage().then((res) => {return res.user}));
   }
+
+  const sendNotification = async () => {
+    const obj = {userId: chat?.users[0].id, chatId: chat.id};
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${env.URL}/notifications`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      } else {
+        const data = {
+          chatId: chat.id,
+        };
+        socket.emit('send_notification', data);
+      }
+    });
+  };
   
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (newMessage === '') {
       return;
     }
 
-    let obj = {content: newMessage, userId: userInfo.id, chatId: chat.id};
-    let js = JSON.stringify(obj);
-
+    const obj = {content: newMessage, userId: userInfo.id, chatId: chat.id};
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
     return fetch(
-      `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json'}}
+      `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
@@ -92,12 +112,19 @@ const MessageInput = ({chat, socket}: Props) => {
         await setTypingIndicator(true);
         await socket.emit('send_message', data);
         setNewMessage('');
+        sendNotification();
       }
     });
   };
 
-  return (
-    <View style={styles.container}>
+  const blockedBox = (
+    <Text style={styles.blockedInput}>
+      This chat has been blocked
+    </Text>
+  )
+
+  const inputBox = (
+    <>
       <TextInput
         value={newMessage}
         onChangeText={setNewMessage}
@@ -114,6 +141,12 @@ const MessageInput = ({chat, socket}: Props) => {
       <Text style={[styles.hidden, {width: hiddenTextWidth}]} onLayout={(e) => {setHeight(e.nativeEvent.layout.height)}}>
         {newMessage}
       </Text>
+    </>
+  )
+
+  return (
+    <View style={styles.container}>
+      {(chat.blocked) ? blockedBox : inputBox}
     </View>
   );
 }
@@ -121,7 +154,6 @@ const MessageInput = ({chat, socket}: Props) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: 'whitesmoke',
     padding: 5,
     paddingHorizontal: 10,
     alignItems: 'center',
@@ -137,6 +169,12 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderColor: 'lightgray',
     borderWidth: StyleSheet.hairlineWidth,
+  },
+  blockedInput: {
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: 'grey'
   },
   buttonContainer: {
     display: 'flex',

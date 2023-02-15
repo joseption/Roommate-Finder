@@ -309,6 +309,43 @@ export const getCurrentChat = async () => {
   }
 }
 
+// Set current push to open chat id
+export const setLocalAppSettingsOpenPushChat = async (id: string) => {
+  try {
+    let allData = await getLocalAppSettings();
+    if (allData) {
+      allData.openPushChat = id;
+      const jsonValue = JSON.stringify(allData);
+      await AsyncStorage.setItem('@app_data', jsonValue);
+    }
+    else {
+      const jsonValue = !id ? '' : JSON.stringify({openPushChat: id});
+      await AsyncStorage.setItem('@app_data', jsonValue);
+    }
+
+    return true;
+  }
+  catch {
+    return false;
+  }
+}
+
+export const getOpenPushChat = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@app_data');
+    const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+    if (data) {
+      return data.openPushChat;
+    }
+    else {
+      return '';
+    }
+  }
+  catch {
+    return '';
+  }
+}
+
 export const isDarkMode = async () => {
   try {
     const jsonValue = await AsyncStorage.getItem('@app_data');

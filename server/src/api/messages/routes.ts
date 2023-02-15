@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
 import { isAuthenticated } from '../../middleware';
 import db from '../../utils/db';
+import { blockedChat } from './messagesHelper';
 const router = express.Router();
-import payload from '../../global'
 import { env } from 'process';
 import { getOAuth } from 'api/users/services';
 import fetch from 'node-fetch';
@@ -18,7 +18,8 @@ router.post('/', async (req: Request, res: Response) => {
     if (!content || !chatId) {
       return res.status(400).json('missing parameters');
     }
-
+    const blocked = await blockedChat(chatId);
+    if (!blocked) {
     const newMessage = await db.message.create({
       data: {
         userId: userId as string, // * the sender of the message
@@ -108,8 +109,8 @@ router.post('/', async (req: Request, res: Response) => {
         }
       }
     }
-
     res.status(200).json(newMessage);
+  }
   } catch (err) {
     res.status(500).json(err);
   }

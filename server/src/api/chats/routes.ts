@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { isAuthenticated } from '../../middleware';
 import db from '../../utils/db';
+import { Chat } from '@prisma/client';
 const router = express.Router();
 
 // router.use(isAuthenticated);
@@ -180,6 +181,59 @@ router.get('/:chatId', async (req: Request, res: Response) => {
     return res.status(200).json(chatInfo);
   } catch (err) {
     res.status(400).json(err);
+  }
+});
+
+router.put('/block', async (req: Request, res: Response) => {
+  try {
+    const { chatId, userId } = req.body;
+    let chat = await db.chat.findUnique({
+      where: {
+        id: chatId as string,
+      }
+    });
+    if (!chat.blocked) {
+      chat = await db.chat.update({
+        data: {
+          blocked: userId as string,
+        },
+        where: {
+          id: chatId,
+        }
+      });
+      await db.notification.deleteMany({
+        where: {
+          chatId: chatId,
+        }
+      })
+      res.status(200).json(chat);
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+router.put('/unblock', async (req: Request, res: Response) => {
+  try {
+    const { chatId, userId }: { chatId: string, userId: string} = req.body;
+    let chat = await db.chat.findUnique({
+      where: {
+        id: chatId as string,
+      }
+    });
+    if (chat.blocked && chat.blocked === userId) {
+      chat = await db.chat.update({
+        data: {
+          blocked: null,
+        },
+        where: {
+          id: chatId,
+        }
+      });
+      res.status(200).json(chat);
+    }
+  } catch (err) {
+    res.status(500).json(err);
   }
 });
 

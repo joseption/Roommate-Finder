@@ -321,7 +321,7 @@ const AccountInfo = (props: any) => {
                 setFirstName(data.first_name);
             if (data.last_name)
                 setLastName(data.last_name);
-            if (data.createdAt)
+            if (data.birthday)
                 setBirthday(data.birthday);
             if (data.phone_number)
                 setPhone(data.phone_number);

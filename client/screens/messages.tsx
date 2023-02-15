@@ -4,12 +4,10 @@ import MessageTab from '../components/messages/message-tab';
 import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
-import { authTokenHeader, env, getLocalStorage } from '../helper';
+import { authTokenHeader, env, getLocalStorage, NavTo, setLocalAppSettingsCurrentChat } from '../helper';
 import io, { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import WavingHand from '../assets/images/waving_hand_svg';
-
-const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io(env.URL);
 
 const MessagesScreen = (props: any, {navigation}:any) => {
   const [showPanel, updateShowPanel] = useState(false);
@@ -45,15 +43,16 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }, [showPanel]);
   
   useEffect(() => {
-    socket.on('receive_message', (data: any) => {
+    props.socket.on('receive_message', (data: any) => {
       const chats = chatsRef.current.filter(chat => chat.id === data.chatId);
       if (chats.length !== 0 && chats[0].blocked) return;
       updateTabs(data);
     });
-    socket.on('receive_block', (data: any) => {
+
+    props.socket.on('receive_block', (data: any) => {
       updateBlocked(data.chat);
     });
-    socket.on('receive_notification', (data: any) => {
+    props.socket.on('receive_notification', (data: any) => {
       const chats = chatsRef.current.map((chat) => {
         if (chat.id === data.chatId) {
           if (currentChatRef.current.id === chat.id && showPanelRef.current) {
@@ -66,7 +65,35 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       });
       setChats(chats);
     });
-  }, [socket])
+  }, [props.socket])
+
+  // Start - Added by Joseph for push notifications
+  useEffect(() => {
+    if (chats && props.openChatFromPush) {
+      let chat = chats.find(chat => chat.id === props.openChatFromPush);
+      if (chat) {
+        setCurrentChat(chat);
+        updateShowPanel(true);
+        props.setOpenChatFromPush('');
+      }
+    }
+  }, [chats, props.openChatFromPush]);
+
+  useEffect(() => {
+    props.socket.emit('send_message', props.messageData);
+  }, [props.messageData]);
+
+  useEffect(() => {
+    let chatId = '';
+    if (currentChat) {
+      chatId = (currentChat as any).id
+    }
+    let data = {id: chatId, is_showing: showPanel, disabled: false, current_page: NavTo.Messages};
+    setLocalAppSettingsCurrentChat(data);
+    props.setShowingMessagePanel(showPanel);
+    props.setCurrentChat(chatId);
+  }, [currentChat, showPanel]);
+  // End
 
   const deleteNotifications = async () => {
     const obj = {userId: userInfo?.id, chatId: currentChatRef.current?.id};
@@ -88,9 +115,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
         setChats(chats);
       }
     });
-  };
-
-  const updateTabs = async (data: any) => {
+  };  const updateTabs = async (data: any) => {
     if (chatsRef.current.length === 0) return;
     const fetchedChat = await getChat(data.chatId)
     const latestMessage = await getMessage(fetchedChat.latestMessage);
@@ -159,18 +184,22 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       `${env.URL}/messages/getMessage?messageId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       const res = JSON.parse(await ret.text());
-      if (res.Error) {
-        console.warn("Error: ", res.Error);
-        return {content: '', createdAt: '', userId: '',};
+      if (res) {
+        if (res.Error) {
+          console.warn("Error: ", res.Error);
+          return {content: '', createdAt: '', userId: '',};
+        }
+        else {
+          let message = {
+            content: res.content,
+            createdAt: res.createdAt,
+            userId: res.userId,
+          };
+          return message;
+        }
       }
       else {
-        const message = {
-          content: res.content,
-          createdAt: res.createdAt,
-          userId: res.userId,
-        };
-        return message;
-      }
+        return {content: '', createdAt: '', userId: '',};      }
     });
   }
 
@@ -218,7 +247,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
     const rooms = await chats.map((chat: any) => {
       return chat.id;
     })
-    socket.emit('join_room', rooms)
+    props.socket.emit('join_room', rooms)
   }
 
   const getChats = async () => {
@@ -308,12 +337,13 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       />
       <MessagePanel
         showPanel={showPanel}
-        socket={socket}
+        socket={props.socket}
         userInfo={userInfo}
         updateShowPanel={updateShowPanel}
         chat={currentChat}
         updateBlocked={updateBlocked}
         updateMuted={updateMuted}
+        isDarkMode={props.isDarkMode}
       />
     </>
   );

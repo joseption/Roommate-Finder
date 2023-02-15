@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Platform, Pressable, StyleSheet, View } from 'react-native';
 import _Button from '../control/button';
 import _TextInput from '../control/text-input';
 import _Text from '../control/text';
@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 const Navigation = (props: any) => {
     const [showMenu,setShowMenu] = useState(false);
     const [visible,setVisible] = useState(false);
+    const [navHeight,setNavHeight] = useState() as any;
     const [image,setImage] = useState('');
     const [userId,setUserId] = useState('');
     const navigation = useNavigation<navProp>();
@@ -31,7 +32,7 @@ const Navigation = (props: any) => {
             setShowMenu(false);
         }        
     }, [props.mobile]);
-
+  
     useEffect(() => {
         setVisible(props.isLoggedIn);
 
@@ -47,6 +48,33 @@ const Navigation = (props: any) => {
     const getUserId = async () => {
         setUserId(await cUserID());
     }
+
+    const slideAnimation = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (props.mobile) {
+          setTimeout(() => {
+            if (!props.showingMessagePanel) {
+                Animated.timing(slideAnimation, {...animationConfig, toValue: 0}).start();
+                setNavHeight();
+            } else {
+                Animated.timing(slideAnimation, {...animationConfig, toValue: -props.height}).start();     
+                setNavHeight(0);
+            }
+          }, 200);
+        }
+        else {
+          Animated.timing(slideAnimation, {...animationConfig, toValue: 0}).start();
+          setNavHeight();
+        }
+    }, [props.showingMessagePanel, props.mobile]);
+    
+    let animationConfig = {
+      toValue: -props.height,
+      duration: 50,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    };
 
     const route = () => {
         if (navigation) {
@@ -262,9 +290,9 @@ const Navigation = (props: any) => {
     });
 
     return (
-        <View
+        <Animated.View 
+        style={[styles.nav, {transform: [{translateY: slideAnimation}], height: navHeight}]}
         onLayout={(e: any) => setNavLayout(e)}
-        style={styles.nav}
         >
             {!props.mobile ?
             <View
@@ -275,7 +303,7 @@ const Navigation = (props: any) => {
                     <_Image
                     source={props.isDarkMode ? require('../../assets/images/logo_w.png') : require('../../assets/images/logo.png')}
                     height={30}
-                    onPress={() => navigate(NavTo.Home)}
+                    onPress={() => navigate(NavTo.Login)}
                     pressStyle={styles.logoContainer}
                     containerStyle={styles.logoContainerStyle}
                     />
@@ -294,12 +322,14 @@ const Navigation = (props: any) => {
                             style={styles.message}
                             icon="message"
                             />
+                            {props.messageCount ?
                             <_Text
                             containerStyle={styles.countContainer}
                             style={styles.count}
                             >
-                                7
+                                {props.messageCount}
                             </_Text>
+                            : null }
                         </Pressable>
                         : null }
                         <Pressable
@@ -448,7 +478,7 @@ const Navigation = (props: any) => {
                     icon="message"
                     currentNav={props.navSelector}
                     navTo={NavTo.Messages}
-                    count={7}
+                    count={props.messageCount}
                     isDarkMode={props.isDarkMode}
                     />
                 </View>
@@ -456,7 +486,7 @@ const Navigation = (props: any) => {
                 null }
             </View>
             }   
-        </View>
+        </Animated.View>
         );
     };  
 

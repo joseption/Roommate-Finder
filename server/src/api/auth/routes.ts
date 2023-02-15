@@ -127,6 +127,7 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
       user:existingUser,
     });
   } catch (err) {
+    console.log(err)
     return res.status(500).json({"Error": "An unexpected error occurred. Please try again."});
   }
 });

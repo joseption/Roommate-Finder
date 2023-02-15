@@ -6,7 +6,22 @@
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "notification": {
+      "icon":"./assets/images/icon.png",
+      "color":"#FFFFFF"
+    },
+    "android": {
+      "package": "com.roomfin",
+      "useNextNotificationsApi": true,
+      "permissions": ["RECEIVE_BOOT_COMPLETED"],
+      "googleServicesFile": "/android/app/google-services.json",
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fc3fe8f6-aef6-47ce-9822-c931e022ee0b"
+      }
+    }
   },
   "name": "roomfin"
 }

@@ -1,4 +1,6 @@
 import bcrypt from "bcrypt";
+import { JWT } from "google-auth-library";
+import { env } from "process";
 import { tagsStyles } from "utils/tags";
 import { uuid } from "uuidv4";
 
@@ -279,4 +281,24 @@ export function completeSetupAndSetStep(id:string, setup_step:string){
       setup_step
     },
   });
+}
+
+export function updatePushToken(id:string, push_token: string) {
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      push_token,
+    },
+  });
+}
+
+export async function getOAuth() {
+  const client = new JWT({
+    email: env.FIREBASE_CLIENT_EMAIL,
+    key: env.FIREBASE_PRIVATE_KEY,
+    scopes: ['https://www.googleapis.com/auth/firebase.messaging']
+  });
+  return await client.getRequestHeaders();
 }

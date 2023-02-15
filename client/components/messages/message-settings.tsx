@@ -137,9 +137,9 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, upda
       >
         <>
           <View style={styles.blockChatImage}>
-            {(mute.includes(userInfo.id)) ? <UnmuteChat/> : <MuteChat/>}
+            {(mute && mute.includes(userInfo.id)) ? <UnmuteChat/> : <MuteChat/>}
           </View>
-          {<Text style={styles.tabText}>{(mute.includes(userInfo.id)) ? 'Unmute Chat' : 'Mute Chat'}</Text>}
+          {<Text style={styles.tabText}>{(mute && mute.includes(userInfo.id)) ? 'Unmute Chat' : 'Mute Chat'}</Text>}
         </>
       </Pressable>
     )

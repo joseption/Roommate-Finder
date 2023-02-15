@@ -1,8 +1,10 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { isAuthenticated } from '../../middleware';
-import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday, updateImage } from './services';
+import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday, updateImage, updatePushToken, getOAuth } from './services';
 import db from '../../utils/db';
 import { uploadImage } from 'utils/uploadImage';
+import { env } from 'process';
+import { JWT } from 'google-auth-library';
 const router = express.Router();
 
 router.use(isAuthenticated); // ! Do this instead of adding isAuthenticated to every function
@@ -613,5 +615,38 @@ router.post('/updateAllProfile', async (req: Request, res: Response, next: NextF
   }
 });
 
+//end point to update push token
+router.post('/updatePushToken', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { pushToken } = req.body;
+    //get payload from body[0]
+    const payload : payload = req.body[0];
+    const userId = payload.userId;
+    if(!pushToken) {
+      return res.status(400).json({ Error: 'Push token is required' });
+    }
+    
+    const update = await updatePushToken(userId, pushToken);
+    if(!update) {
+      return res.status(400).json({ Error: 'Update failed' });
+    }
+
+    return res.status(200).json({ message: 'Update successful' });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ Error: 'Server error' });
+  }
+});
+
+//Get OAuth 2.0 token
+router.get('/getOAuth', async (req: Request, res: Response) => {
+  try {
+    const auth = await getOAuth();
+    return res.status(200).json({ token: auth });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ Error: 'Server error' });
+  }
+});
 
 export default router;

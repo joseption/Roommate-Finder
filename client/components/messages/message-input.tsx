@@ -84,6 +84,17 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage}: Props
       return;
     }
 
+    const data = {
+      chatId: chat.id,
+      content: newMessage,
+      userId: userInfo.id,
+      // id is temporary for rendering purposes. 
+      // It provides no value otherwise.
+      id: randomNum(),
+    }
+    await setTypingIndicator(true);
+    await socket.emit('send_message', data);
+
     const obj = {content: newMessage, userId: userInfo.id, chatId: chat.id};
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
@@ -95,16 +106,6 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage}: Props
         console.warn("Error: ", res.Error);
       }
       else {
-        const data = {
-          chatId: chat.id,
-          content: newMessage,
-          userId: userInfo.id,
-          // id is temporary for rendering purposes. 
-          // It provides no value otherwise.
-          id: randomNum(),
-        }
-        await setTypingIndicator(true);
-        await socket.emit('send_message', data);
         setNewMessage('');
         sendNotification();
       }

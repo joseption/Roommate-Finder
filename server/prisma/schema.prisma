@@ -130,8 +130,9 @@ model Chat {
   groupAdmin    String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime? @updatedAt
-  Message       Message[]
   blocked       String?
+  muted         String[]
+  Message       Message[]
   Notification  Notification[]
 }
 

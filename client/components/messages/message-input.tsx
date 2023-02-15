@@ -77,6 +77,7 @@ const MessageInput = ({chat, socket, newMessage, setNewMessage}: Props) => {
       if (res.Error) {
         console.warn("Error: ", res.Error);
       } else {
+        if (!res.id) return;
         const data = {
           chatId: chat.id,
         };

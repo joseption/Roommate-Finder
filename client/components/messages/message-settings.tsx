@@ -2,6 +2,8 @@ import { View, StyleSheet, Pressable, Dimensions, Text } from "react-native";
 import BlockChat from "../../assets/images/block_chat_svg";
 import UnblockChat from "../../assets/images/unblock_chat_svg";
 import { authTokenHeader, env } from "../../helper";
+import UnmuteChat from "../../assets/images/unmute_chat_svg";
+import MuteChat from "../../assets/images/mute_chat_svg";
 
 interface Props {
   chat: any,
@@ -9,10 +11,11 @@ interface Props {
   showPopUp: boolean,
   setShowPopUp: any,
   updateBlocked: any,
+  updateMuted: any,
   socket: any,
 }
 
-const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, updateBlocked }: Props) => {
+const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, updateBlocked, updateMuted }: Props) => {
   const dim = Dimensions.get('window');
 
   const styles = StyleSheet.create({
@@ -59,9 +62,9 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, upda
     const obj = { chatId: chat.id, userId: userInfo.id };
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
-    const blockType = (chat.blocked) ? 'unblock' : 'block';
+    const muteType = (chat.blocked) ? 'unmute' : 'mute';
     return fetch(
-      `${env.URL}/chats/${blockType}`, {method: 'PUT', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      `${env.URL}/chats/${muteType}`, {method: 'PUT', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
@@ -76,6 +79,23 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, upda
         };
         await socket.emit('send_block', data);
         updateBlocked(res);
+      }
+    });
+  }
+
+  const muteAction = async () => {
+    const obj = { chatId: chat.id, userId: userInfo.id };
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
+    const blockType = (chat.muted.includes(userInfo.id)) ? 'unmute' : 'mute';
+    return fetch(
+      `${env.URL}/chats/${blockType}`, {method: 'PUT', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      } else {
+        updateMuted(res);
       }
     });
   }
@@ -104,12 +124,33 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, upda
       </Pressable>
     )
   }
+
+  const MuteTab = ({ block, mute }: any) => {
+    if (isDisabled(block)) return <></>;
+    return (
+      <Pressable 
+        style={styles.tabContainer}
+        onPress={() => {
+          muteAction();
+          setShowPopUp(false);
+        }}
+      >
+        <>
+          <View style={styles.blockChatImage}>
+            {(mute.includes(userInfo.id)) ? <UnmuteChat/> : <MuteChat/>}
+          </View>
+          {<Text style={styles.tabText}>{(mute.includes(userInfo.id)) ? 'Unmute Chat' : 'Mute Chat'}</Text>}
+        </>
+      </Pressable>
+    )
+  }
   
   return (
     <>
       <Pressable onPress={() => setShowPopUp(false)} style={showPopUp ? styles.popUpBackground : {display: 'none'}}/>
       <View style={showPopUp ? styles.popUp : {display: 'none'}}>
         <BlockedTab block={chat.blocked}/>
+        <MuteTab block={chat.blocked} mute={chat.muted}/>
       </View>
     </>
   );

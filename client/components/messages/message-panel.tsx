@@ -12,10 +12,11 @@ interface Props {
   userInfo: any,
   chat: any,
   socket: any,
-  updateBlocked: any
+  updateBlocked: any,
+  updateMuted: any,
 }
 
-const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked }: Props) => {
+const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked, updateMuted }: Props) => {
   const [newMessage, setNewMessage] = useState('');
 
   // These values are mapped to percentage of screen size.
@@ -61,6 +62,7 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket, upda
           showPanel={showPanel}
           updateShowPanel={updateShowPanel}
           updateBlocked={updateBlocked}
+          updateMuted={updateMuted}
           socket={socket}
         />
         <Messages chat={chat} userInfo={userInfo} socket={socket}/>

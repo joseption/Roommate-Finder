@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { isAuthenticated } from '../../middleware';
 import db from '../../utils/db';
 import { blockedChat } from 'api/messages/messagesHelper';
+import { mutedChat } from './notificationsHelper';
 const router = express.Router();
 
 // router.use(isAuthenticated);
@@ -11,13 +12,16 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const { userId, chatId } = req.body;
     const userBlockedChat = await blockedChat(chatId);
-    if (!userBlockedChat) {
-      await db.notification.create({
+    const userMutedChat = await mutedChat(chatId, userId);
+    if (!userBlockedChat && !userMutedChat) {
+      const notif = await db.notification.create({
         data: {
           userId: userId as string,
           chatId: chatId as string,
         }
       });
+      res.status(200).json(notif);
+      return;
     }
     res.status(200).json({});
   } catch (err) {

@@ -9,6 +9,7 @@ import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-nat
 import _Image from '../control/image';
 import { ScrollView } from 'react-native-gesture-handler';
 import _Dropdown from '../control/dropdown';
+import axios from 'axios';
 
 const CreateListing = (props: any) => {
 
@@ -16,6 +17,7 @@ const CreateListing = (props: any) => {
   const [imageURLArray, setImageURLArray] = useState<string[]>([]);
   const [imageUriArray, setImageUriArray] = useState<string[]>([]);
   const [imageErrorArray, setImageErrorArray] = useState<string[]>([]);
+  const [isCalculating, setIsCalculating] = useState(false);
   
   useEffect(() => {
     getUserInfo();
@@ -191,6 +193,53 @@ const CreateListing = (props: any) => {
     setImageUriArray(updatedImageUriArray);
   };
 
+  useEffect(() => {
+    calculateDistance();
+  },[formData.address, formData.zipcode, formData.city]);
+
+  const compareDistances = (UCF_latitude: number, UCF_longitude: number, listing_latitude: number, listing_longitude: number) => {
+    
+    const earth_radius = 3963; 
+    const UCF_latitude_radians = UCF_latitude * Math.PI / 180;
+    const listing_latitude_radians = listing_latitude * Math.PI / 180;
+    const change_in_latitude = (listing_latitude - UCF_latitude) * Math.PI / 180;
+    const change_in_longitude = (listing_longitude - UCF_longitude) * Math.PI / 180;
+
+    /* Used something called Haversine Formula, basically it finds the distance of two points on a sphere */
+    const math = Math.pow(Math.sin(change_in_latitude / 2), 2) +
+      Math.cos(UCF_latitude_radians) * Math.cos(listing_latitude_radians) *
+      Math.pow(Math.sin(change_in_longitude / 2), 2);
+
+    const result = 2 * Math.asin(Math.sqrt(math));
+    const distance = earth_radius * result;
+
+    return distance;
+  }
+
+  const calculateDistance = async () => {
+
+    if (!formData.address || !formData.zipcode || !formData.city || isCalculating) {
+      return;
+    }
+    setIsCalculating(true);
+    const address = formData.address.replace(/\s/g, "%20")
+    const response = await axios.get(`https://www.mapquestapi.com/geocoding/v1/address?key=UM9XiqmIBZmifAAiq32yTgaLbUDWJGBS&location=${address},${formData.city},${formData.zipcode}`);
+    console.log(response)
+    const listingData = response.data.results[0].locations[0].latLng;
+    const UCF = { lat: 28.602427, lng: -81.200058 };
+    let distanceToUcf;
+    if (!listingData) {
+      console.error("Location not found");
+      setFormData({ ...formData, distanceToUcf: 0 });
+      setIsCalculating(false);
+      return;
+    }
+    distanceToUcf = Math.round(compareDistances(UCF.lat, UCF.lng, listingData.lat, listingData.lng));
+    console.log(distanceToUcf)
+    setFormData({ ...formData, distanceToUcf });
+    setIsCalculating(false);
+  };
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -278,6 +327,7 @@ const CreateListing = (props: any) => {
       <_Text style={styles.title}>Create Listing</_Text>
       <ScrollView>
         <View style={styles.formContainer}>
+          
           <View style={styles.imagesContainer}>
             {getPhotos().map((photo, index) => (
               <View key={index} style={styles.photoContainer}>
@@ -303,9 +353,9 @@ const CreateListing = (props: any) => {
           >
             {'Upload Photos'}
           </_Button>
+
           <_Text style={styles.label}>Title</_Text>
           <View style={styles.inputContainer}>
-            
             <TextInput
               style={styles.input}
               onChangeText={(text) => handleChange('name', text)}
@@ -321,7 +371,7 @@ const CreateListing = (props: any) => {
               value={formData.description}
             />
           </View>
-
+          
           <_Text style={styles.label}>City</_Text>
           <View style={styles.inputContainer}>
           
@@ -409,16 +459,7 @@ const CreateListing = (props: any) => {
             onChangeText={(text) => handleChange('zipcode', text)}
             value={formData.zipcode}
           />
-        </View>
-          <_Text style={styles.label}>Distance</_Text>
-        <View style={styles.inputContainer}>
-          
-          <TextInput
-            style={styles.input}
-            onChangeText={(text) => handleChange('distanceToUcf', parseInt(text))}
-            value={formData.distanceToUcf}
-          />
-        </View>
+        </View>    
         <_Button
           isDarkMode={props.isDarkMode}
           onPress={() => {

@@ -22,7 +22,6 @@ function MyChats({
   selectedChatUser,
   setSelectedChatUser,
 }: Props) {
-  console.log(chats, userId, "hit");
   return (
     <Box
       display={{ base: selectedChat ? "none" : "flex", md: "flex" }}

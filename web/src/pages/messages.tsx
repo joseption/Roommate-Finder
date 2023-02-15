@@ -1,6 +1,6 @@
 import { Box, ChakraProvider, Spinner } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import ChatBox from "../components/Messaging/ChatBox";
 import MyChats from "../components/Messaging/MyChats";
@@ -8,10 +8,9 @@ import { GetChats, GetCurrentUserInfo } from "../request/fetch";
 import { user } from "../types/auth.types";
 import { chat } from "../types/chat.types";
 export default function Messages() {
-  const [selectedChat, setSelectedChat] = useState<chat | null>();
-  const [chats, setChats] = useState<chat[]>([]);
+  const [selectedChat, setSelectedChat] = useState<chat>({} as chat);
   const [userId, setUserId] = useState("");
-  const [selectedChatUser, setSelectedChatUser] = useState<user>();
+  const [selectedChatUser, setSelectedChatUser] = useState<user>({} as user);
   const { data: userData, isLoading: userLoading } = useQuery(["UserInfo"], {
     queryFn: () => GetCurrentUserInfo(),
     onSuccess: (data) => {
@@ -25,15 +24,15 @@ export default function Messages() {
     },
   });
   const { data: myChats, isLoading: chatsLoading } = useQuery(["chats"], {
-    queryFn: () => GetChats(userData?.id as string),
+    queryFn: () => GetChats(),
     onSuccess: (data) => {
-      setChats(data);
+      // console.log(data);
     },
+    // suspense: true,
+    // refetchInterval: 100,
+    // refetchIntervalInBackground: true,
     onError: (err) => {
       console.log(err);
-    },
-    onSettled: () => {
-      // console.log(chats, "chats loaded");
     },
   });
 
@@ -51,7 +50,7 @@ export default function Messages() {
             <Spinner />
           ) : (
             <MyChats
-              chats={chats}
+              chats={myChats as chat[]}
               userId={userId}
               selectedChat={selectedChat}
               setSelectedChat={setSelectedChat}
@@ -59,16 +58,13 @@ export default function Messages() {
               selectedChatUser={selectedChatUser}
             />
           )}
-          {chatsLoading ? (
-            <Spinner />
-          ) : (
-            <ChatBox
-              selectedChat={selectedChat}
-              user={userData}
-              selectedChatUser={selectedChatUser}
-              setSelectedChat={setSelectedChat}
-            />
-          )}
+
+          <ChatBox
+            selectedChat={selectedChat}
+            userId={userId}
+            selectedChatUser={selectedChatUser}
+            setSelectedChat={setSelectedChat}
+          />
         </Box>
       </div>
     </ChakraProvider>

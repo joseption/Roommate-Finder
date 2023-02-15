@@ -3,11 +3,11 @@
  */
 import type { AuthSession } from "../types/auth.types";
 import { ListingInfo } from "../types/listings.types";
+import { message } from "../types/message.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 
-// const backend_api = "https://api.roomfin.xyz";
-const backend_api = "http://localhost:8080";
+const backend_api = "https://api.roomfin.xyz";
 
 export async function login(email: string, password: string) {
   return await doRequest<AuthSession>(
@@ -271,7 +271,14 @@ export async function MakeListings(
 }
 
 export async function SendMessage(
-  messageContent: string,
+  content: string,
   chatId: string,
-  senderId: string
-) {}
+  userId: string
+) {
+  return await doRequest<message>(
+    `${backend_api}/messages`,
+    { content, chatId, userId },
+    "POST",
+    true
+  );
+}

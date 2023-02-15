@@ -25,11 +25,13 @@ function LeftSideChatBoxTitle({ userId, chat, setSelectedChatUser }: Props) {
         console.log(err);
       },
       onSuccess: (data) => {
-        setSenderName(data.email);
-        setSelectedChatUser(data);
+        // setSenderName(data.email);
+        // setSelectedChatUser(data);
       },
     }
   );
+  setSenderName(senderInfo?.email as string);
+  setSelectedChatUser(senderInfo as user);
   return <Text>{senderName}</Text>;
 }
 

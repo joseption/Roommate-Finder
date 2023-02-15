@@ -4,7 +4,7 @@ import db from '../../utils/db';
 import { Chat } from '@prisma/client';
 const router = express.Router();
 
-// router.use(isAuthenticated);
+router.use(isAuthenticated);
 
 // todo: verify how to extract userId from logged in user from faiz.
 // * For now just include userId from query params
@@ -41,7 +41,9 @@ router.post('/', async (req: Request, res: Response) => {
 // get all chats for a logged in user, sorted by newest
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { userId } = req.query;
+    // const { userId } = req.query;
+    const payload: payload = req.body[0];
+    const userId = payload.userId;
     const chats = await db.chat.findMany({
       where: {
         users: {

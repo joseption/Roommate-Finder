@@ -1,7 +1,7 @@
 export interface message {
-  id: string;
+  id?: string;
   userId: string;
   chatId: string;
   content: string;
-  createdAt: string;
+  createdAt?: string;
 }

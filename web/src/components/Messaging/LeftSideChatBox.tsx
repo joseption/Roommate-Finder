@@ -37,17 +37,13 @@ export const LeftSideChatBox = ({
       },
       onSuccess: (data) => {
         setSenderName(data.email);
-        setSelectedChatUser(data);
-        console.log("senderInfo", data, selectedChatUser);
       },
     }
   );
 
   function handleClick() {
     setSelectedChat(chat);
-    if (!senderLoading && senderInfo) {
-      setSelectedChatUser(senderInfo);
-    }
+    setSelectedChatUser(senderInfo as user);
   }
   return (
     <Box
@@ -60,11 +56,6 @@ export const LeftSideChatBox = ({
       borderRadius="lg"
       key={chat.id}
     >
-      {/* <LeftSideChatBoxTitle
-        userId={userId}
-        chat={chat}
-        setSelectedChatUser={setSelectedChatUser}
-      /> */}
       <Text>{senderName}</Text>
     </Box>
   );

@@ -1,17 +1,26 @@
 import { Box } from "@chakra-ui/react";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 
 import { user } from "../../types/auth.types";
 import { chat } from "../../types/chat.types";
 import { SingleChat } from "./SingleChat";
 interface Props {
-  selectedChat: chat;
-  setSelectedChat: (chat: chat | null) => void;
-  selectedChatUser: user;
+  userId: string;
+  selectedChat?: chat;
+  setSelectedChat: Dispatch<SetStateAction<chat>>;
+  selectedChatUser?: user;
 }
 
 // className="my-1/2 mx-4 w-full" bg="white"
-function ChatBox({ selectedChat, selectedChatUser, setSelectedChat }: Props) {
+function ChatBox({
+  selectedChat,
+  selectedChatUser,
+  setSelectedChat,
+  userId,
+}: Props) {
+  if (!selectedChat) return null;
+  // console.log(selectedChat, "selected chat");
+  // console.log(selectedChatUser, "selected chat user");
   return (
     <Box
       display={{ base: selectedChat ? "flex" : "none", md: "flex" }}
@@ -27,6 +36,7 @@ function ChatBox({ selectedChat, selectedChatUser, setSelectedChat }: Props) {
         selectedChat={selectedChat}
         selectedChatUser={selectedChatUser}
         setSelectedChat={setSelectedChat}
+        userId={userId}
       />
     </Box>
   );

@@ -12,10 +12,12 @@ interface Props {
   userInfo: any,
   chat: any,
   socket: any,
-  updateBlocked: any
+  updateBlocked: any,
+  updateMuted: any,
+  isDarkMode: boolean
 }
 
-const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked }: Props) => {
+const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked, updateMuted }: Props) => {
   const [newMessage, setNewMessage] = useState('');
 
   // These values are mapped to percentage of screen size.
@@ -26,7 +28,7 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket, upda
   
   let animationConfig = {
     toValue: PANEL_OUT_OF_SCREEN,
-    duration: 400,
+    duration: 250,
     easing: Easing.ease,
     useNativeDriver: true,
   };
@@ -61,7 +63,9 @@ const MessagePanel = ({ showPanel, updateShowPanel, userInfo, chat, socket, upda
           showPanel={showPanel}
           updateShowPanel={updateShowPanel}
           updateBlocked={updateBlocked}
+          updateMuted={updateMuted}
           socket={socket}
+          isDarkMode={isDarkMode}
         />
         <Messages chat={chat} userInfo={userInfo} socket={socket}/>
         <MessageInput chat={chat} socket={socket} newMessage={newMessage} setNewMessage={setNewMessage}/>

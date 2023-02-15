@@ -3,6 +3,7 @@
  */
 import type { AuthSession } from "../types/auth.types";
 import { ListingInfo } from "../types/listings.types";
+import { message } from "../types/message.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 
@@ -263,6 +264,19 @@ export async function MakeListings(
       address,
       petsAllowed,
     },
+    "POST",
+    true
+  );
+}
+
+export async function SendMessage(
+  content: string,
+  chatId: string,
+  userId: string
+) {
+  return await doRequest<message>(
+    `${backend_api}/messages`,
+    { content, chatId, userId },
     "POST",
     true
   );

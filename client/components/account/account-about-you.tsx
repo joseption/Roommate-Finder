@@ -198,7 +198,7 @@ const AccountAbout = (props: any) => {
 
     const setBio = (e: any) => {
         setIsSaved(false);
-        setBioForm(e)
+        setBioForm(e ? e : '')
     }
 
     const onLoad = async () => {

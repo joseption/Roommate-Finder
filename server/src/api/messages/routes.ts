@@ -141,7 +141,7 @@ router.get('/:chatId', async (req: Request, res: Response) => {
         chatId: chatId,
       },
       orderBy: {
-        createdAt: 'asc',
+        createdAt: 'desc',
       },
     });
     res.status(200).json(messages);

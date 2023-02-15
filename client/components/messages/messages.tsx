@@ -52,6 +52,7 @@ const Messages = ({chat, userInfo, socket}: Props) => {
     socket.on('receive_typing', (data: any) => {
       if (data.chatId !== chatRef.current.id) return;
       if (chatRef.current.blocked) return;
+      if (data.userId === userInfoRef.current.id) return;
 
       if (data.isTyping) {
         if (!typingIndicatorExists()) {

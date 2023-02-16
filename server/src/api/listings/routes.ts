@@ -4,74 +4,75 @@ import { isAuthenticated } from '../../middleware';
 import { uploadImage } from 'utils/uploadImage';
  
 const prisma = new PrismaClient();
- 
 const router = require('express').Router();
- 
-// router.use(isAuthenticated);
+router.use(isAuthenticated);
  
 // listings REST API everything is under /listings
 // create listing
 router.post('/', async (req: Request, res: Response) => {
-  const {
-    name,
-    images,
-    city,
-    housing_type,
-    description,
-    price,
-    petsAllowed,
-    address,
-    bathrooms,
-    rooms,
-    size,
-    zipcode,
-    distanceToUcf,
-  } = req.body;
-  const uploadImages = [];
-  if (!name) {
-    return res.status(400).json({ Error: 'Name is required' });
-  }
-  //check if images is an array
-  if (!images || !Array.isArray(images)) {
-    return res.status(400).json({ Error: 'Images are required' });
-  } else {
-    //check if images are base64 string
-    //upload images to s3 bucket
-    //add image urls to uploadImages array
-    for (let i = 0; i < images.length; i++) {
-      const image = images[i];
-      if (!/^data:image\/[a-z]+;base64,/.test(image)) {
-        return res.status(400).json({ Error: 'Image should be a base64 image!' });
-      }
-      const uploadedImage = await uploadImage(image);
- 
-      if (!uploadedImage) return res.status(400).json({ Error: 'Failed to upload image' });
-      uploadImages.push(uploadedImage);
-    }
-  }
- 
-  if (!city) {
-    return res.status(400).json({ Error: 'City is required' });
-  }
-  if (!housing_type) {
-    return res.status(400).json({ Error: 'Housing type is required' });
-  }
-  if (!description) {
-    return res.status(400).json({ Error: 'Description is required' });
-  }
-  if (!price) {
-    return res.status(400).json({ Error: 'Price is required' });
-  }
-  if (petsAllowed === undefined) {
-    return res.status(400).json({ Error: 'Pets allowed is required' });
-  }
-  if (!address) {
-    return res.status(400).json({ Error: 'Address is required' });
-  }
-  try {
+  try { 
+        console.log(req.body);
     const payload: payload = req.body[0];
     const userId = payload.userId;
- 
+    
+    const {
+      name,
+      images,
+      city,
+      housing_type,
+      description,
+      price,
+      petsAllowed,
+      address,
+      bathrooms,
+      rooms,
+      size,
+      zipcode,
+      distanceToUcf,
+    } = req.body;
+    const uploadImages = [];
+
+    if (!name) {
+      return res.status(400).json({ Error: 'Name is required' });
+    }
+    //check if images is an array
+    if (!images || !Array.isArray(images)) {
+      return res.status(400).json({ Error: 'Images are required' });
+    } else {
+      //check if images are base64 string
+      //upload images to s3 bucket
+      //add image urls to uploadImages array
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        if (!/^data:image\/[a-z]+;base64,/.test(image)) {
+          return res.status(400).json({ Error: 'Image should be a base64 image!' });
+        }
+        const uploadedImage = await uploadImage(image);
+  
+        if (!uploadedImage) return res.status(400).json({ Error: 'Failed to upload image' });
+        uploadImages.push(uploadedImage);
+      }
+    }
+  
+    if (!city) {
+      return res.status(400).json({ Error: 'City is required' });
+    }
+    if (!housing_type) {
+      return res.status(400).json({ Error: 'Housing type is required' });
+    }
+    if (!description) {
+      return res.status(400).json({ Error: 'Description is required' });
+    }
+    if (!price) {
+      return res.status(400).json({ Error: 'Price is required' });
+    }
+    if (petsAllowed === undefined) {
+      return res.status(400).json({ Error: 'Pets allowed is required' });
+    }
+    if (!address) {
+      return res.status(400).json({ Error: 'Address is required' });
+    }
+
     const listing = await prisma.listings.create({
       data: {
         name: name as string,

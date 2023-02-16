@@ -25,7 +25,6 @@ const CreateListing = (props: any) => {
     getUserInfo();
     setFormData({
       ...formData,
-      userId: userInfo?.id,
     }); 
   }, [userInfo?.id])
 
@@ -41,7 +40,6 @@ const CreateListing = (props: any) => {
     description: '',
     price: 0.0,
     petsAllowed: false,
-    userId: userInfo?.id,
     address: '',
     bathrooms: 0,
     rooms: 0,
@@ -133,25 +131,26 @@ const CreateListing = (props: any) => {
 
   const handleSubmit = async () => { 
     try {
-
-      const response = await fetch(`${env.URL}/listings/`, {
+      let auth = await authTokenHeader();
+      await fetch(`${env.URL}/listings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'authorization': await authTokenHeader(),
+          'authorization': auth,
         },
         body: JSON.stringify(formData),
+      }).then(async ret => {
+        let res = JSON.parse(await ret.text());
+        if (!res.Error) {
+          console.log(formData)
+          return true;
+        }
+        console.log(res);
       });
-      
-        const createdListing = await response.json();
-        console.log(createdListing)
-        console.log(formData)
-        return createdListing;
-
     } catch (err) {
       console.error(err);
-    }
-    
+    }  
+    return false;
   };  
 
   const getOptions = () => {
@@ -241,6 +240,13 @@ const CreateListing = (props: any) => {
     setFormData({ ...formData, distanceToUcf });
     setIsCalculating(false);
   };
+
+  const createListing = async () => {
+    let res = await handleSubmit();
+    if (res) {
+      props.onClose();
+    }
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -602,8 +608,7 @@ const CreateListing = (props: any) => {
           <_Button
             isDarkMode={props.isDarkMode}
             onPress={() => {
-              handleSubmit();
-              props.onClose();
+              createListing();
             }}
             style={[Style(props.isDarkMode).buttonGold]}
           >

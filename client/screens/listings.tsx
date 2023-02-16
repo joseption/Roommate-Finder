@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import AllListingsView from '../components/listings/all-listings';
-import { authTokenHeader, env } from '../helper';
+import { authTokenHeader, env, Listings_Screen } from '../helper';
 import BottomNavbar from '../components/listings/bottom-nav';
 import FavoriteListings from '../components/listings/favorite-listings';
 import CreateListing from '../components/listings/create-listing';
@@ -10,12 +10,6 @@ import _Dropdown from '../components/control/dropdown';
 import ListingView from '../components/listings/listing';
 import _Text from '../components/control/text';
 import { Color } from '../style';
-
-export enum Listings_Screen {
-  all,
-  favorites,
-  create
-}
 
 const ListingsScreen = (props: any) => {
   const [isListing, setIsListing] = useState(false);
@@ -71,6 +65,17 @@ const ListingsScreen = (props: any) => {
     ];
   };
 
+  const bottomBarNav = () => {
+    return <BottomNavbar
+    isDarkMode={props.isDarkMode}
+    setCurrentScreen={setCurrentScreen}
+    handleNavigation={handleNavigation}
+    disabled={currentScreen !== Listings_Screen.all || selectedFilter !== 'all'}
+    setSearchPressed={setSearchPressed}
+    currentScreen={currentScreen}
+  />
+  }
+
   const styles = StyleSheet.create({
   container: {
     display: 'flex',
@@ -93,6 +98,12 @@ const ListingsScreen = (props: any) => {
     textAlign: 'center',
     color: Color(props.isDarkMode).black,
   },
+  contentContainer: {
+    height: '100%'
+  },
+  distanceContainer: {
+    padding: 10,
+  }
 });
 
   return (
@@ -100,13 +111,16 @@ const ListingsScreen = (props: any) => {
       {!currentListing ? (
         <View style={styles.content}>
           {currentScreen === Listings_Screen.all ? (
-            <>
+            <View
+            style={styles.contentContainer}
+            >
               <_Dropdown
                 isDarkMode={props.isDarkMode}
                 options={getDistanceOptions()}
-                placeholder="Select..."
+                placeholder="Select a distance from UCF..."
                 value={distance}
                 setValue={setDistance}
+                containerStyle={styles.distanceContainer}
               />
               <AllListingsView
                 isDarkMode={props.isDarkMode}
@@ -116,26 +130,29 @@ const ListingsScreen = (props: any) => {
                 setIsListing={setIsListing}
                 selectedFilter={selectedFilter}
               />
-            </>
+              {bottomBarNav()}
+            </View>
           ) : currentScreen === Listings_Screen.favorites ? (
-            <FavoriteListings 
-              allListings={allListings} 
-              isDarkMode={props.isDarkMode} 
-              />
+            <View
+            style={styles.contentContainer}
+            >
+              <FavoriteListings 
+                allListings={allListings} 
+                isDarkMode={props.isDarkMode} 
+                />
+                {bottomBarNav()}
+              </View>
           ) : (
-            <CreateListing 
-              isDarkMode={props.isDarkMode} 
-              onClose={() => handleNavigation(Listings_Screen.all)}
+            <View
+            style={styles.contentContainer}
+            >
+              <CreateListing 
+                isDarkMode={props.isDarkMode} 
+                onClose={() => handleNavigation(Listings_Screen.all)}
               />
+              {bottomBarNav()}
+            </View>
           )}
-          <BottomNavbar
-            isDarkMode={props.isDarkMode}
-            setCurrentScreen={setCurrentScreen}
-            handleNavigation={handleNavigation}
-            disabled={currentScreen !== Listings_Screen.all || selectedFilter !== 'all'}
-            setSearchPressed={setSearchPressed}
-            currentScreen={currentScreen}
-          />
         </View>
       ) : (
         <ListingView

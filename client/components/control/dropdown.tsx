@@ -69,7 +69,6 @@ const _Dropdown = (props: any, {navigation}:any) => {
             style.push(props.labelStyle);
         if (props.error == true)
             style.push(styles.error);
-
         return style;
     }
 
@@ -419,24 +418,26 @@ const _Dropdown = (props: any, {navigation}:any) => {
         <View
         style={styles.text}
         >
+            {props.label ?
             <Text
             style={labelStyle()}
             >
-            {props.label}
-                </Text>
-                {props.error ?
-                <Text
-                style={labelStyle()}
-                >
-                {errorMessage()}
-                </Text>
-                : null
-                }
-                {props.required ?
-                <Text
-                style={labelStyle()}>
-                    *
-                </Text>
+                {props.label}
+            </Text>
+            : null}
+            {props.error ?
+            <Text
+            style={labelStyle()}
+            >
+            {errorMessage()}
+            </Text>
+            : null
+            }
+            {props.required ?
+            <Text
+            style={labelStyle()}>
+                *
+            </Text>
             : null
             }
             </View>

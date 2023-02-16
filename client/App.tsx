@@ -66,6 +66,7 @@ export const App = (props: any) => {
   const [messageData,setMessageData] = useState({});
   const [currentChat,setCurrentChat] = useState('');
   const [showingMessagePanel,setShowingMessagePanel] = useState(false);
+  const [enableScroll,setEnableScroll] = useState(true);
   const [openChatFromPush,setOpenChatFromPush] = useState('');
   const appState = useRef(AppState.currentState);
   const [loaded] = useFonts({
@@ -122,6 +123,11 @@ export const App = (props: any) => {
     if (Platform.OS === 'android')
       checkDismissNotifications(currentChat);
   }, [currentChat, showingMessagePanel]);
+
+  useEffect(() => {
+    if (Platform.OS === 'android' && !showingMessagePanel)
+      Keyboard.dismiss()
+  }, [showingMessagePanel]);
 
   useEffect(() => {
     if (Platform.OS === 'android')
@@ -411,6 +417,7 @@ export const App = (props: any) => {
   }
 
   const onBackPress = () => {
+    setShowingMessagePanel(false);
     let current = getRouteName();
     let name = getPreviousRouteName();
     if (name) {
@@ -661,7 +668,8 @@ export const App = (props: any) => {
       paddingRight = 10;
 
       // Don't add padding for message app on mobile
-      if (getRouteName() == NavTo.Messages) {
+      let rn = getRouteName();
+      if (rn == NavTo.Messages || rn == NavTo.Listings) {
         paddingLeft = 0;
         paddingRight = 0;
         paddingTop = 0;
@@ -722,6 +730,7 @@ export const App = (props: any) => {
         theme={MyTheme()}
         >
           <KeyboardAvoidingView
+          keyboardVerticalOffset={StatusBar.currentHeight}
           behavior='padding'
           style={styles.avoidContainer}>
           <TouchableWithoutFeedback onPress={(e:any) => checkKeyboardDismiss()}>
@@ -732,7 +741,7 @@ export const App = (props: any) => {
             scrollEventThrottle={100}
             onContentSizeChange={(w, h) => getScrollDims(w, h)}
             keyboardShouldPersistTaps={'handled'}
-            scrollEnabled={navSelector !== NavTo.Messages}
+            scrollEnabled={navSelector !== NavTo.Messages && navSelector !== NavTo.Listings}
             >
               <View
                 style={styles.stack}
@@ -740,7 +749,6 @@ export const App = (props: any) => {
                 <StatusBar
                   backgroundColor={Color(isDarkMode).statusBar}
                   barStyle={isDarkMode ? "light-content" : "dark-content"}
-                  
                 />
                 <Stack.Navigator
                 screenOptions={{header: (e: any) => header(e), contentStyle: contentStyle(), navigationBarColor: Color(isDarkMode).statusBar}}

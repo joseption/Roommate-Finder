@@ -249,6 +249,49 @@ export function GetTagsandBio(id:string){
   });
 }
 
+// Get users filtered by tags 
+export async function GetUsersByTags(filters: string[]) {
+  const allTags = await db.tags.findMany({
+    select: {
+      tag: true,
+      user_id: true
+    }
+  });
+  
+  const userTags: { [key: string]: string[] } = allTags.reduce((acc, current) => {
+    acc[current.user_id] = acc[current.user_id] || [];
+    acc[current.user_id].push(current.tag);
+    return acc;
+  }, {} as { [key: string]: string[] });
+
+  const userIDs = Object.keys(userTags).filter(user_id => {
+    const userTagList = userTags[user_id];
+    return filters.every(filter => userTagList.includes(filter));
+  });
+
+  // Get users that match the fetched userIDs
+  return db.user.findMany({
+    where: {
+      id: {
+        in: userIDs,
+      },
+    },
+  });
+}
+
+
+// Get match percentages for logged in user with all other users 
+export async function GetMatches(mainUserId: string, userIds: string[]) {
+  return db.matches.findMany({
+    where: {
+      userOneId: mainUserId,
+      userTwoId: {
+        in: userIds,
+      },
+    },
+  });
+}
+
 export function updateBday(id:string, birthday:string){
     return db.user.update({
       where: {

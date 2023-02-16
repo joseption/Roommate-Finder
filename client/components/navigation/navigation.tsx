@@ -449,7 +449,7 @@ const Navigation = (props: any) => {
                     navigate={navigate}
                     icon="user"
                     currentNav={props.navSelector}
-                    navTo={NavTo.Account}
+                    navTo={NavTo.Profile}
                     isDarkMode={props.isDarkMode}
                     />
                     <NavMobileButton

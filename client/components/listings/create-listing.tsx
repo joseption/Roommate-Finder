@@ -398,7 +398,7 @@ const CreateListing = (props: any) => {
         paddingTop: 10,
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'flex-end',
+        justifyContent: 'center',
         paddingBottom: 5
       }
   });
@@ -596,16 +596,6 @@ const CreateListing = (props: any) => {
             isDarkMode={props.isDarkMode}
             label="Zip Code"
           />
- 
-          <_TextInput
-             containerStyle={styles.inputContainerStyle}
-            onChangeText={(text: any) => handleChange('distanceToUcf', parseInt(text))}
-            value={formData.distanceToUcf}
-            label="Distance"
-            isDarkMode={props.isDarkMode}
-            keyboardType="numeric"
-          />
-
         <View
         style={styles.submitContainer}
         >
@@ -617,7 +607,7 @@ const CreateListing = (props: any) => {
             }}
             style={[Style(props.isDarkMode).buttonGold]}
           >
-            {'Add New Listing'}
+            {'Create Listing'}
           </_Button>
         </View>
       </View>

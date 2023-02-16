@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, Button, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Fontisto';
+import Icon2 from 'react-native-vector-icons/Ionicons';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
 import { Style, Color, FontSize, Radius } from '../style';
@@ -70,16 +71,19 @@ const ProfileScreen = (props: any) => {
     }
   };
 
-  //if (!profile.id) {
-    //return (
-      //<View style={styles.loadingScreen}>
-       // <ActivityIndicator size="large" />
-     // </View>
-    //);
-  //}
+  if (!profile.id) {
+    return (
+      <View style={styles.loadingScreen}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.profileContainer}>
+      <TouchableOpacity onPress={() => { navigation.goBack() }}>
+        <Icon2 name="arrow-back" size={30} color="#000" />
+      </TouchableOpacity>
       <Image style={styles.profileImg} source={profile?.image} />
       <Text style={styles.name}>{profile?.first_name + " " + profile?.last_name}</Text>
       <Text style={styles.info}>Age: {profile?.age} | From: {profile?.city}, {profile?.state}</Text>
@@ -107,6 +111,7 @@ const ProfileScreen = (props: any) => {
   );
 
 };
+
 export default ProfileScreen;
 
 

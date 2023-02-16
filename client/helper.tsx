@@ -71,6 +71,7 @@ export const NavTo = {
   Profile: 'Profile' as never,
   Survey: 'Survey' as never,
   Search: 'Search' as never,
+  Filters: 'Filters' as never,
   Listings: 'Listings' as never,
   Messages: 'Messages' as never,
   Logout: 'Logout' as never,

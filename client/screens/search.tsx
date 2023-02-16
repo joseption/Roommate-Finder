@@ -1,6 +1,6 @@
 import { RouteProp, useNavigation } from '@react-navigation/native';
-import { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
@@ -11,7 +11,7 @@ interface SearchScreenProps {
   route: RouteProp<Record<string, any>, 'Search'>;
 }
 
-const SearchScreen = ({ route }: SearchScreenProps, props : any) => {
+const SearchScreen = ({ route }: SearchScreenProps) => {
   /*
   Daniyal: This screen should be used to add all the components
   that you will need to it for search. I have created a components
@@ -27,14 +27,14 @@ const SearchScreen = ({ route }: SearchScreenProps, props : any) => {
   const filtersParam = route.params?.filters || [];
 
   const [filtersFetched, setFiltersFetched] = useState(false);
-  const [filters, setFilters] = useState<string[]>(filtersParam);
+  const [filters, setFilters] = useState<any[]>([]);
 
   useEffect(() => {
     console.log("Inside useEffect of search screen");
     if (filtersParam.length) {
       console.log(filtersParam);
+      setFilters(filtersParam);
       setFiltersFetched(true);
-      setFilters([...route.params?.filters]);
     }
     else {
       setFiltersFetched(false);
@@ -43,13 +43,40 @@ const SearchScreen = ({ route }: SearchScreenProps, props : any) => {
 
   return (
     <ScrollView style={styles.exploreContainer}>
-      <Text style={styles.heading}>You are viewing{'\n'}everyone here!</Text>
-      <View style={styles.buttonsRow}>
-        <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate(NavTo.Filters); }}>
-          <Text style={styles.buttonText}>Filter Results</Text>
-        </TouchableOpacity>
-      </View>
-      <Profile filters={filters} filtersFetched={filtersFetched} />
+      {filtersFetched ?
+        <>
+          <Text style={styles.heading}>You are viewing{'\n'}filtered profiles!</Text>
+          <View style={styles.buttonsRow}>
+            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate(NavTo.Filters); }}>
+              <Text style={styles.buttonText}>Change Filters</Text>
+            </TouchableOpacity>
+          </View>
+          {
+            filters?.map((item, index) => {
+              if (index % 3 === 0) {
+                return (
+                  <View key={index} style={styles.filtersRow}>
+                    <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index]}</Text></View>
+                    {filters[index + 1] && <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index + 1]}</Text></View>}
+                    {filters[index + 2] && <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index + 2]}</Text></View>}
+                  </View>
+                );
+              }
+            })
+          }
+          <Profile filters={filters} filtersFetched={filtersFetched} />
+        </>
+        :
+        <>
+          <Text style={styles.heading}>You are viewing{'\n'}everyone here!</Text>
+          <View style={styles.buttonsRow}>
+            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate(NavTo.Filters); }}>
+              <Text style={styles.buttonText}>Filter Results</Text>
+            </TouchableOpacity>
+          </View>
+          <Profile filters={filters} filtersFetched={filtersFetched} />
+        </>
+      }
     </ScrollView>
   );
 };
@@ -83,11 +110,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 25,
-    marginBottom: 30,
+    marginBottom: 10,
   },
   button: {
-    // marginTop: 25,
-    // marginBottom: 25,
     marginLeft: 7,
     marginRight: 7,
     padding: 10,
@@ -104,6 +129,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  filtersRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginTop: 20,
+    // marginBottom: 30,
+    // backgroundColor: 'green',
+  },
+  filterBox: {
+    backgroundColor: '#72e335',
+    borderRadius: 30,
+    paddingLeft: 14,
+    paddingRight: 14,
+    paddingTop: 7,
+    paddingBottom: 10
+  },
+  filterText: {
+    margin: 'auto',
+    fontSize: 13
   },
   seeMore: {
     fontSize: 16,

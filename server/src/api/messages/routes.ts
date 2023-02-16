@@ -132,6 +132,23 @@ router.get('/getMessage', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/asc/:chatId', async (req: Request, res: Response) => {
+  try {
+    const { chatId } = req.params;
+    const messages = await db.message.findMany({
+      where: {
+        chatId: chatId,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+    res.status(200).json(messages);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
 // fetch all messages in a given chat
 router.get('/:chatId', async (req: Request, res: Response) => {
   try {

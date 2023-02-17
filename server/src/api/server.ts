@@ -12,6 +12,7 @@ import listings from './listings/routes';
 import matches from './matches/routes';
 import bodyParser from 'body-parser';
 import { startSocketIO } from './websockets';
+import { Socket } from 'socket.io';
 
 const port = process.env.PORT || 8080;
 const app = express();

@@ -7,9 +7,11 @@ import {
   Spinner,
   Text,
 } from "@chakra-ui/react";
+import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { io, Socket } from "socket.io-client";
 
 import { GetMessages } from "../../request/fetch";
 import { SendMessage } from "../../request/mutate";
@@ -24,13 +26,16 @@ interface Props {
   selectedChatUser?: user;
 }
 
+const ENDPOINT = "http://localhost:8080";
+let socket: Socket<DefaultEventsMap, DefaultEventsMap>,
+  selectedChatCompare: chat;
+
 export const SingleChat = ({
   selectedChat,
   selectedChatUser,
   setSelectedChat,
   userId,
 }: Props) => {
-  // console.log(selectedChat, "selected chat");
   const { data, isLoading } = useQuery(["messages", selectedChat.id], {
     // add chat id
     queryFn: () => GetMessages(selectedChat.id),
@@ -41,20 +46,47 @@ export const SingleChat = ({
       console.log(err);
     },
     // refetchOnMount: true,
-    // refetchInterval: 100,
-    // refetchIntervalInBackground: true,
     onSettled: (data) => {
       setMessages(data as message[]);
+      socket.emit("join chat", selectedChat.id);
+      selectedChatCompare = selectedChat;
     },
+  });
+
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit("setup", userId);
+    socket.on("connected", () => {
+      setSocketConnected(true);
+    });
+    // socket.on("typing", () => setIsTyping(true));
+    // socket.on("stop typing", () => setIsTyping(false));
+  }, []);
+
+  useEffect(() => {
+    socket.on("message received", (newMessageReceived: message) => {
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare.id !== newMessageReceived.chatId
+      ) {
+        // * Give notification
+      } else {
+        setMessages([...messages, newMessageReceived]);
+      }
+    });
   });
 
   const [messages, setMessages] = useState<message[]>([]);
   const [loading, setLoading] = useState(false); // * use react query builtin loading
   const [newMessage, setNewMessage] = useState<string>("");
+  const [socketConnected, setSocketConnected] = useState(false);
+  // const [typing, setTyping] = useState(false);
+  // const [isTyping, setIsTyping] = useState(false);
 
   const { mutate: sendMessageMutation } = useMutation({
     mutationFn: (content: string) => {
       setNewMessage("");
+      // socket.emit("stop typing", selectedChat.id);
       return SendMessage(content, selectedChat.id, userId);
     },
     onSuccess: (data) => {
@@ -65,10 +97,14 @@ export const SingleChat = ({
     },
   });
   const sendMessage = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    console.log("send message function");
     if (event.key === "Enter" && newMessage) {
       try {
         sendMessageMutation(newMessage);
+        socket.emit("new message", {
+          content: newMessage,
+          chatId: selectedChat.id,
+          userId: userId,
+        });
         setMessages([
           ...messages,
           { content: newMessage, chatId: selectedChat.id, userId: userId },
@@ -78,9 +114,26 @@ export const SingleChat = ({
       }
     }
   };
+
   const typingHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
     // * add typing indicator logic
+    // if (!socketConnected) return;
+    // if (typing) return;
+    // if (!typing) {
+    //   setTyping(true);
+    //   socket.emit("typing", selectedChat.id);
+    // }
+    // const lastTypingTime = new Date().getTime();
+    // const timerLength = 3000;
+    // setTimeout(() => {
+    //   const timeNow = new Date().getTime();
+    //   const timeDiff = timeNow - lastTypingTime;
+    //   if (timeDiff >= timerLength && typing) {
+    //     socket.emit("stop typing", selectedChat.id);
+    //     setTyping(false);
+    //   }
+    // }, timerLength);
   };
 
   return (
@@ -141,6 +194,7 @@ export const SingleChat = ({
               </div>
             )}
             <FormControl onKeyDown={sendMessage} isRequired mt={3}>
+              {/* {isTyping ? <div>Loading...</div> : <></>} */}
               <Input
                 variant="filled"
                 bg="E0E0E0"

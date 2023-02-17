@@ -609,6 +609,7 @@ const CreateListing = (props: any) => {
             isDarkMode={props.isDarkMode}
             onPress={() => {
               createListing();
+              props.onClose();
             }}
             style={[Style(props.isDarkMode).buttonGold]}
           >

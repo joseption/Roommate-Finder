@@ -22,7 +22,7 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
     });
 
     socket.on('send_typing', (data: any) => {
-      socket.to(data.chatId).emit('receive_typ ing', data);
+      socket.to(data.chatId).emit('receive_typing', data);
     });
 
     socket.on('send_block', (data: any) => {

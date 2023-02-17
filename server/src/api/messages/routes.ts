@@ -10,6 +10,41 @@ import fetch from 'node-fetch';
 // router.use(isAuthenticated);
 
 // sending a message
+router.post('/web', async (req: Request, res: Response) => {
+  try {
+    // todo: replace userid in content with user from refresh token
+    const { content, userId, chatId } = req.body;
+
+    if (!content || !chatId) {
+      return res.status(400).json('missing parameters');
+    }
+    const blocked = await blockedChat(chatId);
+    if (!blocked) {
+      const newMessage = await db.message.create({
+        data: {
+          userId: userId as string, // * the sender of the message
+          content: content as string,
+          chatId: chatId as string,
+        },
+      });
+      // update latest message in chat
+      await db.chat.update({
+        where: {
+          id: chatId as string,
+        },
+        data: {
+          latestMessage: newMessage.id as string, // * the content here really doesnt matter I'm just updating it so I can sort by updatedAt later
+        },
+      });
+      res.status(200).json(newMessage);
+    }
+    res.status(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// sending a message
 router.post('/', async (req: Request, res: Response) => {
   try {
     // todo: replace userid in content with user from refresh token

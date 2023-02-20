@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import AllListingsView from '../components/listings/all-listings';
-import { authTokenHeader, env, Listings_Screen } from '../helper';
+import { authTokenHeader, env, Listings_Screen, getLocalStorage } from '../helper';
 import BottomNavbar from '../components/listings/bottom-nav';
 import FavoriteListings from '../components/listings/favorite-listings';
 import CreateListing from '../components/listings/create-listing';
@@ -9,19 +9,31 @@ import { useLinkProps } from '@react-navigation/native';
 import _Dropdown from '../components/control/dropdown';
 import ListingView from '../components/listings/listing';
 import _Text from '../components/control/text';
-import { Color } from '../style';
+import { Color, FontSize, Style } from '../style';
+import _Button from '../components/control/button';
+import Filter from '../components/listings/filter';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faFilter } from '@fortawesome/free-solid-svg-icons';
 
 const ListingsScreen = (props: any) => {
   const [isListing, setIsListing] = useState(false);
   const [listingID, setListingID] = useState('');
-  const [distance, setDistance] = useState('');
   const [allListings, setAllListings] = useState([]);
   const [init, setInit] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [currentScreen, setCurrentScreen] = useState(Listings_Screen.all);
   const [searchPressed, setSearchPressed] = useState(false);
-  const [isListingViewVisible, setIsListingViewVisible] = useState(false);
   const [currentListing, setCurrentListing] = useState(null);
+  const [userInfo, setUserInfo] = useState<any>();
+  const [showFilter, setShowFilter] = useState(false);
+
+  useEffect(() => {
+    getUserInfo();
+  }, [userInfo?.id])
+
+  const getUserInfo = async () => {
+    setUserInfo(await getLocalStorage().then((res) => {return res.user}));
+  };
 
   useEffect(() => {
     if (!init) {
@@ -41,7 +53,6 @@ const ListingsScreen = (props: any) => {
       })
         .then(async (ret) => {
           let res = JSON.parse(await ret.text());
-          //console.log(res);
           setAllListings(res);
         });
     } catch (e) {
@@ -57,14 +68,6 @@ const ListingsScreen = (props: any) => {
     }
   };
 
-  const getDistanceOptions = () => {
-    return [
-      { key: 1, value: 'Less than 1 mile' },
-      { key: 2, value: 'Between 1 and 10 miles' },
-      { key: 3, value: 'More than 10 miles' },
-    ];
-  };
-
   const bottomBarNav = () => {
     return <BottomNavbar
     isDarkMode={props.isDarkMode}
@@ -76,96 +79,135 @@ const ListingsScreen = (props: any) => {
   />
   }
 
+  const handleOpenFilterModal = () => {
+    setShowFilter(true);
+  };
+
+  const handleCloseFilterModal = () => {
+    setShowFilter(false);
+  };
+
   const styles = StyleSheet.create({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-  },
-  content: {
-    flex: 1,
-  },
-  dropdownContainer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    padding: 10,
-    backgroundColor: 'white',
-  },
-  title: {
-    fontSize: 20,
-    marginBottom: 16,
-    textAlign: 'center',
-    color: Color(props.isDarkMode).black,
-  },
-  contentContainer: {
-    height: '100%'
-  },
-  distanceContainer: {
-    padding: 10,
-  }
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+    },
+    content: {
+      flex: 1,
+    },
+    title: {
+      margin: 10,
+      textAlign: 'center',
+      fontFamily: 'Inter-SemiBold',
+      fontSize: FontSize.large,
+      color: Color(props.isDarkMode).titleText
+    },
+    contentContainer: {
+      height: '100%'
+    },
+    titleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      margin: 10,
+    },
+    rightContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+    },
+    buttonSmall: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: Color(props.isDarkMode).actualWhite,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
 });
 
-  return (
-    <View style={styles.container}>
-      {!currentListing ? (
-        <View style={styles.content}>
-          {currentScreen === Listings_Screen.all ? (
-            <View
-            style={styles.contentContainer}
-            >
-              <_Dropdown
+return (
+  <View style={styles.container}>
+    {!currentListing && currentScreen === Listings_Screen.all && !showFilter && (
+      <View style={styles.content}>
+        <View style={styles.contentContainer}>
+          <View style={styles.titleContainer}>
+            <_Text style={styles.title}>Search Listings</_Text>
+            <View style={styles.rightContainer}>
+              <_Button 
                 isDarkMode={props.isDarkMode}
-                options={getDistanceOptions()}
-                placeholder="Select a distance from UCF..."
-                value={distance}
-                setValue={setDistance}
-                containerStyle={styles.distanceContainer}
-              />
-              <AllListingsView
-                isDarkMode={props.isDarkMode}
-                setCurrentListing={setCurrentListing}
-                allListings={allListings}
-                setListingID={setListingID}
-                setIsListing={setIsListing}
-                selectedFilter={selectedFilter}
-              />
-              {bottomBarNav()}
+                onPress={handleOpenFilterModal} 
+                style={styles.buttonSmall}>
+                <FontAwesomeIcon icon={faFilter} size={20} color="black" />
+              </_Button>
             </View>
-          ) : currentScreen === Listings_Screen.favorites ? (
-            <View
-            style={styles.contentContainer}
-            >
-              <FavoriteListings 
-                allListings={allListings} 
-                isDarkMode={props.isDarkMode} 
-                />
-                {bottomBarNav()}
-              </View>
-          ) : (
-            <View
-            style={styles.contentContainer}
-            >
-              <CreateListing 
-                isDarkMode={props.isDarkMode} 
-                onClose={() => handleNavigation(Listings_Screen.all)}
-              />
-              {bottomBarNav()}
-            </View>
-          )}
+          </View>
+          <AllListingsView
+            isDarkMode={props.isDarkMode}
+            setCurrentListing={setCurrentListing}
+            allListings={allListings}
+            setListingID={setListingID}
+            setIsListing={setIsListing}
+            selectedFilter={selectedFilter}
+          />
+          {bottomBarNav()}
         </View>
-      ) : (
-        <ListingView
-          isDarkMode={props.isDarkMode}
-          setCurrentListing={setCurrentListing}
-          currentListing={currentListing}
-        />
-      )}
-    </View>
-  );
-  
-  
-  };
-  
-  export default ListingsScreen;
+      </View>
+    )}
 
+    {!currentListing && currentScreen === Listings_Screen.all && showFilter && (
+      <View style={styles.content}>
+        <View style={styles.contentContainer}>
+          <Filter 
+          isDarkMode={props.isDarkMode}
+          setShowFilter = {setShowFilter}
+          onClose={handleCloseFilterModal} 
+          
+          />
+        </View>
+      </View>
+    )}
+
+    {!currentListing && currentScreen === Listings_Screen.favorites && (
+      <View style={styles.content}>
+        <View style={styles.contentContainer}>
+          <FavoriteListings 
+            isDarkMode={props.isDarkMode}
+            setCurrentListing={setCurrentListing}
+            allListings={allListings}
+            setListingID={setListingID}
+            setIsListing={setIsListing}
+            selectedFilter={selectedFilter}
+            userId={userInfo?.id}
+          />
+          {bottomBarNav()}
+        </View>
+      </View>
+    )}
+
+    {!currentListing && currentScreen === Listings_Screen.create && (
+      <View style={styles.content}>
+        <View style={styles.contentContainer}>
+          <CreateListing 
+            isDarkMode={props.isDarkMode} 
+            onClose={() => handleNavigation(Listings_Screen.all)}
+          />
+          {bottomBarNav()}
+        </View>
+      </View>
+    )}
+
+    {currentListing && (
+      <ListingView
+        isDarkMode={props.isDarkMode}
+        setCurrentListing={setCurrentListing}
+        currentListing={currentListing}
+      />
+    )}
+  </View>
+);
+};
+  
+export default ListingsScreen;

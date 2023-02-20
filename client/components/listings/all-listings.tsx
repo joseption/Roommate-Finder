@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { Color } from '../../style';
+import { Color, FontSize } from '../../style';
 import ListingCard from './listing-card';
 
 const AllListingsView = (props: any) => {
@@ -29,16 +29,34 @@ const AllListingsView = (props: any) => {
 
   const styles = StyleSheet.create({
     container: {
-      ...Platform.select({
-        web:{
-          paddingLeft: 3,
-        }
-      }),
-      backgroundColor: Color(props.isDarkMode).contentBackgroundSecondary,
-      paddingLeft: 10,
-      paddingRight: 10
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
     },
-  });
+    content: {
+      flex: 1,
+    },
+    dropdownContainer: {
+      position: 'absolute',
+      bottom: 0,
+      width: '100%',
+      padding: 10,
+      backgroundColor: 'white',
+    },
+    title: {
+      margin: 10,
+      textAlign: 'center',
+      fontFamily: 'Inter-SemiBold',
+      fontSize: FontSize.large,
+      color: Color(props.isDarkMode).titleText
+    },
+    contentContainer: {
+      height: '100%'
+    },
+    distanceContainer: {
+      padding: 10,
+    }
+});
 
   return (
     <ScrollView style={styles.container}>

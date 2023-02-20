@@ -28,13 +28,6 @@ const Sidebar = ({
   const [petsAllowedCurrent, setPetsAllowedCurrent] = useState<boolean>();
   const [maxDistToUCF, setMaxDistToUCF] = useState<number>();
 
-  // console.log("curprice:", currentPrice);
-  // console.log("htype:", htype);
-  // console.log("numRooms:", numRooms);
-  // console.log("numBathRooms:", numBathRooms);
-  // console.log("petsAllowedCurrent:", petsAllowedCurrent);
-  // console.log("maxDistToUCF:", maxDistToUCF);
-
   function handleRoomsRadioChange(e: React.ChangeEvent<HTMLInputElement>) {
     setNumRooms(Number(e.target.value));
   }
@@ -49,8 +42,7 @@ const Sidebar = ({
     setHtype(e.target.value);
   }
 
-  function handleFilters(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
+  function handleFilters() {
     if (currentPrice) {
       handlePriceChange(currentPrice);
     }
@@ -283,7 +275,7 @@ const Sidebar = ({
         </select>
         <button
           className="mt-4 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
-          onClick={(e) => handleFilters(e)}
+          onClick={handleFilters}
         >
           Apply filters
         </button>

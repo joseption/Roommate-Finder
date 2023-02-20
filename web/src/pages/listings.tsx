@@ -74,17 +74,11 @@ export default function Listings() {
       ) : (
         <div className="flex">
           <Sidebar
-            // price={price}
             handlePriceChange={handlePriceChange}
-            // housingType={housingType}
             handleHousingTypeChange={handleHousingTypeChange}
-            // bedrooms={bedrooms}
             handleBedroomsChange={handleBedroomsChange}
-            // bathrooms={bathrooms}
             handleBathroomsChange={handleBathroomsChange}
-            // petsAllowed={petsAllowed}
             handlePetsAllowedChange={handlePetsAllowedChange}
-            // distanceToUCF={distanceToUCF}
             handleDistanceToUCFChange={handleDistanceToUCFChange}
           />
           <ul

@@ -36,6 +36,9 @@ const MessagesScreen = (props: any, {navigation}:any) => {
 
   useEffect(() => {
     chatsRef.current = chats;
+    if (props?.route?.params?.user && !chatsHaveLoaded && userInfo) {
+      openOrCreateChat(props?.route?.params?.user);
+    }
   }, [chats]);
 
   useEffect(() => {
@@ -95,6 +98,50 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }, [currentChat, showPanel]);
   // End
 
+  useEffect(() => {
+    if (!props?.route?.params?.user || !userInfo) return;
+    openOrCreateChat(props?.route?.params?.user);
+  }, [props?.route?.params?.requestId])
+
+  const createChat = async (userIdOne: string, userIdTwo: string) => {
+    const obj = {userIdOne: userIdOne, userIdTwo: userIdTwo};
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${env.URL}/chats`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      }
+      else {
+        let chat = res;
+        const users = [];
+        const user = await getUser(userIdTwo);
+        users.push(user);
+        chat = {...chat, users: users, blocked: '', muted: [], notifCount: 0}
+        const newChats= [chat, ...chatsRef.current];
+        props.socket.emit('join_room', chat.id)
+        setChats(newChats);
+        setCurrentChat(chat);
+        updateShowPanel(true);
+      }
+    });
+  };
+  
+  const openOrCreateChat = (userId: string) => {
+    let chat = chatsRef.current.filter((chat) => {
+      return chat.users[0].id === userId;
+    })
+    // Chat exists
+    if (chat.length !== 0) {
+      setCurrentChat(chat[0]);
+      updateShowPanel(true);
+      return;
+    }
+    createChat(userInfo.id, userId);
+  };
+
   const deleteNotifications = async () => {
     const obj = {userId: userInfo?.id, chatId: currentChatRef.current?.id};
     const js = JSON.stringify(obj);
@@ -115,7 +162,9 @@ const MessagesScreen = (props: any, {navigation}:any) => {
         setChats(chats);
       }
     });
-  };  const updateTabs = async (data: any) => {
+  };  
+  
+  const updateTabs = async (data: any) => {
     if (chatsRef.current.length === 0) return;
     const fetchedChat = await getChat(data.chatId)
     const latestMessage = await getMessage(fetchedChat.latestMessage);

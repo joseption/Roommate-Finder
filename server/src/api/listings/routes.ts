@@ -2,19 +2,19 @@ import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../middleware';
 import { uploadImage } from 'utils/uploadImage';
- 
+
 const prisma = new PrismaClient();
 const router = require('express').Router();
 router.use(isAuthenticated);
- 
+
 // listings REST API everything is under /listings
 // create listing
 router.post('/', async (req: Request, res: Response) => {
-  try { 
-        console.log(req.body);
+  try {
+    console.log(req.body);
     const payload: payload = req.body[0];
     const userId = payload.userId;
-    
+
     const {
       name,
       images,
@@ -48,12 +48,12 @@ router.post('/', async (req: Request, res: Response) => {
           return res.status(400).json({ Error: 'Image should be a base64 image!' });
         }
         const uploadedImage = await uploadImage(image);
-  
+
         if (!uploadedImage) return res.status(400).json({ Error: 'Failed to upload image' });
         uploadImages.push(uploadedImage);
       }
     }
-  
+
     if (!city) {
       return res.status(400).json({ Error: 'City is required' });
     }
@@ -96,7 +96,7 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(500).json({ Error: err.message });
   }
 });
- 
+
 // * update a listing
 router.put('/:listingId', async (req: Request, res: Response) => {
   try {
@@ -116,30 +116,30 @@ router.put('/:listingId', async (req: Request, res: Response) => {
       distanceToUcf,
     } = req.body;
 
-  const uploadImages = [];
-  //check if images is an array
-  
-  //check if images are base64 string
-  //upload images to s3 bucket
-  //add image urls to uploadImages array
-    if(images && Array.isArray(images)) {
+    const uploadImages = [];
+    //check if images is an array
+
+    //check if images are base64 string
+    //upload images to s3 bucket
+    //add image urls to uploadImages array
+    if (images && Array.isArray(images)) {
       for (let i = 0; i < images.length; i++) {
         const image = images[i];
         if (!/^data:image\/[a-z]+;base64,/.test(image)) {
           return res.status(400).json({ Error: 'Image should be a base64 image!' });
         }
         const uploadedImage = await uploadImage(image);
-   
+
         if (!uploadedImage) return res.status(400).json({ Error: 'Failed to upload image' });
         uploadImages.push(uploadedImage);
       }
     }
-  
+
     const listing = await prisma.listings.findFirst({
       where: {
         id: req.params.listingId as string,
-      }
-    })
+      },
+    });
     // console.log('listing images', listing.images, 'images uploaded', uploadImages, 'images variable', images);
     uploadImages.push(...listing.images);
     const updatedListing = await prisma.listings.update({
@@ -167,7 +167,7 @@ router.put('/:listingId', async (req: Request, res: Response) => {
     res.status(500).json({ Error: err.message });
   }
 });
- 
+
 // * delete a listing
 router.delete('/:listingId', async (req: Request, res: Response) => {
   try {
@@ -181,27 +181,28 @@ router.delete('/:listingId', async (req: Request, res: Response) => {
     res.status(500).json(err);
   }
 });
- 
+
 // * get all listings
-router.get('/all', async (req: Request, res: Response) => {
+router.post('/all', async (req: Request, res: Response) => {
   try {
-    const {housing_type, price, petsAllowed, distanceToUcf, rooms, bathrooms} = req.body;
+    const { housing_type, price, petsAllowed, distanceToUcf, rooms, bathrooms } = req.body;
+    console.log(req.body);
     const listings = await prisma.listings.findMany({
       where: {
         housing_type: housing_type || undefined,
-        price: price || undefined,
+        price: price ? { lte: price } : undefined,
         petsAllowed: petsAllowed || undefined,
-        distanceToUcf: distanceToUcf || undefined,
+        distanceToUcf: distanceToUcf ? { lte: distanceToUcf } : undefined,
         rooms: rooms || undefined,
         bathrooms: bathrooms || undefined,
-      }
+      },
     });
     res.status(200).json(listings);
   } catch (err) {
     res.status(500).json(err);
   }
 });
- 
+
 // * get one listing
 router.get('/:listingId', async (req: Request, res: Response) => {
   try {
@@ -215,5 +216,5 @@ router.get('/:listingId', async (req: Request, res: Response) => {
     res.status(500).json(err);
   }
 });
- 
+
 export default router;

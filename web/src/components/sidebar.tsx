@@ -5,22 +5,21 @@ import React, { memo, useRef, useState } from "react";
 import Button from "./Inputs/Button";
 
 interface Props {
-  // setPrice: (price: number) => void;
-  setPrice: (price: number) => void;
-  setHousingType: (housingType: string) => void;
-  setBedrooms: (bedrooms: number) => void;
-  setBathrooms: (bathrooms: number) => void;
-  setPetsAllowed: (petsAllowed: boolean) => void;
-  setDistanceToUCF: (distanceToUCF: number) => void;
+  handlePriceChange: (price: number) => void;
+  handleHousingTypeChange: (housingType: string) => void;
+  handleBedroomsChange: (bedrooms: number) => void;
+  handleBathroomsChange: (bathrooms: number) => void;
+  handlePetsAllowedChange: (petsAllowed: boolean) => void;
+  handleDistanceToUCFChange: (distanceToUCF: number) => void;
 }
 
 const Sidebar = ({
-  setPrice,
-  setHousingType,
-  setBedrooms,
-  setBathrooms,
-  setPetsAllowed,
-  setDistanceToUCF,
+  handlePriceChange,
+  handleHousingTypeChange,
+  handleBedroomsChange,
+  handleBathroomsChange,
+  handlePetsAllowedChange,
+  handleDistanceToUCFChange,
 }: Props) => {
   const [currentPrice, setCurrentPrice] = useState<number>(10000);
   const [htype, setHtype] = useState<string>();
@@ -53,22 +52,22 @@ const Sidebar = ({
   function handleFilters(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     if (currentPrice) {
-      setPrice(currentPrice);
+      handlePriceChange(currentPrice);
     }
     if (htype) {
-      setHousingType(htype);
+      handleHousingTypeChange(htype);
     }
     if (numRooms) {
-      setBedrooms(numRooms);
+      handleBedroomsChange(numRooms);
     }
     if (numBathRooms) {
-      setBathrooms(numBathRooms);
+      handleBathroomsChange(numBathRooms);
     }
     if (petsAllowedCurrent !== undefined) {
-      setPetsAllowed(petsAllowedCurrent);
+      handlePetsAllowedChange(petsAllowedCurrent);
     }
     if (maxDistToUCF) {
-      setDistanceToUCF(maxDistToUCF);
+      handleDistanceToUCFChange(maxDistToUCF);
     }
   }
 
@@ -293,4 +292,4 @@ const Sidebar = ({
   );
 };
 
-export default React.memo(Sidebar);
+export default Sidebar;

@@ -1,56 +1,40 @@
 import { useRouter } from "next/router";
 import { resolve } from "path/posix";
-import React, { useRef, useState } from "react";
+import React, { memo, useRef, useState } from "react";
 
 import Button from "./Inputs/Button";
 
 interface Props {
-  price: number;
-  setPrice: React.Dispatch<React.SetStateAction<number>>;
-  housingType: string[];
-  setHousingType: React.Dispatch<React.SetStateAction<string[]>>;
-  bedrooms: number;
-  setBedrooms: React.Dispatch<React.SetStateAction<number>>;
-  bathrooms: number;
-  setBathrooms: React.Dispatch<React.SetStateAction<number>>;
-  petsAllowed: boolean | null | undefined;
-  setPetsAllowed: React.Dispatch<
-    React.SetStateAction<boolean | null | undefined>
-  >;
-  distanceToUCF: number;
-  setDistanceToUCF: React.Dispatch<React.SetStateAction<number>>;
+  // setPrice: (price: number) => void;
+  setPrice: (price: number) => void;
+  setHousingType: (housingType: string) => void;
+  setBedrooms: (bedrooms: number) => void;
+  setBathrooms: (bathrooms: number) => void;
+  setPetsAllowed: (petsAllowed: boolean) => void;
+  setDistanceToUCF: (distanceToUCF: number) => void;
 }
 
-export default function Sidebar({
-  price,
+const Sidebar = ({
   setPrice,
-  housingType,
   setHousingType,
-  bedrooms,
   setBedrooms,
-  bathrooms,
   setBathrooms,
-  petsAllowed,
   setPetsAllowed,
-  distanceToUCF,
   setDistanceToUCF,
-}: Props) {
+}: Props) => {
   const [currentPrice, setCurrentPrice] = useState<number>(10000);
-  const [apartmentChecked, setApartmentChecked] = useState(false);
-  const [houseChecked, setHouseChecked] = useState(false);
-  const [condoChecked, setCondoChecked] = useState(false);
+  const [htype, setHtype] = useState<string>();
   const [numRooms, setNumRooms] = useState<number>();
   const [numBathRooms, setNumBathRooms] = useState<number>();
   const [petsAllowedCurrent, setPetsAllowedCurrent] = useState<boolean>();
   const [maxDistToUCF, setMaxDistToUCF] = useState<number>();
 
-  function getH_TypeChecked() {
-    const checked: string[] = [];
-    apartmentChecked ? checked.push("Apartment") : null;
-    houseChecked ? checked.push("House") : null;
-    condoChecked ? checked.push("Condo") : null;
-    return checked;
-  }
+  // console.log("curprice:", currentPrice);
+  // console.log("htype:", htype);
+  // console.log("numRooms:", numRooms);
+  // console.log("numBathRooms:", numBathRooms);
+  // console.log("petsAllowedCurrent:", petsAllowedCurrent);
+  // console.log("maxDistToUCF:", maxDistToUCF);
 
   function handleRoomsRadioChange(e: React.ChangeEvent<HTMLInputElement>) {
     setNumRooms(Number(e.target.value));
@@ -60,17 +44,20 @@ export default function Sidebar({
     setNumBathRooms(parseInt(e.target.value));
   }
 
-  console.log(price);
-  console.log(housingType);
-  console.log(bedrooms);
-  console.log(bathrooms);
-  console.log(petsAllowed);
-  console.log(distanceToUCF);
+  function handleHousingTypeRadioChange(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
+    setHtype(e.target.value);
+  }
 
-  function handleFilters() {
-    setPrice(currentPrice);
-    const res = getH_TypeChecked();
-    setHousingType(res);
+  function handleFilters(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    if (currentPrice) {
+      setPrice(currentPrice);
+    }
+    if (htype) {
+      setHousingType(htype);
+    }
     if (numRooms) {
       setBedrooms(numRooms);
     }
@@ -84,6 +71,13 @@ export default function Sidebar({
       setDistanceToUCF(maxDistToUCF);
     }
   }
+
+  // console.log("price: ", price);
+  // console.log("htype: ", housingType);
+  // console.log("numRooms: ", bedrooms);
+  // console.log("numBathRooms: ", bathrooms);
+  // console.log("petsAllowed: ", petsAllowed);
+  // console.log("maxDistToUCF: ", distanceToUCF);
 
   const router = useRouter();
   return (
@@ -105,7 +99,7 @@ export default function Sidebar({
             type="number"
             step="50.0"
             min="400"
-            onChange={(e) => setPrice(e.target.valueAsNumber)}
+            onChange={(e) => setCurrentPrice(Number(e.target.value))}
             className="mr-3 w-full appearance-none border-none bg-transparent py-1 px-2 leading-tight text-gray-700 focus:outline-none"
             placeholder="Enter a max price"
           />
@@ -117,9 +111,10 @@ export default function Sidebar({
           <li className="flex items-center">
             <input
               id="h_type_apartment"
-              type="checkbox"
-              value=""
-              onChange={() => setApartmentChecked(!apartmentChecked)}
+              type="radio"
+              value="Apartment"
+              name="h_type"
+              onChange={handleHousingTypeRadioChange}
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
             />
 
@@ -134,9 +129,10 @@ export default function Sidebar({
           <li className="flex items-center">
             <input
               id="h_type_house"
-              type="checkbox"
-              value=""
-              onChange={() => setHouseChecked(!houseChecked)}
+              type="radio"
+              value="House"
+              name="h_type"
+              onChange={handleHousingTypeRadioChange}
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
             />
 
@@ -151,9 +147,10 @@ export default function Sidebar({
           <li className="flex items-center">
             <input
               id="condo"
-              type="checkbox"
-              value=""
-              onChange={() => setCondoChecked(!condoChecked)}
+              type="radio"
+              value="Condo"
+              name="h_type"
+              onChange={handleHousingTypeRadioChange}
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
             />
 
@@ -287,11 +284,13 @@ export default function Sidebar({
         </select>
         <button
           className="mt-4 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
-          onClick={handleFilters}
+          onClick={(e) => handleFilters(e)}
         >
           Apply filters
         </button>
       </div>
     </div>
   );
-}
+};
+
+export default React.memo(Sidebar);

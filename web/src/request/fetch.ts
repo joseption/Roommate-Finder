@@ -4,7 +4,7 @@
 
 import { user } from "../types/auth.types";
 import { chat } from "../types/chat.types";
-import { ListingInfo } from "../types/listings.types";
+import { ListingInfo, ListingRequest } from "../types/listings.types";
 import { message } from "../types/message.types";
 import { SurveyInfo } from "../types/survey.types";
 import { BioAndTags } from "../types/tags.types";
@@ -65,11 +65,11 @@ export async function GetAllUsers() {
   );
 }
 
-export async function GetListings() {
+export async function GetListings(body: ListingRequest) {
   return await doRequest<ListingInfo[]>(
     `${backend_api}/listings/all`,
-    null,
-    "GET",
+    body,
+    "POST",
     true
   );
 }

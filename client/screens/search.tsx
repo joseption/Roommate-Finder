@@ -6,6 +6,8 @@ import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
 import { navProp, NavTo } from '../helper';
 import Profile from '../components/search/profiles';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+
 
 interface SearchScreenProps {
   route: RouteProp<Record<string, any>, 'Search'>;
@@ -24,60 +26,93 @@ const SearchScreen = ({ route }: SearchScreenProps) => {
   */
 
   const navigation = useNavigation<navProp>();
-  const filtersParam = route.params?.filters || [];
 
   const [filtersFetched, setFiltersFetched] = useState(false);
-  const [filters, setFilters] = useState<any[]>([]);
+  const [filters, setFilters] = useState<any[]>(route.params?.filters || []);
+  const [genderFilter, setGenderFilter] = useState<string>(route.params?.genderFilter || "");
+  const [locationFilter, setLocationFilter] = useState<string>(route.params?.locationFilter || "");
+  const [sharingPrefFilter, setSharingPrefFilter] = useState<string>(route.params?.sharingPrefFilter || "");
+  const [sorting, setSorting] = useState(false);
 
   useEffect(() => {
-    console.log("Inside useEffect of search screen");
-    if (filtersParam.length) {
-      console.log(filtersParam);
-      setFilters(filtersParam);
+    setFilters(route.params?.filters || []);
+    setGenderFilter(route.params?.genderFilter || "");
+    setLocationFilter(route.params?.locationFilter || "");
+    setSharingPrefFilter(route.params?.sharingPrefFilter || "");
+    if (route.params?.filters?.length || route.params?.genderFilter?.length ||
+      route.params?.locationFilter?.length || route.params?.sharingPrefFilter?.length) {
       setFiltersFetched(true);
     }
     else {
       setFiltersFetched(false);
     }
-  }, [filtersParam]);
+  }, [route.params?.filters, route.params?.genderFilter, route.params?.locationFilter, route.params?.sharingPrefFilter]);
+
+  const handleToggleButtonPress = () => {
+    setSorting(!sorting);
+  };
+
+  const icon = sorting ? 'toggle-on' : 'toggle-off';
+  const iconColor = sorting ? '#4CAF50' : '#000';
+
+  const toggleButton =
+    <TouchableOpacity style={styles.toggleButton} onPress={handleToggleButtonPress}>
+      <Icon name={icon} size={25} color={iconColor} />
+    </TouchableOpacity>;
 
   return (
     <ScrollView style={styles.exploreContainer}>
-      {filtersFetched ?
-        <>
-          <Text style={styles.heading}>You are viewing{'\n'}filtered profiles!</Text>
-          <View style={styles.buttonsRow}>
-            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate(NavTo.Filters); }}>
-              <Text style={styles.buttonText}>Change Filters</Text>
-            </TouchableOpacity>
-          </View>
-          {
-            filters?.map((item, index) => {
-              if (index % 3 === 0) {
-                return (
-                  <View key={index} style={styles.filtersRow}>
-                    <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index]}</Text></View>
-                    {filters[index + 1] && <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index + 1]}</Text></View>}
-                    {filters[index + 2] && <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index + 2]}</Text></View>}
-                  </View>
-                );
-              }
-            })
-          }
-          <Profile filters={filters} filtersFetched={filtersFetched} />
-        </>
-        :
-        <>
-          <Text style={styles.heading}>You are viewing{'\n'}everyone here!</Text>
-          <View style={styles.buttonsRow}>
-            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate(NavTo.Filters); }}>
-              <Text style={styles.buttonText}>Filter Results</Text>
-            </TouchableOpacity>
-          </View>
-          <Profile filters={filters} filtersFetched={filtersFetched} />
-        </>
+      <View style={styles.myProfileRow}>
+        <TouchableOpacity onPress={() => { navigation.navigate(NavTo.MyProfile) }}>
+          <Text style={styles.myProfileBtnText}>My Profile</Text>
+        </TouchableOpacity>
+      </View>
+      {
+        filtersFetched ?
+          <>
+            <Text style={styles.heading}>You are viewing{'\n'}filtered profiles!</Text>
+            <View style={styles.buttonsRow}>
+              <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate(NavTo.Filters); }}>
+                <Text style={styles.buttonText}>Change Filters</Text>
+              </TouchableOpacity>
+            </View>
+            {
+              filters?.map((item, index) => {
+                if (index % 3 === 0) {
+                  return (
+                    <View key={index} style={styles.filtersRow}>
+                      <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index]}</Text></View>
+                      {filters[index + 1] && <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index + 1]}</Text></View>}
+                      {filters[index + 2] && <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index + 2]}</Text></View>}
+                    </View>
+                  );
+                }
+              })
+            }
+            <View style={styles.toggleRow}>
+              <View><Text style={styles.toggleLabel}>Sort by Match Percentage</Text></View>
+              {toggleButton}
+            </View>
+            <Profile filters={filters} filtersFetched={filtersFetched} genderFilter={genderFilter}
+              locationFilter={locationFilter} sharingPrefFilter={sharingPrefFilter} sorting={sorting} />
+          </>
+          :
+          <>
+            <Text style={styles.heading}>You are viewing{'\n'}everyone here!</Text>
+            <View style={styles.buttonsRow}>
+              <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate(NavTo.Filters); }}>
+                <Text style={styles.buttonText}>Filter Results</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.toggleRow}>
+              <View><Text style={styles.toggleLabel}>Sort by Match Percentage</Text></View>
+              {toggleButton}
+            </View>
+            <Profile filters={filters} filtersFetched={filtersFetched} genderFilter={genderFilter}
+              locationFilter={locationFilter} sharingPrefFilter={sharingPrefFilter} sorting={sorting} />
+          </>
       }
-    </ScrollView>
+    </ScrollView >
   );
 };
 
@@ -89,9 +124,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingTop: '10%',
-    // height: '100%',
     paddingBottom: '25%',
-    // borderWidth: 3,
   },
   heading: {
     fontWeight: 'bold',
@@ -104,6 +137,18 @@ const styles = StyleSheet.create({
     // shadowOffset: { width: 0, height: 1 },
     // shadowOpacity: 0.8,
     // shadowRadius: 2,
+  },
+  myProfileRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 10,
+  },
+  myProfileBtnText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textDecorationLine: 'underline',
+    paddingRight: 6
   },
   buttonsRow: {
     flex: 1,
@@ -134,7 +179,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     marginTop: 20,
-    // marginBottom: 30,
     // backgroundColor: 'green',
   },
   filterBox: {
@@ -148,6 +192,20 @@ const styles = StyleSheet.create({
   filterText: {
     margin: 'auto',
     fontSize: 13
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 25,
+    marginHorizontal: 15
+  },
+  toggleLabel: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  toggleButton: {
+    borderRadius: 5,
+    alignItems: 'center',
   },
   seeMore: {
     fontSize: 16,

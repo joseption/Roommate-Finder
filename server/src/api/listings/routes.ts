@@ -185,7 +185,17 @@ router.delete('/:listingId', async (req: Request, res: Response) => {
 // * get all listings
 router.get('/all', async (req: Request, res: Response) => {
   try {
-    const listings = await prisma.listings.findMany();
+    const {housing_type, price, petsAllowed, distanceToUcf, rooms, bathrooms} = req.body;
+    const listings = await prisma.listings.findMany({
+      where: {
+        housing_type: housing_type || undefined,
+        price: price || undefined,
+        petsAllowed: petsAllowed || undefined,
+        distanceToUcf: distanceToUcf || undefined,
+        rooms: rooms || undefined,
+        bathrooms: bathrooms || undefined,
+      }
+    });
     res.status(200).json(listings);
   } catch (err) {
     res.status(500).json(err);

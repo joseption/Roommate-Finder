@@ -1,9 +1,90 @@
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import { resolve } from "path/posix";
+import React, { useRef, useState } from "react";
 
 import Button from "./Inputs/Button";
 
-export default function Sidebar() {
+interface Props {
+  price: number;
+  setPrice: React.Dispatch<React.SetStateAction<number>>;
+  housingType: string[];
+  setHousingType: React.Dispatch<React.SetStateAction<string[]>>;
+  bedrooms: number;
+  setBedrooms: React.Dispatch<React.SetStateAction<number>>;
+  bathrooms: number;
+  setBathrooms: React.Dispatch<React.SetStateAction<number>>;
+  petsAllowed: boolean | null | undefined;
+  setPetsAllowed: React.Dispatch<
+    React.SetStateAction<boolean | null | undefined>
+  >;
+  distanceToUCF: number;
+  setDistanceToUCF: React.Dispatch<React.SetStateAction<number>>;
+}
+
+export default function Sidebar({
+  price,
+  setPrice,
+  housingType,
+  setHousingType,
+  bedrooms,
+  setBedrooms,
+  bathrooms,
+  setBathrooms,
+  petsAllowed,
+  setPetsAllowed,
+  distanceToUCF,
+  setDistanceToUCF,
+}: Props) {
+  const [currentPrice, setCurrentPrice] = useState<number>(10000);
+  const [apartmentChecked, setApartmentChecked] = useState(false);
+  const [houseChecked, setHouseChecked] = useState(false);
+  const [condoChecked, setCondoChecked] = useState(false);
+  const [numRooms, setNumRooms] = useState<number>();
+  const [numBathRooms, setNumBathRooms] = useState<number>();
+  const [petsAllowedCurrent, setPetsAllowedCurrent] = useState<boolean>();
+  const [maxDistToUCF, setMaxDistToUCF] = useState<number>();
+
+  function getH_TypeChecked() {
+    const checked: string[] = [];
+    apartmentChecked ? checked.push("Apartment") : null;
+    houseChecked ? checked.push("House") : null;
+    condoChecked ? checked.push("Condo") : null;
+    return checked;
+  }
+
+  function handleRoomsRadioChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setNumRooms(Number(e.target.value));
+  }
+
+  function handleBathroomsRadioChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setNumBathRooms(parseInt(e.target.value));
+  }
+
+  console.log(price);
+  console.log(housingType);
+  console.log(bedrooms);
+  console.log(bathrooms);
+  console.log(petsAllowed);
+  console.log(distanceToUCF);
+
+  function handleFilters() {
+    setPrice(currentPrice);
+    const res = getH_TypeChecked();
+    setHousingType(res);
+    if (numRooms) {
+      setBedrooms(numRooms);
+    }
+    if (numBathRooms) {
+      setBathrooms(numBathRooms);
+    }
+    if (petsAllowedCurrent !== undefined) {
+      setPetsAllowed(petsAllowedCurrent);
+    }
+    if (maxDistToUCF) {
+      setDistanceToUCF(maxDistToUCF);
+    }
+  }
+
   const router = useRouter();
   return (
     <div className="sticky top-0 h-screen">
@@ -24,6 +105,7 @@ export default function Sidebar() {
             type="number"
             step="50.0"
             min="400"
+            onChange={(e) => setPrice(e.target.valueAsNumber)}
             className="mr-3 w-full appearance-none border-none bg-transparent py-1 px-2 leading-tight text-gray-700 focus:outline-none"
             placeholder="Enter a max price"
           />
@@ -37,6 +119,7 @@ export default function Sidebar() {
               id="h_type_apartment"
               type="checkbox"
               value=""
+              onChange={() => setApartmentChecked(!apartmentChecked)}
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
             />
 
@@ -53,6 +136,7 @@ export default function Sidebar() {
               id="h_type_house"
               type="checkbox"
               value=""
+              onChange={() => setHouseChecked(!houseChecked)}
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
             />
 
@@ -69,6 +153,7 @@ export default function Sidebar() {
               id="condo"
               type="checkbox"
               value=""
+              onChange={() => setCondoChecked(!condoChecked)}
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
             />
 
@@ -84,119 +169,126 @@ export default function Sidebar() {
           Pets Allowed
         </h6>
 
-        <select className="space-y-2 rounded text-sm">
-          <option value="select">Select</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
+        <select
+          className="space-y-2 rounded text-sm"
+          onChange={(e) => {
+            setPetsAllowedCurrent(e.target.value === "Yes" ? true : false);
+          }}
+        >
+          <option value="Select">Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
         </select>
         <h6 className="mt-4 text-sm font-medium text-gray-900 dark:text-gray-100">
           Rooms
         </h6>
-        <ul className="space-y-2 text-sm">
-          <li className="flex items-center">
+        <div className="flex flex-col space-y-2 text-sm">
+          <label className="mt-3 inline-flex items-center">
             <input
-              type="checkbox"
-              value=""
-              className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
+              type="radio"
+              className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
+              name="rooms"
+              value={1}
+              onChange={handleRoomsRadioChange}
             />
-
-            <label className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-              1
-            </label>
-          </li>
-          <li className="flex items-center">
+            <span className="ml-2 text-gray-700">1</span>
+          </label>
+          <label className="mt-3 inline-flex items-center">
             <input
-              type="checkbox"
-              value=""
-              className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
+              type="radio"
+              className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
+              name="rooms"
+              value={2}
+              onChange={handleRoomsRadioChange}
             />
-
-            <label className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-              2
-            </label>
-          </li>
-          <li className="flex items-center">
+            <span className="ml-2 text-gray-700">2</span>
+          </label>
+          <label className="mt-3 inline-flex items-center">
             <input
-              type="checkbox"
-              value=""
-              className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
+              type="radio"
+              className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
+              name="rooms"
+              value={3}
+              onChange={handleRoomsRadioChange}
             />
-
-            <label className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-              3
-            </label>
-          </li>
-          <li className="flex items-center">
+            <span className="ml-2 text-gray-700">3</span>
+          </label>
+          <label className="mt-3 inline-flex items-center">
             <input
-              type="checkbox"
-              value=""
-              className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
+              type="radio"
+              className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
+              name="rooms"
+              value={4}
+              onChange={handleRoomsRadioChange}
             />
-
-            <label className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-              4+
-            </label>
-          </li>
-        </ul>
+            <span className="ml-2 text-gray-700">4+</span>
+          </label>
+        </div>
         <h6 className="mt-4 text-sm font-medium text-gray-900 dark:text-gray-100">
           Bathrooms
         </h6>
-        <ul className="space-y-2 text-sm">
-          <li className="flex items-center">
-            <input
-              type="checkbox"
-              value=""
-              className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
-            />
 
-            <label className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-              1
-            </label>
-          </li>
-          <li className="flex items-center">
+        <div className="flex flex-col space-y-2 text-sm">
+          <label className="mt-3 inline-flex items-center">
             <input
-              type="checkbox"
-              value=""
-              className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
+              type="radio"
+              className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
+              name="bathroom"
+              value={1}
+              onChange={handleBathroomsRadioChange}
             />
-
-            <label className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-              2
-            </label>
-          </li>
-          <li className="flex items-center">
+            <span className="ml-2 text-gray-700">1</span>
+          </label>
+          <label className="mt-3 inline-flex items-center">
             <input
-              type="checkbox"
-              value=""
-              className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
+              type="radio"
+              className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
+              name="bathroom"
+              value={2}
+              onChange={handleBathroomsRadioChange}
             />
-
-            <label className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-              3
-            </label>
-          </li>
-          <li className="flex items-center">
+            <span className="ml-2 text-gray-700">2</span>
+          </label>
+          <label className="mt-3 inline-flex items-center">
             <input
-              type="checkbox"
-              value=""
-              className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
+              type="radio"
+              className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
+              name="bathroom"
+              value={3}
+              onChange={handleBathroomsRadioChange}
             />
+            <span className="ml-2 text-gray-700">3</span>
+          </label>
+          <label className="mt-3 inline-flex items-center">
+            <input
+              type="radio"
+              className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
+              name="bathroom"
+              value={4}
+              onChange={handleBathroomsRadioChange}
+            />
+            <span className="ml-2 text-gray-700">4+</span>
+          </label>
+        </div>
 
-            <label className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-              4+
-            </label>
-          </li>
-        </ul>
         <h6 className="mt-4 text-sm font-medium text-gray-900 dark:text-gray-100">
           Distance to UCF
         </h6>
-        <select className="space-y-2 rounded text-sm">
+        <select
+          className="space-y-2 rounded text-sm"
+          onChange={(e) => {
+            setMaxDistToUCF(Number(e.target.value));
+          }}
+        >
           <option value="select">Select</option>
-          <option value="3">{"< 3 miles"}</option>
-          <option value="6">{"< 6 miles"}</option>
-          <option value="10">{"< 10 miles"}</option>
+          <option value={3}>{"< 3 miles"}</option>
+          <option value={6}>{"< 6 miles"}</option>
+          <option value={10}>{"< 10 miles"}</option>
         </select>
-        <button className="mt-4 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full">
+        <button
+          className="mt-4 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
+          onClick={handleFilters}
+        >
           Apply filters
         </button>
       </div>

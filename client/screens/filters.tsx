@@ -8,6 +8,10 @@ const FiltersScreen = (props: any) => {
 
     const navigation = useNavigation<navProp>();
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+    const [genderFilter, setGenderFilter] = useState<string>();
+    const [locationFilter, setLocationFilter] = useState<string>();
+    const [sharingPrefFilter, setSharingPrefFilter] = useState<string>();
+
     const tagStyles = [
         "✈️ Travel",
         "📷 Photography",
@@ -28,6 +32,10 @@ const FiltersScreen = (props: any) => {
         "🌸 Anime",
         "🛍 Shopping"
     ];
+
+    const genderOptions = ["Male", "Female", "Does not matter"];
+    const locationOptions = ["On Campus", "Oviedo", "Union Park", "Orlando", "Lake Nona"];
+    const sharingPrefOptions = ["Never", "Sometimes", "Always"];
 
     const handleFilterPress = (filter: string) => {
         if (selectedFilters.includes(filter)) {
@@ -62,10 +70,83 @@ const FiltersScreen = (props: any) => {
         );
     });
 
+    const genderFilters = genderOptions.map((filter, index) => {
+        return (
+            <TouchableOpacity key={filter} onPress={() => { setGenderFilter(filter) }}
+                style={{
+                    width: '42%',
+                    height: 40,
+                    marginRight: 5,
+                    marginLeft: 5,
+                    borderColor: 'skyblue',
+                    borderWidth: 2,
+                    borderRadius: 15,
+                    backgroundColor: genderFilter === filter ? 'steelblue' : 'powderblue'
+                }}>
+                <Text style={{
+                    margin: 'auto',
+                    fontWeight: '500',
+                    color: genderFilter === filter ? 'powderblue' : 'steelblue'
+                }}>
+                    {filter}
+                </Text>
+            </TouchableOpacity>
+        );
+    });
+
+    const locationFilters = locationOptions.map((filter, index) => {
+        return (
+            <TouchableOpacity key={filter} onPress={() => { setLocationFilter(filter) }}
+                style={{
+                    width: '42%',
+                    height: 40,
+                    marginRight: 5,
+                    marginLeft: 5,
+                    borderColor: 'skyblue',
+                    borderWidth: 2,
+                    borderRadius: 15,
+                    backgroundColor: locationFilter === filter ? 'steelblue' : 'powderblue'
+                }}>
+                <Text style={{
+                    margin: 'auto',
+                    fontWeight: '500',
+                    color: locationFilter === filter ? 'powderblue' : 'steelblue'
+                }}>
+                    {filter}
+                </Text>
+            </TouchableOpacity>
+        );
+    });
+
+    const sharingPrefFilters = sharingPrefOptions.map((filter, index) => {
+        return (
+            <TouchableOpacity key={filter} onPress={() => { setSharingPrefFilter(filter) }}
+                style={{
+                    width: '42%',
+                    height: 40,
+                    marginRight: 5,
+                    marginLeft: 5,
+                    borderColor: 'skyblue',
+                    borderWidth: 2,
+                    borderRadius: 15,
+                    backgroundColor: sharingPrefFilter === filter ? 'steelblue' : 'powderblue'
+                }}>
+                <Text style={{
+                    margin: 'auto',
+                    fontWeight: '500',
+                    color: sharingPrefFilter === filter ? 'powderblue' : 'steelblue'
+                }}>
+                    {filter}
+                </Text>
+            </TouchableOpacity>
+        );
+    });
+
     return (
         <ScrollView style={styles.exploreContainer}>
             <Text style={styles.heading}>Filter Results</Text>
             <Text style={styles.info}>Please pick options that you would like to filter{"\n"}search results by</Text>
+            <Text style={styles.subheading}>Tags</Text>
             {filterTags &&
                 filterTags.map((item, index) => {
                     if (index % 2 === 0) {
@@ -78,9 +159,54 @@ const FiltersScreen = (props: any) => {
                     }
                 })
             }
+            <Text style={styles.subheading}>Gender</Text>
+            {genderFilters &&
+                genderFilters.map((item, index) => {
+                    if (index % 2 === 0) {
+                        return (
+                            <View key={index} style={styles.filtersRow}>
+                                {genderFilters[index]}
+                                {genderFilters[index + 1] && genderFilters[index + 1]}
+                            </View>
+                        );
+                    }
+                })
+            }
+            <Text style={styles.subheading}>Location</Text>
+            {locationFilters &&
+                locationFilters.map((item, index) => {
+                    if (index % 2 === 0) {
+                        return (
+                            <View key={index} style={styles.filtersRow}>
+                                {locationFilters[index]}
+                                {locationFilters[index + 1] && locationFilters[index + 1]}
+                            </View>
+                        );
+                    }
+                })
+            }
+            <Text style={styles.subheading}>Sharing Preferences</Text>
+            {sharingPrefFilters &&
+                sharingPrefFilters.map((item, index) => {
+                    if (index % 2 === 0) {
+                        return (
+                            <View key={index} style={styles.filtersRow}>
+                                {sharingPrefFilters[index]}
+                                {sharingPrefFilters[index + 1] && sharingPrefFilters[index + 1]}
+                            </View>
+                        );
+                    }
+                })
+            }
             <View style={styles.row}>
                 <TouchableOpacity style={styles.searchBtn} onPress={() => {
-                    navigation.navigate(NavTo.Search, { key: Math.random(), filters: selectedFilters } as never)
+                    navigation.navigate(NavTo.Search, {
+                        key: Math.random(),
+                        filters: selectedFilters,
+                        genderFilter: genderFilter,
+                        locationFilter: locationFilter,
+                        sharingPrefFilter: sharingPrefFilter
+                    } as never)
                 }}>
                     <Text style={styles.searchBtnText}>Search</Text>
                 </TouchableOpacity>
@@ -123,7 +249,14 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingLeft: 10,
         paddingRight: 10,
-        marginBottom: 35
+        marginBottom: 10
+    },
+    subheading: {
+        fontSize: 16,
+        fontWeight: '700',
+        paddingLeft: 25,
+        paddingBottom: 15,
+        marginTop: 10
     },
     filtersRow: {
         flexDirection: 'row',
@@ -137,12 +270,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginTop: 15,
     },
-    // filterBox: {
-
-    // },
-    // filterText: {
-
-    // },
     cancelBtn: {
         width: '35%',
         marginLeft: 4,

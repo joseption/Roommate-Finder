@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList, Pressable} from 'react-native';
+import { View, Alert, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList, Pressable} from 'react-native';
 import _Text from '../control/text';
 import { Color, FontSize, Radius, Style } from '../../style';
 import { env } from '../../helper';
@@ -9,23 +9,21 @@ import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-nat
 import _Image from '../control/image';
 import { ScrollView } from 'react-native-gesture-handler';
 import _Dropdown from '../control/dropdown';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import _TextInput from '../control/text-input';
 import _Group from '../control/group';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+
 const CreateListing = (props: any) => {
 
   const [userInfo, setUserInfo] = useState<any>();
   const [imageURLArray, setImageURLArray] = useState<string[]>([]);
   const [imageUriArray, setImageUriArray] = useState<string[]>([]);
   const [imageErrorArray, setImageErrorArray] = useState<string[]>([]);
-  const [isCalculating, setIsCalculating] = useState(false);
+  const [isLocationNotFound, setIsLocationNotFound] = useState(false);
   
   useEffect(() => {
     getUserInfo();
-    setFormData({
-      ...formData,
-    }); 
   }, [userInfo?.id])
 
   const getUserInfo = async () => {
@@ -194,10 +192,6 @@ const CreateListing = (props: any) => {
     setImageUriArray(updatedImageUriArray);
   };
 
-  useEffect(() => {
-    calculateDistance();
-  },[formData.address, formData.zipcode, formData.city]);
-
   const compareDistances = (UCF_latitude: number, UCF_longitude: number, listing_latitude: number, listing_longitude: number) => {
     
     const earth_radius = 3963; 
@@ -217,28 +211,14 @@ const CreateListing = (props: any) => {
     return distance;
   }
 
-  const calculateDistance = async () => {
-
-    if (!formData.address || !formData.zipcode || !formData.city || isCalculating) {
-      return;
-    }
-    setIsCalculating(true);
-    const address = formData.address.replace(/\s/g, "%20")
-    const response = await axios.get(`https://www.mapquestapi.com/geocoding/v1/address?key=UM9XiqmIBZmifAAiq32yTgaLbUDWJGBS&location=${address},${formData.city},${formData.zipcode}`);
-    console.log(response)
+  const calculateDistance = async (response: AxiosResponse<any, any>) => {
     const listingData = response.data.results[0].locations[0].latLng;
     const UCF = { lat: 28.602427, lng: -81.200058 };
-    let distanceToUcf;
-    if (!listingData) {
-      console.error("Location not found");
-      setFormData({ ...formData, distanceToUcf: 0 });
-      setIsCalculating(false);
-      return;
-    }
-    distanceToUcf = Math.round(compareDistances(UCF.lat, UCF.lng, listingData.lat, listingData.lng));
-    console.log(distanceToUcf)
-    setFormData({ ...formData, distanceToUcf });
-    setIsCalculating(false);
+    let distUcf = Math.round(compareDistances(UCF.lat, UCF.lng, listingData.lat, listingData.lng));
+      
+    console.log("distance: " + distUcf)
+    formData.distanceToUcf = distUcf;
+    handleChange('distanceToUcf', distUcf);
   };
 
   const createListing = async () => {
@@ -247,6 +227,38 @@ const CreateListing = (props: any) => {
       props.onClose();
     }
   }
+
+  const checkAddressValidity = async (address: string): Promise<boolean> => {
+    const boundingBox = '24.396308,-81.786088,31.000652,-79.974309'; // bounding box for Florida
+    const response = await axios.get(`https://www.mapquestapi.com/geocoding/v1/address?key=UM9XiqmIBZmifAAiq32yTgaLbUDWJGBS&location=${encodeURIComponent(address)}&boundingBox=${encodeURIComponent(boundingBox)}`);
+    console.log(response)
+    console.log(response.data.results[0].locations.length)
+
+    const locationsInFlorida = response.data.results[0].locations.filter((location: { adminArea3: string; }) => {
+      return location.adminArea3 === 'FL';
+    });
+
+    if (locationsInFlorida.length > 0) {
+      calculateDistance(response);
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const handleSubmitListing = async () => {
+    const address = formData.address.replace(/\s/g, "%20")
+    const isValidAddress = await checkAddressValidity(address+formData.city+formData.zipcode);
+    console.log("valid:" + isValidAddress);
+  
+    if (isValidAddress) {
+      createListing();
+      props.onClose();
+    } else {
+      setIsLocationNotFound(true);
+      console.error("Location not found");
+    }
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -406,13 +418,61 @@ const CreateListing = (props: any) => {
         flexDirection: 'row',
         justifyContent: 'center',
         paddingBottom: 5
-      }
+      },
+      modalOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        zIndex: 9999,
+        justifyContent: "center",
+        alignItems: "center",
+      },
+      modalBox: {
+        backgroundColor: "white",
+        width: 300,
+        padding: 24,
+        borderRadius: 8,
+        alignItems: "center",
+      },
+      modalTitle: {
+        fontSize: 24,
+        fontWeight: "bold",
+        marginBottom: 16,
+      },
+      modalMessage: {
+        fontSize: 16,
+        marginBottom: 24,
+      },
+      modalCloseButton: {
+        backgroundColor: "#e0e0e0",
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 4,
+      },
+      modalCloseButtonText: {
+        fontSize: 16,
+      },
   });
 
   return (
     <View style={styles.container}>
-      <_Text style={styles.title}>Create Listing</_Text>
+      {isLocationNotFound && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <_Text style={styles.modalTitle}>Location not found</_Text>
+            <_Text style={styles.modalMessage}>Please enter a valid location for your listing.</_Text>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setIsLocationNotFound(false)}>
+              <_Text style={styles.modalCloseButtonText}>Close</_Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+      {
       <ScrollView>
+      <_Text style={styles.title}>Create Listing</_Text>
         <View style={styles.formContainer}>
           <_Group
                 isDarkMode={props.isDarkMode}
@@ -608,8 +668,7 @@ const CreateListing = (props: any) => {
           <_Button
             isDarkMode={props.isDarkMode}
             onPress={() => {
-              createListing();
-              props.onClose();
+              handleSubmitListing();
             }}
             style={[Style(props.isDarkMode).buttonGold]}
           >
@@ -618,6 +677,7 @@ const CreateListing = (props: any) => {
         </View>
       </View>
     </ScrollView>
+    }
   </View>
   )
 };

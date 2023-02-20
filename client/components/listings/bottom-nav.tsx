@@ -54,7 +54,6 @@ const BottomNavbar = (props: any) => {
 
   return (
     <View style={styles.container}>
-      
       <TouchableHighlight 
         onPress={() => {
           onSearch()

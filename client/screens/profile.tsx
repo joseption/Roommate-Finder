@@ -50,11 +50,9 @@ const ProfileScreen = (props: any) => {
   const getTags = async () => {
     try {
       if (profile.id) {
-        console.log("Inside getTags");
         await fetch(`${env.URL}/users/getBioAndTagsMob?userId=${profile.id}`,
           { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
             let res = JSON.parse(await ret.text());
-            console.log(res);
             if (res.Error) {
               console.warn("Error: ", res.Error);
             }
@@ -70,6 +68,10 @@ const ProfileScreen = (props: any) => {
       return;
     }
   };
+
+  const generateRequestId = () => {
+    return Math.floor(Math.random() * 9999999) + 1;
+  }
 
   if (!profile.id) {
     return (
@@ -90,7 +92,11 @@ const ProfileScreen = (props: any) => {
       <Text style={styles.bio}>"{profile?.bio}"</Text>
       <View style={styles.chatRow}>
         <Icon name="messenger" size={32}
-          style={styles.chatIcon} onPress={() => { console.log("Chat button pressed") }}>
+          style={styles.chatIcon}
+          onPress={() => {
+            navigation.navigate(NavTo.Messages, {user: profile.id, requestId: generateRequestId()} as never);
+          }}
+        >
         </Icon>
       </View>
       <Text style={styles.interestsHeading}>My Interests and Hobbies</Text>

@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { isAuthenticated } from '../../middleware';
-import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday, updateImage, updatePushToken, getOAuth, GetUsersByTags, GetMatches } from './services';
+import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday, updateImage, updatePushToken, getOAuth, GetUsersByTags, GetMatches, GetUsersByGender, GetUsersByLocation, GetUsersBySharingPref } from './services';
 import db from '../../utils/db';
 import { uploadImage } from 'utils/uploadImage';
 import { env } from 'process';
@@ -51,6 +51,21 @@ router.get('/me', async (req: Request, res: Response, next: NextFunction) => {
     //Get user id from payload 
     const payload : payload = req.body[0];
     const userId = payload.userId;
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(400).json({ Error: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ Error: 'Server error' });
+  }
+});
+
+//Get current user profile
+router.get('/myProfile', async (req: Request, res: Response) => {
+  try {
+    const userId = req.query.userId;
     const user = await findUserById(userId);
     if (!user) {
       return res.status(400).json({ Error: 'User not found' });
@@ -196,13 +211,49 @@ router.get('/AllprofilesMob', async (req: Request, res: Response, next: NextFunc
 //Get Users filtered by Tags
 router.get('/profilesByTags', async (req: Request, res: Response) => {
   try {
-
-    console.log("Inside profilesByTags API");
-    console.log(req.query);
-
+    const gender = req.query.gender;
+    const location = req.query.location;
+    const sharingPref = req.query.sharingPref;
     const filters = req.query.filters;
     const filtersArray = (filters as string).split(',');
-    const users = await GetUsersByTags(filtersArray as string[]);
+
+    const userIds1 = await GetUsersByTags(filtersArray as string[]);
+    const userIds2 = await GetUsersByGender(gender as string);
+    const userIds3 = await GetUsersByLocation(location as string);
+    const userIds4 = await GetUsersBySharingPref(sharingPref as string);
+
+    const lists = [userIds1, userIds2, userIds3, userIds4];
+    const filterOptions = [filters, gender, location, sharingPref];
+
+    const nonEmptyLists = lists.filter(list => list !== undefined && list.length > 0);
+    const nonEmptyFilterOptions = filterOptions.filter(x => x !== undefined && x.length > 0);
+
+    let users;
+
+    if (nonEmptyLists.length === 0 || nonEmptyFilterOptions.length === 0) {
+      console.log("No filters found. Fetching All Profiles instead");
+      users = await db.user.findMany();
+    }
+    else {
+      let userIdsCommon = nonEmptyLists[0];
+      for (let i = 1; i < nonEmptyLists.length; i++) {
+        if (nonEmptyFilterOptions[i] !== undefined && nonEmptyFilterOptions[i] !== 'undefined') {
+          userIdsCommon = userIdsCommon.filter((value: any) => nonEmptyLists[i].includes(value));
+        }
+      }
+
+      console.log("Final userIds: ");
+      console.log(userIdsCommon);
+
+      // Get users that match the fetched userIDs
+      users = await db.user.findMany({
+        where: {
+          id: {
+            in: userIdsCommon,
+          },
+        },
+      });
+    }
 
     const mainUserId = req.query.userId;
     const userIds = users.map(x => x.id);
@@ -219,7 +270,9 @@ router.get('/profilesByTags', async (req: Request, res: Response) => {
         user.matchPercentage = match.matchPercentage;
       }
     });
+
     return res.status(200).json(users);
+
   } catch (err) {
     console.log(err);
     return res.status(500).json({ Error: 'Server error' });

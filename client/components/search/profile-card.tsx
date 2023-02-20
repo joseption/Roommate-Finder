@@ -33,22 +33,18 @@ const ProfileCard = (props: any) => {
       <View style={styles.row}>
         <View style={styles.column1}>
           <Text style={styles.name}>{profile.first_name + " " + profile.last_name}</Text>
-          <Text style={styles.regText}>Age: {profile.age}</Text>
-          <Text style={styles.regText}>From: {profile.city + ", " + profile.state}</Text>
-          <Text style={styles.regText}>Bio: {profile.bio}</Text>
+          <Text style={styles.profileInfo}>From: {profile.city + ", " + profile.state}</Text>
+          <Text style={styles.profileInfo}>Match: {profile.matchPercentage}%</Text>
         </View>
         <View style={styles.column2}>
           <Image style={styles.profileImg} source={profile.image} />
         </View>
       </View>
-      <View style={{...styles.row, ...styles.row2}}>
+      <View style={styles.row}>
         <View style={styles.column1}>
           <TouchableOpacity onPress={() => { navigation.navigate(NavTo.Profile, { profile: profile } as never) }}>
             <Text style={styles.viewProfileButton}>View Profile</Text>
           </TouchableOpacity>
-        </View>
-        <View style={styles.column2}>
-          <Text style={styles.match}>Match: {profile.matchPercentage}%</Text>
         </View>
       </View>
     </View>
@@ -77,9 +73,6 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     // backgroundColor: 'lightgreen',
   },
-  row2: {
-    paddingTop: 10
-  },
   column1: {
     flex: 2,
     // backgroundColor: 'lightblue',
@@ -93,19 +86,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingBottom: 4,
   },
-  regText: {
+  profileInfo: {
     paddingBottom: 2,
     textAlign: 'justify',
-    paddingRight: 17
-  },
-  viewProfileButton: {
-    color: 'black',
-    backgroundColor: 'yellow',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    borderRadius: 7,
-    width: '60%',
-    padding: 10,
+    paddingRight: 17,
+    fontWeight: '500',
+    fontStyle: 'italic',
   },
   profileImg: {
     width: 100,
@@ -113,11 +99,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: Radius.round,
   },
-  match: {
-    textAlign: 'right',
-    fontStyle: 'italic',
-    paddingTop: '8%',
-    paddingRight: 5,
-    fontWeight: '500'
-  }
+  viewProfileButton: {
+    color: 'black',
+    backgroundColor: 'yellow',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    borderRadius: 7,
+    width: '40%',
+    padding: 10,
+  },
 });

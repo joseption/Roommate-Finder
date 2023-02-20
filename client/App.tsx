@@ -12,6 +12,7 @@ import ListingsScreen from './screens/listings';
 import MessagesScreen from './screens/messages';
 import SearchScreen from './screens/search';
 import FiltersScreen from './screens/filters';
+import MyProfileScreen from './screens/my-profile';
 import { Color, Content } from './style';
 import { env as environ, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, isDarkMode as isDarkModeHelper, navProp, authTokenHeader, userId, setLocalAppSettingsPushMessageToken, getPushMessageToken, getCurrentChat, setLocalAppSettingsCurrentChat, setLocalAppSettingsOpenPushChat, getOpenPushChat } from './helper';
 import LogoutScreen from './screens/logout';
@@ -860,6 +861,18 @@ export const App = (props: any) => {
                   options={{ title: NavTo.Filters, animation: 'none' }}
                 >
                   {(props: any) => <FiltersScreen
+                    {...props}
+                    mobile={mobile}
+                    isMatches={isMatches}
+                    setIsMatches={setIsMatches}
+                    isDarkMode={isDarkMode}
+                  />}
+              </Stack.Screen>
+              <Stack.Screen
+                  name={NavTo.MyProfile}
+                  options={{ title: NavTo.MyProfile, animation: 'none' }}
+                >
+                  {(props: any) => <MyProfileScreen
                     {...props}
                     mobile={mobile}
                     isMatches={isMatches}

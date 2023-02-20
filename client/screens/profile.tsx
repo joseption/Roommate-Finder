@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, Button, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Fontisto';
-import Icon2 from 'react-native-vector-icons/Ionicons';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
 import { Style, Color, FontSize, Radius } from '../style';
 import _Image from '../components/control/image';
 import { env, navProp, NavTo, authTokenHeader } from '../helper';
+import Icon from 'react-native-vector-icons/Ionicons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 
 const ProfileScreen = (props: any) => {
@@ -31,7 +31,7 @@ const ProfileScreen = (props: any) => {
         setProfile(rt.params['profile']);
       }
     }
-  }, [navigation]);
+  }, []);
 
   useEffect(() => {
     getTags();
@@ -82,22 +82,26 @@ const ProfileScreen = (props: any) => {
   return (
     <ScrollView style={styles.profileContainer}>
       <TouchableOpacity onPress={() => { navigation.goBack() }}>
-        <Icon2 name="arrow-back" size={30} color="#000" />
+        <Icon name="arrow-back" size={30} color="#000" />
       </TouchableOpacity>
       <Image style={styles.profileImg} source={profile?.image} />
       <Text style={styles.name}>{profile?.first_name + " " + profile?.last_name}</Text>
       <Text style={styles.info}>Age: {profile?.age} | From: {profile?.city}, {profile?.state}</Text>
+      <Text style={styles.match}>Match: {profile?.matchPercentage}%</Text>
       <Text style={styles.bio}>"{profile?.bio}"</Text>
       <View style={styles.chatRow}>
-        <Icon name="messenger" size={32}
-          style={styles.chatIcon} onPress={() => { console.log("Chat button pressed") }}>
-        </Icon>
+        <TouchableOpacity style={styles.chatButton} onPress={() => { }}>
+          <Text style={styles.chatText} >
+            <AntDesign name="message1" size={15} color="white" style={styles.chatIcon} />
+            Chat
+          </Text>
+        </TouchableOpacity>
       </View>
-      <Text style={styles.interestsHeading}>My Interests and Hobbies</Text>
+      <Text style={styles.interestsHeading}>Interests and Hobbies</Text>
       {tagsFetched ? tags.map((tag, index) =>
         (index % 3 == 0) &&
         <View style={styles.tagsRow} key={index}>
-          <View style={styles.tagBox}><Text style={styles.tagText}>{tag?.tag}</Text></View>
+          <View style={styles.tagBox}><Text style={styles.tagText}>{tags[index]?.tag}</Text></View>
           {tags[index + 1]?.tag && <View style={styles.tagBox}><Text style={styles.tagText}>{tags[index + 1]?.tag}</Text></View>}
           {tags[index + 2]?.tag && <View style={styles.tagBox}><Text style={styles.tagText}>{tags[index + 2]?.tag}</Text></View>}
         </View>
@@ -123,9 +127,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingTop: 30,
-    // height: '100%',
-    // paddingBottom: '29%',
-    // borderWidth: 3,
   },
   profileImg: {
     width: 140,
@@ -150,22 +151,41 @@ const styles = StyleSheet.create({
   info: {
     textAlign: 'center',
   },
+  match: {
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginTop: 7
+  },
   bio: {
     textAlign: 'center',
     marginLeft: 25,
     marginRight: 25,
-    marginTop: 12,
+    marginTop: 7,
     marginBottom: 18,
     // color: 'grey'
     // backgroundColor: 'yellow'
   },
   chatRow: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
+  chatButton: {
+    borderWidth: 1,
+    borderRadius: 30,
+    backgroundColor: 'black',
+    paddingVertical: 5,
+    paddingBottom: 7,
+    paddingHorizontal: 15,
+    marginRight: 15,
+    marginVertical: 10
+  },
+  chatText: {
+    color: 'white',
+    fontWeight: '600',
+    textAlign: 'center'
+  },
   chatIcon: {
-    paddingRight: '10%',
+    paddingRight: 5,
     paddingBottom: 0,
     // backgroundColor: 'yellow',
   },
@@ -184,22 +204,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   tagBox: {
-    // width: 130,
-    // height: 45,
     color: 'white',
     backgroundColor: 'grey',
     borderColor: 'grey',
     borderWidth: 2,
     borderRadius: 30,
-    paddingLeft: 14,
-    paddingRight: 14,
+    paddingHorizontal: 14,
     paddingTop: 7,
     paddingBottom: 10,
   },
   tagText: {
-    margin: 'auto',
-    fontWeight: '500',
     color: 'white',
-    fontSize: 13
+    fontSize: 13,
+    fontWeight: '500',
+    margin: 'auto',
   }
 });

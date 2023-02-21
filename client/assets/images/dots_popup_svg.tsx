@@ -1,16 +1,16 @@
 import Svg, { Circle } from "react-native-svg"
 
-const Dots = ({width, height}: any) => {
+const Dots = ({width, height, color}: any) => {
   return (
     <Svg
       width={width}
       height={height}
-      viewBox="0 0 87 17"
+      viewBox="0 0 90 17"
       fill="none"
     >
-      <Circle cx={8.5} cy={8.5} r={8.5} fill="#000" />
-      <Circle cx={78.5} cy={8.5} r={8.5} fill="#000" />
-      <Circle cx={43.5} cy={8.5} r={8.5} fill="#000" />
+      <Circle cx={10} cy={10} r={10} fill={color} />
+      <Circle cx={80} cy={10} r={10} fill={color} />
+      <Circle cx={45} cy={10} r={10} fill={color} />
     </Svg>
   );
 };

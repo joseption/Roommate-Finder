@@ -29,19 +29,21 @@ const _TextInput = (props: any) => {
 
   const labelStyle = () => {
     var style = [];
-    if (!props.labelStyle)
-      style.push(Style(props.isDarkMode).labelDefault)
-    else
-      style.push(props.labelStyle);
+    if (props.label) {
+      if (!props.labelStyle)
+        style.push(Style(props.isDarkMode).labelDefault)
+      else
+        style.push(props.labelStyle);
 
-    if (props.error == true)
-      style.push(styles.error);
+      if (props.error == true)
+        style.push(styles.error);
 
-    if (props.readonly) {
-      style.push({color: Color(props.isDarkMode).disabledText});
+      if (props.readonly) {
+        style.push({color: Color(props.isDarkMode).disabledText});
+      }
+      else
+        style.push({color: Color(props.isDarkMode).text});
     }
-    else
-      style.push({color: Color(props.isDarkMode).text});
 
     return style;
   }
@@ -58,12 +60,7 @@ const _TextInput = (props: any) => {
     var style = [];
     style.push(Style(props.isDarkMode).inputDefault);
     style.push(inputStyle());
-    if (props.multiline) {
-      style.push({
-        height: props.height,
-      });
-    }
-    if (!props.style) {
+    if (props.style) {
       style.push(props.style);
     }
     style.push(styles.transparentBackground);
@@ -75,6 +72,12 @@ const _TextInput = (props: any) => {
 
     if (props.error)
       style.push({borderColor: Color(props.isDarkMode).danger});
+
+    if (props.multiline && props.height >= 0) {
+      style.push({
+        height: props.height,
+      });
+    }
 
     return style;
   }
@@ -289,7 +292,7 @@ const _TextInput = (props: any) => {
         : null }
       </View>
       <View
-      style={styles.textBackground}
+      style={[styles.textBackground, props.innerContainerStyle]}
       pointerEvents={props.readonly ? 'none' : 'auto'}
       >
         {phoneMask ?
@@ -318,6 +321,8 @@ const _TextInput = (props: any) => {
         blurOnSubmit={props.blurOnSubmit}
         onBlur={props.onBlur}
         onFocus={props.onFocus}
+        onLayout={props.onLayout}
+        onContentSizeChange={props.onContentSizeChange}
         />
       </View>
     </View>

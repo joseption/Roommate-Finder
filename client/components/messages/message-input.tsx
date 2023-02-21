@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { TextInput, View, StyleSheet, Pressable, Text } from "react-native";
-import { authTokenHeader, env, getLocalStorage } from "../../helper";
+import { TextInput, View, StyleSheet, Pressable, Text, TouchableHighlight } from "react-native";
+import { authTokenHeader, env, getLocalStorage, isDarkMode } from "../../helper";
 import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Svg, Path } from "react-native-svg";
+import _TextInput from "../control/text-input";
+import { Color, Radius } from "../../style";
 
 const sendIcon = (
   <Svg
@@ -24,11 +26,11 @@ interface Props {
   socket: Socket<DefaultEventsMap, DefaultEventsMap>,
   newMessage: string,
   setNewMessage: any,
+  isDarkMode: boolean
 }
 
-const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage}: Props) => {
-  const [height, setHeight] = useState(0);
-  const [hiddenTextWidth, setHiddenTextWidth] = useState(0);
+const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDarkMode}: Props) => {
+  const [msgHeight, setMsgHeight] = useState(40);
 
   const randomNum = () => {
     return (Math.floor(Math.random() * 999999) + 1).toString();
@@ -80,7 +82,8 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage}: Props
   };
   
   const sendMessage = async () => {
-    if (newMessage === '') {
+    let msg = newMessage.trim();
+    if (msg === '') {
       return;
     }
 
@@ -92,10 +95,12 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage}: Props
       // It provides no value otherwise.
       id: randomNum(),
     }
+    setNewMessage('');
+    giveMsgHeight(0);
     await setTypingIndicator(true);
     await socket.emit('send_message', data);
 
-    const obj = {content: newMessage, userId: userInfo.id, chatId: chat.id};
+    const obj = {content: msg, userId: userInfo.id, chatId: chat.id};
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
     return fetch(
@@ -106,36 +111,83 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage}: Props
         console.warn("Error: ", res.Error);
       }
       else {
-        setNewMessage('');
         sendNotification();
       }
     });
   };
 
+  const giveMsgHeight = (height: number) => {
+    let h = 40;
+    if (height >= h)
+      h = height;
+    if (height > 200)
+      h = 200;
+    setMsgHeight(h);
+  }
+
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      paddingLeft: 10,
+      paddingRight: 5,
+      alignItems: 'center',
+      backgroundColor: Color(isDarkMode).contentBackgroundSecondary,
+      paddingVertical: 10
+    },
+    blockedInput: {
+      flex: 1,
+      textAlign: 'center',
+      fontWeight: 'bold',
+      color: Color(isDarkMode).textTertiary
+    },
+    buttonContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginLeft: 5,
+      borderRadius: Radius.round,
+      padding: 10
+    },
+    hidden: {
+      position: 'absolute',
+      top: 10000,
+      right: 10000,
+      backgroundColor: 'transparent',
+      borderColor: 'transparent',
+      color: 'transparent',
+      padding: 10,
+      marginHorizontal: 10,
+      minHeight: 41,
+      maxHeight: 115,
+    }
+  });
+
   const blockedBox = (
     <Text style={styles.blockedInput}>
-      This chat has been blocked
+      Unable to contact user
     </Text>
   )
 
   const inputBox = (
     <>
-      <TextInput
+      <_TextInput
         value={newMessage}
         onChangeText={setNewMessage}
-        onLayout={(e) => setHiddenTextWidth(e.nativeEvent.layout.width)}
-        style={[styles.input, {height: height}]}
-        placeholder={'Aa'}
-        multiline
+        style={{paddingTop: 8}}
+        placeholder='Message'
+        multiline={true}
+        isDarkMode={isDarkMode}
+        containerStyle={{width: '100%', flexDirection: 'row', flex: 1}}
+        innerContainerStyle={{width: '100%'}}
+        onContentSizeChange={(e: any) => giveMsgHeight(e.nativeEvent.contentSize.height)}
+        height={msgHeight}
       />
-      <View style={styles.buttonContainer}>
-        <Pressable onPress={sendMessage}>
+      <TouchableHighlight
+        underlayColor={Color(isDarkMode).underlayMask}
+        style={styles.buttonContainer}
+        onPress={() => sendMessage()}>
           {sendIcon}
-        </Pressable>
-      </View>
-      <Text style={[styles.hidden, {width: hiddenTextWidth}]} onLayout={(e) => {setHeight(e.nativeEvent.layout.height)}}>
-        {newMessage}
-      </Text>
+      </TouchableHighlight>
     </>
   )
 
@@ -145,51 +197,5 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage}: Props
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    padding: 5,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    minHeight: 55,
-  },
-  input: {
-    appearance: 'none',
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 10,
-    marginHorizontal: 10,
-
-    borderRadius: 15,
-    borderColor: 'lightgray',
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  blockedInput: {
-    flex: 1,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    color: 'grey'
-  },
-  buttonContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    height: '100%',
-    paddingBottom: 9,
-    alignItems: 'flex-end'
-  },
-  hidden: {
-    position: 'absolute',
-    top: 10000,
-    right: 10000,
-    backgroundColor: 'transparent',
-    borderColor: 'transparent',
-    color: 'transparent',
-    padding: 10,
-    marginHorizontal: 10,
-    minHeight: 41,
-    maxHeight: 115,
-  }
-});
 
 export default MessageInput;

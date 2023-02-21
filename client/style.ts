@@ -500,6 +500,11 @@ function LightColor() {
     userIcon: '#D2D4D9',
     statusBar: '#FFFFFF',
     holderUnderlay: '#0000001a',
+    msgFromBG: '#E4E6E9',
+    msgToBG: '#418DFC',
+    msgFromFG: '#050505',
+    msgToFG: '#FFFFFF',
+    underlayMask: '#F0F2F5bf',
   }
 }
 
@@ -976,6 +981,11 @@ function DarkColor() {
     userIcon: '#D2D4D9',
     statusBar: '#141414',
     holderUnderlay: '#FFFFFF1a',
+    msgFromBG: '#4E4F50',
+    msgToBG: '#418DFC',
+    msgFromFG: '#FFFFFF',
+    msgToFG: '#FFFFFF',
+    underlayMask: '#191919bf',
   }
 }
 

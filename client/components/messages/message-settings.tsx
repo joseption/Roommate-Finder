@@ -1,9 +1,11 @@
-import { View, StyleSheet, Pressable, Dimensions, Text } from "react-native";
+import { View, StyleSheet, Pressable, Dimensions, Text, TouchableHighlight } from "react-native";
 import BlockChat from "../../assets/images/block_chat_svg";
 import UnblockChat from "../../assets/images/unblock_chat_svg";
 import { authTokenHeader, env } from "../../helper";
 import UnmuteChat from "../../assets/images/unmute_chat_svg";
 import MuteChat from "../../assets/images/mute_chat_svg";
+import { Color, Radius } from "../../style";
+import _Text from "../control/text";
 
 interface Props {
   chat: any,
@@ -13,9 +15,10 @@ interface Props {
   updateBlocked: any,
   updateMuted: any,
   socket: any,
+  isDarkMode: boolean
 }
 
-const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, updateBlocked, updateMuted }: Props) => {
+const MessageSettings = ({ isDarkMode, chat, userInfo, showPopUp, setShowPopUp, socket, updateBlocked, updateMuted }: Props) => {
   const dim = Dimensions.get('window');
 
   const styles = StyleSheet.create({
@@ -27,34 +30,29 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, upda
       backgroundColor: 'transparent',
     },
     popUp: {
+      backgroundColor: isDarkMode ? Color(isDarkMode).contentDialogBackgroundSecondary : Color(isDarkMode).actualWhite,
+      borderRadius: Radius.default,
+      elevation: 3,
+      padding: 5,
+      marginRight: 10
+    },
+    popUpContainer: {
+      justifyContent: 'flex-end',
+      flexDirection: 'row',
       zIndex: 3,
       position: 'absolute',
-      width: 130,
-      transform: [{translateX: (dim.width - 150)}, {translateY: 35}],
-  
-      backgroundColor: 'white',
-      borderRadius: 10,
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 3,
-      },
-      shadowOpacity: 0.29,
-      shadowRadius: 4.65,
-      elevation: 7,
+      right: 0,
+      top: 40
     },
     tabContainer: {
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 5,
+      padding: 10,
       borderRadius: 10,
     },
     blockChatImage: {
-      marginRight: 5,
-    },
-    tabText: {
-      fontWeight: '400'
+      marginRight: 10,
     }
   });
 
@@ -108,7 +106,8 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, upda
   const BlockedTab = ({ block }: any) => {
     if (isDisabled(block)) return <></>;
     return (
-      <Pressable 
+      <TouchableHighlight
+        underlayColor={Color(isDarkMode).underlayMask} 
         style={styles.tabContainer}
         onPress={() => {
           blockAction();
@@ -119,16 +118,17 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, upda
           <View style={styles.blockChatImage}>
             {(block) ? <UnblockChat/> : <BlockChat/>}
           </View>
-          {<Text style={styles.tabText}>{(block) ? 'Unblock Chat' : 'Block Chat'}</Text>}
+          {<_Text isDarkMode={isDarkMode}>{(block) ? 'Unblock User' : 'Block User'}</_Text>}
         </>
-      </Pressable>
+      </TouchableHighlight>
     )
   }
 
   const MuteTab = ({ block, mute }: any) => {
     if (isDisabled(block)) return <></>;
     return (
-      <Pressable 
+      <TouchableHighlight 
+        underlayColor={Color(isDarkMode).underlayMask} 
         style={styles.tabContainer}
         onPress={() => {
           muteAction();
@@ -139,19 +139,25 @@ const MessageSettings = ({ chat, userInfo, showPopUp, setShowPopUp, socket, upda
           <View style={styles.blockChatImage}>
             {(mute && mute.includes(userInfo.id)) ? <UnmuteChat/> : <MuteChat/>}
           </View>
-          {<Text style={styles.tabText}>{(mute && mute.includes(userInfo.id)) ? 'Unmute Chat' : 'Mute Chat'}</Text>}
+          {<_Text isDarkMode={isDarkMode}>{(mute && mute.includes(userInfo.id)) ? 'Unmute Chat' : 'Mute Chat'}</_Text>}
         </>
-      </Pressable>
+      </TouchableHighlight>
     )
   }
   
   return (
     <>
+    {!isDisabled(chat.blocked) ?
+    <>
       <Pressable onPress={() => setShowPopUp(false)} style={showPopUp ? styles.popUpBackground : {display: 'none'}}/>
-      <View style={showPopUp ? styles.popUp : {display: 'none'}}>
-        <BlockedTab block={chat.blocked}/>
-        <MuteTab block={chat.blocked} mute={chat.muted}/>
+      <View style={showPopUp ? styles.popUpContainer : {display: 'none'}}>
+        <View style={styles.popUp}>
+          <BlockedTab block={chat.blocked}/>
+          <MuteTab block={chat.blocked} mute={chat.muted}/>
+        </View>
       </View>
+    </>
+    : null}
     </>
   );
 }

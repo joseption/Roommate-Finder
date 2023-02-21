@@ -9,7 +9,7 @@
     ],
     "notification": {
       "icon":"./assets/images/icon.png",
-      "color":"#FFFFFF"
+      "color":"#edb74d"
     },
     "android": {
       "package": "com.roomfin",

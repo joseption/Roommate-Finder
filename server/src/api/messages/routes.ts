@@ -73,7 +73,16 @@ router.post('/', async (req: Request, res: Response) => {
       },
     });
 
-    // Send push notification to all chat users
+    // Send push notification to all chat users as long as chat has not been muted
+    const chat = await db.chat.findUnique({
+      where: {
+        id: chatId,
+      },
+      select: {
+        muted: true
+      },
+    });
+
     const fromUser = await db.user.findUnique({
       where: {
         id: userId,
@@ -96,7 +105,11 @@ router.post('/', async (req: Request, res: Response) => {
     if (fromUser) {
       let auth = await getOAuth();
       if (auth && auth.Authorization) {
+        let muted = chat && chat.muted;
         for (let i = 0; i < chatUsers.users.length; i++) {
+          if (muted && muted.includes(chatUsers.users[i])) {
+            continue; // Chat muted - do not send push notification
+          }
           if (chatUsers.users[i] !== userId) {
             const toUser = await db.user.findUnique({
               where: {

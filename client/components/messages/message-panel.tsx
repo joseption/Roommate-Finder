@@ -37,9 +37,16 @@ const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, 
     if (showPanel) {
       Animated.timing(slideAnimation, {...animationConfig, toValue: PANEL_IN_SCREEN}).start();
     } else {
-      Animated.timing(slideAnimation, {...animationConfig}).start((() => setNewMessage('')));
+      Animated.timing(slideAnimation, {...animationConfig}).start();
     }
   }, [showPanel, slideAnimation]);
+
+  const image = () => {
+    if (chat && chat.users && chat.users.length > 0) {
+      return chat.users[0].image;
+    }
+    return "";
+  }
 
   return (
     <>
@@ -71,6 +78,8 @@ const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, 
           chat={chat}
           userInfo={userInfo}
           socket={socket}
+          isDarkMode={isDarkMode}
+          image={image()}
         />
         <MessageInput
           chat={chat}
@@ -78,6 +87,7 @@ const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, 
           socket={socket}
           newMessage={newMessage}
           setNewMessage={setNewMessage}
+          isDarkMode={isDarkMode}
         />
       </Animated.View>
     </>

@@ -4,12 +4,15 @@ import MessageTab from '../components/messages/message-tab';
 import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
-import { authTokenHeader, env, getLocalStorage, NavTo, setLocalAppSettingsCurrentChat } from '../helper';
+import { authTokenHeader, env, getLocalStorage, navProp, NavTo, setLocalAppSettingsCurrentChat } from '../helper';
 import io, { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import WavingHand from '../assets/images/waving_hand_svg';
+import { Color, DarkStyle, FontSize, Style } from '../style';
+import _Text from '../components/control/text';
+import { useNavigation } from '@react-navigation/native';
 
-const MessagesScreen = (props: any, {navigation}:any) => {
+const MessagesScreen = (props: any) => {
   const [showPanel, updateShowPanel] = useState(false);
   const [currentChat, setCurrentChat] = useState<any>({});
   const [chats, setChats] = useState<any[]>([]);
@@ -18,6 +21,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   const chatsRef = useRef(chats);
   const currentChatRef = useRef(currentChat);
   const showPanelRef = useRef(showPanel);
+  const navigation = useNavigation<navProp>();
 
   useEffect(() => {
     getUserInfo();
@@ -36,6 +40,9 @@ const MessagesScreen = (props: any, {navigation}:any) => {
 
   useEffect(() => {
     chatsRef.current = chats;
+    if (props?.route?.params?.user && !chatsHaveLoaded && userInfo) {
+      openOrCreateChat(props?.route?.params?.user);
+    }
   }, [chats]);
 
   useEffect(() => {
@@ -95,6 +102,50 @@ const MessagesScreen = (props: any, {navigation}:any) => {
   }, [currentChat, showPanel]);
   // End
 
+  useEffect(() => {
+    if (!props?.route?.params?.user || !userInfo) return;
+    openOrCreateChat(props?.route?.params?.user);
+  }, [props?.route?.params?.requestId])
+
+  const createChat = async (userIdOne: string, userIdTwo: string) => {
+    const obj = {userIdOne: userIdOne, userIdTwo: userIdTwo};
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${env.URL}/chats`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      }
+      else {
+        let chat = res;
+        const users = [];
+        const user = await getUser(userIdTwo);
+        users.push(user);
+        chat = {...chat, users: users, blocked: '', muted: [], notifCount: 0}
+        const newChats= [chat, ...chatsRef.current];
+        props.socket.emit('join_room', chat.id)
+        setChats(newChats);
+        setCurrentChat(chat);
+        updateShowPanel(true);
+      }
+    });
+  };
+  
+  const openOrCreateChat = (userId: string) => {
+    let chat = chatsRef.current.filter((chat) => {
+      return chat?.users[0]?.id === userId;
+    })
+    // Chat exists
+    if (chat.length !== 0) {
+      setCurrentChat(chat[0]);
+      updateShowPanel(true);
+      return;
+    }
+    createChat(userInfo.id, userId);
+  };
+
   const deleteNotifications = async () => {
     const obj = {userId: userInfo?.id, chatId: currentChatRef.current?.id};
     const js = JSON.stringify(obj);
@@ -115,7 +166,9 @@ const MessagesScreen = (props: any, {navigation}:any) => {
         setChats(chats);
       }
     });
-  };  const updateTabs = async (data: any) => {
+  };  
+  
+  const updateTabs = async (data: any) => {
     if (chatsRef.current.length === 0) return;
     const fetchedChat = await getChat(data.chatId)
     const latestMessage = await getMessage(fetchedChat.latestMessage);
@@ -303,20 +356,41 @@ const MessagesScreen = (props: any, {navigation}:any) => {
       justifyContent: 'center',
     },
     textStyle: {
-      fontSize: 18,
+      fontSize: FontSize.default,
       fontWeight: 'bold',
       marginHorizontal: 40,
       textAlign: 'center',
+      color: Color(props.isDarkMode).text
+    },
+    subTextStyle: {
+      fontWeight: 'normal',
+      marginTop: 10,
+      marginBottom: 20
     },
   });
 
   if (chatsHaveLoaded && chats.length === 0) {
     return (
       <View style={styles.noMessagesContainer}>
-          <WavingHand width={200} height={200}/>
-          <Text style={styles.textStyle}>
-            Find your next roommate by starting a chat through their profile!
-          </Text>
+          <WavingHand width={100} height={100}/>
+          <_Text
+          style={styles.textStyle}
+          >
+            Looks like you don't have any message yet.
+          </_Text>
+          <_Text
+          style={[styles.textStyle, styles.subTextStyle]}
+          >
+            Find your next roommate by starting a chat from a profile through the explore page!
+          </_Text>
+          <_Button
+          style={Style(props.isDarkMode).buttonInverted}
+          textStyle={Style(props.isDarkMode).buttonInvertedText}
+          onPress={(e: any) => navigation.navigate(NavTo.Search)}
+          isDarkMode={props.isDarkMode}
+          >
+            Explore
+          </_Button>
       </View>
     );
   }
@@ -332,6 +406,7 @@ const MessagesScreen = (props: any, {navigation}:any) => {
             chat={item}
             setCurrentChat={setCurrentChat}
             key={item.id}
+            isDarkMode={props.isDarkMode}
           />
         }
       />

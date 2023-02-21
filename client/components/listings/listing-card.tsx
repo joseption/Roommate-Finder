@@ -14,7 +14,7 @@ const ListingCard = (props: any) => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    setIsFavorite(true) // props.item.isFavorite
+    setIsFavorite(true) //props.item.isFavorite
   }, [props.item.isFavorite]);
 
   const styles = StyleSheet.create({
@@ -30,10 +30,12 @@ const ListingCard = (props: any) => {
       marginTop: 10,
       color: Color(props.isDarkMode).text
     },
-    subheader: {
-      fontSize: FontSize.default,
+    subHeader: {
+      fontSize: FontSize.large,
       color: Color(props.isDarkMode).textTertiary,
-      fontStyle: 'italic'
+      marginTop: 10,
+      fontStyle: 'italic',
+      fontWeight: 'normal',
     },
     description: {
       fontSize: FontSize.default,
@@ -80,7 +82,12 @@ const ListingCard = (props: any) => {
           outlineStyle: 'none'
         }
       }),
-    }
+    },
+    headerContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
   });
 
   const containerStyle = () => {
@@ -129,17 +136,19 @@ const ListingCard = (props: any) => {
         <View>
         <Image source={{ uri: props.item.images[0] }} style={styles.image} />
         <Pressable style = {styles.favorite} onPress = {() => sendFavorite()}>
-          <FontAwesomeIcon  style = {styles.iconBorder} icon={faStar} size={32} color='#000000b3'/>
-          <FontAwesomeIcon  style = {styles.icon} icon={faStar} size={30} color={favoriteColor()}/>
+          <FontAwesomeIcon style={styles.iconBorder} icon={faStar} size={32} color='#000000b3'/>
+          <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()}/>
         </Pressable>
         </View>
-        <_Text isDarkMode={props.isDarkMode} style={styles.header}>{props.item.name}</_Text>
-        <_Text isDarkMode={props.isDarkMode} style={styles.subheader}>{props.item.city}</_Text>
-        <_Text isDarkMode={props.isDarkMode} style={styles.description}>{props.item.description}</_Text>
-        <_Text isDarkMode={props.isDarkMode} style={styles.price}>{props.item.price}</_Text>
-        <_Text isDarkMode={props.isDarkMode} style={styles.petsAllowed}>
-          Pets Allowed: {props.item.petsAllowed ? 'Yes' : 'No'}
-        </_Text>
+        <View style={styles.headerContainer}>
+          <_Text isDarkMode={props.isDarkMode} style={styles.header}>{props.item.name}</_Text>
+          <_Text isDarkMode={props.isDarkMode} style={styles.subHeader}>{props.item.rooms + " bds"}</_Text>
+        </View>
+        <View style={styles.headerContainer}>
+          <_Text isDarkMode={props.isDarkMode} style={styles.subHeader}>{props.item.city}</_Text>
+          <_Text isDarkMode={props.isDarkMode} style={styles.subHeader}>{props.item.bathrooms + " ba"}</_Text>
+        </View>
+        <_Text isDarkMode={props.isDarkMode} style={styles.subHeader}>{'$' + props.item.price}</_Text>
       </View>
     </TouchableHighlight>
   );

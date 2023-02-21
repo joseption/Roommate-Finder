@@ -900,6 +900,7 @@ export const App = (props: any) => {
                   mobile={mobile}
                   isDarkMode={isDarkMode}
                   setNavSelector={setNavSelector}
+                  navSelector={navSelector}
                   socket={socket}
                   setMessageCount={setMessageCount}
                   messageData={messageData}

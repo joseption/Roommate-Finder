@@ -68,6 +68,7 @@ const _Text = (props: any) => {
         style={styles.text}
         >
           <Text
+          numberOfLines={props.numberOfLines}
           onPress={() => press()}
           style={style()}>
             {props.children}
@@ -95,6 +96,7 @@ const _Text = (props: any) => {
       style={[styles.text, props.innerContainerStyle]}
       >
         <Text
+          numberOfLines={props.numberOfLines}
           style={style()}
         >
           {props.children}

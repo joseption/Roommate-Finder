@@ -1,66 +1,175 @@
-import { View, StyleSheet, Text, Image } from "react-native";
-import { Color } from "../../style";
+import { useEffect, useRef } from "react";
+import { View, StyleSheet, Text, Image, Animated } from "react-native";
+import { isDarkMode } from "../../helper";
+import { Color, Radius } from "../../style";
+import _Text from "../control/text";
+import { TypingAnimation } from 'react-native-typing-animation';
+import _Image from "../control/image";
 
 interface Props {
   message: any,
   userInfo: any
   isTypingIndicator: boolean,
+  isDarkMode: boolean,
+  image: any
 }
 
-const Message = ({ message, userInfo, isTypingIndicator }: Props) => {
+const Message = ({ message, userInfo, isTypingIndicator, isDarkMode, image }: Props) => {
   if (!userInfo) return <></>
   
   const isMyMessage = () => message.userId === userInfo?.id;
 
+  const getUserIcon = () => {
+    if (image)
+      return {uri: image};
+    else
+      return require('../../assets/images/user.png');
+  }
+
+  const msgStyle = () => {
+    let style = [];
+    if (!message.showImg) {
+      style.push({
+        marginLeft: 47
+      });
+    }
+
+    return style;
+  }
+
+  const msgContainerStyle = () => {
+    let style = [];
+    if (message.firstFromInBlock) {
+      style.push({
+        marginTop: 20
+      });
+    }
+    if (message.showImg && !message.lastFromMsg) {
+      style.push({
+        marginBottom: 20
+      });
+    }
+
+    return style;
+  }
+
   const styles = StyleSheet.create({
     myMessage: {
-      margin: 5,
-      padding: 10,
-      borderRadius: 10,
-      maxWidth: '80%',
-      backgroundColor: Color(message.isDarkMode).default,
+      marginVertical: 1,
+      paddingVertical: 7,
+      paddingHorizontal: 10,
+      borderRadius: Radius.default,
+      backgroundColor: Color(isDarkMode).msgToBG,
+      color: Color(isDarkMode).msgToFG,
       alignSelf: 'flex-end',
-  
-      shadowColor: 'black',
-      shadowOffset: {
-        width: 0,
-        height: 1,
-      },
-      shadowOpacity: .18,
-      shadowRadius: 1,
+      maxWidth: '60%'
     },
     theirMessage: {
-      backgroundColor: Color(message.isDarkMode).grey,
+      backgroundColor: Color(isDarkMode).msgFromBG,
       alignSelf: 'flex-start',
-      color: Color(message.isDarkMode).black,
+      color: Color(isDarkMode).msgFromFG,
+      maxWidth: '60%',
+      marginRight: 43
     },
     typingIndicatorImage: {
       width: 28,
       height: 18,
+    },
+    indicator: {
+      backgroundColor: Color(isDarkMode).msgFromFG,
+      height: 5,
+      width: 5,
+      borderRadius: Radius.round,
+      margin: 1
+    },
+    indicatorContainer: {
+      flexDirection: 'row',
+      padding: 10
+    },
+    fromMsg: {
+        color: Color(isDarkMode).msgFromFG,
+        wordBreak: 'break-all'
+    },
+    toMsg: {
+      color: Color(isDarkMode).msgToFG,
+      wordBreak: 'break-all'
+    },
+    image: {
+      height: image ? 35 : 30,
+      width: image ? 35 : 30,
+      borderRadius: Radius.round,
+    },
+    imageContainerStyle: {
+      minHeight: 35,
+      minWidth: 35,
+      marginRight: 10,
+      borderRadius: Radius.round,
+      borderColor: Color(isDarkMode).separator,
+      borderWidth: 1,
+      backgroundColor: Color(isDarkMode).userIcon,
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'row'
+    },
+    fromMsgContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'flex-end',
     }
   });
 
   if (isTypingIndicator) {
     return (
-      <View style={[styles.myMessage, styles.theirMessage,]}>
-        <Image style={styles.typingIndicatorImage} source={require('./../../assets/images/loading_indicator.gif')}/>
+      <View style={styles.indicatorContainer}>
+        <TypingAnimation 
+        dotColor={Color(isDarkMode).textTertiary}
+        dotMargin={4}
+        dotAmplitude={3}
+        dotSpeed={.1}
+        dotRadius={3}
+        dotX={10}
+        dotY={0}
+        />
       </View>
     )
   }
   
   return (
-    <>
+    <View
+    style={msgContainerStyle()}
+    >
       {
         isMyMessage() ?
-          <View style={styles.myMessage}>
-            <Text style={{color: Color(message.isDarkMode).white}}>{message.content}</Text>
+          <View style={[styles.myMessage]}>
+            <_Text
+            style={styles.toMsg}
+            >
+              {message.content}
+            </_Text>
           </View>
         :
-        <View style={[styles.myMessage, styles.theirMessage]}>
-          <Text>{message.content}</Text>
+        <View
+        style={styles.fromMsgContainer}
+        >
+          {message.showImg ? 
+          <_Image
+            height={image ? 35 : 30}
+            width={image ? 35 : 30}
+            style={styles.image}
+            containerStyle={styles.imageContainerStyle}
+            source={getUserIcon()}
+          />
+          : null }
+          <View style={[styles.myMessage, styles.theirMessage, msgStyle()]}>
+            <_Text
+            style={styles.fromMsg}
+            >
+              {message.content}
+            </_Text>
+          </View>
         </View>
       }
-    </>
+    </View>
   );
 }
 

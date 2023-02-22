@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, Button, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
 import { Style, Color, FontSize, Radius } from '../style';
 import _Image from '../components/control/image';
-import { env, navProp, NavTo, authTokenHeader } from '../helper';
+import { env, navProp, NavTo, userId as getUserId, authTokenHeader, AccountScreenType } from '../helper';
 import Icon from 'react-native-vector-icons/Ionicons';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 
 
-const ProfileScreen = (props: any) => {
+const MyProfileScreen = (props: any) => {
   /*
   Daniyal: Add all content for the single page view here,
   If you need to make reusable components, create a folder
   in the components folder named "profile" and add your compo>nent files there
   */
 
+  const [userId, setUserId] = useState<string>();
   const [profile, setProfile] = useState<any>({});
   const [tags, setTags] = useState<any[]>([]);
   const [tagsFetched, setTagsFetched] = useState(false);
@@ -25,34 +25,67 @@ const ProfileScreen = (props: any) => {
   const navigation = useNavigation<navProp>();
 
   useEffect(() => {
-    let rt = route();
-    if (rt && rt.params && rt.name && rt.name == NavTo.Profile) {
-      if (rt.params['profile']) {
-        setProfile(rt.params['profile']);
-      }
-    }
+    getLoggedInUserId();
   }, []);
 
   useEffect(() => {
+    if (userId) {
+      getProfile();
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    console.log(profile);
     getTags();
   }, [profile]);
 
-  const route = () => {
-    if (navigation) {
-      let state = navigation.getState();
-      if (state && state.routes) {
-        return state.routes[state.index];
-      }
+  const getLoggedInUserId = async () => {
+    const userId = await getUserId();
+    setUserId(userId);
+    // setUserId("a781adb8-d31d-424d-8918-c9cf639ccc7e"); // for testing
+  };
+
+  function getAge(dateString: any) {
+    var today = new Date();
+    var birthDate = new Date(dateString);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
     }
-    return null;
+    return age;
   }
 
+  const getProfile = async () => {
+    try {
+      console.log("Inside getProfile");
+      await fetch(`${env.URL}/users/myProfile?userId=${userId}`,
+        { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
+          let res = JSON.parse(await ret.text());
+          console.log(res);
+          if (res.Error) {
+            console.warn("Error: ", res.Error);
+          }
+          else {
+            setProfile({ ...res, age: res.birthday ? getAge(res.birthday) : 0 });
+          }
+        });
+    }
+    catch (e) {
+      console.log(e);
+      return;
+    }
+  };
+
   const getTags = async () => {
+    setTagsFetched(false);
     try {
       if (profile.id) {
-        await fetch(`${env.URL}/users/getBioAndTagsMob?userId=${profile.id}`,
+        console.log("Inside getTags");
+        await fetch(`${env.URL}/users/getBioAndTagsMob?userId=${userId}`,
           { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
             let res = JSON.parse(await ret.text());
+            console.log(res);
             if (res.Error) {
               console.warn("Error: ", res.Error);
             }
@@ -69,10 +102,6 @@ const ProfileScreen = (props: any) => {
     }
   };
 
-  const generateRequestId = () => {
-    return Math.floor(Math.random() * 9999999) + 1;
-  }
-
   if (!profile.id) {
     return (
       <View style={styles.loadingScreen}>
@@ -83,27 +112,23 @@ const ProfileScreen = (props: any) => {
 
   return (
     <ScrollView style={styles.profileContainer}>
-      <TouchableOpacity onPress={() => { navigation.goBack() }}>
-        <Icon name="arrow-back" size={30} color="#000" />
-      </TouchableOpacity>
+      <View style={styles.btnRow}>
+        <TouchableOpacity onPress={() => { navigation.goBack() }}>
+          <Icon name="arrow-back" size={30} color="#000" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => { navigation.navigate(NavTo.Account, { view: 'info' } as never) }}>
+          <Text style={styles.btnText}>Edit Profile</Text>
+        </TouchableOpacity>
+      </View>
       <Image style={styles.profileImg} source={profile?.image} />
       <Text style={styles.name}>{profile?.first_name + " " + profile?.last_name}</Text>
       <Text style={styles.info}>Age: {profile?.age} | From: {profile?.city}, {profile?.state}</Text>
-      <Text style={styles.match}>Match: {profile?.matchPercentage}%</Text>
       <Text style={styles.bio}>"{profile?.bio}"</Text>
-      <View style={styles.chatRow}>
-        <TouchableOpacity style={styles.chatButton} onPress={() => { }}>
-          <Text style={styles.chatText} >
-            <AntDesign name="message1" size={15} color="white" style={styles.chatIcon} />
-            Chat
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.interestsHeading}>Interests and Hobbies</Text>
+      <Text style={styles.interestsHeading}>My Interests and Hobbies</Text>
       {tagsFetched ? tags.map((tag, index) =>
         (index % 3 == 0) &&
         <View style={styles.tagsRow} key={index}>
-          <View style={styles.tagBox}><Text style={styles.tagText}>{tags[index]?.tag}</Text></View>
+          <View style={styles.tagBox}><Text style={styles.tagText}>{tag?.tag}</Text></View>
           {tags[index + 1]?.tag && <View style={styles.tagBox}><Text style={styles.tagText}>{tags[index + 1]?.tag}</Text></View>}
           {tags[index + 2]?.tag && <View style={styles.tagBox}><Text style={styles.tagText}>{tags[index + 2]?.tag}</Text></View>}
         </View>
@@ -115,10 +140,9 @@ const ProfileScreen = (props: any) => {
       }
     </ScrollView>
   );
-
 };
 
-export default ProfileScreen;
+export default MyProfileScreen;
 
 
 const styles = StyleSheet.create({
@@ -129,6 +153,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingTop: 30,
+  },
+  btnRow: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+  },
+  btnText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+    textDecorationLine: 'underline'
   },
   profileImg: {
     width: 140,
@@ -153,49 +190,20 @@ const styles = StyleSheet.create({
   info: {
     textAlign: 'center',
   },
-  match: {
-    textAlign: 'center',
-    fontStyle: 'italic',
-    marginTop: 7
-  },
   bio: {
     textAlign: 'center',
     marginLeft: 25,
     marginRight: 25,
     marginTop: 7,
     marginBottom: 18,
-    // color: 'grey'
     // backgroundColor: 'yellow'
-  },
-  chatRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  chatButton: {
-    borderWidth: 1,
-    borderRadius: 30,
-    backgroundColor: 'black',
-    paddingVertical: 5,
-    paddingBottom: 7,
-    paddingHorizontal: 15,
-    marginRight: 15,
-    marginVertical: 10
-  },
-  chatText: {
-    color: 'white',
-    fontWeight: '600',
-    textAlign: 'center'
-  },
-  chatIcon: {
-    paddingRight: 5,
-    paddingBottom: 0,
-    // backgroundColor: 'yellow',
   },
   interestsHeading: {
     fontSize: 16,
     fontWeight: 'bold',
     paddingLeft: '5%',
     paddingBottom: 26,
+    paddingTop: 12,
     // color: '#424242',
     // backgroundColor: 'blue'
   },

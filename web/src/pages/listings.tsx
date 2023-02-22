@@ -5,6 +5,7 @@ import React, { Fragment, useCallback, useMemo, useState } from "react";
 
 import Button from "../components/Inputs/Button";
 import ListingCard from "../components/ListingCard";
+import ListingContent from "../components/listingsContent";
 import Sidebar from "../components/sidebar";
 import { GetListings } from "../request/fetch";
 import { ListingInfo, ListingRequest } from "../types/listings.types";
@@ -81,18 +82,7 @@ export default function Listings() {
             handlePetsAllowedChange={handlePetsAllowedChange}
             handleDistanceToUCFChange={handleDistanceToUCFChange}
           />
-          <ul
-            role="list"
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-          >
-            {data.map((listing: ListingInfo) => {
-              return (
-                <li key={listing.id}>
-                  <ListingCard listing={listing} />
-                </li>
-              );
-            })}
-          </ul>
+          <ListingContent data={data} />
         </div>
       )}
     </div>

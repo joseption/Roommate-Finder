@@ -75,6 +75,9 @@ export const LightStyle = StyleSheet.create({
     paddingBottom: 5,
     outlineStyle: 'none'
   },
+  font: {
+    fontFamily: 'Inter-Regular'
+  },
   textHuge: {
     fontSize: FontSize.huge,
     color: Color(false).text,
@@ -258,7 +261,11 @@ export const LightStyle = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: Radius.default,
-    marginLeft:3,
+    ...Platform.select({
+      web: {
+        marginLeft:3,
+      }
+    }),
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -556,6 +563,9 @@ export const DarkStyle = StyleSheet.create({
     paddingBottom: 5,
     outlineStyle: 'none'
   },
+  font: {
+    fontFamily: 'Inter-Regular'
+  },
   textHuge: {
     fontSize: FontSize.huge,
     color: Color(true).text,
@@ -739,7 +749,11 @@ export const DarkStyle = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: Radius.default,
-    marginLeft:3,
+    ...Platform.select({
+      web: {
+        marginLeft:3,
+      }
+    }),
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',

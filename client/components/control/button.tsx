@@ -17,6 +17,7 @@ const _Button = (props: any) => {
 
     const textStyle = () => {
         var style = [];
+        style.push(Style(props.isDarkMode).font);
         if (props.disabled || props.loading)
             style.push(styles.textDisabled)
         else

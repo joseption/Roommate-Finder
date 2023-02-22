@@ -1,17 +1,24 @@
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
 import { navProp, NavTo } from '../helper';
 import Profile from '../components/search/profiles';
+import { Color, FontSize, Radius } from '../style';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 interface SearchScreenProps {
   route: RouteProp<Record<string, any>, 'Search'>;
+  isDarkMode: boolean;
+  mobile: boolean;
+  isMatches: boolean;
+  setIsMatches: any;
+  setNavSelector: any;
 }
 
-const SearchScreen = ({ route }: SearchScreenProps) => {
+const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setNavSelector }: SearchScreenProps) => {
   /*
   Daniyal: This screen should be used to add all the components
   that you will need to it for search. I have created a components
@@ -25,137 +32,158 @@ const SearchScreen = ({ route }: SearchScreenProps) => {
 
   const navigation = useNavigation<navProp>();
   const filtersParam = route.params?.filters || [];
-
+  const [noResults, setNoResults] = useState(false);
   const [filtersFetched, setFiltersFetched] = useState(false);
   const [filters, setFilters] = useState<any[]>([]);
 
   useEffect(() => {
-    console.log("Inside useEffect of search screen");
-    if (filtersParam.length) {
-      console.log(filtersParam);
+    console.log(filtersParam.length);
+    console.log(filters);
+    if (filtersParam.length > 0) {
       setFilters(filtersParam);
       setFiltersFetched(true);
     }
-    else {
+    else if (filtersParam.length != 0 && filters && filters.length > 0) {
+      setFilters(filters);
+      setFiltersFetched(false);
+    }
+    else if (filtersParam.length == 0 && filters.length != 0) {
+      setFilters([]);
       setFiltersFetched(false);
     }
   }, [filtersParam]);
 
+  const styles = StyleSheet.create({
+    exploreContainer: {
+      flex: 1,
+    },
+    heading: {
+      fontWeight: 'bold',
+      fontSize: FontSize.large,
+      color: Color(isDarkMode).text
+    },
+    buttonsRow: {
+
+    },
+    button: {
+      padding: 10,
+      borderRadius: Radius.round,
+      margin: -5
+    },
+    buttonText: {
+      color: 'white',
+      fontSize: 14,
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
+    filterBox: {
+      backgroundColor: Color(isDarkMode).contentHolder,
+      borderRadius: Radius.round,
+      paddingVertical: 5,
+      paddingHorizontal: 15,
+      marginRight: 2,
+      borderColor: Color(isDarkMode).separator
+    },
+    filterText: {
+      margin: 'auto',
+      fontSize: FontSize.default,
+      color: Color(isDarkMode).text
+    },
+    seeMore: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: 'grey',
+      textAlign: 'right',
+      textDecorationLine: 'underline',
+      paddingRight: 15,
+      marginBottom: 120
+    },
+    filterIcon: {
+      ...Platform.select({
+        web: {
+          outlineStyle: 'none'
+        }
+      }),
+    },
+    header: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 10
+    },
+    container: {
+      height: '100%',
+      justifyContent: 'flex-start'
+    },
+    filterContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      marginBottom: 8,
+      marginHorizontal: 10,
+      paddingBottom: 10,
+      minHeight: 45
+    },
+    filterContent: {
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+    }
+  });
+
   return (
-    <ScrollView style={styles.exploreContainer}>
-      {filtersFetched ?
-        <>
-          <Text style={styles.heading}>You are viewing{'\n'}filtered profiles!</Text>
-          <View style={styles.buttonsRow}>
-            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate(NavTo.Filters); }}>
-              <Text style={styles.buttonText}>Change Filters</Text>
-            </TouchableOpacity>
+    <View style={styles.exploreContainer}>
+        <View
+        style={styles.container}
+        >
+          <View
+          style={styles.header}
+          >
+            <_Text
+            style={styles.heading}
+            isDarkMode={isDarkMode}
+            >
+              Explore
+            </_Text>
+            <View style={styles.buttonsRow}>
+              <TouchableHighlight
+              underlayColor={Color(isDarkMode).underlayMask}
+              style={styles.button}
+              onPress={() => { navigation.navigate(NavTo.Filters, {params: filters.toString()} as never); }}
+              >
+                <FontAwesomeIcon 
+                size={20} 
+                color={filtersParam.length > 0 ? Color(isDarkMode).gold : Color(isDarkMode).text} 
+                style={styles.filterIcon} 
+                icon="filter"
+                >
+                </FontAwesomeIcon>
+              </TouchableHighlight>
+            </View>
           </View>
+          {!noResults && filters && filters.length > 0 ?
+          <ScrollView
+          horizontal={true}
+          style={styles.filterContainer}
+          contentContainerStyle={styles.filterContent}
+          >
           {
-            filters?.map((item, index) => {
-              if (index % 3 === 0) {
+            filters?.map((item, key) => {
                 return (
-                  <View key={index} style={styles.filtersRow}>
-                    <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index]}</Text></View>
-                    {filters[index + 1] && <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index + 1]}</Text></View>}
-                    {filters[index + 2] && <View style={styles.filterBox}><Text style={styles.filterText}>{filters[index + 2]}</Text></View>}
-                  </View>
+                    <View style={styles.filterBox}>
+                      <_Text
+                      style={styles.filterText}
+                      >
+                        {filters[key]}
+                      </_Text>
+                    </View>
                 );
-              }
             })
           }
-          <Profile filters={filters} filtersFetched={filtersFetched} />
-        </>
-        :
-        <>
-          <Text style={styles.heading}>You are viewing{'\n'}everyone here!</Text>
-          <View style={styles.buttonsRow}>
-            <TouchableOpacity style={styles.button} onPress={() => { navigation.navigate(NavTo.Filters); }}>
-              <Text style={styles.buttonText}>Filter Results</Text>
-            </TouchableOpacity>
-          </View>
-          <Profile filters={filters} filtersFetched={filtersFetched} />
-        </>
-      }
-    </ScrollView>
+        </ScrollView>
+        : null}
+        <Profile filters={filters} filtersFetched={filtersFetched} isDarkMode={isDarkMode} setNoResults={setNoResults} />
+        </View>
+      </View>
   );
 };
 
 export default SearchScreen;
-
-
-const styles = StyleSheet.create({
-  exploreContainer: {
-    flex: 1,
-    backgroundColor: 'white',
-    paddingTop: '10%',
-    // height: '100%',
-    paddingBottom: '25%',
-    // borderWidth: 3,
-  },
-  heading: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    textAlign: 'center',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    // elevation: 4,
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 1 },
-    // shadowOpacity: 0.8,
-    // shadowRadius: 2,
-  },
-  buttonsRow: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 25,
-    marginBottom: 10,
-  },
-  button: {
-    marginLeft: 7,
-    marginRight: 7,
-    padding: 10,
-    borderRadius: 7,
-    backgroundColor: 'grey',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 1, height: 1 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  filtersRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginTop: 20,
-    // marginBottom: 30,
-    // backgroundColor: 'green',
-  },
-  filterBox: {
-    backgroundColor: '#72e335',
-    borderRadius: 30,
-    paddingLeft: 14,
-    paddingRight: 14,
-    paddingTop: 7,
-    paddingBottom: 10
-  },
-  filterText: {
-    margin: 'auto',
-    fontSize: 13
-  },
-  seeMore: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'grey',
-    textAlign: 'right',
-    textDecorationLine: 'underline',
-    paddingRight: 15,
-    marginBottom: 120
-  }
-});

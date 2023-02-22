@@ -94,6 +94,8 @@ const Navigation = (props: any) => {
     const setNavigation = (nav: any) => {
         if (nav == NavTo.Account)
             nav = NavTo.Profile
+        else if (nav == NavTo.Filters)
+            nav = NavTo.Search
         props.setNavSelector(nav);
             
         setVisible(nav != NavTo.Login);

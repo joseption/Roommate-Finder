@@ -25,9 +25,9 @@ export default function Listings() {
 
   // const handlePriceChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   //   debouncedPrice(e);
-  //   await router.push({
-  //     query: { ...router.query, p: Number(e.target.value) },
-  //   });
+  // await router.push({
+  //   query: { ...router.query, p: Number(e.target.value) },
+  // });
   // };
   const handlePriceChange = useCallback(
     (p: number) => {
@@ -94,6 +94,7 @@ export default function Listings() {
             handleBathroomsChange={handleBathroomsChange}
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             handlePetsAllowedChange={handlePetsAllowedChange}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             handleDistanceToUCFChange={handleDistanceToUCFChange}
           />
           <ListingContent data={data} />

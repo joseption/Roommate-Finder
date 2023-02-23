@@ -1,4 +1,4 @@
-import { frontendEnv, env } from 'middleware';
+import { frontendEnv, webfrontendEnv } from 'middleware';
 import { IncomingMessage, Server, ServerResponse } from 'node:http';
 
 const SocketServer = require('socket.io').Server;
@@ -6,11 +6,11 @@ const SocketServer = require('socket.io').Server;
 export const startSocketIO = (server: Server<typeof IncomingMessage, typeof ServerResponse>) => {
   const io = new SocketServer(server, {
     cors: {
-      origin: [frontendEnv.URL, env.URL],
+      origin: [frontendEnv.URL, webfrontendEnv.URL],
       pingTimeout: 60000,
     },
   });
-
+  console.log(webfrontendEnv.URL, "frontend url");
   io.on('connection', (socket: any) => {
     socket.on('join_room', (data: any) => {
       socket.join(data);

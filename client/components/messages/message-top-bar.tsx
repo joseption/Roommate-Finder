@@ -3,10 +3,12 @@ import _Button from "../control/button";
 import Svg, { Path } from "react-native-svg"
 import Dots from "../../assets/images/dots_popup_svg";
 import { useEffect, useState } from "react";
+import { NavTo, navProp } from "../../helper";
 import MessageSettings from "./message-settings";
 import { Color, FontSize, Radius } from "../../style";
 import _Image from "../control/image";
 import _Text from "../control/text";
+import { useNavigation } from "@react-navigation/native";
 
 
 
@@ -42,6 +44,7 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
   if (!chat?.users) return <></>;
 
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
+  const navigation = useNavigation<navProp>();
 
   const getUserIcon = () => {
     if (chat?.users[0]?.image)
@@ -132,6 +135,9 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
         numberOfLines={1}
         style={styles.name}
         containerStyle={styles.nameContainer}
+        onPress={() => {
+          navigation.navigate(NavTo.Profile, { profile: chat?.users[0]?.id } as never);
+        }}
         >
           {chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}
         </_Text>

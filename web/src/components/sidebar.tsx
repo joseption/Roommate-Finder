@@ -21,54 +21,19 @@ const Sidebar = ({
   handlePetsAllowedChange,
   handleDistanceToUCFChange,
 }: Props) => {
-  const [currentPrice, setCurrentPrice] = useState<number>(10000);
-  const [htype, setHtype] = useState<string>();
-  const [numRooms, setNumRooms] = useState<number>();
-  const [numBathRooms, setNumBathRooms] = useState<number>();
-  const [petsAllowedCurrent, setPetsAllowedCurrent] = useState<boolean>();
-  const [maxDistToUCF, setMaxDistToUCF] = useState<number>();
-
   function handleRoomsRadioChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setNumRooms(Number(e.target.value));
+    handleBedroomsChange(Number(e.target.value));
   }
 
   function handleBathroomsRadioChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setNumBathRooms(parseInt(e.target.value));
+    handleBathroomsChange(Number(e.target.value));
   }
 
   function handleHousingTypeRadioChange(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
-    setHtype(e.target.value);
+    handleHousingTypeChange(e.target.value);
   }
-
-  function handleFilters() {
-    if (currentPrice) {
-      handlePriceChange(currentPrice);
-    }
-    if (htype) {
-      handleHousingTypeChange(htype);
-    }
-    if (numRooms) {
-      handleBedroomsChange(numRooms);
-    }
-    if (numBathRooms) {
-      handleBathroomsChange(numBathRooms);
-    }
-    if (petsAllowedCurrent !== undefined) {
-      handlePetsAllowedChange(petsAllowedCurrent);
-    }
-    if (maxDistToUCF) {
-      handleDistanceToUCFChange(maxDistToUCF);
-    }
-  }
-
-  // console.log("price: ", price);
-  // console.log("htype: ", housingType);
-  // console.log("numRooms: ", bedrooms);
-  // console.log("numBathRooms: ", bathrooms);
-  // console.log("petsAllowed: ", petsAllowed);
-  // console.log("maxDistToUCF: ", distanceToUCF);
 
   const router = useRouter();
   return (
@@ -77,12 +42,12 @@ const Sidebar = ({
         id="dropdown"
         className="z-10 w-56 rounded-lg bg-white p-3 shadow dark:bg-gray-700"
       >
-        <Button
+        <button
+          className="my-4 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
           onClick={() => void router.push("/createListing")}
-          className="mx-auto mb-4"
         >
           Create Listing
-        </Button>
+        </button>
         <h6>Price</h6>
         <div className="flex items-center border-b border-gray-500 py-2">
           <span className="mr-2 font-bold text-gray-700">$</span>
@@ -160,7 +125,8 @@ const Sidebar = ({
         <select
           className="space-y-2 rounded text-sm"
           onChange={(e) => {
-            setPetsAllowedCurrent(e.target.value === "Yes" ? true : false);
+            // setPetsAllowedCurrent(e.target.value === "Yes" ? true : false);
+            handlePetsAllowedChange(e.target.value === "Yes" ? true : false);
           }}
         >
           <option value="Select">Select</option>
@@ -265,7 +231,8 @@ const Sidebar = ({
         <select
           className="space-y-2 rounded text-sm"
           onChange={(e) => {
-            setMaxDistToUCF(Number(e.target.value));
+            // setMaxDistToUCF(Number(e.target.value));
+            handleDistanceToUCFChange(Number(e.target.value));
           }}
         >
           <option value="select">Select</option>
@@ -273,12 +240,6 @@ const Sidebar = ({
           <option value={6}>{"< 6 miles"}</option>
           <option value={10}>{"< 10 miles"}</option>
         </select>
-        <button
-          className="mt-4 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
-          onClick={handleFilters}
-        >
-          Apply filters
-        </button>
       </div>
     </div>
   );

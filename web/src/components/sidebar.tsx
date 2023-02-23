@@ -2,12 +2,12 @@ import { useRouter } from "next/router";
 import React, { memo, useRef, useState } from "react";
 
 interface Props {
-  handlePriceChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handlePriceChange: (p: number) => void;
   handleHousingTypeChange: (housingType: string) => void;
   handleBedroomsChange: (bedrooms: number) => void;
   handleBathroomsChange: (bathrooms: number) => void;
-  handlePetsAllowedChange: (pA: boolean) => Promise<void>;
-  handleDistanceToUCFChange: (d: number) => Promise<void>;
+  handlePetsAllowedChange: (pA: boolean) => void;
+  handleDistanceToUCFChange: (d: number) => void;
 }
 
 const Sidebar = ({
@@ -21,10 +21,25 @@ const Sidebar = ({
   const router = useRouter();
   const { p, h_type, rms, brs, pA, dtu } = router.query;
 
+  const [currentPrice, setCurrentPrice] = useState(p ? Number(p) : 10000);
+  const [currentHousingType, setCurrentHousingType] = useState<string>();
+
+  const [currentBedrooms, setCurrentBedrooms] = useState(rms ? Number(rms) : 5);
+  const [currentBathrooms, setCurrentBathrooms] = useState(
+    brs ? Number(brs) : 5
+  );
+  const [currentPetsAllowed, setCurrentPetsAllowed] = useState(
+    pA ? Boolean(pA) : undefined
+  );
+  const [currentDistanceToUCF, setCurrentDistanceToUCF] = useState(
+    dtu ? Number(dtu) : undefined
+  );
+
   async function handleRoomsRadioChange(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
-    handleBedroomsChange(Number(e.target.value));
+    // handleBedroomsChange(Number(e.target.value));
+    setCurrentBedrooms(Number(e.target.value));
     await router.push({
       query: { ...router.query, rms: Number(e.target.value) },
     });
@@ -33,7 +48,8 @@ const Sidebar = ({
   async function handleBathroomsRadioChange(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
-    handleBathroomsChange(Number(e.target.value));
+    // handleBathroomsChange(Number(e.target.value));
+    setCurrentBathrooms(Number(e.target.value));
     await router.push({
       query: { ...router.query, brs: Number(e.target.value) },
     });
@@ -42,10 +58,31 @@ const Sidebar = ({
   async function handleHousingTypeRadioChange(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
-    handleHousingTypeChange(e.target.value);
+    // handleHousingTypeChange(e.target.value);
+    setCurrentHousingType(e.target.value);
     await router.push({
       query: { ...router.query, h_type: e.target.value },
     });
+  }
+  function applyFilters() {
+    if (currentPrice) {
+      handlePriceChange(currentPrice);
+    }
+    if (currentHousingType) {
+      handleHousingTypeChange(currentHousingType);
+    }
+    if (currentBedrooms) {
+      handleBedroomsChange(currentBedrooms);
+    }
+    if (currentBathrooms) {
+      handleBathroomsChange(currentBathrooms);
+    }
+    if (currentPetsAllowed) {
+      handlePetsAllowedChange(currentPetsAllowed);
+    }
+    if (currentDistanceToUCF) {
+      handleDistanceToUCFChange(currentDistanceToUCF);
+    }
   }
   return (
     <div className="sticky top-0 h-screen">
@@ -67,10 +104,17 @@ const Sidebar = ({
             step="50.0"
             min="400"
             defaultValue={p ? p : 1000}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              void (async (e: React.ChangeEvent<HTMLInputElement>) => {
-                await handlePriceChange(e);
-              })(e);
+            // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            //   void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+            //     await handlePriceChange(e);
+            //   })(e);
+            // }}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+              setCurrentPrice(Number(e.target.value));
+              await router.push({
+                query: { ...router.query, p: Number(e.target.value) },
+              });
             }}
             className="mr-3 w-full appearance-none border-none bg-transparent py-1 px-2 leading-tight text-gray-700 focus:outline-none"
             placeholder="Enter a max price"
@@ -156,13 +200,16 @@ const Sidebar = ({
         <select
           className="space-y-2 rounded text-sm"
           defaultValue={pA ? (pA ? "Yes" : "No") : "Select"}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            void (async (e: React.ChangeEvent<HTMLSelectElement>) => {
-              await handlePetsAllowedChange(
-                e.target.value === "Yes" ? true : false
-              );
-            })(e);
-          }}
+          // onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+          //   void (async (e: React.ChangeEvent<HTMLSelectElement>) => {
+          //     await handlePetsAllowedChange(
+          //       e.target.value === "Yes" ? true : false
+          //     );
+          //   })(e);
+          // }}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            setCurrentPetsAllowed(e.target.value === "Yes" ? true : false)
+          }
         >
           <option value="Select">Select</option>
           <option value="Yes">Yes</option>
@@ -306,10 +353,13 @@ const Sidebar = ({
         <select
           className="space-y-2 rounded text-sm"
           defaultValue={dtu ? dtu : "select"}
+          // onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+          //   void (async (e: React.ChangeEvent<HTMLSelectElement>) => {
+          //     await handleDistanceToUCFChange(Number(e.target.value));
+          //   })(e);
+          // }}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            void (async (e: React.ChangeEvent<HTMLSelectElement>) => {
-              await handleDistanceToUCFChange(Number(e.target.value));
-            })(e);
+            setCurrentDistanceToUCF(Number(e.target.value));
           }}
         >
           <option value="select">Select</option>
@@ -319,7 +369,7 @@ const Sidebar = ({
         </select>
         <button
           className="my-2 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
-          onClick={() => (window.location.href = "/listings")}
+          onClick={applyFilters}
         >
           Apply filters
         </button>

@@ -18,17 +18,27 @@ interface Props {
 const Messages = ({chat, userInfo, socket, isDarkMode, image}: Props) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [typingStates, setTypingStates] = useState<Set<string>>(new Set<string>());
   const chatRef = useRef(chat);
   const userInfoRef = useRef(userInfo);
   const messagesRef = useRef(messages);
+
+  const typingIndicatorExists = () => {
+    return messagesRef.current.length !== 0 && messagesRef.current[0].typingIndicator;
+  }
   
   useEffect(() => {
     chatRef.current = chat
     getMessages(chat.id);
     if (messages?.length !== 0 && messages[0].chatId != chatRef.current.id) {
-      setLoading(true)
+      setLoading(true);
     }
-  }, [chat])
+  }, [chat]);
+
+  useEffect(() => {
+    setTypingIndicator()
+  }, [typingStates])
+
 
   useEffect(() => {
     userInfoRef.current = userInfo
@@ -45,28 +55,18 @@ const Messages = ({chat, userInfo, socket, isDarkMode, image}: Props) => {
       setMessages([data, ...messagesRef.current]);
     });
 
-    const typingIndicatorExists = () => {
-      return messagesRef.current.length !== 0 && messagesRef.current[0].typingIndicator;
-    }
-
 
     // Listen for typing indicator socket
     socket.on('receive_typing', (data: any) => {
-      if (data.chatId !== chatRef.current.id) return;
       if (chatRef.current.blocked) return;
       if (data.userId === userInfoRef.current.id) return;
 
       if (data.isTyping) {
-        if (!typingIndicatorExists()) {
-          setMessages([data, ...messagesRef.current])
-        }
+        typingStates.add(data.chatId);
       } else {
-        if (typingIndicatorExists()) {
-          let newMessages = [...messagesRef.current]
-          newMessages.shift();
-          setMessages(newMessages);
-        }
+        typingStates.delete(data.chatId);
       }
+      setTypingStates(new Set<string>(typingStates));
     });
 
     socket.on("connect_error", (err) => {
@@ -77,6 +77,26 @@ const Messages = ({chat, userInfo, socket, isDarkMode, image}: Props) => {
       }
     });
   }, [socket]);
+
+  const setTypingIndicator = async () => {
+    if (typingStates.has(chat.id)) {
+      if (!typingIndicatorExists()) {
+        const data = {
+          chatId: chat.id,
+          typingIndicator: true,
+          userId: chat.users[0].id,
+          id: -1,
+        };
+        setMessages([data, ...messagesRef.current])
+      }
+    } else {
+      if (typingIndicatorExists()) {
+        let newMessages = [...messagesRef.current]
+        newMessages.shift();
+        setMessages(newMessages);
+      }
+    }
+  }
 
   const getMessages = async (id: string) => {
     if (!id) return;
@@ -95,6 +115,7 @@ const Messages = ({chat, userInfo, socket, isDarkMode, image}: Props) => {
       else {
         setMessages(res);
         setLoading(false);
+        setTypingIndicator();
       }
     });
   }
@@ -107,7 +128,8 @@ const Messages = ({chat, userInfo, socket, isDarkMode, image}: Props) => {
       if (id && messages && messages.length > 0) {
         if (item.userId != id && 
             (messages[idx - 1] && messages[idx - 1].userId == id) ||
-            !messages[idx - 1]) {
+            !messages[idx - 1] ||
+            messages[idx - 1]?.typingIndicator) {
               item.showImg = true;
               item.lastFromMsg = !messages[idx - 1];
         }

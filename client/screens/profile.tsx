@@ -35,11 +35,11 @@ const ProfileScreen = (props: any) => {
   useEffect(() => {
     let rt = route();
     if (rt && rt.params && rt.name && rt.name == NavTo.Profile) {
-      if (rt.params["profile"]) {
-        setProfile(rt.params["profile"]);
+      if (rt.params['profile']) {
+        getUser(rt.params['profile']);
       }
     }
-  }, []);
+  }, [props.route])
 
   useEffect(() => {
     getTags();
@@ -80,6 +80,20 @@ const ProfileScreen = (props: any) => {
     }
   };
 
+  const getUser = async (id: string) => {
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      const res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      } else {
+        setProfile(res);
+      }
+    });
+  }
+
   const generateRequestId = () => {
     return Math.floor(Math.random() * 9999999) + 1;
   };
@@ -111,14 +125,11 @@ const ProfileScreen = (props: any) => {
       <Text style={styles.match}>Match: {profile?.matchPercentage}%</Text>
       <Text style={styles.bio}>"{profile?.bio}"</Text>
       <View style={styles.chatRow}>
-        <TouchableOpacity style={styles.chatButton} onPress={() => {}}>
-          <Text style={styles.chatText}>
-            <AntDesign
-              name="message1"
-              size={15}
-              color="white"
-              style={styles.chatIcon}
-            />
+        <TouchableOpacity style={styles.chatButton} onPress={() => {
+          navigation.navigate(NavTo.Messages, {user: profile.id, requestId: generateRequestId()} as never);
+        }}>
+          <Text style={styles.chatText} >
+            <AntDesign name="message1" size={15} color="white" style={styles.chatIcon} />
             Chat
           </Text>
         </TouchableOpacity>

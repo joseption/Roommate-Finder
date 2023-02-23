@@ -31,6 +31,7 @@ interface Props {
 
 const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDarkMode}: Props) => {
   const [msgHeight, setMsgHeight] = useState(40);
+  const [wasTyping, setWasTyping] = useState(false);
 
   const randomNum = () => {
     return (Math.floor(Math.random() * 999999) + 1).toString();
@@ -51,6 +52,7 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
       id: randomNum(),
     }
     socket.emit('send_typing', data);
+    setWasTyping(isTyping);
   }
 
   const setTypingIndicator = async (remove?: boolean) => {
@@ -58,6 +60,7 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
       await prepareTypingIndicatorData(false);
       return;
     };
+    if (wasTyping && newMessage?.length !== 0) return;
     await prepareTypingIndicatorData(newMessage?.length !== 0);
   }
 

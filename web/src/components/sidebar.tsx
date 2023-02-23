@@ -1,16 +1,13 @@
 import { useRouter } from "next/router";
-import { resolve } from "path/posix";
 import React, { memo, useRef, useState } from "react";
 
-import Button from "./Inputs/Button";
-
 interface Props {
-  handlePriceChange: (price: number) => void;
+  handlePriceChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   handleHousingTypeChange: (housingType: string) => void;
   handleBedroomsChange: (bedrooms: number) => void;
   handleBathroomsChange: (bathrooms: number) => void;
-  handlePetsAllowedChange: (petsAllowed: boolean) => void;
-  handleDistanceToUCFChange: (distanceToUCF: number) => void;
+  handlePetsAllowedChange: (pA: boolean) => Promise<void>;
+  handleDistanceToUCFChange: (d: number) => Promise<void>;
 }
 
 const Sidebar = ({
@@ -21,21 +18,35 @@ const Sidebar = ({
   handlePetsAllowedChange,
   handleDistanceToUCFChange,
 }: Props) => {
-  function handleRoomsRadioChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const router = useRouter();
+  const { p, h_type, rms, brs, pA, dtu } = router.query;
+
+  async function handleRoomsRadioChange(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
     handleBedroomsChange(Number(e.target.value));
+    await router.push({
+      query: { ...router.query, rms: Number(e.target.value) },
+    });
   }
 
-  function handleBathroomsRadioChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleBathroomsRadioChange(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
     handleBathroomsChange(Number(e.target.value));
+    await router.push({
+      query: { ...router.query, brs: Number(e.target.value) },
+    });
   }
 
-  function handleHousingTypeRadioChange(
+  async function handleHousingTypeRadioChange(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
     handleHousingTypeChange(e.target.value);
+    await router.push({
+      query: { ...router.query, h_type: e.target.value },
+    });
   }
-
-  const router = useRouter();
   return (
     <div className="sticky top-0 h-screen">
       <div
@@ -55,7 +66,12 @@ const Sidebar = ({
             type="number"
             step="50.0"
             min="400"
-            onChange={(e) => setCurrentPrice(Number(e.target.value))}
+            defaultValue={p ? p : 1000}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                await handlePriceChange(e);
+              })(e);
+            }}
             className="mr-3 w-full appearance-none border-none bg-transparent py-1 px-2 leading-tight text-gray-700 focus:outline-none"
             placeholder="Enter a max price"
           />
@@ -70,7 +86,12 @@ const Sidebar = ({
               type="radio"
               value="Apartment"
               name="h_type"
-              onChange={handleHousingTypeRadioChange}
+              checked={h_type === "Apartment"}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleHousingTypeRadioChange(e);
+                })(e);
+              }}
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
             />
 
@@ -88,7 +109,12 @@ const Sidebar = ({
               type="radio"
               value="House"
               name="h_type"
-              onChange={handleHousingTypeRadioChange}
+              checked={h_type === "House"}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleHousingTypeRadioChange(e);
+                })(e);
+              }}
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
             />
 
@@ -106,7 +132,12 @@ const Sidebar = ({
               type="radio"
               value="Condo"
               name="h_type"
-              onChange={handleHousingTypeRadioChange}
+              checked={h_type === "Condo"}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleHousingTypeRadioChange(e);
+                })(e);
+              }}
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
             />
 
@@ -124,9 +155,13 @@ const Sidebar = ({
 
         <select
           className="space-y-2 rounded text-sm"
-          onChange={(e) => {
-            // setPetsAllowedCurrent(e.target.value === "Yes" ? true : false);
-            handlePetsAllowedChange(e.target.value === "Yes" ? true : false);
+          defaultValue={pA ? (pA ? "Yes" : "No") : "Select"}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+            void (async (e: React.ChangeEvent<HTMLSelectElement>) => {
+              await handlePetsAllowedChange(
+                e.target.value === "Yes" ? true : false
+              );
+            })(e);
           }}
         >
           <option value="Select">Select</option>
@@ -143,7 +178,12 @@ const Sidebar = ({
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
               name="rooms"
               value={1}
-              onChange={handleRoomsRadioChange}
+              checked={rms ? Number(rms) === 1 : false}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleRoomsRadioChange(e);
+                })(e);
+              }}
             />
             <span className="ml-2 text-gray-700">1</span>
           </label>
@@ -153,7 +193,12 @@ const Sidebar = ({
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
               name="rooms"
               value={2}
-              onChange={handleRoomsRadioChange}
+              checked={rms ? Number(rms) === 2 : false}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleRoomsRadioChange(e);
+                })(e);
+              }}
             />
             <span className="ml-2 text-gray-700">2</span>
           </label>
@@ -163,7 +208,12 @@ const Sidebar = ({
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
               name="rooms"
               value={3}
-              onChange={handleRoomsRadioChange}
+              checked={rms ? Number(rms) === 3 : false}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleRoomsRadioChange(e);
+                })(e);
+              }}
             />
             <span className="ml-2 text-gray-700">3</span>
           </label>
@@ -173,7 +223,12 @@ const Sidebar = ({
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
               name="rooms"
               value={4}
-              onChange={handleRoomsRadioChange}
+              checked={rms ? Number(rms) === 4 : false}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleRoomsRadioChange(e);
+                })(e);
+              }}
             />
             <span className="ml-2 text-gray-700">4+</span>
           </label>
@@ -189,7 +244,12 @@ const Sidebar = ({
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
               name="bathroom"
               value={1}
-              onChange={handleBathroomsRadioChange}
+              checked={brs ? Number(brs) === 1 : false}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleBathroomsRadioChange(e);
+                })(e);
+              }}
             />
             <span className="ml-2 text-gray-700">1</span>
           </label>
@@ -199,7 +259,12 @@ const Sidebar = ({
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
               name="bathroom"
               value={2}
-              onChange={handleBathroomsRadioChange}
+              checked={brs ? Number(brs) === 2 : false}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleBathroomsRadioChange(e);
+                })(e);
+              }}
             />
             <span className="ml-2 text-gray-700">2</span>
           </label>
@@ -209,7 +274,12 @@ const Sidebar = ({
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
               name="bathroom"
               value={3}
-              onChange={handleBathroomsRadioChange}
+              checked={brs ? Number(brs) === 3 : false}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleBathroomsRadioChange(e);
+                })(e);
+              }}
             />
             <span className="ml-2 text-gray-700">3</span>
           </label>
@@ -219,7 +289,12 @@ const Sidebar = ({
               className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
               name="bathroom"
               value={4}
-              onChange={handleBathroomsRadioChange}
+              checked={brs ? Number(brs) === 4 : false}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                  await handleBathroomsRadioChange(e);
+                })(e);
+              }}
             />
             <span className="ml-2 text-gray-700">4+</span>
           </label>
@@ -230,9 +305,11 @@ const Sidebar = ({
         </h6>
         <select
           className="space-y-2 rounded text-sm"
-          onChange={(e) => {
-            // setMaxDistToUCF(Number(e.target.value));
-            handleDistanceToUCFChange(Number(e.target.value));
+          defaultValue={dtu ? dtu : "select"}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+            void (async (e: React.ChangeEvent<HTMLSelectElement>) => {
+              await handleDistanceToUCFChange(Number(e.target.value));
+            })(e);
           }}
         >
           <option value="select">Select</option>
@@ -240,6 +317,18 @@ const Sidebar = ({
           <option value={6}>{"< 6 miles"}</option>
           <option value={10}>{"< 10 miles"}</option>
         </select>
+        <button
+          className="my-2 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
+          onClick={() => (window.location.href = "/listings")}
+        >
+          Apply filters
+        </button>
+        <button
+          className="my-2 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
+          onClick={() => (window.location.href = "/listings")}
+        >
+          Clear filters
+        </button>
       </div>
     </div>
   );

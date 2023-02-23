@@ -1,16 +1,15 @@
-import { Dialog, Disclosure, Transition } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
+import { debounce } from "lodash";
 import { useRouter } from "next/router";
-import React, { Fragment, useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 
-import Button from "../components/Inputs/Button";
-import ListingCard from "../components/ListingCard";
 import ListingContent from "../components/listingsContent";
 import Sidebar from "../components/sidebar";
 import { GetListings } from "../request/fetch";
-import { ListingInfo, ListingRequest } from "../types/listings.types";
+import { ListingRequest } from "../types/listings.types";
 
 export default function Listings() {
+  const router = useRouter();
   const [price, setPrice] = useState<number>(100000);
   const [housingType, setHousingType] = useState<string | undefined>();
   const [bedrooms, setBedrooms] = useState<number | undefined>();
@@ -18,26 +17,47 @@ export default function Listings() {
   const [petsAllowed, setPetsAllowed] = useState<boolean | null | undefined>();
   const [distanceToUCF, setDistanceToUCF] = useState<number>();
 
-  function handleRoomsRadioChange(e: React.ChangeEvent<HTMLInputElement>) {
-    handleBedroomsChange(Number(e.target.value));
-  }
+  // const { p, h_type, rms, brs, pA, dtu } = router.query;
 
-  function handleBathroomsRadioChange(e: React.ChangeEvent<HTMLInputElement>) {
-    handleBathroomsChange(Number(e.target.value));
-  }
+  // async function handleRoomsRadioChange(
+  //   e: React.ChangeEvent<HTMLInputElement>
+  // ) {
+  //   handleBedroomsChange(Number(e.target.value));
+  //   await router.push({
+  //     query: { ...router.query, rms: Number(e.target.value) },
+  //   });
+  // }
 
-  function handleHousingTypeRadioChange(
-    e: React.ChangeEvent<HTMLInputElement>
-  ) {
-    handleHousingTypeChange(e.target.value);
-  }
+  // async function handleBathroomsRadioChange(
+  //   e: React.ChangeEvent<HTMLInputElement>
+  // ) {
+  //   handleBathroomsChange(Number(e.target.value));
+  //   await router.push({
+  //     query: { ...router.query, brs: Number(e.target.value) },
+  //   });
+  // }
 
-  const handlePriceChange = useCallback(
-    (p: number) => {
-      setPrice(p);
-    },
-    [setPrice]
-  );
+  // async function handleHousingTypeRadioChange(
+  //   e: React.ChangeEvent<HTMLInputElement>
+  // ) {
+  //   handleHousingTypeChange(e.target.value);
+  //   await router.push({
+  //     query: { ...router.query, h_type: e.target.value },
+  //   });
+  // }
+  const debouncedPrice = React.useRef(
+    debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+      setPrice(Number(e.target.value));
+    }, 500)
+  ).current;
+
+  const handlePriceChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedPrice(e);
+    await router.push({
+      query: { ...router.query, p: Number(e.target.value) },
+    });
+  };
+
   const handleHousingTypeChange = useCallback(
     (h: string) => {
       setHousingType(h);
@@ -57,16 +77,18 @@ export default function Listings() {
     [setBathrooms]
   );
   const handlePetsAllowedChange = useCallback(
-    (pA: boolean) => {
+    async (pA: boolean) => {
       setPetsAllowed(pA);
+      await router.push({ query: { ...router.query, pA: pA } });
     },
-    [setPetsAllowed]
+    [router]
   );
   const handleDistanceToUCFChange = useCallback(
-    (d: number) => {
+    async (d: number) => {
       setDistanceToUCF(d);
+      await router.push({ query: { ...router.query, dtu: d } });
     },
-    [setDistanceToUCF]
+    [router]
   );
 
   const listingReq: ListingRequest = {
@@ -81,22 +103,22 @@ export default function Listings() {
   const { data, isLoading } = useQuery(["listings", listingReq], () =>
     GetListings(listingReq)
   );
-  const router = useRouter();
   return (
     <div className="">
       {isLoading || !data ? (
         <div>Loading...</div>
       ) : (
         <div className="flex">
-          {/* <Sidebar
+          <Sidebar
             handlePriceChange={handlePriceChange}
             handleHousingTypeChange={handleHousingTypeChange}
             handleBedroomsChange={handleBedroomsChange}
             handleBathroomsChange={handleBathroomsChange}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             handlePetsAllowedChange={handlePetsAllowedChange}
             handleDistanceToUCFChange={handleDistanceToUCFChange}
-          /> */}
-          <div className="sticky top-0 h-screen">
+          />
+          {/* <div className="sticky top-0 h-screen">
             <div
               id="dropdown"
               className="z-10 w-56 rounded-lg bg-white p-3 shadow dark:bg-gray-700"
@@ -114,7 +136,12 @@ export default function Listings() {
                   type="number"
                   step="50.0"
                   min="400"
-                  // onChange={(e) => setCurrentPrice(Number(e.target.value))}
+                  defaultValue={p ? p : 1000}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                      await handlePriceChange(e);
+                    })(e);
+                  }}
                   className="mr-3 w-full appearance-none border-none bg-transparent py-1 px-2 leading-tight text-gray-700 focus:outline-none"
                   placeholder="Enter a max price"
                 />
@@ -132,7 +159,12 @@ export default function Listings() {
                     type="radio"
                     value="Apartment"
                     name="h_type"
-                    onChange={handleHousingTypeRadioChange}
+                    checked={h_type === "Apartment"}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleHousingTypeRadioChange(e);
+                      })(e);
+                    }}
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
                   />
 
@@ -150,7 +182,12 @@ export default function Listings() {
                     type="radio"
                     value="House"
                     name="h_type"
-                    onChange={handleHousingTypeRadioChange}
+                    checked={h_type === "House"}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleHousingTypeRadioChange(e);
+                      })(e);
+                    }}
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
                   />
 
@@ -168,7 +205,12 @@ export default function Listings() {
                     type="radio"
                     value="Condo"
                     name="h_type"
-                    onChange={handleHousingTypeRadioChange}
+                    checked={h_type === "Condo"}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleHousingTypeRadioChange(e);
+                      })(e);
+                    }}
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary-600 focus:ring-2 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-primary-600"
                   />
 
@@ -186,10 +228,13 @@ export default function Listings() {
 
               <select
                 className="space-y-2 rounded text-sm"
-                onChange={(e) => {
-                  handlePetsAllowedChange(
-                    e.target.value === "Yes" ? true : false
-                  );
+                defaultValue={pA ? (pA ? "Yes" : "No") : "Select"}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  void (async (e: React.ChangeEvent<HTMLSelectElement>) => {
+                    await handlePetsAllowedChange(
+                      e.target.value === "Yes" ? true : false
+                    );
+                  })(e);
                 }}
               >
                 <option value="Select">Select</option>
@@ -206,7 +251,12 @@ export default function Listings() {
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
                     name="rooms"
                     value={1}
-                    onChange={handleRoomsRadioChange}
+                    checked={rms ? Number(rms) === 1 : false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleRoomsRadioChange(e);
+                      })(e);
+                    }}
                   />
                   <span className="ml-2 text-gray-700">1</span>
                 </label>
@@ -216,7 +266,12 @@ export default function Listings() {
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
                     name="rooms"
                     value={2}
-                    onChange={handleRoomsRadioChange}
+                    checked={rms ? Number(rms) === 2 : false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleRoomsRadioChange(e);
+                      })(e);
+                    }}
                   />
                   <span className="ml-2 text-gray-700">2</span>
                 </label>
@@ -226,7 +281,12 @@ export default function Listings() {
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
                     name="rooms"
                     value={3}
-                    onChange={handleRoomsRadioChange}
+                    checked={rms ? Number(rms) === 3 : false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleRoomsRadioChange(e);
+                      })(e);
+                    }}
                   />
                   <span className="ml-2 text-gray-700">3</span>
                 </label>
@@ -236,7 +296,12 @@ export default function Listings() {
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
                     name="rooms"
                     value={4}
-                    onChange={handleRoomsRadioChange}
+                    checked={rms ? Number(rms) === 4 : false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleRoomsRadioChange(e);
+                      })(e);
+                    }}
                   />
                   <span className="ml-2 text-gray-700">4+</span>
                 </label>
@@ -252,7 +317,12 @@ export default function Listings() {
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
                     name="bathroom"
                     value={1}
-                    onChange={handleBathroomsRadioChange}
+                    checked={brs ? Number(brs) === 1 : false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleBathroomsRadioChange(e);
+                      })(e);
+                    }}
                   />
                   <span className="ml-2 text-gray-700">1</span>
                 </label>
@@ -262,7 +332,12 @@ export default function Listings() {
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
                     name="bathroom"
                     value={2}
-                    onChange={handleBathroomsRadioChange}
+                    checked={brs ? Number(brs) === 2 : false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleBathroomsRadioChange(e);
+                      })(e);
+                    }}
                   />
                   <span className="ml-2 text-gray-700">2</span>
                 </label>
@@ -272,7 +347,12 @@ export default function Listings() {
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
                     name="bathroom"
                     value={3}
-                    onChange={handleBathroomsRadioChange}
+                    checked={brs ? Number(brs) === 3 : false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleBathroomsRadioChange(e);
+                      })(e);
+                    }}
                   />
                   <span className="ml-2 text-gray-700">3</span>
                 </label>
@@ -282,7 +362,12 @@ export default function Listings() {
                     className="h-4 w-4 rounded border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700"
                     name="bathroom"
                     value={4}
-                    onChange={handleBathroomsRadioChange}
+                    checked={brs ? Number(brs) === 4 : false}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      void (async (e: React.ChangeEvent<HTMLInputElement>) => {
+                        await handleBathroomsRadioChange(e);
+                      })(e);
+                    }}
                   />
                   <span className="ml-2 text-gray-700">4+</span>
                 </label>
@@ -293,9 +378,11 @@ export default function Listings() {
               </h6>
               <select
                 className="space-y-2 rounded text-sm"
-                onChange={(e) => {
-                  // setMaxDistToUCF(Number(e.target.value));
-                  handleDistanceToUCFChange(Number(e.target.value));
+                defaultValue={dtu ? dtu : "select"}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  void (async (e: React.ChangeEvent<HTMLSelectElement>) => {
+                    await handleDistanceToUCFChange(Number(e.target.value));
+                  })(e);
                 }}
               >
                 <option value="select">Select</option>
@@ -303,8 +390,20 @@ export default function Listings() {
                 <option value={6}>{"< 6 miles"}</option>
                 <option value={10}>{"< 10 miles"}</option>
               </select>
+              <button
+                className="my-2 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
+                onClick={() => (window.location.href = "/listings")}
+              >
+                Apply filters
+              </button>
+              <button
+                className="my-2 flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
+                onClick={() => (window.location.href = "/listings")}
+              >
+                Clear filters
+              </button>
             </div>
-          </div>
+          </div> */}
           <ListingContent data={data} />
         </div>
       )}

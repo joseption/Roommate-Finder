@@ -10,7 +10,6 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
       pingTimeout: 60000,
     },
   });
-  console.log(webfrontendEnv.URL, "frontend url");
   io.on('connection', (socket: any) => {
     socket.on('join_room', (data: any) => {
       socket.join(data);

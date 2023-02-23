@@ -42,7 +42,7 @@ const ProfileCard = (props: any) => {
       </View>
       <View style={styles.row}>
         <View style={styles.column1}>
-          <TouchableOpacity onPress={() => { navigation.navigate(NavTo.Profile, { profile: profile } as never) }}>
+          <TouchableOpacity onPress={() => { navigation.navigate(NavTo.Profile, { profile: profile.id } as never) }}>
             <Text style={styles.viewProfileButton}>View Profile</Text>
           </TouchableOpacity>
         </View>

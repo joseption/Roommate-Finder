@@ -59,6 +59,7 @@ const MessagesScreen = (props: any) => {
     props.socket.on('receive_block', (data: any) => {
       updateBlocked(data.chat);
     });
+
     props.socket.on('receive_notification', (data: any) => {
       const chats = chatsRef.current.map((chat) => {
         if (chat.id === data.chatId) {
@@ -170,8 +171,7 @@ const MessagesScreen = (props: any) => {
   
   const updateTabs = async (data: any) => {
     if (chatsRef.current.length === 0) return;
-    const fetchedChat = await getChat(data.chatId)
-    const latestMessage = await getMessage(fetchedChat.latestMessage);
+    const latestMessage = {content: data.content, userId: data.userId};
     let newChat: any;
     let newChats = chatsRef.current.filter((chat) => {
       const condition = data.chatId !== chat.id; 

@@ -11,7 +11,6 @@ router.use(isAuthenticated);
 // create listing
 router.post('/', async (req: Request, res: Response) => {
   try {
-    console.log(req.body);
     const payload: payload = req.body[0];
     const userId = payload.userId;
 
@@ -140,7 +139,6 @@ router.put('/:listingId', async (req: Request, res: Response) => {
         id: req.params.listingId as string,
       },
     });
-    // console.log('listing images', listing.images, 'images uploaded', uploadImages, 'images variable', images);
     uploadImages.push(...listing.images);
     const updatedListing = await prisma.listings.update({
       where: {
@@ -186,7 +184,6 @@ router.delete('/:listingId', async (req: Request, res: Response) => {
 router.post('/all', async (req: Request, res: Response) => {
   try {
     const { housing_type, price, petsAllowed, distanceToUcf, rooms, bathrooms } = req.body;
-    console.log(req.body);
     const listings = await prisma.listings.findMany({
       where: {
         housing_type: housing_type || undefined,

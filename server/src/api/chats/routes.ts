@@ -173,7 +173,6 @@ router.put('/removeFromGroup', async (req: Request, res: Response) => {
 router.delete('/delete/:chatId', async (req: Request, res: Response) => {
   try {
     const { chatId } = req.params;
-    console.log(chatId, 'hit delete route');
     await db.chat.delete({
       where: {
         id: chatId as string,

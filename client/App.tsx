@@ -494,7 +494,7 @@ export const App = (props: any) => {
         return routes[0].name;
       }
     }
-    return NavTo.Profile;
+    return NavTo.MyProfile;
   }
 
   const navigateToSetupStep = (step: string) => {

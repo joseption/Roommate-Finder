@@ -1,4 +1,5 @@
 import { Platform, StyleSheet } from 'react-native';
+import { isMobile } from './helper';
 
 export const Color = (darkMode: boolean) => {
   return !darkMode ? LightColor() : DarkColor();
@@ -350,7 +351,7 @@ export const LightStyle = StyleSheet.create({
       width: '100%',
       backgroundColor: Color(false).promptMask,
       position: 'absolute',
-      borderRadius: Radius.large,
+      borderRadius: isMobile() ? 0 : Radius.large,
       top: 0,
       left: 0
   },
@@ -838,7 +839,7 @@ export const DarkStyle = StyleSheet.create({
       width: '100%',
       backgroundColor: Color(true).promptMask,
       position: 'absolute',
-      borderRadius: Radius.large,
+      borderRadius: isMobile() ? 0 : Radius.large,
       top: 0,
       left: 0
   },

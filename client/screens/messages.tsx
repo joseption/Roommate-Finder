@@ -419,6 +419,7 @@ const MessagesScreen = (props: any) => {
         updateBlocked={updateBlocked}
         updateMuted={updateMuted}
         isDarkMode={props.isDarkMode}
+        setShowingMessagePanel={props.setShowingMessagePanel}
       />
     </>
   );

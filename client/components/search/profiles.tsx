@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ProfileCard from './profile-card';
 import { env, authTokenHeader, navProp, NavTo } from '../../helper';
 import { Color, Style } from '../../style';
@@ -32,6 +32,7 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
   const navigation = useNavigation<navProp>();
   const [allProfiles, setAllProfiles] = useState([]);
   const [isFetchedProfiles, setFetchedProfiles] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(false);
 
   useEffect(() => {
     if (forceGetProfiles) {
@@ -50,12 +51,14 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
   }, [filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting]);
 
   const getProfiles = async () => {
+    setIsPageLoading(true);
     if (filtersFetched) {
-      getFilteredProfiles();
+      await getFilteredProfiles();
     }
     else {
-      getAllProfiles();
+      await getAllProfiles();
     }
+    setIsPageLoading(false);
   }
 
   const sortProfiles = (data: any) => {
@@ -135,15 +138,14 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
 
   const containerStyle = () => {
     let style = [];
-    if (!(isFetchedProfiles && allProfiles.length)) {
+    if (!(isFetchedProfiles && allProfiles.length) || isPageLoading) {
       style.push({
         height: '100%',
         flex: 1,
-        flexDirection: 'row',
         justifyContent: 'center',
-        alignItems: 'center'
       });
     }
+
     return style;
   }
 
@@ -160,6 +162,20 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
     },
     noResults: {
       alignItems: 'center'
+    },
+    loadingScreen: {
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1,
+      height: '100%',
+    },
+    loading: {
+      flex: 1,
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'column'
     }
   });
 
@@ -168,6 +184,8 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
     style={styles.profilesContainer}
     contentContainerStyle={containerStyle()}
     >
+      {!isPageLoading ? 
+      <View>
       {isFetchedProfiles &&
         (allProfiles.length ?
           allProfiles.map((profile: any, index) =>
@@ -197,6 +215,18 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
             </_Button>
           </View>
         )
+      }
+      </View>
+      :
+      <View
+      style={styles.loadingScreen}
+      >
+      <ActivityIndicator
+      size="large"
+      color={Color(isDarkMode).gold}
+      style={styles.loading}
+      />
+      </View>
       }
     </ScrollView>
   );

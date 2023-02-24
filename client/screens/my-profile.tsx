@@ -109,7 +109,10 @@ const MyProfileScreen = (props: any) => {
 
   const styles = StyleSheet.create({
     loadingScreen: {
-      margin: 'auto'
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1
     },
     rowContent: {
       flexDirection: 'row',
@@ -123,7 +126,6 @@ const MyProfileScreen = (props: any) => {
       borderWidth: 1,
       borderRadius: Radius.round,
       borderColor: Color(props.isDarkMode).separator,
-      marginHorizontal: 'auto',
       backgroundColor: Color(props.isDarkMode).userIcon
     },
     name: {
@@ -161,17 +163,23 @@ const MyProfileScreen = (props: any) => {
       backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).holderSecondary,
     },
     mainContent: {
-      marginTop: 35,
+      marginTop: 45,
       width: '100%'
     },
     group: {
       marginTop: -50
     },
     imageContainer: {
-      zIndex: 3
+      zIndex: 3,
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'center'
     },
     view: {
       flexDirection: 'column-reverse'
+    },
+    bio: {
+      width: '100%'
     }
   });
 
@@ -237,6 +245,7 @@ const MyProfileScreen = (props: any) => {
               </_Text>
               <_Text
               isDarkMode={props.isDarkMode}
+              style={styles.bio}
               >
                 {profile?.bio}
               </_Text>
@@ -267,7 +276,7 @@ const MyProfileScreen = (props: any) => {
         width={150}
         style={styles.profileImg}
         source={{uri: profile?.image}}
-        containerStyle={props.imageContainer}
+        containerStyle={styles.imageContainer}
         />
       </View>
     </ScrollView>

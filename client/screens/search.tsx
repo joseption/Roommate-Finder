@@ -135,7 +135,7 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
     },
     container: {
       height: '100%',
-      justifyContent: 'flex-start'
+      justifyContent: 'flex-start',
     },
     filterContainer: {
       display: 'flex',

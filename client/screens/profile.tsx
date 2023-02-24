@@ -9,6 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Platform,
+  TouchableHighlight,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -118,7 +119,10 @@ const ProfileScreen = (props: any) => {
 
   const styles = StyleSheet.create({
     loadingScreen: {
-      margin: 'auto'
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1
     },
     rowContent: {
       flexDirection: 'row',
@@ -132,7 +136,6 @@ const ProfileScreen = (props: any) => {
       borderWidth: 1,
       borderRadius: Radius.round,
       borderColor: Color(props.isDarkMode).separator,
-      marginHorizontal: 'auto',
       backgroundColor: Color(props.isDarkMode).userIcon
     },
     name: {
@@ -170,14 +173,17 @@ const ProfileScreen = (props: any) => {
       backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).holderSecondary,
     },
     mainContent: {
-      marginTop: 35,
+      marginTop: 45,
       width: '100%'
     },
     group: {
       marginTop: -50
     },
     imageContainer: {
-      zIndex: 3
+      zIndex: 3,
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'center'
     },
     view: {
       flexDirection: 'column-reverse',
@@ -193,7 +199,7 @@ const ProfileScreen = (props: any) => {
     btnContent: {
       justifyContent: 'center',
       alignItems: 'center',
-      flexDirection: 'row'
+      flexDirection: 'row',
     },
     btnText: {
       marginLeft: 5,
@@ -207,6 +213,23 @@ const ProfileScreen = (props: any) => {
       fontSize: FontSize.default,
       backgroundColor: Color(props.isDarkMode).gold,
       marginBottom: 5
+    },
+    backIcon: {
+      ...Platform.select({
+        web: {
+          outlineStyle: 'none'
+        }
+      }),
+    },
+    button: {
+      padding: 10,
+      borderRadius: Radius.round,
+      margin: 5,
+      position: 'absolute',
+      zIndex: 5
+    },
+    bio: {
+      width: '100%'
     }
   });
 
@@ -223,6 +246,19 @@ const ProfileScreen = (props: any) => {
 
   return (
     <ScrollView>
+      <TouchableHighlight
+      underlayColor={Color(props.isDarkMode).underlayMask}
+      style={styles.button}
+      onPress={() => navigation.goBack() }
+      >
+        <FontAwesomeIcon 
+        size={20} 
+        color={Color(props.isDarkMode).text} 
+        style={styles.backIcon} 
+        icon="arrow-left"
+        >
+        </FontAwesomeIcon>
+      </TouchableHighlight>
       <View
       style={styles.view}
       >
@@ -298,6 +334,7 @@ const ProfileScreen = (props: any) => {
               </_Text>
               <_Text
               isDarkMode={props.isDarkMode}
+              style={styles.bio}
               >
                 {profile?.bio}
               </_Text>
@@ -328,7 +365,7 @@ const ProfileScreen = (props: any) => {
         width={150}
         style={styles.profileImg}
         source={{uri: profile?.image}}
-        containerStyle={props.imageContainer}
+        containerStyle={styles.imageContainer}
         />
       </View>
     </ScrollView>

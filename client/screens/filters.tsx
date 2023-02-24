@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TouchableHighlight } from 'react-native';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
-import { navProp, NavTo } from '../helper';
+import { isDarkMode, navProp, NavTo } from '../helper';
 import { Color, FontSize, Radius, Style } from '../style';
 
 
@@ -43,10 +43,16 @@ const FiltersScreen = (props: any) => {
     useEffect(() => {
         let rt = route();
         if (rt && rt.params && rt.name && rt.name == NavTo.Filters) {
-          if (rt.params['params']) {
-            let params = (rt.params['params'] as string).split(',');
-            addFilters(params);
-          }
+            if (rt.params['params']) {
+                let params = (rt.params['params'] as string).split(',');
+                addFilters(params);
+            }
+            if (rt.params['genderFilter'])
+                setGenderFilter(rt.params['genderFilter']);
+            if (rt.params['locationFilter'])
+                setLocationFilter(rt.params['locationFilter']);
+            if (rt.params['sharingPrefFilter'])
+                setSharingPrefFilter(rt.params['sharingPrefFilter']);
         }
         props.setNavSelector(NavTo.Search);
     }, []);
@@ -72,7 +78,7 @@ const FiltersScreen = (props: any) => {
         setSelectedFilters(allFilters);
     }
 
-    const handleFilterPress = (filter: string, init: boolean = false) => {
+    const handleFilterPress = (filter: string) => {
         let filters = [] as never[];
         selectedFilters.forEach(x => filters.push(x as never))
         let filterText = filter.substring(3, filter.length);
@@ -90,16 +96,17 @@ const FiltersScreen = (props: any) => {
     }
 
     const filters = () => {
-        console.log("rerender!");
         return tagStyles.map((item, key) => {
             return (
             <TouchableHighlight
             underlayColor={Color(props.isDarkMode).underlayMask}
             key={key}
             onPress={() => { handleFilterPress(item) }}
-            style={[styles.filterStyle, filterStyle(item)]}
+            style={[styles.filterStyle, filtersStyle(item)]}
             >
-                <_Text style={styles.filterText}>
+                <_Text 
+                style={[styles.filterText, filtersTextStyle(item)]}
+                >
                     {item}
                 </_Text>
             </TouchableHighlight>
@@ -107,11 +114,67 @@ const FiltersScreen = (props: any) => {
         });
     }
 
-    const filterStyle = (filter: string) => {
+    const setSingleFilter = (item: string, filter: any, setFilter: any) => {
+        if (filter === item)
+            setFilter('');
+        else
+            setFilter(item);
+    }
+
+    const item = (options: string[], filter: any, setFilter: any) => {
+        return options.map((item, key) => {
+            return (
+                <TouchableHighlight
+                underlayColor={Color(props.isDarkMode).underlayMask}
+                key={key}
+                onPress={() => { setSingleFilter(item, filter, setFilter) }}
+                style={[styles.filterStyle, filterStyle(item, filter)]}
+                >
+                    <_Text
+                    style={[styles.filterText, filterTextStyle(item, filter)]}
+                    >
+                        {item}
+                    </_Text>
+                </TouchableHighlight>
+                );
+        })
+    }
+
+    const filterStyle = (filter: string, active: string | undefined) => {
+        let selected = active === filter;
+        let style = [];
+        style.push({
+            backgroundColor: selected ? Color(props.isDarkMode).gold : Color(props.isDarkMode).contentHolder,
+        });
+
+        return style;
+    }
+
+    const filterTextStyle = (filter: string, active: string | undefined) => {
+        let selected = active === filter;
+        let style = [];
+        style.push({
+            color: selected ? Color(props.isDarkMode).actualWhite : Color(props.isDarkMode).text
+        });
+
+        return style;
+    }
+
+    const filtersStyle = (filter: string) => {
         let selected = selectedFilters.includes(filter);
         let style = [];
         style.push({
-            backgroundColor: selected ? Color(props.isDarkMode).gold : Color(props.isDarkMode).contentHolder
+            backgroundColor: selected ? Color(props.isDarkMode).gold : Color(props.isDarkMode).contentHolder,
+        });
+
+        return style;
+    }
+
+    const filtersTextStyle = (filter: string) => {
+        let selected = selectedFilters.includes(filter);
+        let style = [];
+        style.push({
+            color: selected ? Color(props.isDarkMode).actualWhite : Color(props.isDarkMode).text
         });
 
         return style;
@@ -123,7 +186,7 @@ const FiltersScreen = (props: any) => {
             marginBottom: 5,
             borderRadius: Radius.round,
             paddingVertical: 5,
-            paddingHorizontal: 15
+            paddingHorizontal: 15,
         },
         exploreContainer: {
             padding: 10,
@@ -149,6 +212,8 @@ const FiltersScreen = (props: any) => {
             flexWrap: 'wrap',
             justifyContent: 'center',
             alignItems: 'center',
+            marginTop: 10,
+            marginBottom: 20
         },
         filterText: {
             color: Color(props.isDarkMode).text,
@@ -156,79 +221,10 @@ const FiltersScreen = (props: any) => {
         },
         exploreContent: {
             height: '100%'
+        },
+        subheading: {
+            fontWeight: 'bold'
         }
-    });
-
-    const genderFilters = genderOptions.map((filter, index) => {
-        return (
-            <TouchableOpacity key={filter} onPress={() => { setGenderFilter(filter) }}
-                style={{
-                    width: '42%',
-                    height: 40,
-                    marginRight: 5,
-                    marginLeft: 5,
-                    borderColor: 'skyblue',
-                    borderWidth: 2,
-                    borderRadius: 15,
-                    backgroundColor: genderFilter === filter ? 'steelblue' : 'powderblue'
-                }}>
-                <Text style={{
-                    margin: 'auto',
-                    fontWeight: '500',
-                    color: genderFilter === filter ? 'powderblue' : 'steelblue'
-                }}>
-                    {filter}
-                </Text>
-            </TouchableOpacity>
-        );
-    });
-
-    const locationFilters = locationOptions.map((filter, index) => {
-        return (
-            <TouchableOpacity key={filter} onPress={() => { setLocationFilter(filter) }}
-                style={{
-                    width: '42%',
-                    height: 40,
-                    marginRight: 5,
-                    marginLeft: 5,
-                    borderColor: 'skyblue',
-                    borderWidth: 2,
-                    borderRadius: 15,
-                    backgroundColor: locationFilter === filter ? 'steelblue' : 'powderblue'
-                }}>
-                <Text style={{
-                    margin: 'auto',
-                    fontWeight: '500',
-                    color: locationFilter === filter ? 'powderblue' : 'steelblue'
-                }}>
-                    {filter}
-                </Text>
-            </TouchableOpacity>
-        );
-    });
-
-    const sharingPrefFilters = sharingPrefOptions.map((filter, index) => {
-        return (
-            <TouchableOpacity key={filter} onPress={() => { setSharingPrefFilter(filter) }}
-                style={{
-                    width: '42%',
-                    height: 40,
-                    marginRight: 5,
-                    marginLeft: 5,
-                    borderColor: 'skyblue',
-                    borderWidth: 2,
-                    borderRadius: 15,
-                    backgroundColor: sharingPrefFilter === filter ? 'steelblue' : 'powderblue'
-                }}>
-                <Text style={{
-                    margin: 'auto',
-                    fontWeight: '500',
-                    color: sharingPrefFilter === filter ? 'powderblue' : 'steelblue'
-                }}>
-                    {filter}
-                </Text>
-            </TouchableOpacity>
-        );
     });
 
     return (
@@ -236,73 +232,76 @@ const FiltersScreen = (props: any) => {
         contentContainerStyle={styles.exploreContent}
         style={styles.exploreContainer}
         >
-            <_Text style={styles.heading}>Filter Results</_Text>
+            <_Text
+            style={styles.heading}
+            isDarkMode={props.isDarkMode}
+            >
+                Filter Results
+            </_Text>
             {tagStyles ?
-                <View
-                style={styles.filterContainer}
-                >
-                {filters()}
+                <View>
+                    <_Text
+                    style={styles.subheading}
+                    isDarkMode={props.isDarkMode}
+                    >
+                        Interests and Activities
+                    </_Text>
+                    <View
+                    style={styles.filterContainer}
+                    >
+                    {filters()}
+                    </View>
                 </View>
                 : null
             }
-            <Text style={styles.subheading}>Gender</Text>
-            {genderFilters &&
-                genderFilters.map((item, index) => {
-                    if (index % 2 === 0) {
-                        return (
-                            <View key={index} style={styles.filtersRow}>
-                                {genderFilters[index]}
-                                {genderFilters[index + 1] && genderFilters[index + 1]}
-                            </View>
-                        );
-                    }
-                })
+            {genderOptions ?
+                <View>
+                    <_Text
+                    style={styles.subheading}
+                    isDarkMode={props.isDarkMode}
+                    >
+                        Gender
+                    </_Text>
+                    <View
+                    style={styles.filterContainer}
+                    >
+                    {item(genderOptions, genderFilter, setGenderFilter)}
+                    </View>
+                </View>
+                : null
             }
-            <Text style={styles.subheading}>Location</Text>
-            {locationFilters &&
-                locationFilters.map((item, index) => {
-                    if (index % 2 === 0) {
-                        return (
-                            <View key={index} style={styles.filtersRow}>
-                                {locationFilters[index]}
-                                {locationFilters[index + 1] && locationFilters[index + 1]}
-                            </View>
-                        );
-                    }
-                })
+            {locationOptions ?
+                <View>
+                    <_Text
+                    style={styles.subheading}
+                    isDarkMode={props.isDarkMode}
+                    >
+                        Location
+                    </_Text>
+                    <View
+                    style={styles.filterContainer}
+                    >
+                    {item(locationOptions, locationFilter, setLocationFilter)}
+                    </View>
+                </View>
+                : null
             }
-            <Text style={styles.subheading}>Sharing Preferences</Text>
-            {sharingPrefFilters &&
-                sharingPrefFilters.map((item, index) => {
-                    if (index % 2 === 0) {
-                        return (
-                            <View key={index} style={styles.filtersRow}>
-                                {sharingPrefFilters[index]}
-                                {sharingPrefFilters[index + 1] && sharingPrefFilters[index + 1]}
-                            </View>
-                        );
-                    }
-                })
+            {sharingPrefOptions ?
+                <View>
+                    <_Text
+                    style={styles.subheading}
+                    isDarkMode={props.isDarkMode}
+                    >
+                        Sharing Preferences
+                        </_Text>
+                    <View
+                    style={styles.filterContainer}
+                    >
+                    {item(sharingPrefOptions, sharingPrefFilter, setSharingPrefFilter)}
+                    </View>
+                </View>
+                : null
             }
-            <View style={styles.row}>
-                <TouchableOpacity style={styles.searchBtn} onPress={() => {
-                    navigation.navigate(NavTo.Search, {
-                        key: Math.random(),
-                        filters: selectedFilters,
-                        genderFilter: genderFilter,
-                        locationFilter: locationFilter,
-                        sharingPrefFilter: sharingPrefFilter
-                    } as never)
-                }}>
-                    <Text style={styles.searchBtnText}>Search</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.cancelBtn} onPress={() => {
-                    navigation.goBack()
-                }}>
-                    <Text style={styles.cancelBtnText}>Cancel</Text>
-                </TouchableOpacity>         
-            </View>
             <View
             style={styles.rowContainer}
             >
@@ -323,9 +322,14 @@ const FiltersScreen = (props: any) => {
                     containerStyle={{flex: 1}}
                     style={Style(props.isDarkMode).buttonGold}
                     onPress={() => {
-                        navigation.navigate(NavTo.Search, { key: Math.random(), filters: selectedFilters } as never)
-                    }}
-                    >
+                        navigation.navigate(NavTo.Search, {
+                            key: Math.random(),
+                            filters: selectedFilters,
+                            genderFilter: genderFilter,
+                            locationFilter: locationFilter,
+                            sharingPrefFilter: sharingPrefFilter
+                        } as never)
+                    }}>
                         Search
                     </_Button>
                 </View>

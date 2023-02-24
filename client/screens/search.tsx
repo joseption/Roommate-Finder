@@ -8,7 +8,6 @@ import { navProp, NavTo } from '../helper';
 import Profile from '../components/search/profiles';
 import { Color, FontSize, Radius } from '../style';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 
 
 interface SearchScreenProps {
@@ -40,6 +39,17 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
   const [locationFilter, setLocationFilter] = useState<string>(route.params?.locationFilter || "");
   const [sharingPrefFilter, setSharingPrefFilter] = useState<string>(route.params?.sharingPrefFilter || "");
   const [sorting, setSorting] = useState(false);
+  const [forceGetProfiles, setForceGetProfiles] = useState(false);
+
+  useEffect(() => {
+    if (!hasFilters() && noResults) {
+      setFilters([]);
+      setGenderFilter("");
+      setLocationFilter("");
+      setSharingPrefFilter("");
+      setNoResults(false);
+    }
+  }, [noResults]);
 
   useEffect(() => {
     let params = route.params;
@@ -48,13 +58,19 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
       setGenderFilter(params.genderFilter || "");
       setLocationFilter(params.locationFilter || "");
       setSharingPrefFilter(params.sharingPrefFilter || "");
-      if (params.filters?.length || params.genderFilter?.length ||
-        params.locationFilter?.length || params.sharingPrefFilter?.length) {
+
+      if (params.filters?.length ||
+        params.genderFilter?.length ||
+        params.locationFilter?.length ||
+        params.sharingPrefFilter?.length) {
         setFiltersFetched(true);
       }
-      else if (params.filters && filters && filters.length > 0) {
-        setFilters(filters);
+      else {
         setFiltersFetched(false);
+      }
+
+      if (params.view && params.view === "matches") {
+        setForceGetProfiles(true);
       }
     }
   }, [route.params]);
@@ -132,27 +148,50 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
     filterContent: {
       justifyContent: 'center',
       alignItems: 'flex-start',
+    },
+    match: {
+      marginRight: 5
+    },
+    options: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: -5
+    },
+    matchBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginHorizontal: 10,
+      justifyContent: 'flex-end',
+      marginRight: 5
+    },
+    matchContent: {
+      borderRadius: Radius.round,
+      padding: 5
     }
   });
 
   const hasFilters = () => {
-    return route && route.params && route.params.filters && route.params.filters.length > 0;
+      if (route && route.params) {
+        if ((route.params.filters && route.params.filters.length > 0) ||
+        route.params.genderFilter ||
+        route.params.locationFilter ||
+        route.params.sharingPrefFilter) {
+          return true;
+      }
+      else {
+        return false;
+      }
+    }
   }
 
   const handleToggleButtonPress = () => {
     setSorting(!sorting);
   };
 
-  const icon = sorting ? 'toggle-on' : 'toggle-off';
-  const iconColor = sorting ? '#4CAF50' : '#000';
-
-  const toggleButton =
-    <TouchableOpacity style={styles.toggleButton} onPress={handleToggleButtonPress}>
-      <Icon name={icon} size={25} color={iconColor} />
-    </TouchableOpacity>;
-
   return (
-    <View style={styles.exploreContainer}>
+    <View
+    style={styles.exploreContainer}
+    >
         <View
         style={styles.container}
         >
@@ -165,48 +204,70 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
             >
               Explore
             </_Text>
-            <View style={styles.buttonsRow}>
+            <View
+              style={styles.options}
+            >
               <TouchableHighlight
-              underlayColor={Color(isDarkMode).underlayMask}
-              style={styles.button}
-              onPress={() => { navigation.navigate(NavTo.Filters, {params: filters.toString()} as never); }}
-              >
-                <FontAwesomeIcon 
-                size={20} 
-                color={hasFilters() ? Color(isDarkMode).gold : Color(isDarkMode).text} 
-                style={styles.filterIcon} 
-                icon="filter"
+                underlayColor={Color(isDarkMode).underlayMask}
+                onPress={handleToggleButtonPress}
+                style={styles.matchContent}
                 >
-                </FontAwesomeIcon>
+                <View
+                style={styles.matchBtn}
+                >
+                  <_Text
+                    style={styles.match}
+                    isDarkMode={isDarkMode}
+                  >
+                    Sort by matches
+                  </_Text>
+                    <FontAwesomeIcon
+                    icon={sorting ? 'toggle-on' : 'toggle-off'}
+                    size={25}
+                    color={sorting ? Color(isDarkMode).gold : Color(isDarkMode).text}
+                    style={styles.filterIcon}
+                  />
+                </View>
               </TouchableHighlight>
+              <View
+              style={styles.buttonsRow}
+              >
+                <TouchableHighlight
+                underlayColor={Color(isDarkMode).underlayMask}
+                style={styles.button}
+                onPress={() => { navigation.navigate(NavTo.Filters,
+                  {
+                    params: filters.toString(),
+                    genderFilter: genderFilter,
+                    locationFilter: locationFilter,
+                    sharingPrefFilter: sharingPrefFilter
+                  } as never); }}
+                >
+                  <FontAwesomeIcon 
+                  size={20} 
+                  color={hasFilters() ? Color(isDarkMode).gold : Color(isDarkMode).text} 
+                  style={styles.filterIcon} 
+                  icon="filter"
+                  >
+                  </FontAwesomeIcon>
+                </TouchableHighlight>
+              </View>
             </View>
           </View>
-          {!noResults && filters && filters.length > 0 ?
-          <ScrollView
-          horizontal={true}
-          style={styles.filterContainer}
-          contentContainerStyle={styles.filterContent}
-          >
-          {
-            filters?.map((item, key) => {
-                return (
-                    <View style={styles.filterBox}>
-                      <_Text
-                      style={styles.filterText}
-                      >
-                        {filters[key]}
-                      </_Text>
-                    </View>
-                );
-            })
-          }
-        </ScrollView>
-        : null}
-            <View style={styles.toggleRow}>
-              <View><Text style={styles.toggleLabel}>Sort by Match Percentage</Text></View>
-              {toggleButton}
-            </View>
-        <Profile filters={filters} filtersFetched={filtersFetched} genderFilter={genderFilter} locationFilter={locationFilter} sharingPrefFilter={sharingPrefFilter} sorting={sorting} isDarkMode={isDarkMode} setNoResults={setNoResults} />
+        <Profile
+        filters={filters}
+        filtersFetched={filtersFetched}
+        genderFilter={genderFilter}
+        locationFilter={locationFilter}
+        sharingPrefFilter={sharingPrefFilter}
+        sorting={sorting}
+        isDarkMode={isDarkMode}
+        setNoResults={setNoResults}
+        noResults={noResults}
+        setForceGetProfiles={setForceGetProfiles}
+        forceGetProfiles={forceGetProfiles}
+        setSorting={setSorting}
+        />
         </View>
       </View>
   );

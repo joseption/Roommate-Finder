@@ -15,9 +15,14 @@ interface Props {
   genderFilter?: string,
   locationFilter?: string,
   sharingPrefFilter?: string
-  sorting?: boolean}
+  sorting?: boolean
+  noResults: boolean,
+  forceGetProfiles: boolean,
+  setForceGetProfiles: any,
+  setSorting: any
+}
 
-const Profile = ({ filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting, isDarkMode, setNoResults }: Props) => {
+const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults, filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting, isDarkMode, setNoResults }: Props) => {
   /*
   Daniyal: This component will contain all of the profile card components
   and anything else that is needed for the overall profile view.F
@@ -29,58 +34,69 @@ const Profile = ({ filters, filtersFetched, genderFilter, locationFilter, sharin
   const [isFetchedProfiles, setFetchedProfiles] = useState(false);
 
   useEffect(() => {
-    setNoResults(!(isFetchedProfiles && allProfiles.length));
-  }, [isFetchedProfiles, allProfiles])
+    if (forceGetProfiles) {
+      if (allProfiles.length > 0) {
+        setAllProfiles(sortProfiles(allProfiles));
+        setForceGetProfiles(false);
+      }
+      setSorting(true);
+    }
+  }, [forceGetProfiles, allProfiles]);
 
   useEffect(() => {
+    if (!forceGetProfiles) {
+      getProfiles();
+    }
+  }, [filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting]);
+
+  const getProfiles = async () => {
     if (filtersFetched) {
-      //console.log(filters);
-      console.log(genderFilter);
-      console.log(locationFilter);
-      console.log(sharingPrefFilter);
       getFilteredProfiles();
     }
     else {
       getAllProfiles();
     }
-  }, [filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting]);
+  }
+
+  const sortProfiles = (data: any) => {
+    if (data) {
+      data.sort((a: any, b: any) => {
+        // If both profiles have matchPercentage, sort based on matchPercentage
+        if (a.matchPercentage !== undefined && b.matchPercentage !== undefined) {
+          return b.matchPercentage - a.matchPercentage;
+        }
+
+        // If only one of the two profiles has matchPercentage, put it first
+        if (a.matchPercentage !== undefined) {
+          return -1;
+        }
+        if (b.matchPercentage !== undefined) {
+          return 1;
+        }
+
+        // If neither of the two profiles have matchPercentage, keep their relative order unchanged
+        return 0;
+      });
+    }
+    return data;
+  }
 
   const getFilteredProfiles = async () => {
     setFetchedProfiles(false);
     let queryString = undefined;
     try {
-      //console.log("Inside getFilteredProfiles");
       if (filtersFetched && filters?.length !== 0) {
         queryString = filters?.join(',');
       }
       await fetch(`${env.URL}/users/profilesByTags?userId=${"e6bb856a-9d91-40a7-8b2e-ca095b7389b8"}&filters=${queryString}&gender=${genderFilter}&location=${locationFilter}&sharingPref=${sharingPrefFilter}`,
         { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
           let res = JSON.parse(await ret.text());
-          //console.log(res);
           if (res.Error) {
             console.warn("Error: ", res.Error);
           }
           else {
             if (sorting) {
-              res.sort((a: any, b: any) => {
-                // If both profiles have matchPercentage, sort based on matchPercentage
-                if (a.matchPercentage !== undefined && b.matchPercentage !== undefined) {
-                  return b.matchPercentage - a.matchPercentage;
-                }
-
-                // If only one of the two profiles has matchPercentage, put it first
-                if (a.matchPercentage !== undefined) {
-                  return -1;
-                }
-                if (b.matchPercentage !== undefined) {
-                  return 1;
-                }
-
-                // If neither of the two profiles have matchPercentage, keep their relative order unchanged
-                return 0;
-              });
-              console.log("Sorted Profiles: ");
-              console.log(res);
+              res = sortProfiles(res);
             }
             setAllProfiles(res);
             setFetchedProfiles(true);
@@ -88,7 +104,6 @@ const Profile = ({ filters, filtersFetched, genderFilter, locationFilter, sharin
         });
     }
     catch (e) {
-      //(e);
       return;
     }
   };
@@ -96,43 +111,24 @@ const Profile = ({ filters, filtersFetched, genderFilter, locationFilter, sharin
   const getAllProfiles = async () => {
     setFetchedProfiles(false);
     try {
-      //console.log("Inside getAllProfiles");
       await fetch(`${env.URL}/users/AllprofilesMob?userId=${"e6bb856a-9d91-40a7-8b2e-ca095b7389b8"}`,
         { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
           let res = JSON.parse(await ret.text());
-          //console.log(res);
           if (res.Error) {
             console.warn("Error: ", res.Error);
           }
           else {
             if (sorting) {
-              res.sort((a: any, b: any) => {
-                // If both profiles have matchPercentage, sort based on matchPercentage
-                if (a.matchPercentage !== undefined && b.matchPercentage !== undefined) {
-                  return b.matchPercentage - a.matchPercentage;
-                }
-
-                // If only one of the two profiles has matchPercentage, put it first
-                if (a.matchPercentage !== undefined) {
-                  return -1;
-                }
-                if (b.matchPercentage !== undefined) {
-                  return 1;
-                }
-
-                // If neither of the two profiles have matchPercentage, keep their relative order unchanged
-                return 0;
-              });
-              console.log("Sorted Profiles: ");
-              console.log(res);
+              res = sortProfiles(res);
             }
             setAllProfiles(res);
-            setFetchedProfiles(true);
+            if (res.length > 0) {
+              setFetchedProfiles(true);
+            }
           }
         });
     }
     catch (e) {
-      //console.log(e);
       return;
     }
   };
@@ -175,7 +171,7 @@ const Profile = ({ filters, filtersFetched, genderFilter, locationFilter, sharin
       {isFetchedProfiles &&
         (allProfiles.length ?
           allProfiles.map((profile: any, index) =>
-            profile.image && <ProfileCard key={index} isDarkMode={isDarkMode} profileInfo={profile} />)
+            <ProfileCard key={index} isDarkMode={isDarkMode} profileInfo={profile} />)
           :
           <View
           style={styles.noResults}
@@ -188,10 +184,16 @@ const Profile = ({ filters, filtersFetched, genderFilter, locationFilter, sharin
             <_Button
               style={Style(isDarkMode).buttonInverted}
               textStyle={Style(isDarkMode).buttonInvertedText}
-              onPress={(e: any) => navigation.navigate(NavTo.Search)}
+              onPress={(e: any) => {
+                setAllProfiles([]);
+                setNoResults(true);
+                setFetchedProfiles(false);
+                getAllProfiles();
+                navigation.navigate(NavTo.Search);
+              }}
               isDarkMode={isDarkMode}
               >
-                  Clear Filters
+                Clear Filters
             </_Button>
           </View>
         )

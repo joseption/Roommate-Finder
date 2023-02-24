@@ -61,7 +61,8 @@ const _Button = (props: any) => {
         text: {
             color: Color(props.isDarkMode).actualWhite,
             fontSize: FontSize.default,
-            margin: 'auto'
+            margin: 'auto',
+            display: 'flex'
         },
         textDisabled: {
             color: Color(props.isDarkMode).textDisabled,
@@ -72,7 +73,7 @@ const _Button = (props: any) => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            flexDirection: 'row'
+            flexDirection: 'row',
         },
         loading: {
             marginRight: 5

@@ -81,7 +81,7 @@ const ProfileCard = (props: any) => {
   return (
     <TouchableHighlight
     underlayColor={Color(props.isDarkMode).underlayMask}
-    onPress={() => { navigation.navigate(NavTo.Profile, { profile: profile.id } as never) }}
+    onPress={() => { navigation.navigate(NavTo.Profile, { profile: profile.id, match: profile.matchPercentage } as never) }}
     style={styles.cardContainer}
     >
       <>

@@ -134,6 +134,8 @@ export const App = (props: any) => {
   useEffect(() => {
     if (Platform.OS === 'android')
       updateNavForPushNotifications();
+
+    contentStyle();
   }, [navSelector]);
 
   // Get device push notification permissions when the app launches
@@ -649,7 +651,7 @@ export const App = (props: any) => {
       return <View></View>;
   }
 
-  const contentStyle = () => {
+  function contentStyle() {
     var style = [];
     style.push(styles.contentStyle);
     var paddingTop = (getRouteName() === NavTo.Login) ? 0 : 10;
@@ -665,7 +667,7 @@ export const App = (props: any) => {
 
       // Don't add padding for message app on mobile
       let rn = getRouteName();
-      if (rn == NavTo.Messages || rn == NavTo.Listings || rn == NavTo.Search) {
+      if (rn == NavTo.Messages || rn == NavTo.Listings || rn == NavTo.Search || rn == NavTo.Profile) {
         paddingLeft = 0;
         paddingRight = 0;
         paddingTop = 0;
@@ -822,6 +824,8 @@ export const App = (props: any) => {
                   {...props}
                   mobile={mobile}
                   isDarkMode={isDarkMode}
+                  setNavSelector={setNavSelector}
+                  navSelector={navSelector}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen

@@ -8,6 +8,8 @@ import { navProp, NavTo } from '../helper';
 import Profile from '../components/search/profiles';
 import { Color, FontSize, Radius } from '../style';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+
 
 interface SearchScreenProps {
   route: RouteProp<Record<string, any>, 'Search'>;
@@ -31,27 +33,31 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
   */
 
   const navigation = useNavigation<navProp>();
-  const filtersParam = route.params?.filters || [];
   const [noResults, setNoResults] = useState(false);
   const [filtersFetched, setFiltersFetched] = useState(false);
-  const [filters, setFilters] = useState<any[]>([]);
+  const [filters, setFilters] = useState<any[]>(route.params?.filters || []);
+  const [genderFilter, setGenderFilter] = useState<string>(route.params?.genderFilter || "");
+  const [locationFilter, setLocationFilter] = useState<string>(route.params?.locationFilter || "");
+  const [sharingPrefFilter, setSharingPrefFilter] = useState<string>(route.params?.sharingPrefFilter || "");
+  const [sorting, setSorting] = useState(false);
 
   useEffect(() => {
-    console.log(filtersParam.length);
-    console.log(filters);
-    if (filtersParam.length > 0) {
-      setFilters(filtersParam);
-      setFiltersFetched(true);
+    let params = route.params;
+    if (params) {
+      setFilters(params.filters || []);
+      setGenderFilter(params.genderFilter || "");
+      setLocationFilter(params.locationFilter || "");
+      setSharingPrefFilter(params.sharingPrefFilter || "");
+      if (params.filters?.length || params.genderFilter?.length ||
+        params.locationFilter?.length || params.sharingPrefFilter?.length) {
+        setFiltersFetched(true);
+      }
+      else if (params.filters && filters && filters.length > 0) {
+        setFilters(filters);
+        setFiltersFetched(false);
+      }
     }
-    else if (filtersParam.length != 0 && filters && filters.length > 0) {
-      setFilters(filters);
-      setFiltersFetched(false);
-    }
-    else if (filtersParam.length == 0 && filters.length != 0) {
-      setFilters([]);
-      setFiltersFetched(false);
-    }
-  }, [filtersParam]);
+  }, [route.params]);
 
   const styles = StyleSheet.create({
     exploreContainer: {
@@ -129,6 +135,22 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
     }
   });
 
+  const hasFilters = () => {
+    return route && route.params && route.params.filters && route.params.filters.length > 0;
+  }
+
+  const handleToggleButtonPress = () => {
+    setSorting(!sorting);
+  };
+
+  const icon = sorting ? 'toggle-on' : 'toggle-off';
+  const iconColor = sorting ? '#4CAF50' : '#000';
+
+  const toggleButton =
+    <TouchableOpacity style={styles.toggleButton} onPress={handleToggleButtonPress}>
+      <Icon name={icon} size={25} color={iconColor} />
+    </TouchableOpacity>;
+
   return (
     <View style={styles.exploreContainer}>
         <View
@@ -151,7 +173,7 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
               >
                 <FontAwesomeIcon 
                 size={20} 
-                color={filtersParam.length > 0 ? Color(isDarkMode).gold : Color(isDarkMode).text} 
+                color={hasFilters() ? Color(isDarkMode).gold : Color(isDarkMode).text} 
                 style={styles.filterIcon} 
                 icon="filter"
                 >
@@ -180,7 +202,11 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
           }
         </ScrollView>
         : null}
-        <Profile filters={filters} filtersFetched={filtersFetched} isDarkMode={isDarkMode} setNoResults={setNoResults} />
+            <View style={styles.toggleRow}>
+              <View><Text style={styles.toggleLabel}>Sort by Match Percentage</Text></View>
+              {toggleButton}
+            </View>
+        <Profile filters={filters} filtersFetched={filtersFetched} genderFilter={genderFilter} locationFilter={locationFilter} sharingPrefFilter={sharingPrefFilter} sorting={sorting} isDarkMode={isDarkMode} setNoResults={setNoResults} />
         </View>
       </View>
   );

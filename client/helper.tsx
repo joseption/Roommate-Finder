@@ -69,6 +69,7 @@ export const NavTo = {
   Login: 'Login' as never,
   Account: 'Account' as never,
   Profile: 'Profile' as never,
+  MyProfile: 'MyProfile' as never,
   Survey: 'Survey' as never,
   Search: 'Search' as never,
   Filters: 'Filters' as never,

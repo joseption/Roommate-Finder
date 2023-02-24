@@ -34,7 +34,9 @@ const MessageSettings = ({ isDarkMode, chat, userInfo, showPopUp, setShowPopUp, 
       borderRadius: Radius.default,
       elevation: 3,
       padding: 5,
-      marginRight: 10
+      marginRight: 10,
+      borderColor: Color(isDarkMode).separator,
+      borderWidth: 1
     },
     popUpContainer: {
       justifyContent: 'flex-end',

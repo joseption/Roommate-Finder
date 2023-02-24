@@ -29,7 +29,6 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-  console.log('/');
   // res.set("Access-Control-Allow-Origin", "*");
   res.json({ BRUH: 'IP ADDRESS LOGGED AND REPORTED TO ADMIN' });
 });

@@ -26,7 +26,6 @@ export const uploadImage = async (image: string) => {
     const { Location } = await s3.upload(params).promise();
     return Location;
   } catch (error) {
-    console.log(error);
     return null;
   }
 };

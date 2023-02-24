@@ -1,4 +1,5 @@
 import { Platform, StyleSheet } from 'react-native';
+import { isMobile } from './helper';
 
 export const Color = (darkMode: boolean) => {
   return !darkMode ? LightColor() : DarkColor();
@@ -74,6 +75,9 @@ export const LightStyle = StyleSheet.create({
     paddingTop: 5,
     paddingBottom: 5,
     outlineStyle: 'none'
+  },
+  font: {
+    fontFamily: 'Inter-Regular'
   },
   textHuge: {
     fontSize: FontSize.huge,
@@ -258,7 +262,11 @@ export const LightStyle = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: Radius.default,
-    marginLeft:3,
+    ...Platform.select({
+      web: {
+        marginLeft:3,
+      }
+    }),
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -343,7 +351,7 @@ export const LightStyle = StyleSheet.create({
       width: '100%',
       backgroundColor: Color(false).promptMask,
       position: 'absolute',
-      borderRadius: Radius.large,
+      borderRadius: isMobile() ? 0 : Radius.large,
       top: 0,
       left: 0
   },
@@ -556,6 +564,9 @@ export const DarkStyle = StyleSheet.create({
     paddingBottom: 5,
     outlineStyle: 'none'
   },
+  font: {
+    fontFamily: 'Inter-Regular'
+  },
   textHuge: {
     fontSize: FontSize.huge,
     color: Color(true).text,
@@ -739,7 +750,11 @@ export const DarkStyle = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: Radius.default,
-    marginLeft:3,
+    ...Platform.select({
+      web: {
+        marginLeft:3,
+      }
+    }),
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -824,7 +839,7 @@ export const DarkStyle = StyleSheet.create({
       width: '100%',
       backgroundColor: Color(true).promptMask,
       position: 'absolute',
-      borderRadius: Radius.large,
+      borderRadius: isMobile() ? 0 : Radius.large,
       top: 0,
       left: 0
   },

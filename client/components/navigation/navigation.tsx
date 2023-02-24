@@ -53,7 +53,6 @@ const Navigation = (props: any) => {
 
     useEffect(() => {
         if (props.mobile) {
-          setTimeout(() => {
             if (!props.showingMessagePanel) {
                 Animated.timing(slideAnimation, {...animationConfig, toValue: 0}).start();
                 setNavHeight();
@@ -61,7 +60,6 @@ const Navigation = (props: any) => {
                 Animated.timing(slideAnimation, {...animationConfig, toValue: -props.height}).start();     
                 setNavHeight(0);
             }
-          }, 200);
         }
         else {
           Animated.timing(slideAnimation, {...animationConfig, toValue: 0}).start();
@@ -71,8 +69,8 @@ const Navigation = (props: any) => {
     
     let animationConfig = {
       toValue: -props.height,
-      duration: 50,
-      easing: Easing.ease,
+      duration: 25,
+      easing: Easing.linear,
       useNativeDriver: true,
     };
 
@@ -93,7 +91,10 @@ const Navigation = (props: any) => {
 
     const setNavigation = (nav: any) => {
         if (nav == NavTo.Account)
-            nav = NavTo.Profile
+            nav = NavTo.MyProfile
+        else if (nav == NavTo.Filters ||
+                nav == NavTo.Profile)
+            nav = NavTo.Search
         props.setNavSelector(nav);
             
         setVisible(nav != NavTo.Login);
@@ -379,7 +380,7 @@ const Navigation = (props: any) => {
                         {props.isSetup ?
                         <View>
                             <NavMenuButton
-                            navigate={() => navigate(NavTo.Profile)}
+                            navigate={() => navigate(NavTo.MyProfile)}
                             icon="user"
                             value="View Profile"
                             navTo={NavTo.Profile}

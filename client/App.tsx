@@ -134,6 +134,8 @@ export const App = (props: any) => {
   useEffect(() => {
     if (Platform.OS === 'android')
       updateNavForPushNotifications();
+
+    contentStyle();
   }, [navSelector]);
 
   // Get device push notification permissions when the app launches
@@ -317,12 +319,6 @@ export const App = (props: any) => {
     }  
   }
 
-  async function getPushChatId() {
-    let id = await getOpenPushChat();
-    console.log(id);
-    //setOpenChatFromPush(id);
-  }
-
   // Resend all combined unread messages as one to the current user
   const updateGroupedPushNotification = async (title: any, message: any, tag: string) => {
     let hasError = false;
@@ -498,7 +494,7 @@ export const App = (props: any) => {
         return routes[0].name;
       }
     }
-    return NavTo.Profile;
+    return NavTo.MyProfile;
   }
 
   const navigateToSetupStep = (step: string) => {
@@ -655,7 +651,7 @@ export const App = (props: any) => {
       return <View></View>;
   }
 
-  const contentStyle = () => {
+  function contentStyle() {
     var style = [];
     style.push(styles.contentStyle);
     var paddingTop = (getRouteName() === NavTo.Login) ? 0 : 10;
@@ -671,7 +667,7 @@ export const App = (props: any) => {
 
       // Don't add padding for message app on mobile
       let rn = getRouteName();
-      if (rn == NavTo.Messages || rn == NavTo.Listings) {
+      if (rn == NavTo.Messages || rn == NavTo.Listings || rn == NavTo.Search || rn == NavTo.Profile) {
         paddingLeft = 0;
         paddingRight = 0;
         paddingTop = 0;
@@ -743,7 +739,7 @@ export const App = (props: any) => {
             scrollEventThrottle={100}
             onContentSizeChange={(w, h) => getScrollDims(w, h)}
             keyboardShouldPersistTaps={'handled'}
-            scrollEnabled={navSelector !== NavTo.Messages && navSelector !== NavTo.Listings}
+            scrollEnabled={navSelector !== NavTo.Messages && navSelector !== NavTo.Listings && navSelector !== NavTo.Search}
             >
               <View
                 style={styles.stack}
@@ -828,6 +824,8 @@ export const App = (props: any) => {
                   {...props}
                   mobile={mobile}
                   isDarkMode={isDarkMode}
+                  setNavSelector={setNavSelector}
+                  navSelector={navSelector}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen
@@ -866,8 +864,9 @@ export const App = (props: any) => {
                     isMatches={isMatches}
                     setIsMatches={setIsMatches}
                     isDarkMode={isDarkMode}
+                    setNavSelector={setNavSelector}
                   />}
-              </Stack.Screen>
+                  </Stack.Screen>
               <Stack.Screen
                   name={NavTo.MyProfile}
                   options={{ title: NavTo.MyProfile, animation: 'none' }}

@@ -6,8 +6,9 @@ import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
 import { Style, Color, FontSize, Radius } from '../style';
 import _Image from '../components/control/image';
-import { env, navProp, NavTo, userId as getUserId, authTokenHeader, AccountScreenType } from '../helper';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { env, navProp, NavTo, userId as getUserId, authTokenHeader, AccountScreenType, isDarkMode } from '../helper';
+import _Text from '../components/control/text';
+import _Group from '../components/control/group';
 
 
 const MyProfileScreen = (props: any) => {
@@ -35,14 +36,12 @@ const MyProfileScreen = (props: any) => {
   }, [userId]);
 
   useEffect(() => {
-    console.log(profile);
     getTags();
   }, [profile]);
 
   const getLoggedInUserId = async () => {
     const userId = await getUserId();
     setUserId(userId);
-    // setUserId("a781adb8-d31d-424d-8918-c9cf639ccc7e"); // for testing
   };
 
   function getAge(dateString: any) {
@@ -58,11 +57,9 @@ const MyProfileScreen = (props: any) => {
 
   const getProfile = async () => {
     try {
-      console.log("Inside getProfile");
       await fetch(`${env.URL}/users/myProfile?userId=${userId}`,
         { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
           let res = JSON.parse(await ret.text());
-          console.log(res);
           if (res.Error) {
             console.warn("Error: ", res.Error);
           }
@@ -72,7 +69,6 @@ const MyProfileScreen = (props: any) => {
         });
     }
     catch (e) {
-      console.log(e);
       return;
     }
   };
@@ -81,11 +77,9 @@ const MyProfileScreen = (props: any) => {
     setTagsFetched(false);
     try {
       if (profile.id) {
-        console.log("Inside getTags");
         await fetch(`${env.URL}/users/getBioAndTagsMob?userId=${userId}`,
           { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
             let res = JSON.parse(await ret.text());
-            console.log(res);
             if (res.Error) {
               console.warn("Error: ", res.Error);
             }
@@ -97,136 +91,196 @@ const MyProfileScreen = (props: any) => {
       }
     }
     catch (e) {
-      console.log(e);
       return;
     }
   };
 
+  const tag = () => {
+    return tags.map((tag, index) =>
+    <_Text
+    style={styles.tagText}
+    key={index}
+    isDarkMode={props.isDarkMode}
+    >
+      {tag?.tag}
+    </_Text>
+    )
+  }
+
+  const styles = StyleSheet.create({
+    loadingScreen: {
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1
+    },
+    rowContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '100%'
+    },
+    profileImg: {
+      width: 150,
+      height: 150,
+      borderWidth: 1,
+      borderRadius: Radius.round,
+      borderColor: Color(props.isDarkMode).separator,
+      backgroundColor: Color(props.isDarkMode).userIcon
+    },
+    name: {
+      fontSize: FontSize.large,
+      fontWeight: 'bold',
+      marginTop: 10,
+    },
+    nameContent: {
+      flex: 1
+    },
+    interestsHeading: {
+      fontSize: FontSize.default,
+      fontWeight: 'bold',
+      paddingBottom: 5,
+      paddingTop: 20,
+    },
+    heading: {
+      fontSize: FontSize.default,
+      fontWeight: 'bold',
+      paddingTop: 20,
+    },
+    tagsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap'
+    },
+    tagText: {
+      marginRight: 5,
+      marginBottom: 5,
+      borderRadius: Radius.round,
+      paddingVertical: 5,
+      paddingHorizontal: 15,
+      color: Color(props.isDarkMode).text,
+      fontSize: FontSize.default,
+      backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).holderSecondary,
+    },
+    mainContent: {
+      marginTop: 45,
+      width: '100%'
+    },
+    group: {
+      marginTop: -50
+    },
+    imageContainer: {
+      zIndex: 3,
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'center'
+    },
+    view: {
+      flexDirection: 'column-reverse'
+    },
+    bio: {
+      width: '100%'
+    }
+  });
+
   if (!profile.id) {
     return (
       <View style={styles.loadingScreen}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator
+        size="large"
+        color={Color(props.isDarkMode).gold}
+        />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.profileContainer}>
-      <View style={styles.btnRow}>
-        <TouchableOpacity onPress={() => { navigation.goBack() }}>
-          <Icon name="arrow-back" size={30} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => { navigation.navigate(NavTo.Account, { view: 'info' } as never) }}>
-          <Text style={styles.btnText}>Edit Profile</Text>
-        </TouchableOpacity>
+    <ScrollView>
+      <View
+      style={styles.view}
+      >
+        <_Group
+        containerStyle={styles.group}
+        isDarkMode={props.isDarkMode}
+        vertical={true}
+        >
+          <View
+          style={styles.mainContent}
+          >
+            <View
+            style={styles.rowContent}
+            >
+              <_Text
+              style={styles.name}
+              isDarkMode={props.isDarkMode}
+              numberOfLines={1}
+              containerStyle={styles.nameContent}
+              >
+                {profile?.first_name + " " + profile?.last_name}
+              </_Text>
+              <_Button
+              onPress={() => { navigation.navigate(NavTo.Account, { view: 'info' } as never) }}
+              isDarkMode={props.isDarkMode}
+              >
+                Edit Profile
+              </_Button>
+            </View>
+            <_Text
+            isDarkMode={props.isDarkMode}
+            >
+              {profile?.age} years old
+            </_Text>
+            <_Text
+            isDarkMode={props.isDarkMode}
+            >
+              {profile?.city}, {profile?.state}
+            </_Text>
+            {profile?.bio ?
+            <View>
+              <_Text
+              style={styles.heading}
+              isDarkMode={props.isDarkMode}
+              >
+                About
+              </_Text>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              style={styles.bio}
+              >
+                {profile?.bio}
+              </_Text>
+            </View>
+            : null }
+            <_Text
+            style={styles.interestsHeading}
+            isDarkMode={props.isDarkMode}
+            >
+              Interests and Hobbies
+            </_Text>
+            {tagsFetched ?
+            <View style={styles.tagsRow}>
+              {tag()}
+            </View>
+              :
+              <View>
+                <ActivityIndicator
+                color={Color(props.isDarkMode).gold}
+                size="large"
+                />
+              </View>
+            }
+          </View>
+        </_Group>
+        <_Image
+        height={150}
+        width={150}
+        style={styles.profileImg}
+        source={{uri: profile?.image}}
+        containerStyle={styles.imageContainer}
+        />
       </View>
-      <Image style={styles.profileImg} source={profile?.image} />
-      <Text style={styles.name}>{profile?.first_name + " " + profile?.last_name}</Text>
-      <Text style={styles.info}>Age: {profile?.age} | From: {profile?.city}, {profile?.state}</Text>
-      <Text style={styles.bio}>"{profile?.bio}"</Text>
-      <Text style={styles.interestsHeading}>My Interests and Hobbies</Text>
-      {tagsFetched ? tags.map((tag, index) =>
-        (index % 3 == 0) &&
-        <View style={styles.tagsRow} key={index}>
-          <View style={styles.tagBox}><Text style={styles.tagText}>{tag?.tag}</Text></View>
-          {tags[index + 1]?.tag && <View style={styles.tagBox}><Text style={styles.tagText}>{tags[index + 1]?.tag}</Text></View>}
-          {tags[index + 2]?.tag && <View style={styles.tagBox}><Text style={styles.tagText}>{tags[index + 2]?.tag}</Text></View>}
-        </View>
-      )
-        :
-        <View>
-          <ActivityIndicator size="large" />
-        </View>
-      }
     </ScrollView>
   );
 };
 
 export default MyProfileScreen;
-
-
-const styles = StyleSheet.create({
-  loadingScreen: {
-    paddingTop: '50%',
-  },
-  profileContainer: {
-    flex: 1,
-    backgroundColor: 'white',
-    paddingTop: 30,
-  },
-  btnRow: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-  },
-  btnText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    textDecorationLine: 'underline'
-  },
-  profileImg: {
-    width: 140,
-    height: 140,
-    borderWidth: 2,
-    borderRadius: Radius.round,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 12,
-    marginBottom: 7,
-    // elevation: 4,
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 1 },
-    // shadowOpacity: 0.8,
-    // shadowRadius: 2,
-  },
-  info: {
-    textAlign: 'center',
-  },
-  bio: {
-    textAlign: 'center',
-    marginLeft: 25,
-    marginRight: 25,
-    marginTop: 7,
-    marginBottom: 18,
-    // backgroundColor: 'yellow'
-  },
-  interestsHeading: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    paddingLeft: '5%',
-    paddingBottom: 26,
-    paddingTop: 12,
-    // color: '#424242',
-    // backgroundColor: 'blue'
-  },
-  tagsRow: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginBottom: 20,
-  },
-  tagBox: {
-    color: 'white',
-    backgroundColor: 'grey',
-    borderColor: 'grey',
-    borderWidth: 2,
-    borderRadius: 30,
-    paddingHorizontal: 14,
-    paddingTop: 7,
-    paddingBottom: 10,
-  },
-  tagText: {
-    color: 'white',
-    fontSize: 13,
-    fontWeight: '500',
-    margin: 'auto',
-  }
-});

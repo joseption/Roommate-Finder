@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Platform,
+  TouchableHighlight,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -16,8 +18,9 @@ import _TextInput from "../components/control/text-input";
 import { Style, Color, FontSize, Radius } from "../style";
 import _Image from "../components/control/image";
 import { env, navProp, NavTo, authTokenHeader } from "../helper";
-import Icon from "react-native-vector-icons/Ionicons";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import _Group from "../components/control/group";
+import _Text from "../components/control/text";
 
 const ProfileScreen = (props: any) => {
   /*
@@ -29,7 +32,7 @@ const ProfileScreen = (props: any) => {
   const [profile, setProfile] = useState<any>({});
   const [tags, setTags] = useState<any[]>([]);
   const [tagsFetched, setTagsFetched] = useState(false);
-
+  const [match, setMatch] = useState(0);
   const navigation = useNavigation<navProp>();
 
   useEffect(() => {
@@ -38,6 +41,7 @@ const ProfileScreen = (props: any) => {
       if (rt.params['profile']) {
         getUser(rt.params['profile']);
       }
+      setMatch(rt.params['match'] ? rt.params['match'] : 0);
     }
   }, [props.route])
 
@@ -75,7 +79,6 @@ const ProfileScreen = (props: any) => {
         });
       }
     } catch (e) {
-      console.log(e);
       return;
     }
   };
@@ -89,6 +92,7 @@ const ProfileScreen = (props: any) => {
       if (res.Error) {
         console.warn("Error: ", res.Error);
       } else {
+        console.log(res)
         setProfile(res);
       }
     });
@@ -98,173 +102,274 @@ const ProfileScreen = (props: any) => {
     return Math.floor(Math.random() * 9999999) + 1;
   };
 
+  const tag = () => {
+    return tags.map((tag, key) =>
+    <View
+    key={key}
+    >
+      <_Text
+      style={styles.tagText}
+      isDarkMode={props.isDarkMode}
+      >
+        {tag?.tag}
+      </_Text>
+    </View>
+    )
+  }
+
+  const styles = StyleSheet.create({
+    loadingScreen: {
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1
+    },
+    rowContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '100%'
+    },
+    profileImg: {
+      width: 150,
+      height: 150,
+      borderWidth: 1,
+      borderRadius: Radius.round,
+      borderColor: Color(props.isDarkMode).separator,
+      backgroundColor: Color(props.isDarkMode).userIcon
+    },
+    name: {
+      fontSize: FontSize.large,
+      fontWeight: 'bold',
+      marginTop: 10,
+    },
+    nameContent: {
+      flex: 1
+    },
+    interestsHeading: {
+      fontSize: FontSize.default,
+      fontWeight: 'bold',
+      paddingBottom: 5,
+      paddingTop: 20,
+    },
+    heading: {
+      fontSize: FontSize.default,
+      fontWeight: 'bold',
+      paddingTop: 20,
+    },
+    tagsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap'
+    },
+    tagText: {
+      marginRight: 5,
+      marginBottom: 5,
+      borderRadius: Radius.round,
+      paddingVertical: 5,
+      paddingHorizontal: 15,
+      color: Color(props.isDarkMode).text,
+      fontSize: FontSize.default,
+      backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).holderSecondary,
+    },
+    mainContent: {
+      marginTop: 45,
+      width: '100%'
+    },
+    group: {
+      marginTop: -50
+    },
+    imageContainer: {
+      zIndex: 3,
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'center'
+    },
+    view: {
+      flexDirection: 'column-reverse',
+      padding: 10
+    },
+    icon: {
+      ...Platform.select({
+          web: {
+              outlineStyle: 'none'
+          }
+      }),
+    },
+    btnContent: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'row',
+    },
+    btnText: {
+      marginLeft: 5,
+      color: Color(props.isDarkMode).actualWhite
+    },
+    matchText: {
+      borderRadius: Radius.round,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      color: Color(props.isDarkMode).actualWhite,
+      fontSize: FontSize.default,
+      backgroundColor: Color(props.isDarkMode).gold,
+      marginBottom: 5
+    },
+    backIcon: {
+      ...Platform.select({
+        web: {
+          outlineStyle: 'none'
+        }
+      }),
+    },
+    button: {
+      padding: 10,
+      borderRadius: Radius.round,
+      margin: 5,
+      position: 'absolute',
+      zIndex: 5
+    },
+    bio: {
+      width: '100%'
+    }
+  });
+
   if (!profile.id) {
     return (
       <View style={styles.loadingScreen}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator
+        size="large"
+        color={Color(props.isDarkMode).gold}
+        />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.profileContainer}>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.goBack();
-        }}
+    <ScrollView>
+      <TouchableHighlight
+      underlayColor={Color(props.isDarkMode).underlayMask}
+      style={styles.button}
+      onPress={() => navigation.goBack() }
       >
-        <Icon name="arrow-back" size={30} color="#000" />
-      </TouchableOpacity>
-      <Image style={styles.profileImg} source={profile?.image} />
-      <Text style={styles.name}>
-        {profile?.first_name + " " + profile?.last_name}
-      </Text>
-      <Text style={styles.info}>
-        Age: {profile?.age} | From: {profile?.city}, {profile?.state}
-      </Text>
-      <Text style={styles.match}>Match: {profile?.matchPercentage}%</Text>
-      <Text style={styles.bio}>"{profile?.bio}"</Text>
-      <View style={styles.chatRow}>
-        <TouchableOpacity style={styles.chatButton} onPress={() => {
-          navigation.navigate(NavTo.Messages, {user: profile.id, requestId: generateRequestId()} as never);
-        }}>
-          <Text style={styles.chatText} >
-            <AntDesign name="message1" size={15} color="white" style={styles.chatIcon} />
-            Chat
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.interestsHeading}>Interests and Hobbies</Text>
-      {tagsFetched ? (
-        tags.map(
-          (tag, index) =>
-            index % 3 == 0 && (
-              <View style={styles.tagsRow} key={index}>
-                <View style={styles.tagBox}>
-                  <Text style={styles.tagText}>{tags[index]?.tag}</Text>
+        <FontAwesomeIcon 
+        size={20} 
+        color={Color(props.isDarkMode).text} 
+        style={styles.backIcon} 
+        icon="arrow-left"
+        >
+        </FontAwesomeIcon>
+      </TouchableHighlight>
+      <View
+      style={styles.view}
+      >
+        <_Group
+        containerStyle={styles.group}
+        isDarkMode={props.isDarkMode}
+        vertical={true}
+        >
+          <View
+          style={styles.mainContent}
+          >
+            <View
+            style={styles.rowContent}
+            >
+              <_Text
+              style={styles.name}
+              isDarkMode={props.isDarkMode}
+              numberOfLines={1}
+              containerStyle={styles.nameContent}
+              >
+                {profile?.first_name + " " + profile?.last_name}
+              </_Text>
+              <_Button
+              onPress={() => {
+                navigation.navigate(NavTo.Messages, {user: profile.id, requestId: generateRequestId()} as never);
+              }}
+              isDarkMode={props.isDarkMode}
+              >
+                <View
+                style={styles.btnContent}
+                >
+                  <FontAwesomeIcon
+                  style={styles.icon}
+                  size={20}
+                  color={Color(props.isDarkMode).actualWhite}
+                  icon="message"
+                  >
+                  </FontAwesomeIcon>
+                  <_Text
+                  style={styles.btnText}
+                  isDarkMode={props.isDarkMode}
+                  >
+                  Message
+                  </_Text>
                 </View>
-                {tags[index + 1]?.tag && (
-                  <View style={styles.tagBox}>
-                    <Text style={styles.tagText}>{tags[index + 1]?.tag}</Text>
-                  </View>
-                )}
-                {tags[index + 2]?.tag && (
-                  <View style={styles.tagBox}>
-                    <Text style={styles.tagText}>{tags[index + 2]?.tag}</Text>
-                  </View>
-                )}
+              </_Button>
+            </View>
+            {match ?
+            <_Text
+            isDarkMode={props.isDarkMode}
+            style={styles.matchText}
+            >
+              {match}% match
+            </_Text>
+            : null }
+            <_Text
+            isDarkMode={props.isDarkMode}
+            >
+              {profile?.age} years old
+            </_Text>
+            <_Text
+            isDarkMode={props.isDarkMode}
+            >
+              {profile?.city}, {profile?.state}
+            </_Text>
+            {profile?.bio ?
+            <View>
+              <_Text
+              style={styles.heading}
+              isDarkMode={props.isDarkMode}
+              >
+                About
+              </_Text>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              style={styles.bio}
+              >
+                {profile?.bio}
+              </_Text>
+            </View>
+            : null }
+            <_Text
+            style={styles.interestsHeading}
+            isDarkMode={props.isDarkMode}
+            >
+              Interests and Hobbies
+            </_Text>
+            {tagsFetched ?
+            <View style={styles.tagsRow}>
+              {tag()}
+            </View>
+              :
+              <View>
+                <ActivityIndicator
+                color={Color(props.isDarkMode).gold}
+                size="large"
+                />
               </View>
-            )
-        )
-      ) : (
-        <View>
-          <ActivityIndicator size="large" />
-        </View>
-      )}
+            }
+          </View>
+        </_Group>
+        <_Image
+        height={150}
+        width={150}
+        style={styles.profileImg}
+        source={{uri: profile?.image}}
+        containerStyle={styles.imageContainer}
+        />
+      </View>
     </ScrollView>
   );
 };
 
 export default ProfileScreen;
-
-const styles = StyleSheet.create({
-  loadingScreen: {
-    paddingTop: "50%",
-  },
-  profileContainer: {
-    flex: 1,
-    backgroundColor: "white",
-    paddingTop: 30,
-  },
-  profileImg: {
-    width: 140,
-    height: 140,
-    borderWidth: 2,
-    borderRadius: Radius.round,
-    marginLeft: "auto",
-    marginRight: "auto",
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 12,
-    marginBottom: 7,
-    // elevation: 4,
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 1 },
-    // shadowOpacity: 0.8,
-    // shadowRadius: 2,
-  },
-  info: {
-    textAlign: "center",
-  },
-  match: {
-    textAlign: "center",
-    fontStyle: "italic",
-    marginTop: 7,
-  },
-  bio: {
-    textAlign: "center",
-    marginLeft: 25,
-    marginRight: 25,
-    marginTop: 7,
-    marginBottom: 18,
-    // color: 'grey'
-    // backgroundColor: 'yellow'
-  },
-  chatRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  chatButton: {
-    borderWidth: 1,
-    borderRadius: 30,
-    backgroundColor: "black",
-    paddingVertical: 5,
-    paddingBottom: 7,
-    paddingHorizontal: 15,
-    marginRight: 15,
-    marginVertical: 10,
-  },
-  chatText: {
-    color: "white",
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  chatIcon: {
-    paddingRight: 5,
-    paddingBottom: 0,
-    // backgroundColor: 'yellow',
-  },
-  interestsHeading: {
-    fontSize: 16,
-    fontWeight: "bold",
-    paddingLeft: "5%",
-    paddingBottom: 26,
-    // color: '#424242',
-    // backgroundColor: 'blue'
-  },
-  tagsRow: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    marginBottom: 20,
-  },
-  tagBox: {
-    color: "white",
-    backgroundColor: "grey",
-    borderColor: "grey",
-    borderWidth: 2,
-    borderRadius: 30,
-    paddingHorizontal: 14,
-    paddingTop: 7,
-    paddingBottom: 10,
-  },
-  tagText: {
-    color: "white",
-    fontSize: 13,
-    fontWeight: "500",
-    margin: "auto",
-  },
-});

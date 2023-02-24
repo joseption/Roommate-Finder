@@ -226,7 +226,6 @@ export async function UpdateTagsandBio(tags:string[], user_id:string, bio:string
     }
     return true;
   } catch (error) {
-    console.log(error)
     return false;
   }
 }

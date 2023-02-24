@@ -37,10 +37,11 @@ interface Props {
   updateBlocked: any,
   updateMuted: any,
   socket: any,
-  isDarkMode: boolean
+  isDarkMode: boolean,
+  setShowingMessagePanel: any
 }
 
-const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, socket, updateBlocked, updateMuted}: Props) => {
+const MessageTopBar = ({setShowingMessagePanel, isDarkMode, showPanel, userInfo, updateShowPanel, chat, socket, updateBlocked, updateMuted}: Props) => {
   if (!chat?.users) return <></>;
 
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
@@ -79,15 +80,15 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
       alignItems: 'center',
       justifyContent: 'center',
       padding: 10,
-      borderRadius: Radius.round
+      borderRadius: Radius.round,
     },
     name: {
       fontSize: FontSize.default,
       fontWeight: 'bold',
       color: Color(isDarkMode).text
     },
-    nameContainer: {
-      flex: 1,
+    profileInfo: {
+      borderRadius: Radius.round,
     },
     image: {
       height: hasImage() ? 35 : 30,
@@ -108,7 +109,20 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
     },
     menu: {
       padding: 10,
-      borderRadius: Radius.round
+      borderRadius: Radius.round,
+    },
+    nameContent: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      paddingVertical: 0,
+      marginLeft: -10
+    },
+    optionsContent: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      flex: 1
     }
   });
 
@@ -124,31 +138,44 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
             {returnIcon}
           </TouchableHighlight>
         </View>
-        <_Image
-        height={hasImage() ? 35 : 30}
-        width={hasImage() ? 35 : 30}
-        style={styles.image}
-        containerStyle={styles.imageContainerStyle}
-        source={getUserIcon()}
-        />
-        <_Text
-        numberOfLines={1}
-        style={styles.name}
-        containerStyle={styles.nameContainer}
-        onPress={() => {
-          navigation.navigate(NavTo.Profile, { profile: chat?.users[0]?.id } as never);
-        }}
+        <View
+        style={styles.optionsContent}
         >
-          {chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}
-        </_Text>
-        <View style={styles.buttonContainer}>
           <TouchableHighlight
-          underlayColor={Color(isDarkMode).underlayMask}
-          onPress={() => setShowPopUp(!showPopUp)}
-          style={styles.menu}
+            style={styles.profileInfo}
+            underlayColor={Color(isDarkMode).underlayMask}
+            onPress={() => {
+              navigation.navigate(NavTo.Profile, { profile: chat?.users[0]?.id } as never);
+              setShowingMessagePanel(false);
+            }}
           >
-            <Dots color={Color(isDarkMode).text} width={20} height={20}/>
+            <View
+            style={styles.nameContent}
+            >
+              <_Image
+              height={hasImage() ? 35 : 30}
+              width={hasImage() ? 35 : 30}
+              style={styles.image}
+              containerStyle={styles.imageContainerStyle}
+              source={getUserIcon()}
+              />
+              <_Text
+              numberOfLines={1}
+              style={styles.name}
+              >
+                {chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}
+              </_Text>
+            </View>
           </TouchableHighlight>
+          <View style={styles.buttonContainer}>
+            <TouchableHighlight
+            underlayColor={Color(isDarkMode).underlayMask}
+            onPress={() => setShowPopUp(!showPopUp)}
+            style={styles.menu}
+            >
+              <Dots color={Color(isDarkMode).text} width={20} height={20}/>
+            </TouchableHighlight>
+          </View>
         </View>
       </View>
       <MessageSettings

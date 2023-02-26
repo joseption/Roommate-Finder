@@ -7,6 +7,20 @@ const prisma = new PrismaClient();
 const router = require('express').Router();
 router.use(isAuthenticated);
 
+// get all listings made by a given user
+router.get('/all/:userId', async (req: Request, res: Response) => {
+  try {
+    const listings = await prisma.listings.findMany({
+      where: {
+        userId: req.params.userId,
+      },
+    });
+    res.status(200).json(listings);
+  } catch (err) {
+    res.status(500).json({ Error: err.message });
+  }
+});
+
 // listings REST API everything is under /listings
 // create listing
 router.post('/', async (req: Request, res: Response) => {

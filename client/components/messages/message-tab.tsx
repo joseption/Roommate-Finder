@@ -10,10 +10,11 @@ interface Props {
   setCurrentChat: any,
   showPanel: boolean,
   updateShowPanel: Dispatch<SetStateAction<boolean>>,
-  isDarkMode: boolean
+  isDarkMode: boolean,
+  typing: any
 }
 
-const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel, isDarkMode}: Props) => {
+const MessageTab = ({typing, chat, setCurrentChat, showPanel, updateShowPanel, isDarkMode}: Props) => {
   const [userInfo, setUserInfo] = useState<any>();
 
   useEffect(() => {
@@ -140,8 +141,39 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel, isDarkMod
     },
     notificationText: {
       color: 'white',
+    },
+    typeContainer: {
+      backgroundColor: Color(isDarkMode).msgFromBG,
+      position: 'absolute',
+      bottom: -1,
+      right: 7,
+      paddingVertical: 1,
+      paddingHorizontal: 2,
+      borderRadius: 10
     }
   });
+
+  const isTyping = () => {
+    if (chat && typing) {
+      if (chat.blocked) {
+        return false;
+      }
+
+      let chattingUser = typing.find((x: any) => {
+        if (userInfo) {
+          return x.chat === chat.id && x.user !== userInfo.id;
+        }
+        else {
+          return null;
+        }
+      });
+
+      return chattingUser;
+    }
+    else {
+      return false;
+    }
+  }
 
   return (
     <TouchableHighlight
@@ -153,13 +185,22 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel, isDarkMod
       }}
     >
       <View style={styles.content}>
-        <_Image
-        height={chat?.users[0]?.image ? 50 : 40}
-        width={chat?.users[0]?.image ? 50 : 40}
-        style={[styles.image, imgStyle()]}
-        containerStyle={styles.imageContainerStyle}
-        source={getUserIcon()}
-        />
+        <View>
+          <_Image
+          height={chat?.users[0]?.image ? 50 : 40}
+          width={chat?.users[0]?.image ? 50 : 40}
+          style={[styles.image, imgStyle()]}
+          containerStyle={styles.imageContainerStyle}
+          source={getUserIcon()}
+          />
+          {isTyping() ?
+          <View
+          style={styles.typeContainer}
+          >
+            <_Image width={25} source={!isDarkMode ? require('../../assets/images/indicator_light.gif') : require('../../assets/images/indicator_dark.gif')}></_Image>
+          </View>
+          : null}
+        </View>
         <View
         style={styles.text}
         >

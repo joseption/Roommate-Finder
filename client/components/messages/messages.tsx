@@ -5,27 +5,26 @@ import { authTokenHeader, env, isDarkMode, userId } from "../../helper";
 import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Color } from "../../style";
+import { Color, Radius } from "../../style";
+import _Image from "../control/image";
 
 interface Props {
   chat: any,
   userInfo: any,
   socket: Socket<DefaultEventsMap, DefaultEventsMap>
   isDarkMode: boolean,
-  image: string
+  image: string,
+  receiveTyping: any,
+  receiveMessage: any,
+  typing: any
 }
 
-const Messages = ({chat, userInfo, socket, isDarkMode, image}: Props) => {
+const Messages = ({typing, receiveTyping, receiveMessage, chat, userInfo, socket, isDarkMode, image}: Props) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [typingStates, setTypingStates] = useState<Set<string>>(new Set<string>());
   const chatRef = useRef(chat);
   const userInfoRef = useRef(userInfo);
   const messagesRef = useRef(messages);
-
-  const typingIndicatorExists = () => {
-    return messagesRef.current.length !== 0 && messagesRef.current[0].typingIndicator;
-  }
   
   useEffect(() => {
     chatRef.current = chat
@@ -36,67 +35,19 @@ const Messages = ({chat, userInfo, socket, isDarkMode, image}: Props) => {
   }, [chat]);
 
   useEffect(() => {
-    setTypingIndicator()
-  }, [typingStates])
-
-
-  useEffect(() => {
     userInfoRef.current = userInfo
   }, [userInfo])
 
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages])
-  
+
   useEffect(() => {
-    // Listen for messages being sent over socket
-    socket.on('receive_message', (data: any) => {
-      if (data.chatId !== chatRef.current.id) return;
-      setMessages([data, ...messagesRef.current]);
-    });
-
-
-    // Listen for typing indicator socket
-    socket.on('receive_typing', (data: any) => {
-      if (chatRef.current.blocked) return;
-      if (data.userId === userInfoRef.current.id) return;
-
-      if (data.isTyping) {
-        typingStates.add(data.chatId);
-      } else {
-        typingStates.delete(data.chatId);
-      }
-      setTypingStates(new Set<string>(typingStates));
-    });
-
-    socket.on("connect_error", (err) => {
-      if (typingIndicatorExists()) {
-        let newMessages = [...messagesRef.current]
-        newMessages.shift();
-        setMessages(newMessages);
-      }
-    });
-  }, [socket]);
-
-  const setTypingIndicator = async () => {
-    if (typingStates.has(chat.id)) {
-      if (!typingIndicatorExists()) {
-        const data = {
-          chatId: chat.id,
-          typingIndicator: true,
-          userId: chat.users[0].id,
-          id: -1,
-        };
-        setMessages([data, ...messagesRef.current])
-      }
-    } else {
-      if (typingIndicatorExists()) {
-        let newMessages = [...messagesRef.current]
-        newMessages.shift();
-        setMessages(newMessages);
-      }
+    if (receiveMessage) {
+      if (receiveMessage.chatId !== chatRef.current.id) return;
+      setMessages([receiveMessage, ...messagesRef.current]);
     }
-  }
+  }, [receiveMessage])
 
   const getMessages = async (id: string) => {
     if (!id) return;
@@ -115,9 +66,25 @@ const Messages = ({chat, userInfo, socket, isDarkMode, image}: Props) => {
       else {
         setMessages(res);
         setLoading(false);
-        setTypingIndicator();
       }
     });
+  }
+
+  const isTyping = () => {
+    if (chatRef && chatRef.current && typing) {
+      if (chatRef.current.blocked) {
+        return false;
+      }
+      
+      let chattingUser = typing.find((x: any) => {
+        return x.chat === chatRef.current.id && x.user !== userInfoRef.current.id;
+      });
+
+      return chattingUser;
+    }
+    else {
+      return false;
+    }
   }
 
   const renderItem = useCallback(({item}:any) => {
@@ -160,8 +127,76 @@ const Messages = ({chat, userInfo, socket, isDarkMode, image}: Props) => {
   const styles = StyleSheet.create({
     loading: {
       height: '100%'
-    }
+    },
+    image: {
+      height: image ? 35 : 30,
+      width: image ? 35 : 30,
+      borderRadius: Radius.round,
+    },
+    imageContainerStyle: {
+      minHeight: 35,
+      minWidth: 35,
+      marginRight: 10,
+      borderRadius: Radius.round,
+      borderColor: Color(isDarkMode).separator,
+      borderWidth: 1,
+      backgroundColor: Color(isDarkMode).userIcon,
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'row'
+    },
+    fromMsgContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+    },
+    myMessage: {
+      marginVertical: 1,
+      paddingVertical: 7,
+      paddingHorizontal: 10,
+      borderRadius: Radius.default,
+      backgroundColor: Color(isDarkMode).msgToBG,
+      color: Color(isDarkMode).msgToFG,
+      alignSelf: 'flex-end',
+      maxWidth: '60%'
+    },
+    theirMessage: {
+      backgroundColor: Color(isDarkMode).msgFromBG,
+      alignSelf: 'flex-start',
+      color: Color(isDarkMode).msgFromFG,
+      maxWidth: '60%',
+    },
   });
+
+  const getUserIcon = () => {
+    if (image)
+      return {uri: image};
+    else
+      return require('../../assets/images/user.png');
+  }
+
+  const indicator = () => {
+    return <>
+    {isTyping() ?
+      <View>
+        <View
+        style={styles.fromMsgContainer}
+        >
+          <_Image
+            height={image ? 35 : 30}
+            width={image ? 35 : 30}
+            style={styles.image}
+            containerStyle={styles.imageContainerStyle}
+            source={getUserIcon()}
+          />
+          <View style={[styles.myMessage, styles.theirMessage]}>
+            <_Image width={25} source={!isDarkMode ? require('../../assets/images/indicator_light.gif') : require('../../assets/images/indicator_dark.gif')}></_Image>
+        </View>
+      </View>
+    </View>
+    : null }
+    </>
+  }
 
   if (loading) {
     return (
@@ -178,6 +213,7 @@ const Messages = ({chat, userInfo, socket, isDarkMode, image}: Props) => {
         renderItem={renderItem}
         initialNumToRender={50}
         removeClippedSubviews
+        ListHeaderComponent={indicator()}
         inverted
         style={{padding: 10}}
       />

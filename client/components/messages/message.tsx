@@ -28,7 +28,7 @@ const Message = ({ message, userInfo, isTypingIndicator, isDarkMode, image }: Pr
 
   const msgStyle = () => {
     let style = [];
-    if (!message.showImg) {
+    if (!message.showImg && !isTypingIndicator) {
       style.push({
         marginLeft: 47
       });
@@ -69,6 +69,8 @@ const Message = ({ message, userInfo, isTypingIndicator, isDarkMode, image }: Pr
       alignSelf: 'flex-start',
       color: Color(isDarkMode).msgFromFG,
       maxWidth: '60%',
+    },
+    theirNoImgLine: {
       marginRight: 43
     },
     typingIndicatorImage: {
@@ -115,23 +117,11 @@ const Message = ({ message, userInfo, isTypingIndicator, isDarkMode, image }: Pr
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'flex-end',
-    }
+    },
   });
 
   if (isTypingIndicator) {
-    return (
-      <View style={styles.indicatorContainer}>
-        <TypingAnimation 
-        dotColor={Color(isDarkMode).textTertiary}
-        dotMargin={4}
-        dotAmplitude={3}
-        dotSpeed={.1}
-        dotRadius={3}
-        dotX={10}
-        dotY={0}
-        />
-      </View>
-    )
+    return null; // Handle typing indicator in main messages it should always stay at the bottom and not show multiple times
   }
   
   return (
@@ -160,7 +150,7 @@ const Message = ({ message, userInfo, isTypingIndicator, isDarkMode, image }: Pr
             source={getUserIcon()}
           />
           : null }
-          <View style={[styles.myMessage, styles.theirMessage, msgStyle()]}>
+          <View style={[styles.myMessage, styles.theirMessage, styles.theirNoImgLine, msgStyle()]}>
             <_Text
             style={styles.fromMsg}
             >

@@ -65,11 +65,14 @@ export const App = (props: any) => {
   const [backTimer,setBackTimer] = useState(0);
   const [loginViewChanged,setLoginViewChanged] = useState('');
   const [messageCount,setMessageCount] = useState(0);
+  const [addMessageCount,setAddMessageCount] = useState(0);
   const [messageData,setMessageData] = useState({});
   const [currentChat,setCurrentChat] = useState('');
   const [showingMessagePanel,setShowingMessagePanel] = useState(false);
   const [enableScroll,setEnableScroll] = useState(true);
   const [openChatFromPush,setOpenChatFromPush] = useState('');
+  const [receiveMessage,setReceiveMessage] = useState(null);
+  const [receiveTyping,setReceiveTyping] = useState(null);
   const appState = useRef(AppState.currentState);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
@@ -77,6 +80,22 @@ export const App = (props: any) => {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
+
+  useEffect(() => {
+    if (addMessageCount === 0) {
+      return;
+    }
+    if (addMessageCount > 0) {
+      setMessageCount(messageCount + addMessageCount);
+    }
+    setAddMessageCount(0);
+  }, [addMessageCount])
+
+  useEffect(() => {
+    if (messageCount < 0) {
+      setMessageCount(0);
+    }
+  }, [messageCount])
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -318,6 +337,18 @@ export const App = (props: any) => {
       hasError = true;
     }  
   }
+
+  useEffect(() => {
+    // Listen for messages being sent over socket
+    socket.on('receive_message', (data: any) => {
+      setReceiveMessage(data);
+    });
+
+    // Listen for typing indicator socket
+    socket.on('receive_typing', (data: any) => {
+      setReceiveTyping(data);
+    });
+  }, [socket]);
 
   // Resend all combined unread messages as one to the current user
   const updateGroupedPushNotification = async (title: any, message: any, tag: string) => {
@@ -902,11 +933,15 @@ export const App = (props: any) => {
                   navSelector={navSelector}
                   socket={socket}
                   setMessageCount={setMessageCount}
+                  messageCount={messageCount}
                   messageData={messageData}
                   setCurrentChat={setCurrentChat}
                   setShowingMessagePanel={setShowingMessagePanel}
                   openChatFromPush={openChatFromPush}
                   setOpenChatFromPush={setOpenChatFromPush}
+                  receiveMessage={receiveMessage}
+                  receiveTyping={receiveTyping}
+                  setAddMessageCount={setAddMessageCount}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen

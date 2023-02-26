@@ -17,7 +17,10 @@ const AccountScreen = (props: any) => {
         if (rt && rt.params && rt.name && rt.name == NavTo.Account) {
             if (rt.params['view']) {
                 let view = (rt.params['view'] as string).toLowerCase();
-                if (props.accountView &&
+                if (rt.params['view'] === "info") {
+                    props.setAccountView(AccountScreenType.info);
+                }
+                else if (props.accountView &&
                     props.accountView === AccountScreenType.about ||
                     !props.accountView &&
                     view.includes("about")) {

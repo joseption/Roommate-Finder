@@ -22,6 +22,33 @@ const MessagesScreen = (props: any) => {
   const currentChatRef = useRef(currentChat);
   const showPanelRef = useRef(showPanel);
   const navigation = useNavigation<navProp>();
+  const [typing, setTyping] = useState<any>([]);
+
+  useEffect(() => {
+    if (props.receiveTyping) {
+      let idx = typing.findIndex((x: any) => {
+        return x.chat === props.receiveTyping.chatId && x.user === props.receiveTyping.userId
+      });
+
+      if (props.receiveTyping.isTyping) {
+        if (idx < 0) {
+          if (props.receiveTyping) {
+            let chat = props.receiveTyping.chatId;
+            let user = props.receiveTyping.userId;
+            if (chat && user) {
+              setTyping([...typing, {chat: chat, user: user}]);
+            }
+          }
+        }
+      }
+      else if (idx >= 0) {
+        let typers = [] as never[];
+        typing.forEach((x: any) => typers.push(x as never))
+        typers.splice(idx, 1)
+        setTyping(typers);
+      }
+    }
+  }, [props.receiveTyping])
 
   useEffect(() => {
     getUserInfo();
@@ -67,6 +94,7 @@ const MessagesScreen = (props: any) => {
             deleteNotifications();
             return chat;
           };
+          props.setAddMessageCount(1);
           return {...chat, notifCount: (chat.notifCount + 1)};
         }
         return chat;
@@ -160,6 +188,8 @@ const MessagesScreen = (props: any) => {
       } else {
         const chats = chatsRef.current.map((chat) => {
           if (chat.id === currentChatRef.current.id) {
+            let cnt = props.messageCount - chat.notifCount;
+            props.setMessageCount(cnt);
             return {...chat, notifCount: 0};
           }
           return chat;
@@ -210,7 +240,7 @@ const MessagesScreen = (props: any) => {
   }
 
   const getUserInfo = async () => {
-    const userInfo = await getLocalStorage().then((res) => {return res.user});
+    const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
     setUserInfo(userInfo);
   }
 
@@ -315,9 +345,11 @@ const MessagesScreen = (props: any) => {
       }
       else {
         const chatArray = [];
+        let totalNotifs = 0;
         for (let i = 0; i < res.length; i++) {
           const lastMessage = await getMessage(res[i].latestMessage);
           const notifCount = await getNotifs(userInfo.id, res[i].id);
+          totalNotifs += notifCount;
           const users = []
           for (let j = 0; j < res[i].users.length; j++) {
             if (res[i].users[j] === userInfo?.id) {
@@ -344,6 +376,7 @@ const MessagesScreen = (props: any) => {
         connectToChatRooms(chatArray);
         setChats(chatArray);
         setChatsHaveLoaded(true);
+        props.setMessageCount(totalNotifs);
       }
     });
   }
@@ -407,6 +440,7 @@ const MessagesScreen = (props: any) => {
             setCurrentChat={setCurrentChat}
             key={item.id}
             isDarkMode={props.isDarkMode}
+            typing={typing}
           />
         }
       />
@@ -420,6 +454,9 @@ const MessagesScreen = (props: any) => {
         updateMuted={updateMuted}
         isDarkMode={props.isDarkMode}
         setShowingMessagePanel={props.setShowingMessagePanel}
+        receiveMessage={props.receiveMessage}
+        receiveTyping={props.receiveTyping}
+        typing={typing}
       />
     </>
   );

@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { Fragment, useRef, useState } from "react";
 
 import ListingContent from "../components/listingsContent";
+import NoListingsModal from "../components/noListingsModal";
 import { GetCurrentUserInfo, GetUserListings } from "../request/fetch";
-
 export default function Mylistings() {
   const { data: userData, isLoading: userLoading } = useQuery(["UserInfo"], {
     queryFn: () => GetCurrentUserInfo(),
@@ -24,7 +24,11 @@ export default function Mylistings() {
         <div>Loading...</div>
       ) : (
         <div className="flex">
-          <ListingContent data={myListings} />
+          {myListings.length > 0 ? (
+            <ListingContent data={myListings} />
+          ) : (
+            <NoListingsModal />
+          )}
         </div>
       )}
     </div>

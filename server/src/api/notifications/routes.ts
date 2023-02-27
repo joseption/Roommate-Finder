@@ -25,7 +25,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
     res.status(200).json({});
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({Error: err});
   }
 });
 
@@ -41,7 +41,7 @@ router.get('/', async (req: Request, res: Response) => {
     });
     res.status(200).json(notifCount);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({Error: err});
   }
 });
 
@@ -57,7 +57,7 @@ router.delete('/', async (req: Request, res: Response) => {
     });
     res.status(200).json(deleted)
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({Error: err});
   }
 });
 

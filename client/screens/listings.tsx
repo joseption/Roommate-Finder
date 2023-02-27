@@ -133,7 +133,7 @@ return (
     {!currentListing && currentScreen === Listings_Screen.all && !showFilter && (
       <View style={styles.content}>
         <View style={styles.contentContainer}>
-            <_Text style={styles.title}>Search Listings</_Text>
+            <_Text style={styles.title}>Explore Listings</_Text>
             <View style={styles.rightContainer}>
               <View style={styles.titleContainer}>
                 <_Button 

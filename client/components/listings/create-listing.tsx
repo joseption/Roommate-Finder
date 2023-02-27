@@ -576,11 +576,12 @@ const CreateListing = (props: any) => {
               height={100}
               isDarkMode={props.isDarkMode} />
 
-            <_TextInput
+              <_TextInput
               containerStyle={styles.inputContainerStyle}
-              onChangeText={(text: any) => handleChange('city', text)}
-              value={formData.city}
-              label="City"
+              style={styles.input}
+              onChangeText={(text: any) => handleChange('address', text)}
+              value={formData.address}
+              label="Address"
               isDarkMode={props.isDarkMode} />
 
             <_Dropdown
@@ -599,13 +600,7 @@ const CreateListing = (props: any) => {
               keyboardType="numeric"
               label="Price"
               isDarkMode={props.isDarkMode} />
-            <_TextInput
-              containerStyle={styles.inputContainerStyle}
-              style={styles.input}
-              onChangeText={(text: any) => handleChange('address', text)}
-              value={formData.address}
-              label="Address"
-              isDarkMode={props.isDarkMode} />
+            
 
             <_Dropdown
               containerStyle={styles.inputContainerStyle}
@@ -622,6 +617,13 @@ const CreateListing = (props: any) => {
               value={formData.rooms}
               setValue={(text: string) => handleChange('rooms', parseInt(text))}
               label="Rooms" />
+
+            <_TextInput
+            containerStyle={styles.inputContainerStyle}
+            onChangeText={(text: any) => handleChange('city', text)}
+            value={formData.city}
+            label="City"
+            isDarkMode={props.isDarkMode} />
 
             <_Dropdown
               containerStyle={styles.inputContainerStyle}

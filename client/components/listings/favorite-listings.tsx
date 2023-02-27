@@ -63,10 +63,14 @@ const FavoriteListings = (props: any) => {
 });
 
   return (
-    <ScrollView style={styles.container}>
-      <_Text style={styles.title}>Favorite Listings</_Text>
-      {favoriteListings}
-    </ScrollView>
+    
+      <>
+        <_Text style={styles.title}>Favorite Listings</_Text>
+        <ScrollView style={styles.container}>
+        {favoriteListings}
+        </ScrollView>
+      </>
+    
     
   );
 };

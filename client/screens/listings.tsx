@@ -110,7 +110,7 @@ const ListingsScreen = (props: any) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      margin: 10,
+      marginBottom: 40,
     },
     rightContainer: {
       flex: 1,
@@ -133,17 +133,17 @@ return (
     {!currentListing && currentScreen === Listings_Screen.all && !showFilter && (
       <View style={styles.content}>
         <View style={styles.contentContainer}>
-          <View style={styles.titleContainer}>
             <_Text style={styles.title}>Search Listings</_Text>
             <View style={styles.rightContainer}>
-              <_Button 
-                isDarkMode={props.isDarkMode}
-                onPress={handleOpenFilterModal} 
-                style={styles.buttonSmall}>
-                <FontAwesomeIcon icon={faFilter} size={20} color="black" />
-              </_Button>
+              <View style={styles.titleContainer}>
+                <_Button 
+                  isDarkMode={props.isDarkMode}
+                  onPress={handleOpenFilterModal} 
+                  style={styles.buttonSmall}>
+                  <FontAwesomeIcon icon={faFilter} size={20} color="black" />
+                </_Button>
+              </View>
             </View>
-          </View>
           <AllListingsView
             isDarkMode={props.isDarkMode}
             setCurrentListing={setCurrentListing}
@@ -164,7 +164,6 @@ return (
           isDarkMode={props.isDarkMode}
           setShowFilter = {setShowFilter}
           onClose={handleCloseFilterModal} 
-          
           />
         </View>
       </View>

@@ -1,7 +1,7 @@
-import { useNavigation } from '@react-navigation/native';
-import { Image, ScrollView, StyleSheet, Text, View  } from 'react-native';
+import { ScrollView, StyleSheet, View  } from 'react-native';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
+import _Image from '../control/image';
 import _Text from '../control/text';
 
 const ListingView = (props: any) => {
@@ -20,11 +20,6 @@ const ListingView = (props: any) => {
     },
     btnContainer: {
       padding: 10,
-    },
-    image: {
-      width: '100%',
-      height: 200,
-      borderRadius: Radius.default
     },
     header: {
       fontSize: FontSize.large,
@@ -63,16 +58,17 @@ const ListingView = (props: any) => {
       fontWeight: 'bold',
       textAlign: 'center',
     },
+    image: {
+      width: '100%',
+      height: 200,
+      borderRadius: Radius.default
+    },
   });
 
   return (
-    <View
-    style={styles.container}
-    >
-      <ScrollView
-      style={styles.content}
-      >
-        <Image source={{ uri: props.currentListing.images[0] }} style={styles.image} />
+    <View style={styles.container}>
+      <ScrollView style={styles.content}>
+        <_Image source={{ uri: props.currentListing.images[0] }} style={styles.image} />
         <_Text isDarkMode={props.isDarkMode} style={styles.header}>{props.currentListing.name}</_Text>
         <_Text isDarkMode={props.isDarkMode} style={styles.subheader}>{props.currentListing.city}</_Text>
         <_Text isDarkMode={props.isDarkMode} style={styles.description}>{props.currentListing.description}</_Text>
@@ -81,10 +77,8 @@ const ListingView = (props: any) => {
           Pets Allowed: {props.currentListing.petsAllowed ? 'Yes' : 'No'}
         </_Text>
       </ScrollView>
-      <View
-      style={styles.btnContainer}
-      >
-        <_Button onPress = {() => onClose()} style = {Style(props.isDarkMode).buttonDefault}>Go Back</_Button>
+      <View style={styles.btnContainer}>
+        <_Button onPress={() => onClose()} style={Style(props.isDarkMode).buttonDefault}>Go Back</_Button>
       </View>
     </View>
   );

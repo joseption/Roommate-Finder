@@ -24,6 +24,7 @@ const Filter = (props: any) => {
   const [rooms, setRooms] = useState('');
   const [bathrooms, setBathrooms] = useState('');
   const [size, setSize] = useState('');
+  const [distance, setDistance] = useState('');
 
   const handleApply = () => {
     props.onFilter({
@@ -33,8 +34,9 @@ const Filter = (props: any) => {
       rooms,
       bathrooms,
       size,
+      distance,
     });
-    props.onClose();
+    props.setShowFilter(false);
   };
 
   const getOptions = () => {
@@ -61,9 +63,23 @@ const Filter = (props: any) => {
     ];
   };
 
+  const getDistanceOptions = () => {
+    return [
+      { key: 1, value: '<3 miles' },
+      { key: 2, value: '<10 miles' },
+      { key: 3, value: '+10 miles' },
+    ];
+  };
+
+  const onClose = () => {
+    props.setShowFilter(false)
+  };
+
   const styles = StyleSheet.create({
     container: {
-      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
     },
     inputContainer: {
       backgroundColor: Color(props.isDarkMode).grey,
@@ -263,16 +279,8 @@ const Filter = (props: any) => {
       <ScrollView>
         <_Text style={styles.title}>Filter Listing</_Text>
         <View style={styles.formContainer}>
-          <_Dropdown
-            containerStyle={styles.inputContainerStyle}
-            isDarkMode={props.isDarkMode}
-            options={getHousingType()}
-            value={housingType}
-            setValue={setHousingType}
-            label="Housing Type"
-          />
 
-          <_TextInput
+        <_TextInput
             containerStyle={styles.inputContainerStyle}
             style={styles.input}
             onChangeText={setPrice}
@@ -281,7 +289,15 @@ const Filter = (props: any) => {
             label="Price"
             isDarkMode={props.isDarkMode}
           />
-
+          <_Dropdown
+            containerStyle={styles.inputContainerStyle}
+            isDarkMode={props.isDarkMode}
+            options={getHousingType()}
+            value={housingType}
+            setValue={setHousingType}
+            label="Housing Type"
+          />      
+          
           <_Dropdown
             containerStyle={styles.inputContainerStyle}
             isDarkMode={props.isDarkMode}
@@ -309,18 +325,18 @@ const Filter = (props: any) => {
             label="Bathrooms"
           />
 
-          <_TextInput
+          <_Dropdown
             containerStyle={styles.inputContainerStyle}
-            style={styles.input}
-            onChangeText={setSize}
-            value={size}
-            keyboardType="numeric"
-            label="Size"
             isDarkMode={props.isDarkMode}
+            options={getDistanceOptions()}
+            value={distance}
+            setValue={setDistance}
+            label="Distance"
           />
 
 <         View style={styles.submitContainer}>
-            <_Button onPress={handleApply} style={Style(props.isDarkMode).buttonDefault}>Apply Filter</_Button>
+            <_Button containerStyle={{flex:1}}style={[Style(props.isDarkMode).buttonInverted,{marginRight:5}]}textStyle={Style(props.isDarkMode).buttonInvertedText}onPress={()=>{onClose()}}>Cancel</_Button>
+            <_Button containerStyle={{flex:1}}style={[Style(props.isDarkMode).buttonGold,{marginRight:5}]}onPress={()=>{handleApply()}}>Apply Filter</_Button>
           </View>
         </View>
       </ScrollView>

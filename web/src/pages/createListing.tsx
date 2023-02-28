@@ -104,7 +104,7 @@ export default function CreateListing() {
               </div>
 
               <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                <div className="sm:col-span-4">
+                <div className="sm:col-span-6">
                   <label
                     htmlFor="Title your listing"
                     className="block text-sm font-medium text-gray-700"

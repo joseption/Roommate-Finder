@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 
+import Button from "../components/Inputs/Button";
 import { GetListing } from "../request/fetch";
 import { UpdateListing } from "../request/mutate";
 
@@ -36,7 +37,7 @@ export default function EditListing() {
     },
   });
 
-  const { mutate: updateListing } = useMutation({
+  const { mutate: updateListing, isLoading: updatingData } = useMutation({
     mutationFn: (fullAddress: string) =>
       UpdateListing(
         name,
@@ -493,12 +494,14 @@ export default function EditListing() {
               >
                 Cancel
               </button>
-              <button
+              <Button
                 type="submit"
-                className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="ml-3 inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm  focus:outline-none focus:ring-2 focus:ring-offset-2"
+                loading={updatingData}
+                disabled={updatingData}
               >
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </form>

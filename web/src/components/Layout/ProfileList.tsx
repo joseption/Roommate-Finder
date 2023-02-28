@@ -27,7 +27,9 @@ export default function ProfileList({
   className = "",
 }: Props) {
   return (
-    <section className={`relative mx-auto h-full max-w-7xl`}>
+    <section
+      className={`relative mx-auto h-full min-h-screen max-w-7xl bg-white`}
+    >
       <AnimatePresence mode={"popLayout"}>
         {profiles?.length ? (
           <div key={"postList"}>

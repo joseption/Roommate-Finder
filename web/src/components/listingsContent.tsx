@@ -10,7 +10,7 @@ function ListingContent({ data }: Props) {
   return (
     <ul
       role="list"
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      className="relative mx-auto grid h-full min-h-screen max-w-7xl grid-cols-1 bg-white sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
     >
       {data.map((listing: ListingInfo) => {
         return (

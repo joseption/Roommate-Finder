@@ -4,6 +4,6 @@
 
 @layer base {
     html, body {
-      @apply min-h-screen bg-slate-200;
+      @apply min-h-screen bg-white;
     }
 }

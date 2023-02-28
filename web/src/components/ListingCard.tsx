@@ -10,7 +10,7 @@ interface Props {
 
 const ListingCard = ({ listing }: Props) => {
   return (
-    <div className="m-10 max-w-sm overflow-hidden rounded shadow-lg">
+    <div className="m-4 max-w-sm overflow-hidden rounded shadow-lg ">
       <Link href={`/listings/${listing.id}`}>
         <img
           className="w-full"

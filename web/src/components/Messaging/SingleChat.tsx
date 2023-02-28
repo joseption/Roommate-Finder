@@ -26,7 +26,7 @@ interface Props {
   selectedChatUser?: user;
 }
 
-const ENDPOINT = "http://localhost:8080";
+const ENDPOINT = "https://api.roomfin.xyz";
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>,
   selectedChatCompare: chat;
 

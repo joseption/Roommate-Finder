@@ -19,7 +19,8 @@ const Filter = (props: any) => {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedSort, setSelectedSort] = useState('default');
   const [housingType, setHousingType] = useState('');
-  const [price, setPrice] = useState('');
+  const [priceMin, setPriceMin] = useState('');
+  const [priceMax, setPriceMax] = useState(''); 
   const [petsAllowed, setPetsAllowed] = useState('');
   const [rooms, setRooms] = useState('');
   const [bathrooms, setBathrooms] = useState('');
@@ -29,7 +30,8 @@ const Filter = (props: any) => {
   const handleApply = () => {
     props.onFilter({
       housingType,
-      price,
+      priceMin,
+      priceMax,
       petsAllowed,
       rooms,
       bathrooms,
@@ -280,15 +282,29 @@ const Filter = (props: any) => {
         <_Text style={styles.title}>Filter Listing</_Text>
         <View style={styles.formContainer}>
 
-        <_TextInput
-            containerStyle={styles.inputContainerStyle}
-            style={styles.input}
-            onChangeText={setPrice}
-            value={price}
-            keyboardType="numeric"
-            label="Price"
-            isDarkMode={props.isDarkMode}
-          />
+            <View style={{ flexDirection: 'row' }}>
+            <_TextInput
+              containerStyle={{ flex: 1, marginRight: 8 }}
+              style={styles.input}
+              onChangeText={setPriceMin}
+              value={priceMin}
+              keyboardType="numeric"
+              placeholder="$0"
+              label="Min Price (per month)"
+              isDarkMode={props.isDarkMode}
+            />
+            <_TextInput
+              containerStyle={{ flex: 1, marginLeft: 8 }}
+              style={styles.input}
+              onChangeText={setPriceMax}
+              value={priceMax}
+              keyboardType="numeric"
+              placeholder="$0"
+              label="Max Price (per month)"
+              isDarkMode={props.isDarkMode}
+            />
+          </View>
+
           <_Dropdown
             containerStyle={styles.inputContainerStyle}
             isDarkMode={props.isDarkMode}

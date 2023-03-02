@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, FlatList, StyleSheet, Text } from 'react-native';
+import { View, FlatList, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import MessageTab from '../components/messages/message-tab';
 import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
@@ -400,7 +400,24 @@ const MessagesScreen = (props: any) => {
       marginTop: 10,
       marginBottom: 20
     },
+    loadingScreen: {
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1
+    },
   });
+
+  if (!chatsHaveLoaded) {
+    return (
+      <View style={styles.loadingScreen}>
+        <ActivityIndicator
+        size="large"
+        color={Color(props.isDarkMode).gold}
+        />
+      </View>
+    );
+  }
 
   if (chatsHaveLoaded && chats.length === 0) {
     return (

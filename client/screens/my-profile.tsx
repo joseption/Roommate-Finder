@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, ActivityIndicator, TouchableHighlight, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import _Button from '../components/control/button';
@@ -9,6 +9,7 @@ import _Image from '../components/control/image';
 import { env, navProp, NavTo, userId as getUserId, authTokenHeader, AccountScreenType, isDarkMode } from '../helper';
 import _Text from '../components/control/text';
 import _Group from '../components/control/group';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 
 const MyProfileScreen = (props: any) => {
@@ -121,20 +122,21 @@ const MyProfileScreen = (props: any) => {
       width: '100%'
     },
     profileImg: {
-      width: 150,
-      height: 150,
+      width: 300,
+      height: 300,
       borderWidth: 1,
-      borderRadius: Radius.round,
+      borderRadius: Radius.large,
       borderColor: Color(props.isDarkMode).separator,
       backgroundColor: Color(props.isDarkMode).userIcon
     },
     name: {
       fontSize: FontSize.large,
       fontWeight: 'bold',
-      marginTop: 10,
+      marginTop: 20,
     },
     nameContent: {
-      flex: 1
+      flex: 1,
+      marginTop: -30,
     },
     interestsHeading: {
       fontSize: FontSize.default,
@@ -163,11 +165,15 @@ const MyProfileScreen = (props: any) => {
       backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).holderSecondary,
     },
     mainContent: {
-      marginTop: 45,
+      marginTop: 50,
       width: '100%'
     },
     group: {
-      marginTop: -50
+      marginTop: -50,
+      flex: 1
+    },
+    groupContent: {
+      flex: 1
     },
     imageContainer: {
       zIndex: 3,
@@ -176,11 +182,46 @@ const MyProfileScreen = (props: any) => {
       justifyContent: 'center'
     },
     view: {
-      flexDirection: 'column-reverse'
+      flexDirection: 'column-reverse',
+      height: '100%',
+      flex: 1
     },
     bio: {
       width: '100%'
-    }
+    },
+    editButton: {
+      padding: 10,
+      borderRadius: Radius.round,
+      backgroundColor: Color(props.isDarkMode).default
+    },
+    backIcon: {
+      ...Platform.select({
+        web: {
+          outlineStyle: 'none'
+        }
+      }),
+    },
+    iconLabel: {
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    labelIcon: {
+      marginRight: 5
+    },
+    firstLabelContainer: {
+      marginTop: -5
+    },
+    container: {
+      height: '100%',
+      paddingBottom: 10
+    },
+    contentContainer: {
+      flex: 1
+    },
+    empty: {
+      height: '100%',
+      flex: 1,
+    },
   });
 
   if (!profile.id) {
@@ -195,16 +236,20 @@ const MyProfileScreen = (props: any) => {
   }
 
   return (
-    <ScrollView>
+    <ScrollView
+    style={styles.container}
+    contentContainerStyle={styles.contentContainer}
+    >
       <View
       style={styles.view}
       >
         <_Group
+        style={styles.groupContent}
         containerStyle={styles.group}
         isDarkMode={props.isDarkMode}
         vertical={true}
         >
-          <View
+          <ScrollView
           style={styles.mainContent}
           >
             <View
@@ -218,23 +263,52 @@ const MyProfileScreen = (props: any) => {
               >
                 {profile?.first_name + " " + profile?.last_name}
               </_Text>
-              <_Button
-              onPress={() => { navigation.navigate(NavTo.Account, { view: 'info' } as never) }}
+              <TouchableHighlight
+                underlayColor={Color(props.isDarkMode).defaultUnderlay}
+                style={styles.editButton}
+                onPress={() => { navigation.navigate(NavTo.Account, { view: 'info' } as never) }}
+                >
+                  <FontAwesomeIcon 
+                  size={20} 
+                  color={Color(props.isDarkMode).actualWhite} 
+                  style={styles.backIcon} 
+                  icon="pencil"
+                  >
+                </FontAwesomeIcon>
+              </TouchableHighlight>
+            </View>
+            <View
+            style={[styles.iconLabel, styles.firstLabelContainer]}
+            >
+              <FontAwesomeIcon 
+                size={15} 
+                color={Color(props.isDarkMode).text} 
+                style={[styles.backIcon, styles.labelIcon]} 
+                icon="cake-candles"
+                >
+              </FontAwesomeIcon>
+              <_Text
               isDarkMode={props.isDarkMode}
               >
-                Edit Profile
-              </_Button>
+                {profile?.age} years old
+              </_Text>
             </View>
-            <_Text
-            isDarkMode={props.isDarkMode}
+            <View
+            style={styles.iconLabel}
             >
-              {profile?.age} years old
-            </_Text>
-            <_Text
-            isDarkMode={props.isDarkMode}
-            >
-              {profile?.city}, {profile?.state}
-            </_Text>
+              <FontAwesomeIcon 
+                size={15} 
+                color={Color(props.isDarkMode).text} 
+                style={[styles.backIcon, styles.labelIcon]} 
+                icon="location-dot"
+                >
+              </FontAwesomeIcon>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              >
+                {profile?.city}, {profile?.state}
+              </_Text>
+            </View>
             {profile?.bio ?
             <View>
               <_Text
@@ -269,11 +343,14 @@ const MyProfileScreen = (props: any) => {
                 />
               </View>
             }
-          </View>
+            <View
+              style={styles.empty}
+            />
+          </ScrollView>
         </_Group>
         <_Image
-        height={150}
-        width={150}
+        height={300}
+        width={300}
         style={styles.profileImg}
         source={{uri: profile?.image}}
         containerStyle={styles.imageContainer}

@@ -101,7 +101,7 @@ const Login = (props: any) => {
       if (data.user.is_setup) {
         navigation.reset({
           index: 0,
-          routes: [{name: NavTo.Profile}],
+          routes: [{name: NavTo.MyProfile}],
         });
         if (data.user.setup_step == 'search')
           navigation.navigate(NavTo.Search);

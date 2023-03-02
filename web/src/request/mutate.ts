@@ -275,8 +275,8 @@ export async function SendMessage(
   userId: string
 ) {
   return await doRequest<message>(
-    `${backend_api}/messages`,
-    { content, chatId, userId },
+    `${backend_api}/messages/web`,
+    { content, userId, chatId },
     "POST",
     true
   );

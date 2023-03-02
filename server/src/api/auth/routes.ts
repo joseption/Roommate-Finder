@@ -30,7 +30,7 @@ const router = express.Router()
 
 router.post('/register', async (req:Request, res:Response, next:NextFunction) => {
   try {
-    //console.log(req.body)
+
     const { email, password, name, LastName } = req.body;
     if (!email || !password || !name || !LastName) {
       return res.status(422).json({"Error": "You must provide an email, password, name and lastName."});
@@ -49,7 +49,6 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
     const ConfrimEmailKey = generateEmailToken(user, jti);
     sendVerifyEmail(email, ConfrimEmailKey);
-    //console.log(ConfrimEmailKey)
     return res.status(200).json({
       accessToken,
       refreshToken,
@@ -57,7 +56,6 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
       user
     });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({"Error": "An unexpected error occurred while registering your account. Please try again."});
   }
 });
@@ -90,7 +88,6 @@ router.post('/registerFast', async (req:Request, res:Response, next:NextFunction
       user
     });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({"Error": "An unexpected error occurred while registering your account. Please try again."});
   }
 });
@@ -110,7 +107,6 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
     const userId = existingUser.id;
     
     const validPassword = await bcrypt.compare(password, existingUser.password);
-    console.log(existingUser.password);
     if (!validPassword) {
       return res.status(401).json({"Error": "An account with the given email and password could not be found."});
     }
@@ -127,7 +123,6 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
       user:existingUser,
     });
   } catch (err) {
-    console.log(err)
     return res.status(500).json({"Error": "An unexpected error occurred. Please try again."});
   }
 });
@@ -226,7 +221,6 @@ router.post('/updatePassword',async (req:Request, res:Response, next:NextFunctio
       if (!resetToken) {
         return res.status(400).json({"Error": "You must provide an reset Token."});
       }
-      //console.log(resetToken)
       const payload = jwt.verify(resetToken, process.env.RESET_PASSWORD_KEY);
 
       if (!payload) {
@@ -242,7 +236,6 @@ router.post('/updatePassword',async (req:Request, res:Response, next:NextFunctio
         });
       }
   } catch (err) {
-    //console.log(err)
     return res.status(500).json({"Error": "Something went wrong."})
   }
 });
@@ -255,20 +248,17 @@ router.post('/confirmEmail',async (req:Request, res:Response, next:NextFunction)
       if (!emailToken) {
         return res.status(400).json({"Error": "You must provide an reset Token."});
       }
-      //console.log(emailToken)
       const payload = jwt.verify(emailToken, process.env.VERIFY_EMAIL_KEY);
 
       if (!payload) {
         return res.status(401).json({"Error": "Invalid Token."});
       }
-      console.log((<any>payload).userId);
         //update Password
         await verify((<any>payload).userId);
         return res.status(200).json({
           message: "Account verified."
         });
   } catch (err) {
-    console.log(err)
     return res.status(500).json({"Error": "Something went wrong."})
   }
 });
@@ -280,7 +270,6 @@ router.post('/sendConfirmationEmail',async (req:Request, res:Response, next:Next
       if (!email) {
         return res.status(400).json({"Error": "Please provide an email"});
       }
-      //console.log(email)
       const user = await findUserByEmail(email);
       if (!user.id) {
         return res.status(401).json({"Error": "An account with the provided email does not exist"});
@@ -292,7 +281,6 @@ router.post('/sendConfirmationEmail',async (req:Request, res:Response, next:Next
         message: "Email sent."
       });
   } catch (err) {
-    //console.log(err)
     return res.status(500).json({"Error": "Something went wrong."})
   }
 });
@@ -316,7 +304,6 @@ router.post('/logout', async (req:Request, res:Response, next:NextFunction) => {
 });
 
 router.post('/checkAuth', async (req:Request, res:Response, next:NextFunction) => {
-  //console.log(req.body)
   try {
     const { accessToken, refreshToken } = req.body;
     if (!accessToken || !refreshToken || accessToken === "undefined" || refreshToken === "undefined") {
@@ -354,7 +341,6 @@ router.post('/checkAuth', async (req:Request, res:Response, next:NextFunction) =
       );
     }
   } catch (err) {
-    console.log(err);
     return res.status(500).json({"Error": "Something went wrong."});
 }});
 

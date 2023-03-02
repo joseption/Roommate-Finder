@@ -12,6 +12,7 @@ import ListingsScreen from './screens/listings';
 import MessagesScreen from './screens/messages';
 import SearchScreen from './screens/search';
 import FiltersScreen from './screens/filters';
+import MyProfileScreen from './screens/my-profile';
 import { Color, Content } from './style';
 import { env as environ, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, isDarkMode as isDarkModeHelper, navProp, authTokenHeader, userId, setLocalAppSettingsPushMessageToken, getPushMessageToken, getCurrentChat, setLocalAppSettingsCurrentChat, setLocalAppSettingsOpenPushChat, getOpenPushChat } from './helper';
 import LogoutScreen from './screens/logout';
@@ -64,11 +65,14 @@ export const App = (props: any) => {
   const [backTimer,setBackTimer] = useState(0);
   const [loginViewChanged,setLoginViewChanged] = useState('');
   const [messageCount,setMessageCount] = useState(0);
+  const [addMessageCount,setAddMessageCount] = useState(0);
   const [messageData,setMessageData] = useState({});
   const [currentChat,setCurrentChat] = useState('');
   const [showingMessagePanel,setShowingMessagePanel] = useState(false);
   const [enableScroll,setEnableScroll] = useState(true);
   const [openChatFromPush,setOpenChatFromPush] = useState('');
+  const [receiveMessage,setReceiveMessage] = useState(null);
+  const [receiveTyping,setReceiveTyping] = useState(null);
   const appState = useRef(AppState.currentState);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
@@ -76,6 +80,22 @@ export const App = (props: any) => {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
+
+  useEffect(() => {
+    if (addMessageCount === 0) {
+      return;
+    }
+    if (addMessageCount > 0) {
+      setMessageCount(messageCount + addMessageCount);
+    }
+    setAddMessageCount(0);
+  }, [addMessageCount])
+
+  useEffect(() => {
+    if (messageCount < 0) {
+      setMessageCount(0);
+    }
+  }, [messageCount])
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -133,6 +153,8 @@ export const App = (props: any) => {
   useEffect(() => {
     if (Platform.OS === 'android')
       updateNavForPushNotifications();
+
+    contentStyle();
   }, [navSelector]);
 
   // Get device push notification permissions when the app launches
@@ -316,11 +338,17 @@ export const App = (props: any) => {
     }  
   }
 
-  async function getPushChatId() {
-    let id = await getOpenPushChat();
-    console.log(id);
-    //setOpenChatFromPush(id);
-  }
+  useEffect(() => {
+    // Listen for messages being sent over socket
+    socket.on('receive_message', (data: any) => {
+      setReceiveMessage(data);
+    });
+
+    // Listen for typing indicator socket
+    socket.on('receive_typing', (data: any) => {
+      setReceiveTyping(data);
+    });
+  }, [socket]);
 
   // Resend all combined unread messages as one to the current user
   const updateGroupedPushNotification = async (title: any, message: any, tag: string) => {
@@ -497,7 +525,7 @@ export const App = (props: any) => {
         return routes[0].name;
       }
     }
-    return NavTo.Profile;
+    return NavTo.MyProfile;
   }
 
   const navigateToSetupStep = (step: string) => {
@@ -654,7 +682,7 @@ export const App = (props: any) => {
       return <View></View>;
   }
 
-  const contentStyle = () => {
+  function contentStyle() {
     var style = [];
     style.push(styles.contentStyle);
     var paddingTop = (getRouteName() === NavTo.Login) ? 0 : 10;
@@ -670,7 +698,7 @@ export const App = (props: any) => {
 
       // Don't add padding for message app on mobile
       let rn = getRouteName();
-      if (rn == NavTo.Messages || rn == NavTo.Listings) {
+      if (rn == NavTo.Messages || rn == NavTo.Listings || rn == NavTo.Search || rn == NavTo.Profile) {
         paddingLeft = 0;
         paddingRight = 0;
         paddingTop = 0;
@@ -742,7 +770,7 @@ export const App = (props: any) => {
             scrollEventThrottle={100}
             onContentSizeChange={(w, h) => getScrollDims(w, h)}
             keyboardShouldPersistTaps={'handled'}
-            scrollEnabled={navSelector !== NavTo.Messages && navSelector !== NavTo.Listings}
+            scrollEnabled={navSelector !== NavTo.Messages && navSelector !== NavTo.Listings && navSelector !== NavTo.Search}
             >
               <View
                 style={styles.stack}
@@ -827,6 +855,8 @@ export const App = (props: any) => {
                   {...props}
                   mobile={mobile}
                   isDarkMode={isDarkMode}
+                  setNavSelector={setNavSelector}
+                  navSelector={navSelector}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen
@@ -865,6 +895,19 @@ export const App = (props: any) => {
                     isMatches={isMatches}
                     setIsMatches={setIsMatches}
                     isDarkMode={isDarkMode}
+                    setNavSelector={setNavSelector}
+                  />}
+                  </Stack.Screen>
+              <Stack.Screen
+                  name={NavTo.MyProfile}
+                  options={{ title: NavTo.MyProfile, animation: 'none' }}
+                >
+                  {(props: any) => <MyProfileScreen
+                    {...props}
+                    mobile={mobile}
+                    isMatches={isMatches}
+                    setIsMatches={setIsMatches}
+                    isDarkMode={isDarkMode}
                   />}
               </Stack.Screen>
                   <Stack.Screen
@@ -887,13 +930,18 @@ export const App = (props: any) => {
                   mobile={mobile}
                   isDarkMode={isDarkMode}
                   setNavSelector={setNavSelector}
+                  navSelector={navSelector}
                   socket={socket}
                   setMessageCount={setMessageCount}
+                  messageCount={messageCount}
                   messageData={messageData}
                   setCurrentChat={setCurrentChat}
                   setShowingMessagePanel={setShowingMessagePanel}
                   openChatFromPush={openChatFromPush}
                   setOpenChatFromPush={setOpenChatFromPush}
+                  receiveMessage={receiveMessage}
+                  receiveTyping={receiveTyping}
+                  setAddMessageCount={setAddMessageCount}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen

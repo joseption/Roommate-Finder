@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { isAuthenticated } from '../../middleware';
-import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday, updateImage, updatePushToken, getOAuth, GetUsersByTags, GetMatches } from './services';
+import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday, updateImage, updatePushToken, getOAuth, GetUsersByTags, GetMatches, GetUsersByGender, GetUsersByLocation, GetUsersBySharingPref } from './services';
 import db from '../../utils/db';
 import { uploadImage } from 'utils/uploadImage';
 import { env } from 'process';
@@ -27,7 +27,6 @@ router.use(isAuthenticated); // ! Do this instead of adding isAuthenticated to e
 router.get("/profile/:userId", async (req: Request, res: Response) => {
   try {
     const { userId} = req.params;
-    console.log(userId);
     const user = await db.user.findFirst({
       where: {
         id: userId
@@ -57,7 +56,20 @@ router.get('/me', async (req: Request, res: Response, next: NextFunction) => {
     }
     res.status(200).json(user);
   } catch (err) {
-    console.log(err);
+    return res.status(500).json({ Error: 'Server error' });
+  }
+});
+
+//Get current user profile
+router.get('/myProfile', async (req: Request, res: Response) => {
+  try {
+    const userId = req.query.userId;
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(400).json({ Error: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (err) {
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -71,7 +83,6 @@ router.get('/profile', async (req: Request, res: Response, next: NextFunction) =
     }
     res.json(user);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -196,13 +207,45 @@ router.get('/AllprofilesMob', async (req: Request, res: Response, next: NextFunc
 //Get Users filtered by Tags
 router.get('/profilesByTags', async (req: Request, res: Response) => {
   try {
-
-    console.log("Inside profilesByTags API");
-    console.log(req.query);
-
+    const gender = req.query.gender;
+    const location = req.query.location;
+    const sharingPref = req.query.sharingPref;
     const filters = req.query.filters;
     const filtersArray = (filters as string).split(',');
-    const users = await GetUsersByTags(filtersArray as string[]);
+
+    const userIds1 = await GetUsersByTags(filtersArray as string[]);
+    const userIds2 = await GetUsersByGender(gender as string);
+    const userIds3 = await GetUsersByLocation(location as string);
+    const userIds4 = await GetUsersBySharingPref(sharingPref as string);
+
+    const lists = [userIds1, userIds2, userIds3, userIds4];
+    const filterOptions = [filters, gender, location, sharingPref];
+
+    const nonEmptyLists = lists.filter(list => list !== undefined && list.length > 0);
+    const nonEmptyFilterOptions = filterOptions.filter(x => x !== undefined && x.length > 0);
+
+    let users;
+
+    if (nonEmptyLists.length === 0 || nonEmptyFilterOptions.length === 0) {
+      users = await db.user.findMany();
+    }
+    else {
+      let userIdsCommon = nonEmptyLists[0];
+      for (let i = 1; i < nonEmptyLists.length; i++) {
+        if (nonEmptyFilterOptions[i] !== undefined && nonEmptyFilterOptions[i] !== 'undefined') {
+          userIdsCommon = userIdsCommon.filter((value: any) => nonEmptyLists[i].includes(value));
+        }
+      }
+
+      // Get users that match the fetched userIDs
+      users = await db.user.findMany({
+        where: {
+          id: {
+            in: userIdsCommon,
+          },
+        },
+      });
+    }
 
     const mainUserId = req.query.userId;
     const userIds = users.map(x => x.id);
@@ -219,9 +262,10 @@ router.get('/profilesByTags', async (req: Request, res: Response) => {
         user.matchPercentage = match.matchPercentage;
       }
     });
+
     return res.status(200).json(users);
+
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -247,7 +291,6 @@ router.post('/updateFirstName', async (req: Request, res: Response, next: NextFu
     }
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -273,7 +316,6 @@ router.post('/updateLastName', async (req: Request, res: Response, next: NextFun
     }
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -305,7 +347,6 @@ router.post('/updatePhoneNumber', async (req: Request, res: Response, next: Next
     }
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -333,7 +374,6 @@ router.post('/updateGender', async (req: Request, res: Response, next: NextFunct
     }
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -365,7 +405,6 @@ router.post('/updateBday', async (req: Request, res: Response, next: NextFunctio
     }
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -396,7 +435,6 @@ router.post('/updateZip', async (req: Request, res: Response, next: NextFunction
     }
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -422,7 +460,6 @@ router.post('/updateCity', async (req: Request, res: Response, next: NextFunctio
     }
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -448,7 +485,6 @@ router.post('/updateCity', async (req: Request, res: Response, next: NextFunctio
     }
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -474,7 +510,6 @@ router.post('/updateState', async (req: Request, res: Response, next: NextFuncti
     }
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -511,7 +546,6 @@ router.post('/updateProfilePicture', async (req: Request, res: Response, next: N
     }
     return res.status(200).json({ message: upload });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -548,7 +582,6 @@ router.post('/setupProfile', async (req: Request, res: Response, next: NextFunct
     }
     return res.status(200).json({ message: 'Bio and tags added successfully' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -564,10 +597,8 @@ router.get('/getBioAndTags', async (req: Request, res: Response) => {
       return res.status(400).json({ Error: 'User not found' });
     }
     const data = await GetTagsandBio(userId);
-    //console.log(data[0])
     return res.status(200).json(data[0]);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -583,10 +614,8 @@ router.get('/getBioAndTagsMob', async (req: Request, res: Response) => {
       return res.status(400).json({ Error: 'User not found' });
     }
     const data = await GetTagsandBio(userId as string);
-    //console.log(data[0])
     return res.status(200).json(data[0]);
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -607,7 +636,6 @@ router.post('/completeSetup', async (req: Request, res: Response, next: NextFunc
     }
     return res.status(200).json({ message: 'Account setup successfully' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -708,7 +736,6 @@ router.post('/updateAllProfile', async (req: Request, res: Response, next: NextF
     
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -731,7 +758,6 @@ router.post('/updatePushToken', async (req: Request, res: Response, next: NextFu
 
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });
@@ -742,7 +768,6 @@ router.get('/getOAuth', async (req: Request, res: Response) => {
     const auth = await getOAuth();
     return res.status(200).json({ token: auth });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ Error: 'Server error' });
   }
 });

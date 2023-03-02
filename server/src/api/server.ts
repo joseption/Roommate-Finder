@@ -12,6 +12,7 @@ import listings from './listings/routes';
 import matches from './matches/routes';
 import bodyParser from 'body-parser';
 import { startSocketIO } from './websockets';
+import { Socket } from 'socket.io';
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -28,7 +29,6 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-  console.log('/');
   // res.set("Access-Control-Allow-Origin", "*");
   res.json({ BRUH: 'IP ADDRESS LOGGED AND REPORTED TO ADMIN' });
 });

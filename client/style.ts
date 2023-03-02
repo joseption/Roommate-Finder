@@ -75,6 +75,9 @@ export const LightStyle = StyleSheet.create({
     paddingBottom: 5,
     outlineStyle: 'none'
   },
+  font: {
+    fontFamily: 'Inter-Regular'
+  },
   textHuge: {
     fontSize: FontSize.huge,
     color: Color(false).text,
@@ -258,7 +261,11 @@ export const LightStyle = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: Radius.default,
-    marginLeft:3,
+    ...Platform.select({
+      web: {
+        marginLeft:3,
+      }
+    }),
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -343,7 +350,7 @@ export const LightStyle = StyleSheet.create({
       width: '100%',
       backgroundColor: Color(false).promptMask,
       position: 'absolute',
-      borderRadius: Radius.large,
+      borderRadius: 0,
       top: 0,
       left: 0
   },
@@ -500,6 +507,11 @@ function LightColor() {
     userIcon: '#D2D4D9',
     statusBar: '#FFFFFF',
     holderUnderlay: '#0000001a',
+    msgFromBG: '#E4E6E9',
+    msgToBG: '#418DFC',
+    msgFromFG: '#050505',
+    msgToFG: '#FFFFFF',
+    underlayMask: '#F0F2F5bf',
   }
 }
 
@@ -550,6 +562,9 @@ export const DarkStyle = StyleSheet.create({
     paddingTop: 5,
     paddingBottom: 5,
     outlineStyle: 'none'
+  },
+  font: {
+    fontFamily: 'Inter-Regular'
   },
   textHuge: {
     fontSize: FontSize.huge,
@@ -734,7 +749,11 @@ export const DarkStyle = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: Radius.default,
-    marginLeft:3,
+    ...Platform.select({
+      web: {
+        marginLeft:3,
+      }
+    }),
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -819,7 +838,7 @@ export const DarkStyle = StyleSheet.create({
       width: '100%',
       backgroundColor: Color(true).promptMask,
       position: 'absolute',
-      borderRadius: Radius.large,
+      borderRadius: 0,
       top: 0,
       left: 0
   },
@@ -976,6 +995,11 @@ function DarkColor() {
     userIcon: '#D2D4D9',
     statusBar: '#141414',
     holderUnderlay: '#FFFFFF1a',
+    msgFromBG: '#4E4F50',
+    msgToBG: '#418DFC',
+    msgFromFG: '#FFFFFF',
+    msgToFG: '#FFFFFF',
+    underlayMask: '#191919bf',
   }
 }
 

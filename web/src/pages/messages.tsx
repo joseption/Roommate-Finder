@@ -19,18 +19,12 @@ export default function Messages() {
     onError: (err) => {
       console.log(err);
     },
-    onSettled: () => {
-      // console.log(userId, "user loaded");
-    },
   });
   const { data: myChats, isLoading: chatsLoading } = useQuery(["chats"], {
     queryFn: () => GetChats(),
     onSuccess: (data) => {
       // console.log(data);
     },
-    // suspense: true,
-    // refetchInterval: 100,
-    // refetchIntervalInBackground: true,
     onError: (err) => {
       console.log(err);
     },

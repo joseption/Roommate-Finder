@@ -25,7 +25,7 @@ export default function Explore() {
         <title>Explore | RoomFin</title>
       </Head>
       <motion.main
-        className={"h-screen"}
+        className={"min-h-screen bg-white"}
         initial={"fadeOut"}
         animate={"fadeIn"}
         exit={"fadeOut"}

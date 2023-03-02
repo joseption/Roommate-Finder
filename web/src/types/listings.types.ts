@@ -15,6 +15,14 @@ export interface ListingInfo {
   distanceToUcf?: number;
   zipcode?: number;
 }
+export interface ListingRequest {
+  housing_type: string | undefined;
+  price: number | undefined;
+  petsAllowed: boolean | undefined | null;
+  rooms: number | undefined;
+  bathrooms: number | undefined;
+  distanceToUcf: number | undefined;
+}
 
 export interface ListingData {
   listing: ListingInfo;

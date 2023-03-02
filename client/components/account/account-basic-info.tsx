@@ -105,7 +105,7 @@ const AccountInfo = (props: any) => {
     }
 
     const subtitle = () => {
-        return props.isSetup ? "Your basic personal information" : "We need some basic information";
+        return "Your basic information";
     }
 
     const subTitleStyle = () => {

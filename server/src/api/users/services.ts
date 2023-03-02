@@ -226,7 +226,6 @@ export async function UpdateTagsandBio(tags:string[], user_id:string, bio:string
     }
     return true;
   } catch (error) {
-    console.log(error)
     return false;
   }
 }
@@ -257,7 +256,7 @@ export async function GetUsersByTags(filters: string[]) {
       user_id: true
     }
   });
-  
+
   const userTags: { [key: string]: string[] } = allTags.reduce((acc, current) => {
     acc[current.user_id] = acc[current.user_id] || [];
     acc[current.user_id].push(current.tag);
@@ -269,16 +268,82 @@ export async function GetUsersByTags(filters: string[]) {
     return filters.every(filter => userTagList.includes(filter));
   });
 
-  // Get users that match the fetched userIDs
-  return db.user.findMany({
-    where: {
-      id: {
-        in: userIDs,
-      },
-    },
-  });
+  return userIDs;
 }
 
+export async function GetUsersByGender(gender: string) {
+  const userIdObjList = await db.responsesOnUsers.findMany({
+    where: {
+      response: {
+        response: gender,
+        question: {
+          question_text: {
+            contains: "gender"
+          }
+        }
+      }
+    },
+    select: {
+      userId: true
+    }
+  });
+
+  const userIds = userIdObjList.map(x => x.userId);
+  return userIds;
+}
+
+export async function GetUsersByLocation(location: string) {
+  const userIdObjList = await db.responsesOnUsers.findMany({
+    where: {
+      response: {
+        response: location,
+        question: {
+          question_text: {
+            contains: "Location"
+          }
+        }
+      }
+    },
+    select: {
+      userId: true
+    }
+  });
+
+  const userIds = userIdObjList.map(x => x.userId);
+  return userIds;
+}
+
+export async function GetUsersBySharingPref(sharingPref: string) {
+  const sharingPrefMap = new Map<string, string>();
+  sharingPrefMap.set("Always", "Always");
+  sharingPrefMap.set("Sometimes", "permission");
+  sharingPrefMap.set("Never", "Never");
+
+  if (sharingPref == 'undefined' || sharingPref == '') {
+    return [];
+  }
+  
+  const userIdObjList = await db.responsesOnUsers.findMany({
+    where: {
+      response: {
+        response: {
+          contains: sharingPrefMap.get(sharingPref)
+        },
+        question: {
+          question_text: {
+            contains: "sharing"
+          }
+        }
+      }
+    },
+    select: {
+      userId: true
+    }
+  });
+
+  const userIds = userIdObjList.map(x => x.userId);
+  return userIds;
+}
 
 // Get match percentages for logged in user with all other users 
 export async function GetMatches(mainUserId: string, userIds: string[]) {

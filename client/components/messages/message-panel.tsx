@@ -15,21 +15,25 @@ interface Props {
   updateBlocked: any,
   updateMuted: any,
   isDarkMode: boolean
+  setShowingMessagePanel: any,
+  receiveTyping: any,
+  receiveMessage: any,
+  typing: any
 }
 
-const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked, updateMuted }: Props) => {
+const MessagePanel = ({ typing, receiveTyping, receiveMessage, setShowingMessagePanel, isDarkMode, showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked, updateMuted }: Props) => {
   const [newMessage, setNewMessage] = useState('');
 
   // These values are mapped to percentage of screen size.
-  const PANEL_OUT_OF_SCREEN = Dimensions.get('window').width * 1.5;
+  const PANEL_OUT_OF_SCREEN = Dimensions.get('window').height * 1.25;
   const PANEL_IN_SCREEN = 0;
   
   const slideAnimation = useRef(new Animated.Value(PANEL_OUT_OF_SCREEN)).current;
   
   let animationConfig = {
     toValue: PANEL_OUT_OF_SCREEN,
-    duration: 250,
-    easing: Easing.ease,
+    duration: 150,
+    easing: Easing.linear,
     useNativeDriver: true,
   };
 
@@ -37,9 +41,16 @@ const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, 
     if (showPanel) {
       Animated.timing(slideAnimation, {...animationConfig, toValue: PANEL_IN_SCREEN}).start();
     } else {
-      Animated.timing(slideAnimation, {...animationConfig}).start((() => setNewMessage('')));
+      Animated.timing(slideAnimation, {...animationConfig}).start();
     }
   }, [showPanel, slideAnimation]);
+
+  const image = () => {
+    if (chat && chat.users && chat.users.length > 0) {
+      return chat.users[0].image;
+    }
+    return "";
+  }
 
   return (
     <>
@@ -53,7 +64,7 @@ const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, 
           styles.container,
           {transform: [
             // interpolate maps integer value to string percentage.
-            {translateX: slideAnimation},
+            {translateY: slideAnimation},
           ]}
         ]}
       >
@@ -66,11 +77,17 @@ const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, 
           updateMuted={updateMuted}
           socket={socket}
           isDarkMode={isDarkMode}
+          setShowingMessagePanel={setShowingMessagePanel}
         />
         <Messages
           chat={chat}
           userInfo={userInfo}
           socket={socket}
+          isDarkMode={isDarkMode}
+          image={image()}
+          receiveMessage={receiveMessage}
+          receiveTyping={receiveTyping}
+          typing={typing}
         />
         <MessageInput
           chat={chat}
@@ -78,6 +95,7 @@ const MessagePanel = ({ isDarkMode, showPanel, updateShowPanel, userInfo, chat, 
           socket={socket}
           newMessage={newMessage}
           setNewMessage={setNewMessage}
+          isDarkMode={isDarkMode}
         />
       </Animated.View>
     </>

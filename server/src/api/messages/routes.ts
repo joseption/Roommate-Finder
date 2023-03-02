@@ -10,6 +10,41 @@ import fetch from 'node-fetch';
 // router.use(isAuthenticated);
 
 // sending a message
+router.post('/web', async (req: Request, res: Response) => {
+  try {
+    // todo: replace userid in content with user from refresh token
+    const { content, userId, chatId } = req.body;
+
+    if (!content || !chatId) {
+      return res.status(400).json('missing parameters');
+    }
+    const blocked = await blockedChat(chatId);
+    if (!blocked) {
+      const newMessage = await db.message.create({
+        data: {
+          userId: userId as string, // * the sender of the message
+          content: content as string,
+          chatId: chatId as string,
+        },
+      });
+      // update latest message in chat
+      await db.chat.update({
+        where: {
+          id: chatId as string,
+        },
+        data: {
+          latestMessage: newMessage.id as string, // * the content here really doesnt matter I'm just updating it so I can sort by updatedAt later
+        },
+      });
+      res.status(200).json(newMessage);
+    }
+    res.status(200);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// sending a message
 router.post('/', async (req: Request, res: Response) => {
   try {
     // todo: replace userid in content with user from refresh token
@@ -38,7 +73,16 @@ router.post('/', async (req: Request, res: Response) => {
       },
     });
 
-    // Send push notification to all chat users
+    // Send push notification to all chat users as long as chat has not been muted
+    const chat = await db.chat.findUnique({
+      where: {
+        id: chatId,
+      },
+      select: {
+        muted: true
+      },
+    });
+
     const fromUser = await db.user.findUnique({
       where: {
         id: userId,
@@ -61,7 +105,11 @@ router.post('/', async (req: Request, res: Response) => {
     if (fromUser) {
       let auth = await getOAuth();
       if (auth && auth.Authorization) {
+        let muted = chat && chat.muted;
         for (let i = 0; i < chatUsers.users.length; i++) {
+          if (muted && muted.includes(chatUsers.users[i])) {
+            continue; // Chat muted - do not send push notification
+          }
           if (chatUsers.users[i] !== userId) {
             const toUser = await db.user.findUnique({
               where: {
@@ -202,7 +250,7 @@ router.post('/sendUpdatedPushNotification', async (req: Request, res: Response) 
       }
     }
     catch (e) {
-      console.log(e);
+
     }
 
     res.status(200).json({message: "Success"});

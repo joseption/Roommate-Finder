@@ -5,9 +5,9 @@ import { createContext } from "react";
 import { Dimensions } from "react-native";
 import { Content } from "./style";
 import * as DeepLinking from 'expo-linking';
-import { faClose, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut, faUserPlus, faArrowLeft, faRefresh, faLock, faPowerOff, faKey, faHouse, faTreeCity, faBed, faSink } from '@fortawesome/free-solid-svg-icons'
+import { faClose, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut, faUserPlus, faArrowLeft, faRefresh, faLock, faPowerOff, faKey, faHouse, faTreeCity, faBed, faSink, faFilter, faToggleOff, faToggleOn, faCertificate, faCakeCandles, faLocationDot, faPencil, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import AsyncStorage from "@react-native-async-storage/async-storage";
-library.add(faSink, faBed, faTreeCity, faClose, faPowerOff, faKey, faRefresh, faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
+library.add(faMagnifyingGlass, faPencil, faLocationDot, faCakeCandles, faCertificate, faToggleOff, faToggleOn, faFilter, faSink, faBed, faTreeCity, faClose, faPowerOff, faKey, faRefresh, faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
 
 export const Stack = createNativeStackNavigator<Page>();
 
@@ -69,6 +69,7 @@ export const NavTo = {
   Login: 'Login' as never,
   Account: 'Account' as never,
   Profile: 'Profile' as never,
+  MyProfile: 'MyProfile' as never,
   Survey: 'Survey' as never,
   Search: 'Search' as never,
   Filters: 'Filters' as never,

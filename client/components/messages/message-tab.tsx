@@ -1,16 +1,20 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
 import { getLocalStorage } from '../../helper';
-import { Color } from '../../style';
+import { Color, FontSize, Radius } from '../../style';
+import _Image from '../control/image';
+import _Text from '../control/text';
 
 interface Props {
   chat: any,
   setCurrentChat: any,
   showPanel: boolean,
   updateShowPanel: Dispatch<SetStateAction<boolean>>,
+  isDarkMode: boolean,
+  typing: any
 }
 
-const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) => {
+const MessageTab = ({typing, chat, setCurrentChat, showPanel, updateShowPanel, isDarkMode}: Props) => {
   const [userInfo, setUserInfo] = useState<any>();
 
   useEffect(() => {
@@ -50,75 +54,177 @@ const MessageTab = ({chat, setCurrentChat, showPanel, updateShowPanel}: Props) =
     );
   };
 
+  const getUserIcon = () => {
+    if (chat?.users[0]?.image)
+      return {uri: chat.users[0].image};
+    else
+      return require('../../assets/images/user.png');
+  }
+
+  const unreadText = () => {
+    let style = [];
+    if (chat && chat.notifCount > 0) {
+      style.push(styles.unreadText);
+    }
+
+    return style;
+  }
+
+  const imgStyle = () => {
+    let style = [];
+    if (chat?.users[0]?.image) {
+      style.push({});
+    }
+    else {
+      style.push({
+        height: 40,
+        width: 40,
+      })
+    }
+
+    return style;
+  }
+
+  const styles = StyleSheet.create({
+    unreadText: {
+      fontWeight: 'bold'
+    },
+    touchable: {
+      flex: 1,
+      flexDirection: 'row',
+      padding: 10,
+      alignItems: 'center',
+    },
+    content: {
+      flexDirection: 'row',
+      flex: 1,
+    },
+    image: {
+      height: 50,
+      width: 50,
+      borderRadius: Radius.round,
+      backgroundColor: Color(isDarkMode).userIcon
+    },
+    imageContainerStyle: {
+      height: 50,
+      width: 50,
+      marginRight: 10,
+      borderRadius: Radius.round,
+      borderColor: Color(isDarkMode).separator,
+      borderWidth: 1,
+      backgroundColor: Color(isDarkMode).userIcon,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    text: {
+      display: 'flex',
+      justifyContent: 'center',
+      flex: 1,
+    },
+    msgText: {
+      fontSize: FontSize.default,
+      color: Color(isDarkMode).text,
+    },
+    notificationContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      marginLeft: 10
+    },
+    notification: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: 25,
+      width: 25,
+      backgroundColor: Color(isDarkMode).danger,
+      borderRadius: Radius.round,
+    },
+    notificationText: {
+      color: 'white',
+    },
+    typeContainer: {
+      backgroundColor: Color(isDarkMode).msgFromBG,
+      position: 'absolute',
+      bottom: -1,
+      right: 7,
+      paddingVertical: 1,
+      paddingHorizontal: 2,
+      borderRadius: 10
+    }
+  });
+
+  const isTyping = () => {
+    if (chat && typing) {
+      if (chat.blocked) {
+        return false;
+      }
+
+      let chattingUser = typing.find((x: any) => {
+        if (userInfo) {
+          return x.chat === chat.id && x.user !== userInfo.id;
+        }
+        else {
+          return null;
+        }
+      });
+
+      return chattingUser;
+    }
+    else {
+      return false;
+    }
+  }
+
   return (
     <TouchableHighlight
       style={styles.touchable}
-      underlayColor="gainsboro"
+      underlayColor={Color(isDarkMode).underlayMask}
       onPress={() => {
         updateShowPanel(!showPanel);
         setCurrentChat(chat);
       }}
     >
       <View style={styles.content}>
-        <Image style={styles.image} source={{ uri: (chat?.users[0]?.image != null) ? chat?.users[0]?.image : 'https://reactnative.dev/img/tiny_logo.png'}} />
-        <View style={styles.text}>
-            <Text numberOfLines={1} style={styles.name}>{chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}</Text>
-            <Text numberOfLines={1}>{getPrefix(chat.latestMessage?.userId) + getContent(chat.latestMessage?.content)}</Text>
+        <View>
+          <_Image
+          height={chat?.users[0]?.image ? 50 : 40}
+          width={chat?.users[0]?.image ? 50 : 40}
+          style={[styles.image, imgStyle()]}
+          containerStyle={styles.imageContainerStyle}
+          source={getUserIcon()}
+          />
+          {isTyping() ?
+          <View
+          style={styles.typeContainer}
+          >
+            <_Image width={25} source={!isDarkMode ? require('../../assets/images/indicator_light.gif') : require('../../assets/images/indicator_dark.gif')}></_Image>
+          </View>
+          : null}
         </View>
-        <View style={styles.notificationContainer}>
+        <View
+        style={styles.text}
+        >
+          <_Text
+          numberOfLines={1}
+          style={[styles.msgText, unreadText()]}
+          >
+            {chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}
+          </_Text>
+          <_Text
+          numberOfLines={1}
+          style={[styles.msgText, unreadText()]}
+          >
+            {getPrefix(chat.latestMessage?.userId) + getContent(chat.latestMessage?.content)}
+          </_Text>
+        </View>
+        <View
+        style={styles.notificationContainer}
+        >
           {displayNotification(chat.notifCount)}
         </View>
       </View>
     </TouchableHighlight>
   );
 };
-
-const styles = StyleSheet.create({
-  touchable: {
-    flex: 1,
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    height: 70,
-    alignItems: 'center',
-  },
-  content: {
-    flexDirection: 'row',
-    flex: 1,
-  },
-  image: {
-    height: 60,
-    width: 60,
-    borderRadius: 30,
-    marginRight: 10,
-  },
-  text: {
-    display: 'flex',
-    justifyContent: 'center',
-    flex: 1,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  notificationContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    minWidth: 30,
-  },
-  notification: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 30,
-    width: 30,
-    backgroundColor: Color(false).danger,
-    borderRadius: 15,
-  },
-  notificationText: {
-    color: 'white',
-  }
-});
 
 export default MessageTab;

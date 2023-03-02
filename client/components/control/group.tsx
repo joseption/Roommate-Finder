@@ -22,6 +22,9 @@ const _Group = (props: any, {navigation}:any) => {
         if (focus) {
             style.push(styles.groupFocus);
         }
+        if (props.containerStyle) {
+            style.push(props.containerStyle);
+        }
 
         return style;
     }

@@ -118,7 +118,7 @@ const AccountAbout = (props: any) => {
     }
 
     const subtitle = () => {
-        return !props.isSetup ? "Tell us about yourself" : "Update your information";
+        return "Tell us about yourself";
     }
 
     const subTitleStyle = () => {

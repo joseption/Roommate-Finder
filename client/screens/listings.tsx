@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableHighlight } from 'react-native';
 import AllListingsView from '../components/listings/all-listings';
 import { authTokenHeader, env, Listings_Screen, getLocalStorage } from '../helper';
 import BottomNavbar from '../components/listings/bottom-nav';
@@ -9,7 +9,7 @@ import { useLinkProps } from '@react-navigation/native';
 import _Dropdown from '../components/control/dropdown';
 import ListingView from '../components/listings/listing';
 import _Text from '../components/control/text';
-import { Color, FontSize, Style } from '../style';
+import { Color, FontSize, Radius, Style } from '../style';
 import _Button from '../components/control/button';
 import Filter from '../components/listings/filter';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -44,8 +44,11 @@ const ListingsScreen = (props: any) => {
 
   const getAllListings = async () => {
     try {
+      let obj = {}; // TODO: ERICK PUT ALL YOUR FILTERS HRE WHEN YOU ARE READY!
+      let js = JSON.stringify(obj);
       await fetch(`${env.URL}/listings/all`, {
-        method: 'GET',
+        method: 'POST',
+        body:js,
         headers: { 
           'Content-Type': 'application/json', 
           'authorization': await authTokenHeader(),
@@ -99,7 +102,7 @@ const ListingsScreen = (props: any) => {
     title: {
       margin: 10,
       textAlign: 'center',
-      fontFamily: 'Inter-SemiBold',
+      fontWeight: 'bold',
       fontSize: FontSize.large,
       color: Color(props.isDarkMode).titleText
     },
@@ -126,6 +129,21 @@ const ListingsScreen = (props: any) => {
       justifyContent: 'center',
       alignItems: 'center',
     },
+    buttonsRow: {
+      marginRight: 5,
+      marginBottom: 3
+    },
+    button: {
+      padding: 10,
+      borderRadius: Radius.round,
+    },
+    filterIcon: {
+      ...Platform.select({
+        web: {
+          outlineStyle: 'none'
+        }
+      }),
+    },
 });
 
 return (
@@ -133,15 +151,26 @@ return (
     {!currentListing && currentScreen === Listings_Screen.all && !showFilter && (
       <View style={styles.content}>
         <View style={styles.contentContainer}>
-            <_Text style={styles.title}>Explore Listings</_Text>
+            <_Text style={styles.title}>Browse Listings</_Text>
             <View style={styles.rightContainer}>
               <View style={styles.titleContainer}>
-                <_Button 
-                  isDarkMode={props.isDarkMode}
-                  onPress={handleOpenFilterModal} 
-                  style={styles.buttonSmall}>
-                  <FontAwesomeIcon icon={faFilter} size={20} color="black" />
-                </_Button>
+                <View
+                style={styles.buttonsRow}
+                >
+                  <TouchableHighlight
+                  underlayColor={Color(props.isDarkMode).underlayMask}
+                  style={styles.button}
+                  onPress={() => handleOpenFilterModal}
+                  >
+                    <FontAwesomeIcon 
+                    size={20} 
+                    color={false ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text} 
+                    style={styles.filterIcon} 
+                    icon="filter"
+                    >
+                    </FontAwesomeIcon>
+                  </TouchableHighlight>
+                </View>
               </View>
             </View>
           <AllListingsView

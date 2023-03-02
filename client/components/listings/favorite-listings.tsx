@@ -50,7 +50,7 @@ const FavoriteListings = (props: any) => {
     title: {
       margin: 10,
       textAlign: 'center',
-      fontFamily: 'Inter-SemiBold',
+      fontWeight: 'bold',
       fontSize: FontSize.large,
       color: Color(props.isDarkMode).titleText
     },

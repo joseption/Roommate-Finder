@@ -6,7 +6,7 @@ import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useEffect, useState } from 'react';
-import { faStar } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faMapMarkerAlt, faBed, faBath, faHome, faBuilding, faCity } from '@fortawesome/free-solid-svg-icons';
 import _Image from '../control/image';
 
 const ListingCard = (props: any) => {
@@ -17,102 +17,108 @@ const ListingCard = (props: any) => {
     setIsFavorite(true) //props.item.isFavorite
   }, [props.item.isFavorite]);
 
+  const housingIcons = {
+    House: faHome,
+    Apartment: faBuilding,
+    Condo: faCity,
+  };
+
   const styles = StyleSheet.create({
+    container: {
+      margin: 10,
+      shadowColor: Color(props.isDarkMode).contentHolderSecondary,
+      shadowOffset: { width: -3, height: 3 },
+      shadowOpacity: 1,
+      shadowRadius: 0,
+      elevation: 2,
+      backgroundColor: Color(props.isDarkMode).contentHolder,
+      borderRadius: Radius.default,
+    },
     image: {
-      width: '100%',
-      height: 175,
+      width: "100%",
+      height: 150,
       borderTopLeftRadius: Radius.default,
       borderTopRightRadius: Radius.default,
     },
+    headerContainer: {
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 10,
+    },
     header: {
       fontSize: FontSize.large,
-      fontWeight: 'bold',
-      marginTop: 10,
-      color: Color(props.isDarkMode).text
+      fontWeight: "bold",
+      color: Color(props.isDarkMode).text,
+      lineHeight: 20,
+      maxHeight: 40,
+      flex: 1,
+    },
+    subHeaderContainer: {
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 10,
+      paddingBottom: 0,
     },
     subHeader: {
-      fontSize: FontSize.large,
-      color: Color(props.isDarkMode).textTertiary,
-      marginTop: 10,
-      fontStyle: 'italic',
-      fontWeight: 'normal',
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      marginRight: 10,
     },
-    description: {
+    subHeaderText: {
       fontSize: FontSize.default,
-      color: Color(props.isDarkMode).text,
+      color: Color(props.isDarkMode).textTertiary,
+      marginLeft: 5,
+      marginRight: 10,
+    },   
+    priceContainer: {
+      borderBottomLeftRadius: Radius.default,
+      borderBottomRightRadius: Radius.default,
+      padding: 10,
+      paddingTop: 10,
       marginTop: 10,
+      borderTopWidth: 1,
+      borderTopColor: Color(props.isDarkMode).border,
     },
     price: {
       fontSize: FontSize.default,
       color: Color(props.isDarkMode).text,
+      fontWeight: "bold",
+      alignSelf: "flex-start",
     },
-    petsAllowed: {
+    priceText: {
       fontSize: FontSize.default,
-      color: Color(props.isDarkMode).text,
-    },
-    viewListingButton: {
-      backgroundColor: Color(props.isDarkMode).black,
-      padding: 10,
-      borderRadius: 5,
-      marginTop: 20,
-      alignSelf: 'flex-end',
-    },
-    viewListingButtonText: {
-      color: Color(props.isDarkMode).white,
-      fontSize: 18,
-      fontWeight: 'bold',
-      textAlign: 'center',
+      color: Color(props.isDarkMode).textTertiary,
+      marginLeft: 5,
     },
     favorite: {
-      position: 'absolute',
+      position: "absolute",
       top: 10,
       right: 10,
     },
     icon: {
       ...Platform.select({
-        web:{
-          outlineStyle: 'none'
-        }
+        web: {
+          outlineStyle: "none",
+        },
       }),
-      position: 'absolute',
+      position: "absolute",
     },
     iconBorder: {
       ...Platform.select({
-        web:{
-          outlineStyle: 'none'
-        }
+        web: {
+          outlineStyle: "none",
+        },
       }),
-    },
-    headerContainer: {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
     },
   });
-
-  const containerStyle = () => {
-    return {
-      padding: 10,
-      shadowColor: Color(props.isDarkMode).contentHolderSecondary,
-      shadowOffset: {width: -3, height: 3},
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      marginLeft: 3,
-      ...Platform.select({
-          web: {
-              width: 'calc(100% - 3px)'
-          },
-          android: {
-              marginLeft: 0
-          }
-      }),
-      marginBottom: 10,
-      elevation: 2,
-      backgroundColor: Color(props.isDarkMode).contentHolder,
-      display: 'flex',
-      borderRadius: Radius.default,
-    }
-  }
+  
+  
+  
 
   const viewListing = () => {
     props.setCurrentListing(props.item)
@@ -128,30 +134,61 @@ const ListingCard = (props: any) => {
 
   return (
     <TouchableHighlight
-    underlayColor={Color(props.isDarkMode).holderUnderlay}
-    onPress = {() => viewListing()}
-    style={containerStyle()}
+      underlayColor={Color(props.isDarkMode).holderUnderlay}
+      onPress={viewListing}
+      style={styles.container}
     >
       <View>
-        <View>
         <Image source={{ uri: props.item.images[0] }} style={styles.image} />
-        <Pressable style = {styles.favorite} onPress = {() => sendFavorite()}>
-          <FontAwesomeIcon style={styles.iconBorder} icon={faStar} size={32} color='#000000b3'/>
-          <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()}/>
+        {/* 
+        <Pressable style={styles.favorite} onPress={sendFavorite}>
+        <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()} />
         </Pressable>
-        </View>
+        */}
         <View style={styles.headerContainer}>
-          <_Text isDarkMode={props.isDarkMode} style={styles.header}>{props.item.name}</_Text>
-          <_Text isDarkMode={props.isDarkMode} style={styles.subHeader}>{props.item.rooms + " bds"}</_Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <_Text isDarkMode={props.isDarkMode} style={styles.header}>
+                {props.item.name}
+            </_Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <FontAwesomeIcon
+              icon={housingIcons[props.item.housing_type]}
+              color={Color(props.isDarkMode).textTertiary}
+              style={{ marginRight: 5 }}
+            />
+            <_Text isDarkMode={props.isDarkMode} style={[styles.header, { color: Color(props.isDarkMode).textTertiary }]}>
+              {props.item.housing_type}
+            </_Text>
+          </View>
+
         </View>
-        <View style={styles.headerContainer}>
-          <_Text isDarkMode={props.isDarkMode} style={styles.subHeader}>{props.item.city}</_Text>
-          <_Text isDarkMode={props.isDarkMode} style={styles.subHeader}>{props.item.bathrooms + " ba"}</_Text>
+        <View style={styles.subHeaderContainer}>
+          <View style={styles.subHeader}>
+            <FontAwesomeIcon icon={faMapMarkerAlt} color={Color(props.isDarkMode).textTertiary} />
+            <_Text isDarkMode={props.isDarkMode} style={styles.subHeaderText}>
+              {props.item.distanceToUcf} {props.item.distanceToUcf === 1 ? "mile" : "miles"} from UCF
+            </_Text>
+          </View>
+          <View style={styles.subHeader}>
+            <FontAwesomeIcon icon={faBed} color={Color(props.isDarkMode).textTertiary} />
+            <_Text isDarkMode={props.isDarkMode} style={styles.subHeaderText}>{props.item.rooms + " bedrooms"}</_Text>
+            <FontAwesomeIcon icon={faBath} color={Color(props.isDarkMode).textTertiary} style={{ marginLeft: 10 }} />
+            <_Text isDarkMode={props.isDarkMode} style={styles.subHeaderText}>{props.item.bathrooms + " bathrooms"}</_Text>
+          </View>
         </View>
-        <_Text isDarkMode={props.isDarkMode} style={styles.subHeader}>{'$' + props.item.price}</_Text>
+        <View style={styles.priceContainer}>
+        <_Text isDarkMode={props.isDarkMode} style={styles.price}>
+          {'$' + props.item.price}
+          <_Text isDarkMode={props.isDarkMode} style={styles.priceText}>/month</_Text>
+        </_Text>
+
+        </View>
       </View>
     </TouchableHighlight>
   );
+  
 };
 
 export default ListingCard;
+

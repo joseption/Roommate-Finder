@@ -412,13 +412,6 @@ const CreateListing = (props: any) => {
       deleteIconShadow: {
         right: -2,
       },
-      submitContainer: {
-        paddingTop: 10,
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        paddingBottom: 5
-      },
       modalOverlay: {
         position: "absolute",
         top: 0,
@@ -584,6 +577,32 @@ const CreateListing = (props: any) => {
               label="Address"
               isDarkMode={props.isDarkMode} />
 
+              <_TextInput
+              containerStyle={styles.inputContainerStyle}
+              onChangeText={(text: any) => handleChange('city', text)}
+              value={formData.city}
+              label="City"
+              isDarkMode={props.isDarkMode} />
+
+              <_TextInput
+              containerStyle={styles.inputContainerStyle}
+              style={styles.input}
+              onChangeText={(text: any) => handleChange('zipcode', text)}
+              keyboardType="numeric"
+              value={formData.zipcode}
+              isDarkMode={props.isDarkMode}
+              label="Zip Code" />
+
+              <_TextInput
+              containerStyle={styles.inputContainerStyle}
+              style={styles.input}
+              onChangeText={(text: any) => handleChange('price', parseFloat(text))}
+              value={`$${formData.price}`}
+              keyboardType="numeric"
+              placeholder="$0"
+              label="Price (per month)"
+              isDarkMode={props.isDarkMode} />
+
             <_Dropdown
               containerStyle={styles.inputContainerStyle}
               isDarkMode={props.isDarkMode}
@@ -592,38 +611,22 @@ const CreateListing = (props: any) => {
               setValue={(text: string) => handleChange('housing_type', text)}
               label="Housing Type" />
 
-            <_TextInput
+              <_TextInput
               containerStyle={styles.inputContainerStyle}
               style={styles.input}
-              onChangeText={(text: any) => handleChange('price', parseFloat(text))}
-              value={String(formData.price)}
+              onChangeText={(text: any) => handleChange('size', parseInt(text))}
+              value={String(formData.size)}
               keyboardType="numeric"
-              label="Price"
+              label="Square Feet"
               isDarkMode={props.isDarkMode} />
-            
 
-            <_Dropdown
-              containerStyle={styles.inputContainerStyle}
-              isDarkMode={props.isDarkMode}
-              options={getYesNo()}
-              value={formData.petsAllowed}
-              setValue={(text: string) => handleChange('petsAllowed', text === 'Yes' ? true : false)}
-              label="Pets Allowed" />
-
-            <_Dropdown
+              <_Dropdown
               containerStyle={styles.inputContainerStyle}
               isDarkMode={props.isDarkMode}
               options={getOptions()}
               value={formData.rooms}
               setValue={(text: string) => handleChange('rooms', parseInt(text))}
-              label="Rooms" />
-
-            <_TextInput
-            containerStyle={styles.inputContainerStyle}
-            onChangeText={(text: any) => handleChange('city', text)}
-            value={formData.city}
-            label="City"
-            isDarkMode={props.isDarkMode} />
+              label="Rooms" />            
 
             <_Dropdown
               containerStyle={styles.inputContainerStyle}
@@ -633,32 +636,19 @@ const CreateListing = (props: any) => {
               setValue={(text: string) => handleChange('bathrooms', parseInt(text))}
               label="Bathrooms" />
 
-            <_TextInput
+            <_Dropdown
               containerStyle={styles.inputContainerStyle}
-              style={styles.input}
-              onChangeText={(text: any) => handleChange('size', parseInt(text))}
-              value={String(formData.size)}
-              keyboardType="numeric"
-              label="Size"
-              isDarkMode={props.isDarkMode} />
-
-            <_TextInput
-              containerStyle={styles.inputContainerStyle}
-              style={styles.input}
-              onChangeText={(text: any) => handleChange('zipcode', text)}
-              keyboardType="numeric"
-              value={formData.zipcode}
               isDarkMode={props.isDarkMode}
-              label="Zip Code" />
-            <View
-              style={styles.submitContainer}
-            >
+              options={getYesNo()}
+              value={formData.petsAllowed}
+              setValue={(text: string) => handleChange('petsAllowed', text === 'Yes' ? true : false)}
+              label="Pets Allowed" />
+              
+            <View>
               <_Button
                 isDarkMode={props.isDarkMode}
-                onPress={() => {
-                  handleSubmitListing();
-                } }
-                style={[Style(props.isDarkMode).buttonGold]}
+                style={[Style(props.isDarkMode).buttonGold,{margin:10}]}
+                onPress={() => {handleSubmitListing();}}
               >
                 {'Create Listing'}
               </_Button>

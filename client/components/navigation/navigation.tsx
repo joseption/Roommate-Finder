@@ -383,7 +383,7 @@ const Navigation = (props: any) => {
                             navigate={() => navigate(NavTo.MyProfile)}
                             icon="user"
                             value="View Profile"
-                            navTo={NavTo.Profile}
+                            navTo={NavTo.MyProfile}
                             isDarkMode={props.isDarkMode}
                             />
                             <NavMenuButton
@@ -469,7 +469,7 @@ const Navigation = (props: any) => {
                     />
                     <NavMobileButton
                     navigate={navigateMobileMatches}
-                    icon="check-double"
+                    icon="magnifying-glass"
                     currentNav={props.navSelector}
                     navTo={NavTo.Search}
                     isDarkMode={props.isDarkMode}

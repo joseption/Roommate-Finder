@@ -39,6 +39,7 @@ const ProfileScreen = (props: any) => {
     let rt = route();
     if (rt && rt.params && rt.name && rt.name == NavTo.Profile) {
       if (rt.params['profile']) {
+        props.setNavSelector(NavTo.Search);
         getUser(rt.params['profile']);
       }
       setMatch(rt.params['match'] ? rt.params['match'] : 0);
@@ -131,20 +132,20 @@ const ProfileScreen = (props: any) => {
       width: '100%'
     },
     profileImg: {
-      width: 150,
-      height: 150,
+      width: 300,
+      height: 300,
       borderWidth: 1,
-      borderRadius: Radius.round,
+      borderRadius: Radius.large,
       borderColor: Color(props.isDarkMode).separator,
       backgroundColor: Color(props.isDarkMode).userIcon
     },
     name: {
       fontSize: FontSize.large,
       fontWeight: 'bold',
-      marginTop: 10,
+      marginRight: 10,
     },
     nameContent: {
-      flex: 1
+      flex: 1,
     },
     interestsHeading: {
       fontSize: FontSize.default,
@@ -173,11 +174,13 @@ const ProfileScreen = (props: any) => {
       backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).holderSecondary,
     },
     mainContent: {
-      marginTop: 45,
-      width: '100%'
+      marginTop: 50,
+      width: '100%',
+      flex: 1,
     },
     group: {
-      marginTop: -50
+      flex: 1,
+      marginTop: -50,
     },
     imageContainer: {
       zIndex: 3,
@@ -187,7 +190,8 @@ const ProfileScreen = (props: any) => {
     },
     view: {
       flexDirection: 'column-reverse',
-      padding: 10
+      padding: 10,
+      flex: 1
     },
     icon: {
       ...Platform.select({
@@ -206,13 +210,14 @@ const ProfileScreen = (props: any) => {
       color: Color(props.isDarkMode).actualWhite
     },
     matchText: {
-      borderRadius: Radius.round,
-      paddingVertical: 5,
-      paddingHorizontal: 10,
       color: Color(props.isDarkMode).actualWhite,
-      fontSize: FontSize.default,
-      backgroundColor: Color(props.isDarkMode).gold,
-      marginBottom: 5
+      fontSize: FontSize.tiny,
+      fontWeight: 'bold'
+    },
+    matchContainer: {
+      position: 'absolute',
+      height: '100%',
+      width: '100%',
     },
     backIcon: {
       ...Platform.select({
@@ -230,6 +235,43 @@ const ProfileScreen = (props: any) => {
     },
     bio: {
       width: '100%'
+    },
+    msgButton: {
+      padding: 10,
+      borderRadius: Radius.round,
+      backgroundColor: Color(props.isDarkMode).default
+    },
+    nameContainer: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    matchInnerContent: {
+      height: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '100%',
+    },
+    empty: {
+      height: '100%',
+      flex: 1,
+    },
+    innerGroup: {
+      height: '100%'
+    },
+    container: {
+      flex: 1,
+    },
+    iconLabel: {
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    labelIcon: {
+      marginRight: 5
+    },
+    firstLabelContainer: {
+      marginTop: -5
     }
   });
 
@@ -245,7 +287,10 @@ const ProfileScreen = (props: any) => {
   }
 
   return (
-    <ScrollView>
+    <ScrollView
+    contentContainerStyle={styles.container}
+    >
+      {navigation.canGoBack() ?
       <TouchableHighlight
       underlayColor={Color(props.isDarkMode).underlayMask}
       style={styles.button}
@@ -259,6 +304,7 @@ const ProfileScreen = (props: any) => {
         >
         </FontAwesomeIcon>
       </TouchableHighlight>
+      : null }
       <View
       style={styles.view}
       >
@@ -266,64 +312,94 @@ const ProfileScreen = (props: any) => {
         containerStyle={styles.group}
         isDarkMode={props.isDarkMode}
         vertical={true}
+        style={styles.innerGroup}
         >
-          <View
+          <ScrollView
           style={styles.mainContent}
           >
             <View
             style={styles.rowContent}
             >
-              <_Text
-              style={styles.name}
-              isDarkMode={props.isDarkMode}
-              numberOfLines={1}
-              containerStyle={styles.nameContent}
+              <View
+              style={styles.nameContainer}
               >
-                {profile?.first_name + " " + profile?.last_name}
-              </_Text>
-              <_Button
-              onPress={() => {
-                navigation.navigate(NavTo.Messages, {user: profile.id, requestId: generateRequestId()} as never);
-              }}
-              isDarkMode={props.isDarkMode}
-              >
-                <View
-                style={styles.btnContent}
+                <_Text
+                style={styles.name}
+                isDarkMode={props.isDarkMode}
+                numberOfLines={1}
+                containerStyle={styles.nameContent}
                 >
-                  <FontAwesomeIcon
-                  style={styles.icon}
-                  size={20}
-                  color={Color(props.isDarkMode).actualWhite}
-                  icon="message"
+                  {profile?.first_name + " " + profile?.last_name}
+                </_Text>
+                {match ?
+                <View>
+                  <FontAwesomeIcon 
+                  size={35} 
+                  color={Color(props.isDarkMode).gold} 
+                  style={styles.backIcon} 
+                  icon="certificate"
                   >
                   </FontAwesomeIcon>
                   <_Text
-                  style={styles.btnText}
                   isDarkMode={props.isDarkMode}
+                  style={styles.matchText}
+                  containerStyle={styles.matchContainer}
+                  innerContainerStyle={styles.matchInnerContent}
                   >
-                  Message
+                    {match}%
                   </_Text>
                 </View>
-              </_Button>
+                : null }
+              </View>
+              <TouchableHighlight
+                underlayColor={Color(props.isDarkMode).defaultUnderlay}
+                style={styles.msgButton}
+                onPress={() => {
+                  props.setNavSelector(NavTo.Messages);
+                  navigation.navigate(NavTo.Messages, {user: profile.id, requestId: generateRequestId()} as never);
+                }}
+                >
+                  <FontAwesomeIcon 
+                  size={20} 
+                  color={Color(props.isDarkMode).actualWhite} 
+                  style={styles.backIcon} 
+                  icon="message"
+                  >
+                </FontAwesomeIcon>
+              </TouchableHighlight>
             </View>
-            {match ?
-            <_Text
-            isDarkMode={props.isDarkMode}
-            style={styles.matchText}
+            <View
+            style={[styles.iconLabel, styles.firstLabelContainer]}
             >
-              {match}% match
-            </_Text>
-            : null }
-            <_Text
-            isDarkMode={props.isDarkMode}
+              <FontAwesomeIcon 
+                size={15} 
+                color={Color(props.isDarkMode).text} 
+                style={[styles.backIcon, styles.labelIcon]} 
+                icon="cake-candles"
+                >
+              </FontAwesomeIcon>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              >
+                {profile?.age} years old
+              </_Text>
+            </View>
+            <View
+            style={styles.iconLabel}
             >
-              {profile?.age} years old
-            </_Text>
-            <_Text
-            isDarkMode={props.isDarkMode}
-            >
-              {profile?.city}, {profile?.state}
-            </_Text>
+              <FontAwesomeIcon 
+                size={15} 
+                color={Color(props.isDarkMode).text} 
+                style={[styles.backIcon, styles.labelIcon]} 
+                icon="location-dot"
+                >
+              </FontAwesomeIcon>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              >
+                {profile?.city}, {profile?.state}
+              </_Text>
+            </View>
             {profile?.bio ?
             <View>
               <_Text
@@ -358,14 +434,18 @@ const ProfileScreen = (props: any) => {
                 />
               </View>
             }
-          </View>
+            <View
+              style={styles.empty}
+            />
+          </ScrollView>
         </_Group>
         <_Image
-        height={150}
-        width={150}
+        height={300}
+        width={300}
         style={styles.profileImg}
         source={{uri: profile?.image}}
         containerStyle={styles.imageContainer}
+        isDarkMode={props.isDarkMode}
         />
       </View>
     </ScrollView>

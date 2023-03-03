@@ -6,7 +6,7 @@ const SocketServer = require('socket.io').Server;
 export const startSocketIO = (server: Server<typeof IncomingMessage, typeof ServerResponse>) => {
   const io = new SocketServer(server, {
     cors: {
-      origin: [frontendEnv.URL, webfrontendEnv.URL "https://api.roomfin.xyz"],
+      origin: [frontendEnv.URL, webfrontendEnv.URL, "https://api.roomfin.xyz"],
       pingTimeout: 60000,
     },
   });

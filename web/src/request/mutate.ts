@@ -8,7 +8,7 @@ import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 
 const backend_api = "https://api.roomfin.xyz";
-//const backend_api = "http://localhost:8080";
+// const backend_api = "http://localhost:8080";
 
 export async function login(email: string, password: string) {
   return await doRequest<AuthSession>(
@@ -322,6 +322,24 @@ export async function DeleteListing(listingId: string) {
     `${backend_api}/listings/${listingId}`,
     null,
     "DELETE",
+    true
+  );
+}
+
+export async function BlockChat(chatId: string, userId: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/chats/block`,
+    { chatId, userId },
+    "PUT",
+    true
+  );
+}
+
+export async function UnblockChat(chatId: string, userId: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/chats/unblock`,
+    { chatId, userId },
+    "PUT",
     true
   );
 }

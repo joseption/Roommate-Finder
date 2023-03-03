@@ -8,9 +8,10 @@ import { GetChats, GetCurrentUserInfo } from "../request/fetch";
 import { user } from "../types/auth.types";
 import { chat } from "../types/chat.types";
 export default function Messages() {
-  const [selectedChat, setSelectedChat] = useState<chat>({} as chat);
+  const [selectedChat, setSelectedChat] = useState<chat | null>(null);
   const [userId, setUserId] = useState("");
   const [selectedChatUser, setSelectedChatUser] = useState<user>({} as user);
+  const [fetchAgain, setFetchAgain] = useState(false);
   const { data: userData, isLoading: userLoading } = useQuery(["UserInfo"], {
     queryFn: () => GetCurrentUserInfo(),
     onSuccess: (data) => {
@@ -32,7 +33,7 @@ export default function Messages() {
 
   return (
     <ChakraProvider>
-      <div style={{ width: "100%" }}>
+      <div className="relative mx-auto h-full min-h-screen max-w-7xl bg-white">
         <Box
           display="flex"
           justifyContent="space-between"
@@ -50,6 +51,8 @@ export default function Messages() {
               setSelectedChat={setSelectedChat}
               setSelectedChatUser={setSelectedChatUser}
               selectedChatUser={selectedChatUser}
+              fetchAgain={fetchAgain}
+              setFetchAgain={setFetchAgain}
             />
           )}
 
@@ -58,6 +61,8 @@ export default function Messages() {
             userId={userId}
             selectedChatUser={selectedChatUser}
             setSelectedChat={setSelectedChat}
+            fetchAgain={fetchAgain}
+            setFetchAgain={setFetchAgain}
           />
         </Box>
       </div>

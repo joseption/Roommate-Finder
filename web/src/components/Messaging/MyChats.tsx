@@ -8,10 +8,12 @@ import { LeftSideChatBox } from "./LeftSideChatBox";
 interface Props {
   chats: chat[];
   userId: string;
-  selectedChat: chat;
-  setSelectedChat: React.Dispatch<React.SetStateAction<chat>>;
+  selectedChat: chat | null;
+  setSelectedChat: React.Dispatch<React.SetStateAction<chat | null>>;
   selectedChatUser: user;
   setSelectedChatUser: React.Dispatch<React.SetStateAction<user>>;
+  fetchAgain: boolean;
+  setFetchAgain: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 function MyChats({
@@ -21,6 +23,8 @@ function MyChats({
   setSelectedChat,
   selectedChatUser,
   setSelectedChatUser,
+  fetchAgain,
+  setFetchAgain,
 }: Props) {
   return (
     <Box

@@ -5,11 +5,10 @@ import React, { useState } from "react";
 import { GetUserInfo } from "../../request/fetch";
 import { user } from "../../types/auth.types";
 import { chat } from "../../types/chat.types";
-import LeftSideChatBoxTitle from "./LeftSideChatBoxTitle";
 interface Props {
   chat: chat;
   userId: string;
-  selectedChat: chat;
+  selectedChat: chat | null;
   setSelectedChat: (chat: chat) => void;
   selectedChatUser: user;
   setSelectedChatUser: (user: user) => void;

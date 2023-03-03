@@ -8,7 +8,8 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/router";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { io, Socket } from "socket.io-client";
@@ -18,25 +19,33 @@ import { SendMessage } from "../../request/mutate";
 import { user } from "../../types/auth.types";
 import { chat } from "../../types/chat.types";
 import { message } from "../../types/message.types";
+import BlockModal from "./BlockModal";
 import { ScrollableChat } from "./ScrollableChat";
 interface Props {
   userId: string;
   selectedChat: chat;
-  setSelectedChat?: Dispatch<SetStateAction<chat>> | undefined;
+  setSelectedChat: Dispatch<SetStateAction<chat | null>> | undefined;
   selectedChatUser?: user;
+  fetchAgain: boolean;
+  setFetchAgain: Dispatch<SetStateAction<boolean>>;
 }
 
 const ENDPOINT = "https://api.roomfin.xyz";
+// const ENDPOINT = "http://localhost:8080";
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>,
   selectedChatCompare: chat;
-
 export const SingleChat = ({
   selectedChat,
   selectedChatUser,
   setSelectedChat,
   userId,
+  fetchAgain,
+  setFetchAgain,
 }: Props) => {
-  const { data, isLoading } = useQuery(["messages", selectedChat.id], {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const queryKey = ["messages", selectedChat.id];
+  const { data, isLoading } = useQuery(queryKey, {
     // add chat id
     queryFn: () => GetMessages(selectedChat.id),
     onSuccess: (data) => {
@@ -45,7 +54,6 @@ export const SingleChat = ({
     onError: (err) => {
       console.log(err);
     },
-    // refetchOnMount: true,
     onSettled: (data) => {
       setMessages(data as message[]);
       socket.emit("join chat", selectedChat.id);
@@ -59,8 +67,9 @@ export const SingleChat = ({
     socket.on("connected", () => {
       setSocketConnected(true);
     });
-    // socket.on("typing", () => setIsTyping(true));
-    // socket.on("stop typing", () => setIsTyping(false));
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -74,19 +83,28 @@ export const SingleChat = ({
         setMessages([...messages, newMessageReceived]);
       }
     });
+    return () => {
+      socket.off("message received");
+    };
+  });
+
+  useEffect(() => {
+    socket.on("block received", (chatId: string) => {
+      selectedChat.blocked = userId;
+      socket.disconnect();
+    });
+    return () => {
+      socket.off("block received");
+    };
   });
 
   const [messages, setMessages] = useState<message[]>([]);
-  const [loading, setLoading] = useState(false); // * use react query builtin loading
   const [newMessage, setNewMessage] = useState<string>("");
   const [socketConnected, setSocketConnected] = useState(false);
-  // const [typing, setTyping] = useState(false);
-  // const [isTyping, setIsTyping] = useState(false);
 
   const { mutate: sendMessageMutation } = useMutation({
     mutationFn: (content: string) => {
       setNewMessage("");
-      // socket.emit("stop typing", selectedChat.id);
       return SendMessage(content, selectedChat.id, userId);
     },
     onSuccess: (data) => {
@@ -117,29 +135,27 @@ export const SingleChat = ({
 
   const typingHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
-    // * add typing indicator logic
-    // if (!socketConnected) return;
-    // if (typing) return;
-    // if (!typing) {
-    //   setTyping(true);
-    //   socket.emit("typing", selectedChat.id);
-    // }
-    // const lastTypingTime = new Date().getTime();
-    // const timerLength = 3000;
-    // setTimeout(() => {
-    //   const timeNow = new Date().getTime();
-    //   const timeDiff = timeNow - lastTypingTime;
-    //   if (timeDiff >= timerLength && typing) {
-    //     socket.emit("stop typing", selectedChat.id);
-    //     setTyping(false);
-    //   }
-    // }, timerLength);
   };
 
+  const blocked: boolean = selectedChat.blocked === null ? false : true;
+  const [showblockmodal, setShowblockmodal] = useState(false);
+  function blockChat() {
+    setShowblockmodal(true);
+  }
   return (
     <>
       {Object.keys(selectedChat).length > 0 ? (
         <>
+          {showblockmodal && (
+            <BlockModal
+              userId={userId}
+              chatId={selectedChat.id}
+              blocked={blocked}
+              showblockmodal={showblockmodal}
+              setShowblockmodal={setShowblockmodal}
+              socket={socket}
+            />
+          )}
           <div className="flex">
             <IconButton
               aria-label="back button"
@@ -162,7 +178,8 @@ export const SingleChat = ({
             <IconButton
               aria-label="block button"
               icon={<NotAllowedIcon />}
-              //   onClick={}
+              onClick={blockChat}
+              hidden={selectedChat.blocked != null}
             />
           </div>
           <Box
@@ -176,7 +193,7 @@ export const SingleChat = ({
             borderRadius="lg"
             overflowY="hidden"
           >
-            {loading ? (
+            {isLoading ? (
               <Spinner
                 size="xl"
                 w={20}
@@ -187,6 +204,7 @@ export const SingleChat = ({
             ) : (
               <div className="flex flex-col overflow-y-scroll">
                 <ScrollableChat
+                  key={selectedChat.id}
                   messages={messages}
                   userId={userId}
                   selectedChatUser={selectedChatUser}
@@ -194,13 +212,13 @@ export const SingleChat = ({
               </div>
             )}
             <FormControl onKeyDown={sendMessage} isRequired mt={3}>
-              {/* {isTyping ? <div>Loading...</div> : <></>} */}
               <Input
                 variant="filled"
                 bg="E0E0E0"
                 placeholder="Enter a message"
                 onChange={typingHandler}
                 value={newMessage}
+                isDisabled={selectedChat.blocked != undefined}
               />
             </FormControl>
           </Box>

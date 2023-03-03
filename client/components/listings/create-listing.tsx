@@ -260,6 +260,12 @@ const CreateListing = (props: any) => {
     }
   };
 
+  const dialogStyle = () => {
+    let style = [];
+    style.push({backgroundColor: !props.isDarkMode ? Color(props.isDarkMode).holderMask : Color(props.isDarkMode).promptMaskMobile});
+    return style;
+}
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -273,10 +279,6 @@ const CreateListing = (props: any) => {
     inputContainerStyle: {
       paddingTop: 5,
       paddingBottom: 5
-    },
-    input: {
-      fontSize: 16,
-      height: 50,
     },
     button: {
       alignItems: 'center',
@@ -293,7 +295,7 @@ const CreateListing = (props: any) => {
     title: {
       margin: 10,
       textAlign: 'center',
-      fontFamily: 'Inter-SemiBold',
+      fontWeight: 'bold',
       fontSize: FontSize.large,
       color: Color(props.isDarkMode).titleText
     },
@@ -418,48 +420,50 @@ const CreateListing = (props: any) => {
         left: 0,
         width: "100%",
         height: "100%",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
         zIndex: 9999,
         justifyContent: "center",
         alignItems: "center",
       },
       modalBox: {
-        backgroundColor: "white",
-        width: 300,
-        padding: 24,
-        borderRadius: 8,
-        alignItems: "center",
+        margin: 'auto',
+        backgroundColor: Color(props.isDarkMode).white,
+        padding: 20,
+        borderWidth: 1,
+        borderStyle: 'solid',
+        borderColor: Color(props.isDarkMode).border,
+        borderRadius: 20,
+        maxWidth: 400
       },
       modalTitle: {
-        fontSize: 24,
+        fontSize: FontSize.large,
         fontWeight: "bold",
-        marginBottom: 16,
+        marginBottom: 5,
       },
       modalMessage: {
-        fontSize: 16,
-        marginBottom: 24,
+        fontSize: FontSize.default,
+        marginBottom: 15
       },
-      modalCloseButton: {
-        backgroundColor: "#e0e0e0",
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 4,
-      },
-      modalCloseButtonText: {
-        fontSize: 16,
-      },
+      closeBtn: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+      }
   });
 
   return (
     <View style={styles.container}>
       {isLocationNotFound && (
-        <View style={styles.modalOverlay}>
+        <View style={[styles.modalOverlay, dialogStyle()]}>
           <View style={styles.modalBox}>
-            <_Text style={styles.modalTitle}>Location not found</_Text>
-            <_Text style={styles.modalMessage}>Please enter a valid location for your listing.</_Text>
-            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setIsLocationNotFound(false)}>
-              <_Text style={styles.modalCloseButtonText}>Close</_Text>
-            </TouchableOpacity>
+            <_Text isDarkMode={props.isDarkMode} style={styles.modalTitle}>Location not found</_Text>
+            <_Text isDarkMode={props.isDarkMode} style={styles.modalMessage}>Please enter a valid location for your listing.</_Text>
+            <_Button
+            onPress={() => setIsLocationNotFound(false)}
+            style={Style(props.isDarkMode).buttonDanger}
+            isDarkMode={props.isDarkMode}
+            containerStyle={styles.closeBtn}
+            >
+              Close
+            </_Button>
           </View>
         </View>
       )}

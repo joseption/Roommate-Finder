@@ -42,6 +42,12 @@ export const SingleChat = ({
   fetchAgain,
   setFetchAgain,
 }: Props) => {
+  const [messages, setMessages] = useState<message[]>([]);
+  const [newMessage, setNewMessage] = useState<string>("");
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [blocked, setBlocked] = useState(
+    selectedChat.blocked === null ? false : true
+  );
   const router = useRouter();
   const queryClient = useQueryClient();
   const queryKey = ["messages", selectedChat.id];
@@ -68,39 +74,62 @@ export const SingleChat = ({
       setSocketConnected(true);
     });
     return () => {
+      // Clean up event listeners
+      socket.off("message received");
+      socket.off("block received");
+      socket.off("unblock received");
+
+      // Disconnect WebSocket
       socket.disconnect();
     };
   }, []);
 
   useEffect(() => {
-    socket.on("message received", (newMessageReceived: message) => {
-      if (
-        !selectedChatCompare ||
-        selectedChatCompare.id !== newMessageReceived.chatId
-      ) {
+    const handleMessageReceived = (newMessageReceived: message) => {
+      if (selectedChat.id !== newMessageReceived.chatId) {
         // * Give notification
       } else {
         setMessages([...messages, newMessageReceived]);
       }
-    });
-    return () => {
-      socket.off("message received");
     };
-  });
+
+    socket.on("message received", handleMessageReceived);
+
+    return () => {
+      socket.off("message received", handleMessageReceived);
+    };
+  }, [messages, selectedChat.id]);
 
   useEffect(() => {
-    socket.on("block received", (chatId: string) => {
+    const handleBlockReceived = (chatId: string) => {
+      console.log("block received");
+      setBlocked(true);
       selectedChat.blocked = userId;
-      socket.disconnect();
-    });
-    return () => {
-      socket.off("block received");
+      // socket.disconnect();
+      // ! chose to not disconnect because it makes it more responsive to block then unblock. However is already on the connection they'll be able to msg you
     };
-  });
 
-  const [messages, setMessages] = useState<message[]>([]);
-  const [newMessage, setNewMessage] = useState<string>("");
-  const [socketConnected, setSocketConnected] = useState(false);
+    socket.on("block received", handleBlockReceived);
+
+    return () => {
+      socket.off("block received", handleBlockReceived);
+    };
+  }, [selectedChat, userId]);
+
+  useEffect(() => {
+    const handleUnblockReceived = (chatId: string) => {
+      socket.connect();
+      console.log("received unblock");
+      setBlocked(false);
+      selectedChat.blocked = null;
+    };
+
+    socket.on("unblock received", handleUnblockReceived);
+
+    return () => {
+      socket.off("unblock received", handleUnblockReceived);
+    };
+  }, [selectedChat, userId]);
 
   const { mutate: sendMessageMutation } = useMutation({
     mutationFn: (content: string) => {
@@ -117,16 +146,21 @@ export const SingleChat = ({
   const sendMessage = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" && newMessage) {
       try {
-        sendMessageMutation(newMessage);
-        socket.emit("new message", {
-          content: newMessage,
-          chatId: selectedChat.id,
-          userId: userId,
-        });
-        setMessages([
-          ...messages,
-          { content: newMessage, chatId: selectedChat.id, userId: userId },
-        ]);
+        console.log(selectedChat.blocked, "blocked");
+        if (selectedChat.blocked === null) {
+          sendMessageMutation(newMessage);
+          socket.emit("new message", {
+            content: newMessage,
+            chatId: selectedChat.id,
+            userId: userId,
+          });
+          setMessages([
+            ...messages,
+            { content: newMessage, chatId: selectedChat.id, userId: userId },
+          ]);
+        } else {
+          setNewMessage("");
+        }
       } catch (err) {
         console.log(err, "error");
       }
@@ -136,8 +170,6 @@ export const SingleChat = ({
   const typingHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
   };
-
-  const blocked: boolean = selectedChat.blocked === null ? false : true;
   const [showblockmodal, setShowblockmodal] = useState(false);
   function blockChat() {
     setShowblockmodal(true);
@@ -179,7 +211,10 @@ export const SingleChat = ({
               aria-label="block button"
               icon={<NotAllowedIcon />}
               onClick={blockChat}
-              hidden={selectedChat.blocked != null}
+              hidden={
+                selectedChat.blocked !== null &&
+                selectedChat?.blocked !== userId
+              }
             />
           </div>
           <Box
@@ -218,7 +253,7 @@ export const SingleChat = ({
                 placeholder="Enter a message"
                 onChange={typingHandler}
                 value={newMessage}
-                isDisabled={selectedChat.blocked != undefined}
+                isDisabled={blocked}
               />
             </FormControl>
           </Box>

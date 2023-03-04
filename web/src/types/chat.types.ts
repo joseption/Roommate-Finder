@@ -7,5 +7,5 @@ export interface chat {
   groupAdmin?: string;
   createdAt: string;
   updatedAt: string;
-  blocked?: string;
+  blocked?: string | null;
 }

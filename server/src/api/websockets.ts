@@ -3,6 +3,8 @@ import { IncomingMessage, Server, ServerResponse } from 'node:http';
 
 const SocketServer = require('socket.io').Server;
 
+
+
 export const startSocketIO = (server: Server<typeof IncomingMessage, typeof ServerResponse>) => {
   const io = new SocketServer(server, {
     cors: {
@@ -10,6 +12,7 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
       pingTimeout: 60000,
     },
   });
+
   io.on('connection', (socket: any) => {
     socket.on('setup', (userData: any) => {
       socket.join(userData);
@@ -46,7 +49,12 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
       socket.broadcast.to(chat).emit('message received', newMessageReceived);
     });
     socket.on('send block', (chatId: string) => {
+      console.log("block received");
       socket.emit('block received', chatId);
+    });
+    socket.on('send unblock', (chatId: string) => {
+      console.log('unblock received');
+      socket.emit('unblock received', chatId);
     });
   });
 };

@@ -173,11 +173,12 @@ router.put('/removeFromGroup', async (req: Request, res: Response) => {
 router.delete('/delete/:chatId', async (req: Request, res: Response) => {
   try {
     const { chatId } = req.params;
-    await db.chat.delete({
+    const z = await db.chat.delete({
       where: {
-        id: chatId as string,
+        id: chatId,
       },
     });
+    console.log(z);
     return res.status(202).json('Chat deleted');
   } catch (err) {
     return res.status(500).json({ Error: err.message });

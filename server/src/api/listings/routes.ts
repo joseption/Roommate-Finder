@@ -214,6 +214,88 @@ router.post('/all', async (req: Request, res: Response) => {
   }
 });
 
+// get favorited listings
+router.get('/favorites', async (req: Request, res: Response) => {
+  try {
+    const payload: payload = req.body[0];
+    const userId = payload.userId;
+    const favorites = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        favoritedListings: {
+          select: {
+            id: true,
+            name: true,
+            images: true,
+            city: true,
+            housing_type: true,
+            description: true,
+            price: true,
+            petsAllowed: true,
+            userId: true,
+            address: true,
+            bathrooms: true,
+            rooms: true,
+            size: true,
+            zipcode: true,
+            distanceToUcf: true,
+          },
+        },
+      },
+    });
+    // const { favoritedListings } = favorites;
+    res.status(200).json(favorites);
+  } catch (err) {
+    res.status(500).json({ Error: err.message });
+  }
+});
+
+router.post('/favorite/:listingId', async (req: Request, res: Response) => {
+  try {
+    const payload: payload = req.body[0];
+    const userId = payload.userId;
+    const listingId = req.params.listingId;
+    const favorite = await prisma.listings.update({
+      where: {
+        id: listingId as string,
+      },
+      data: {
+        favoritedBy: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    });
+    res.status(200).json('successfully favorited');
+  } catch (err) {
+    res.status(500).json({ Error: err.message });
+  }
+});
+
+router.post('/unfavorite/:listingId', async (req: Request, res: Response) => {
+  try {
+    const payload: payload = req.body[0];
+    const userId = payload.userId;
+    const listingId = req.params.listingId;
+    const favorite = await prisma.listings.update({
+      where: {
+        id: listingId as string,
+      },
+      data: {
+        favoritedBy: {
+          disconnect: {
+            id: userId,
+          },
+        },
+      },
+    });
+    res.status(200).json('successfully unfavorited');
+  } catch (err) {
+    res.status(500).json({ Error: err.message });
+  }
+});
+
 // * get one listing
 router.get('/:listingId', async (req: Request, res: Response) => {
   try {

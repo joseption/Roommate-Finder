@@ -8,21 +8,20 @@ import { AiFillEdit } from "react-icons/ai";
 import { FaTrashAlt } from "react-icons/fa";
 
 import { GetCurrentUserInfo, GetListing } from "../../request/fetch";
-import { DeleteListing } from "../../request/mutate";
-import { ListingInfo } from "../../types/listings.types";
+import { AccessChat, DeleteListing } from "../../request/mutate";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Example() {
+export default function IndividualListingPage() {
   const router = useRouter();
   const { id } = router.query;
   const { data, isLoading } = useQuery({
     queryKey: ["listing", id],
     queryFn: () => GetListing(id as string),
     onSuccess: (data) => {
-      // console.log(data);
+      console.log(data);
     },
     onError: (err) => {
       console.log(err);
@@ -53,6 +52,25 @@ export default function Example() {
       // delete listing
       deleteListing();
     }
+  }
+  const { mutate: validateChat } = useMutation({
+    mutationFn: () => AccessChat(id as string, userData?.id as string),
+    onSuccess: () => {
+      void router.push("/messages");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+
+  function messageOwner() {
+    // access chat with owner
+    const ownerId = data?.userId;
+    if (userData?.id == ownerId) {
+      // cant message yourself
+      return;
+    }
+    validateChat();
   }
 
   return (
@@ -162,7 +180,10 @@ export default function Example() {
             </div>
 
             <div className="mt-10 flex sm:flex-col">
-              <button className="flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-500 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full">
+              <button
+                onClick={messageOwner}
+                className="flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-400 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
+              >
                 Message Owner
               </button>
             </div>

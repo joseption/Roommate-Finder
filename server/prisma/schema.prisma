@@ -8,40 +8,41 @@ datasource db {
 }
 
 model User {
-  email            String             @unique
-  is_active        Boolean            @default(false)
-  is_superuser     Boolean            @default(false)
-  is_verified      Boolean            @default(false)
-  image            String?
-  gender           String?
-  first_name       String?
-  last_name        String?
-  birthday         String?
-  phone_number     String?
-  zip_code         String?
-  city             String?
-  state            String?
-  reset_id         Int?
-  reset_exp        DateTime?
-  update_id        Int?
-  update_exp       DateTime?
-  activate_id      Int?
-  activate_exp     DateTime?
-  is_setup         Boolean?
-  setup_step       String?
-  id               String             @id @default(uuid())
-  createdAt        DateTime           @default(now())
-  password         String
-  updatedAt        DateTime           @updatedAt
-  bio              String?
-  push_token       String?
-  Listings         Listings[]
-  matches          Matches[]
-  Message          Message[]
-  Notification     Notification[]
-  refreshTokens    RefreshToken[]
-  ResponsesOnUsers ResponsesOnUsers[]
-  tags             tags[]
+  email             String             @unique
+  is_active         Boolean            @default(false)
+  is_superuser      Boolean            @default(false)
+  is_verified       Boolean            @default(false)
+  image             String?
+  gender            String?
+  first_name        String?
+  last_name         String?
+  birthday          String?
+  phone_number      String?
+  zip_code          String?
+  city              String?
+  state             String?
+  reset_id          Int?
+  reset_exp         DateTime?
+  update_id         Int?
+  update_exp        DateTime?
+  activate_id       Int?
+  activate_exp      DateTime?
+  is_setup          Boolean?
+  setup_step        String?
+  id                String             @id @default(uuid())
+  createdAt         DateTime           @default(now())
+  password          String
+  updatedAt         DateTime           @updatedAt
+  bio               String?
+  push_token        String?
+  Listings          Listings[]         @relation(name: "ListingCreator")
+  matches           Matches[]
+  Message           Message[]
+  Notification      Notification[]
+  refreshTokens     RefreshToken[]
+  ResponsesOnUsers  ResponsesOnUsers[]
+  tags              tags[]
+  favoritedListings Listings[]         @relation(name: "ListingsFavorited")
 }
 
 model RefreshToken {
@@ -118,7 +119,8 @@ model Listings {
   size          Int?
   zipcode       String?
   distanceToUcf Int?
-  user          User     @relation(fields: [userId], references: [id])
+  user          User     @relation(name: "ListingCreator", fields: [userId], references: [id])
+  favoritedBy   User[]   @relation(name: "ListingsFavorited")
 }
 
 model Chat {

@@ -343,3 +343,13 @@ export async function UnblockChat(chatId: string, userId: string) {
     true
   );
 }
+
+// if chat doesn't exist create one otherwise just show them it
+export async function AccessChat(userIdOne: string, userIdTwo: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/chats`,
+    { userIdOne, userIdTwo },
+    "POST",
+    true
+  );
+}

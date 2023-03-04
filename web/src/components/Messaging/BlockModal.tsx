@@ -33,26 +33,29 @@ export default function BlockModal({
   //   const [open, setOpen] = useState(true);
 
   const cancelButtonRef = useRef(null);
-  const router = useRouter();
 
   const { mutate: blockChatMutation } = useMutation({
     mutationFn: (blockRequest: BlockRequest) => {
       return BlockChat(blockRequest.chatId, blockRequest.userId);
     },
   });
-  // const { mutate: unblockChatMutation } = useMutation({
-  //   mutationFn: (blockRequest: BlockRequest) => {
-  //     return UnblockChat(blockRequest.chatId, blockRequest.userId);
-  //   },
-  // });
+  const { mutate: unblockChatMutation } = useMutation({
+    mutationFn: (blockRequest: BlockRequest) => {
+      return UnblockChat(blockRequest.chatId, blockRequest.userId);
+    },
+  });
 
   function handleClick() {
-    // if (blocked) {
-    //   unblockChatMutation({ chatId: chatId, userId: userId });
-    // } else {
-    // }
-    blockChatMutation({ chatId: chatId, userId: userId });
-    socket.emit("send block", { chatId: chatId });
+    console.log(socket.connected, "sc Connected");
+    if (blocked) {
+      if (socket.connected) {
+        socket.emit("send unblock", { chatId: chatId });
+        unblockChatMutation({ chatId: chatId, userId: userId });
+      }
+    } else {
+      socket.emit("send block", { chatId: chatId });
+      blockChatMutation({ chatId: chatId, userId: userId });
+    }
     setShowblockmodal(false);
   }
 
@@ -116,11 +119,13 @@ export default function BlockModal({
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    Are you sure you would like to block this chat?
+                    Are you sure you would like to{" "}
+                    {blocked ? "unblock" : "block"} this chat?
                   </Dialog.Title>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">
-                      Once you block a user you will not be able to unblock
+                      If this user is violating our terms of service, please
+                      report them.
                     </p>
                   </div>
                 </div>
@@ -131,7 +136,7 @@ export default function BlockModal({
                   className="inline-flex w-full justify-center rounded-md border border-transparent bg-amber-500 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
                   onClick={handleClick}
                 >
-                  Block
+                  {blocked ? "Unblock" : "Block"}
                 </button>
                 <button
                   type="button"

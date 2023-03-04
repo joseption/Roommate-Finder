@@ -48,8 +48,8 @@ export const LeftSideChatBox = ({
     <Box
       onClick={handleClick}
       cursor="pointer"
-      bg={selectedChat === chat ? "#e0b936" : "E8E8E8"}
-      color={selectedChat === chat ? "white" : "black"}
+      bg={selectedChat?.id === chat.id ? "#e0b936" : "E8E8E8"}
+      color={selectedChat?.id === chat.id ? "white" : "black"}
       px={3}
       py={2}
       borderRadius="lg"

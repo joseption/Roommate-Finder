@@ -12,6 +12,17 @@ router.use(isAuthenticated);
 router.post('/', async (req: Request, res: Response) => {
   try {
     const { userIdOne, userIdTwo } = req.body;
+    // validate users exist
+    const userOne = await db.user.findUnique({
+      where: {
+        id: userIdOne as string,
+      },
+    });
+    const userTwo = await db.user.findUnique({
+      where: {
+        id: userIdTwo as string,
+      },
+    });
     const chatExists = await db.chat.findFirst({
       where: {
         users: {
@@ -20,6 +31,9 @@ router.post('/', async (req: Request, res: Response) => {
         isGroupChat: false,
       },
     });
+    if (!userOne || !userTwo) {
+      return res.status(400).json({Error: "User does not exist"});
+    }
     // if chat already exists just return it
     if (chatExists) {
       return res.status(200).json(chatExists);
@@ -173,17 +187,22 @@ router.put('/removeFromGroup', async (req: Request, res: Response) => {
 router.delete('/delete/:chatId', async (req: Request, res: Response) => {
   try {
     const { chatId } = req.params;
-    const z = await db.chat.delete({
+    await db.message.deleteMany({
+      where: {
+        chatId,
+      },
+    });
+    await db.chat.delete({
       where: {
         id: chatId,
       },
     });
-    console.log(z);
     return res.status(202).json('Chat deleted');
   } catch (err) {
     return res.status(500).json({ Error: err.message });
   }
 });
+
 
 // given a chatId return info on the chat /chats/chatId
 // * honestly didnt need this in my original design but added just incase front end might need it

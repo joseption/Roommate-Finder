@@ -30,8 +30,8 @@ interface Props {
   setFetchAgain: Dispatch<SetStateAction<boolean>>;
 }
 
-const ENDPOINT = "https://api.roomfin.xyz";
-// const ENDPOINT = "http://localhost:8080";
+// const ENDPOINT = "https://api.roomfin.xyz";
+const ENDPOINT = "http://localhost:8080";
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>,
   selectedChatCompare: chat;
 export const SingleChat = ({
@@ -105,7 +105,7 @@ export const SingleChat = ({
       console.log("block received");
       setBlocked(true);
       selectedChat.blocked = userId;
-      // socket.disconnect();
+      socket.disconnect();
       // ! chose to not disconnect because it makes it more responsive to block then unblock. However is already on the connection they'll be able to msg you
     };
 

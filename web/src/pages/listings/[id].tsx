@@ -54,7 +54,8 @@ export default function IndividualListingPage() {
     }
   }
   const { mutate: validateChat } = useMutation({
-    mutationFn: () => AccessChat(id as string, userData?.id as string),
+    mutationFn: () =>
+      AccessChat(data?.userId as string, userData?.id as string),
     onSuccess: () => {
       void router.push("/messages");
     },

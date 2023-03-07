@@ -22,6 +22,11 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
       socket.join(data);
       console.log('user joined room', data);
     });
+
+    socket.on('create_chat', (data: any) => {
+      if (!data || data.users.length === 0) return;
+      socket.nsp.to(data.users[0].id).emit('receive_chat', data);
+    })
     
     socket.on('send_message', (data: any) => {
       socket.nsp.to(data.chatId).emit('receive_message', data);
@@ -34,6 +39,7 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
     socket.on('send_block', (data: any) => {
       socket.to(data.chatId).emit('receive_block', data);
     });
+
     socket.on('send_notification', (data: any) => {
       socket.to(data.chatId).emit('receive_notification', data);
     });

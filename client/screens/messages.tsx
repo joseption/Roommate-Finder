@@ -101,6 +101,12 @@ const MessagesScreen = (props: any) => {
       });
       setChats(chats);
     });
+
+    props.socket.on('receive_chat', (data: any) => {
+      props.socket.emit('join_room', data.id);
+      const newChats= [data, ...chatsRef.current];
+      setChats(newChats);
+    })
   }, [props.socket])
 
   // Start - Added by Joseph for push notifications
@@ -152,9 +158,10 @@ const MessagesScreen = (props: any) => {
         const users = [];
         const user = await getUser(userIdTwo);
         users.push(user);
-        chat = {...chat, users: users, blocked: '', muted: [], notifCount: 0}
+        chat = {...chat, users: users, blocked: '', muted: [], notifCount: 0};
+        props.socket.emit('create_chat', chat);
         const newChats= [chat, ...chatsRef.current];
-        props.socket.emit('join_room', chat.id)
+        props.socket.emit('join_room', chat.id);
         setChats(newChats);
         setCurrentChat(chat);
         updateShowPanel(true);
@@ -241,22 +248,9 @@ const MessagesScreen = (props: any) => {
 
   const getUserInfo = async () => {
     const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
+    // join own user room
+    props.socket.emit('join_room', userInfo.id)
     setUserInfo(userInfo);
-  }
-
-  const getChat = async (chatId: string) => {
-    const tokenHeader = await authTokenHeader();
-    return fetch(
-      `${env.URL}/chats/${chatId}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
-    ).then(async ret => {
-      const res = JSON.parse(await ret.text());
-      if (res.Error) {
-        console.warn("Error: ", res.Error);
-      }
-      else {
-        return res;
-      }
-    });
   }
 
   const getMessage = async (id: string) => {
@@ -436,7 +430,10 @@ const MessagesScreen = (props: any) => {
           <_Button
           style={Style(props.isDarkMode).buttonInverted}
           textStyle={Style(props.isDarkMode).buttonInvertedText}
-          onPress={(e: any) => navigation.navigate(NavTo.Search)}
+          onPress={() => {
+            props.setNavSelector(NavTo.Search);
+            navigation.navigate(NavTo.Search);
+          }}
           isDarkMode={props.isDarkMode}
           >
             Explore

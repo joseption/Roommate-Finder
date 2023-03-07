@@ -43,10 +43,8 @@ const Messages = ({typing, receiveTyping, receiveMessage, chat, userInfo, socket
   }, [messages])
 
   useEffect(() => {
-    if (receiveMessage) {
-      if (receiveMessage.chatId !== chatRef.current.id) return;
-      setMessages([receiveMessage, ...messagesRef.current]);
-    }
+    if (!receiveMessage || receiveMessage.chatId !== chatRef.current.id) return;
+    setMessages([receiveMessage, ...messagesRef.current]);
   }, [receiveMessage])
 
   const getMessages = async (id: string) => {

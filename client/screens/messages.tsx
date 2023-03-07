@@ -75,14 +75,14 @@ const MessagesScreen = (props: any) => {
   useEffect(() => {
     showPanelRef.current = showPanel;
   }, [showPanel]);
+
+  useEffect(() => {
+    const chats = chatsRef.current.filter(chat => chat.id === props.receiveMessage.chatId);
+    if (chats.length !== 0 && chats[0].blocked) return;
+    updateTabs(props.receiveMessage);
+  }, [props.receiveMessage])
   
   useEffect(() => {
-    props.socket.on('receive_message', (data: any) => {
-      const chats = chatsRef.current.filter(chat => chat.id === data.chatId);
-      if (chats.length !== 0 && chats[0].blocked) return;
-      updateTabs(data);
-    });
-
     props.socket.on('receive_block', (data: any) => {
       updateBlocked(data.chat);
     });

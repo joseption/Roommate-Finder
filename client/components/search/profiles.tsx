@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ProfileCard from './profile-card';
 import { env, authTokenHeader, navProp, NavTo } from '../../helper';
 import { Color, Style } from '../../style';
@@ -19,7 +19,7 @@ interface Props {
   noResults: boolean,
   forceGetProfiles: boolean,
   setForceGetProfiles: any,
-  setSorting: any
+  setSorting: any,
 }
 
 const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults, filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting, isDarkMode, setNoResults }: Props) => {
@@ -33,6 +33,13 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
   const [allProfiles, setAllProfiles] = useState([]);
   const [isFetchedProfiles, setFetchedProfiles] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);  
+
+  const refreshMe = () => {
+    setRefreshing(true);
+    getProfiles();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     if (forceGetProfiles) {
@@ -183,6 +190,14 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
     <ScrollView
     style={styles.profilesContainer}
     contentContainerStyle={containerStyle()}
+    refreshControl={
+      <RefreshControl
+      refreshing={refreshing}
+      onRefresh={refreshMe}
+      colors={[Color(isDarkMode).gold]}
+      progressBackgroundColor={Color(isDarkMode).contentHolder}
+      />
+    }
     >
       {!isPageLoading ? 
       <View>

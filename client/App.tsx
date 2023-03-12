@@ -74,6 +74,7 @@ export const App = (props: any) => {
   const [receiveMessage,setReceiveMessage] = useState(null);
   const [receiveTyping,setReceiveTyping] = useState(null);
   const appState = useRef(AppState.currentState);
+  const [forceUpdateAccount, setForceUpdateAccount] = useState(false);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
@@ -845,6 +846,7 @@ export const App = (props: any) => {
                   setIsDarkMode={setIsDarkMode}
                   setNavSelector={setNavSelector}
                   setUpdatePicture={setUpdatePicture}
+                  setForceUpdateAccount={setForceUpdateAccount}
                   />}
                   </Stack.Screen>
                   <Stack.Screen
@@ -857,6 +859,7 @@ export const App = (props: any) => {
                   isDarkMode={isDarkMode}
                   setNavSelector={setNavSelector}
                   navSelector={navSelector}
+                  setShowingMessagePanel={setShowingMessagePanel}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen
@@ -908,6 +911,8 @@ export const App = (props: any) => {
                     isMatches={isMatches}
                     setIsMatches={setIsMatches}
                     isDarkMode={isDarkMode}
+                    setForceUpdateAccount={setForceUpdateAccount}
+                    forceUpdateAccount={forceUpdateAccount}
                   />}
               </Stack.Screen>
                   <Stack.Screen
@@ -942,6 +947,7 @@ export const App = (props: any) => {
                   receiveMessage={receiveMessage}
                   receiveTyping={receiveTyping}
                   setAddMessageCount={setAddMessageCount}
+                  showingMessagePanel={showingMessagePanel}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen

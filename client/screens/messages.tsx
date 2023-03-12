@@ -138,6 +138,10 @@ const MessagesScreen = (props: any) => {
   // End
 
   useEffect(() => {
+    updateShowPanel(props.showingMessagePanel);
+  }, [props.showingMessagePanel])
+
+  useEffect(() => {
     if (!props?.route?.params?.user || !userInfo) return;
     openOrCreateChat(props?.route?.params?.user);
   }, [props?.route?.params?.requestId])
@@ -383,7 +387,7 @@ const MessagesScreen = (props: any) => {
       justifyContent: 'center',
     },
     textStyle: {
-      fontSize: FontSize.default,
+      fontSize: FontSize.large,
       fontWeight: 'bold',
       marginHorizontal: 40,
       textAlign: 'center',
@@ -392,7 +396,8 @@ const MessagesScreen = (props: any) => {
     subTextStyle: {
       fontWeight: 'normal',
       marginTop: 10,
-      marginBottom: 20
+      marginBottom: 20,
+      fontSize: FontSize.default
     },
     loadingScreen: {
       flexDirection: 'column',
@@ -420,7 +425,7 @@ const MessagesScreen = (props: any) => {
           <_Text
           style={styles.textStyle}
           >
-            Looks like you don't have any message yet.
+            No messages
           </_Text>
           <_Text
           style={[styles.textStyle, styles.subTextStyle]}
@@ -467,7 +472,6 @@ const MessagesScreen = (props: any) => {
         updateBlocked={updateBlocked}
         updateMuted={updateMuted}
         isDarkMode={props.isDarkMode}
-        setShowingMessagePanel={props.setShowingMessagePanel}
         receiveMessage={props.receiveMessage}
         receiveTyping={props.receiveTyping}
         typing={typing}

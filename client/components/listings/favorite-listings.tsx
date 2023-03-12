@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { Color, FontSize } from '../../style';
 import _Text from '../control/text';
 import ListingCard from './listing-card';
 
 const FavoriteListings = (props: any) => {
   const [favoriteListings, setFavoriteListings] = useState<JSX.Element[]>([]);
+  const [refreshing, setRefreshing] = useState(false);  
+
+  const refresh = () => {
+    setRefreshing(true);
+    props.refresh();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     generateFavoriteListings();
@@ -66,7 +73,17 @@ const FavoriteListings = (props: any) => {
     
       <>
         <_Text style={styles.title}>My Listings</_Text>
-        <ScrollView style={styles.container}>
+        <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+          refreshing={refreshing}
+          onRefresh={refresh}
+          colors={[Color(props.isDarkMode).gold]}
+          progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+          />
+        }
+        >
         {favoriteListings}
         </ScrollView>
       </>

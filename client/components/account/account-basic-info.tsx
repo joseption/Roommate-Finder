@@ -9,7 +9,7 @@ import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
 import _Image from '../control/image';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { AccountScreenType, authTokenHeader, env, getLocalStorage, navProp, NavTo, setLocalAppSettings } from '../../helper';
+import { AccountScreenType, authTokenHeader, env, getLocalStorage, LocalIsDarkMode, navProp, NavTo, setLocalAppSettings, SetLocalIsDarkMode } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
@@ -275,6 +275,7 @@ const AccountInfo = (props: any) => {
     }
 
     const completeSave = () => {
+        props.setForceUpdateAccount(true);
         setIsLoading(false);
         setIsSaved(true);
         props.setUpdatePicture(imageUri);
@@ -605,6 +606,7 @@ const AccountInfo = (props: any) => {
         props.setIsDarkMode(e);
         let settings = {is_darkmode: e};
         await setLocalAppSettings(settings);
+        SetLocalIsDarkMode(e);
     }
 
     return (

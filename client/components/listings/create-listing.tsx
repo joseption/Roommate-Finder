@@ -309,8 +309,8 @@ const CreateListing = (props: any) => {
       backgroundColor: Color(props.isDarkMode).actualWhite,
       borderColor: Color(props.isDarkMode).separator,
       borderWidth: 1,
-      height: 125,
-      width: 125,
+      height: 100,
+      width: 100,
       borderRadius: Radius.default
     },
     formContainer: {
@@ -468,7 +468,9 @@ const CreateListing = (props: any) => {
         </View>
       )}
       {
-      <><_Text style={styles.title}>Create Listing</_Text><ScrollView>
+      <>
+      <_Text style={styles.title}>Create Listing</_Text>
+      <ScrollView>
           <View style={styles.formContainer}>
             <_Group
               isDarkMode={props.isDarkMode}
@@ -641,7 +643,7 @@ const CreateListing = (props: any) => {
               label="Bathrooms" />
 
             <_Dropdown
-              containerStyle={styles.inputContainerStyle}
+              containerStyle={[styles.inputContainerStyle, {marginBottom: 20}]}
               isDarkMode={props.isDarkMode}
               options={getYesNo()}
               value={formData.petsAllowed}
@@ -651,7 +653,7 @@ const CreateListing = (props: any) => {
             <View>
               <_Button
                 isDarkMode={props.isDarkMode}
-                style={[Style(props.isDarkMode).buttonGold,{margin:10}]}
+                style={[Style(props.isDarkMode).buttonGold]}
                 onPress={() => {handleSubmitListing();}}
               >
                 {'Create Listing'}

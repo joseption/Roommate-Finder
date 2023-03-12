@@ -129,7 +129,6 @@ const ProfileScreen = (props: any) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      width: '100%'
     },
     profileImg: {
       width: 300,
@@ -142,10 +141,7 @@ const ProfileScreen = (props: any) => {
     name: {
       fontSize: FontSize.large,
       fontWeight: 'bold',
-      marginRight: 10,
-    },
-    nameContent: {
-      flex: 1,
+      marginRight: 5,
     },
     interestsHeading: {
       fontSize: FontSize.default,
@@ -245,7 +241,7 @@ const ProfileScreen = (props: any) => {
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
+      flex: 1
     },
     matchInnerContent: {
       height: '100%',
@@ -271,9 +267,33 @@ const ProfileScreen = (props: any) => {
       marginRight: 5
     },
     firstLabelContainer: {
-      marginTop: -5
+    },
+    outerMatchContainer: {
+      marginRight: 5,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    leftHeader: {
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    nameContent: {
+      flex: 1,
+      alignItems:'center'
     }
   });
+
+  const goBack = () => {
+    let rt = route();
+    if (rt && rt.params && rt.name && rt.name == NavTo.Profile &&
+      rt.params['fromChat'] && rt.params['fromChat'] === 'true' && rt.params['profile']) {
+      props.setShowingMessagePanel(true);
+      navigation.navigate(NavTo.Messages, {user: rt.params['profile'], requestId: generateRequestId()} as never);
+    }
+    else {
+      navigation.goBack();
+    }
+  }
 
   if (!profile.id) {
     return (
@@ -294,7 +314,7 @@ const ProfileScreen = (props: any) => {
       <TouchableHighlight
       underlayColor={Color(props.isDarkMode).underlayMask}
       style={styles.button}
-      onPress={() => navigation.goBack() }
+      onPress={() => goBack() }
       >
         <FontAwesomeIcon 
         size={20} 
@@ -324,15 +344,17 @@ const ProfileScreen = (props: any) => {
               style={styles.nameContainer}
               >
                 <_Text
+                innerContainerStyle={styles.nameContent}
                 style={styles.name}
                 isDarkMode={props.isDarkMode}
                 numberOfLines={1}
-                containerStyle={styles.nameContent}
                 >
                   {profile?.first_name + " " + profile?.last_name}
                 </_Text>
                 {match ?
-                <View>
+                <View
+                style={styles.outerMatchContainer}
+                >
                   <FontAwesomeIcon 
                   size={35} 
                   color={Color(props.isDarkMode).gold} 
@@ -350,8 +372,8 @@ const ProfileScreen = (props: any) => {
                   </_Text>
                 </View>
                 : null }
-              </View>
-              <TouchableHighlight
+                </View>
+                <TouchableHighlight
                 underlayColor={Color(props.isDarkMode).defaultUnderlay}
                 style={styles.msgButton}
                 onPress={() => {

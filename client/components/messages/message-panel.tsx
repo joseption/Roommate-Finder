@@ -15,13 +15,12 @@ interface Props {
   updateBlocked: any,
   updateMuted: any,
   isDarkMode: boolean
-  setShowingMessagePanel: any,
   receiveTyping: any,
   receiveMessage: any,
-  typing: any
+  typing: any,
 }
 
-const MessagePanel = ({ typing, receiveTyping, receiveMessage, setShowingMessagePanel, isDarkMode, showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked, updateMuted }: Props) => {
+const MessagePanel = ({ typing, receiveTyping, receiveMessage, isDarkMode, showPanel, updateShowPanel, userInfo, chat, socket, updateBlocked, updateMuted }: Props) => {
   const [newMessage, setNewMessage] = useState('');
 
   // These values are mapped to percentage of screen size.
@@ -77,7 +76,6 @@ const MessagePanel = ({ typing, receiveTyping, receiveMessage, setShowingMessage
           updateMuted={updateMuted}
           socket={socket}
           isDarkMode={isDarkMode}
-          setShowingMessagePanel={setShowingMessagePanel}
         />
         <Messages
           chat={chat}

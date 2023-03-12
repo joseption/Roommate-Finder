@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableHighlight, ActivityIndicator } from 'react-native';
 import AllListingsView from '../components/listings/all-listings';
 import { authTokenHeader, env, Listings_Screen, getLocalStorage } from '../helper';
 import BottomNavbar from '../components/listings/bottom-nav';
@@ -26,6 +26,7 @@ const ListingsScreen = (props: any) => {
   const [currentListing, setCurrentListing] = useState(null);
   const [userInfo, setUserInfo] = useState<any>();
   const [showFilter, setShowFilter] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     getUserInfo();
@@ -43,6 +44,7 @@ const ListingsScreen = (props: any) => {
   }, [currentScreen]);
 
   const getAllListings = async () => {
+    setIsLoaded(false);
     try {
       let obj = {}; // TODO: ERICK PUT ALL YOUR FILTERS HRE WHEN YOU ARE READY!
       let js = JSON.stringify(obj);
@@ -59,8 +61,9 @@ const ListingsScreen = (props: any) => {
           setAllListings(res);
         });
     } catch (e) {
-      return;
+      // Failed
     }
+    setIsLoaded(true);
   };
 
   const handleNavigation = (screen: Listings_Screen) => {
@@ -113,7 +116,6 @@ const ListingsScreen = (props: any) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 40,
     },
     rightContainer: {
       flex: 1,
@@ -144,13 +146,42 @@ const ListingsScreen = (props: any) => {
         }
       }),
     },
+    headerContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    },
+    loading: {
+      position: 'relative',
+      flex: 1,
+      backgroundColor: 'transparent'
+    }
 });
+
+const refresh = async () => {
+  await getAllListings();
+}
+
+const loading = () => {
+  return <View
+  style={[Style(props.isDarkMode).maskPrompt, styles.loading]}
+  >
+    <ActivityIndicator
+    size="large"
+    color={Color(props.isDarkMode).gold}
+    style={Style(props.isDarkMode).maskLoading}
+    />    
+  </View>
+}
 
 return (
   <View style={styles.container}>
     {!currentListing && currentScreen === Listings_Screen.all && !showFilter && (
       <View style={styles.content}>
         <View style={styles.contentContainer}>
+          <View
+          style={styles.headerContainer}
+          >
             <_Text style={styles.title}>Browse Listings</_Text>
             <View style={styles.rightContainer}>
               <View style={styles.titleContainer}>
@@ -173,6 +204,10 @@ return (
                 </View>
               </View>
             </View>
+            </View>
+          {!isLoaded ?
+          <>{loading()}</>
+          :
           <AllListingsView
             isDarkMode={props.isDarkMode}
             setCurrentListing={setCurrentListing}
@@ -180,7 +215,9 @@ return (
             setListingID={setListingID}
             setIsListing={setIsListing}
             selectedFilter={selectedFilter}
+            refresh={refresh}
           />
+          }
           {bottomBarNav()}
         </View>
       </View>
@@ -201,6 +238,9 @@ return (
     {!currentListing && currentScreen === Listings_Screen.favorites && (
       <View style={styles.content}>
         <View style={styles.contentContainer}>
+          {!isLoaded ?
+          <>{loading()}</>
+          :
           <FavoriteListings 
             isDarkMode={props.isDarkMode}
             setCurrentListing={setCurrentListing}
@@ -209,7 +249,9 @@ return (
             setIsListing={setIsListing}
             selectedFilter={selectedFilter}
             userId={userInfo?.id}
+            refresh={refresh}
           />
+          }
           {bottomBarNav()}
         </View>
       </View>

@@ -73,7 +73,7 @@ const Register = (props: any, {navigation}:any) => {
       }
       catch(e)
       {
-        setMessage('An unknown error occurred');
+        setMessage('An unexpected error occurred');
         hasError = true;
       }    
       if (hasError) {

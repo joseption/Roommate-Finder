@@ -11,7 +11,6 @@ import { AccountScreenType, navProp, NavTo, setLocalStorage } from '../helper';
 
 const AccountScreen = (props: any) => {
     const navigation = useNavigation<navProp>();
-
     useEffect(() => {
         let rt = route();
         if (rt && rt.params && rt.name && rt.name == NavTo.Account) {
@@ -104,6 +103,7 @@ const AccountScreen = (props: any) => {
         isDarkMode={props.isDarkMode}
         setIsDarkMode={props.setIsDarkMode}
         setUpdatePicture={props.setUpdatePicture}
+        setForceUpdateAccount={props.setForceUpdateAccount}
         />
         :
         <View>
@@ -116,6 +116,7 @@ const AccountScreen = (props: any) => {
             isSetup={props.isSetup}
             unauthorized={unauthorized}
             isDarkMode={props.isDarkMode}
+            setForceUpdateAccount={props.setForceUpdateAccount}
             />
             :
             <View>

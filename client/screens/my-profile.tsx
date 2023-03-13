@@ -25,6 +25,13 @@ const MyProfileScreen = (props: any) => {
   const [tagsFetched, setTagsFetched] = useState(false);
 
   const navigation = useNavigation<navProp>();
+  useEffect(() => {
+      if (props.forceUpdateAccount) {
+          setUserId('');
+          getLoggedInUserId();
+          props.setForceUpdateAccount(false);
+      }
+  }, [props.forceUpdateAccount])
 
   useEffect(() => {
     getLoggedInUserId();

@@ -180,7 +180,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
         }
     }
 
-    const filteredItems = (value: string) => {
+    const filteredItems = (value: string, isModal: boolean = false) => {
         if (props.options) {
             if (!value)
                 value = '';
@@ -188,7 +188,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
             var cnt = 0;
             var items = props.options.filter((x: any) => {
                 // Added !focus so that all options show when the menu is opened after being closed to show all options
-                if (x && x.value && x.value.trim().toLowerCase().includes(value.trim().toLowerCase()) || !value || !focus) {
+                if (x && x.value && x.value.trim().toLowerCase().includes(value.trim().toLowerCase()) || !value || !focus || isModal) {
                     if (cnt % 2 != 0)
                         x.background = Color(props.isDarkMode).holder;
                     else
@@ -226,8 +226,8 @@ const _Dropdown = (props: any, {navigation}:any) => {
             mappedItems(''); // Try mapping again (old value doesn't exist in list anymore)
     }
 
-    const mappedItems = (value: string) => {
-        var fItems = filteredItems(value);
+    const mappedItems = (value: string, isModal: boolean = false) => {
+        var fItems = filteredItems(value, isModal);
         if (!focus && value && fItems.filter((x: { value: string; }) => x.value === value).length == 0) {
             clearSelected();
         }
@@ -469,7 +469,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
             </View>
             :
             <Modal
-            onShow={() => mappedItems(props.value)}
+            onShow={() => mappedItems(props.value, true)}
             visible={true}
             animationType='fade'
             transparent={true}

@@ -38,10 +38,9 @@ interface Props {
   updateMuted: any,
   socket: any,
   isDarkMode: boolean,
-  setShowingMessagePanel: any
 }
 
-const MessageTopBar = ({setShowingMessagePanel, isDarkMode, showPanel, userInfo, updateShowPanel, chat, socket, updateBlocked, updateMuted}: Props) => {
+const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, socket, updateBlocked, updateMuted}: Props) => {
   if (!chat?.users) return <></>;
 
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
@@ -145,8 +144,10 @@ const MessageTopBar = ({setShowingMessagePanel, isDarkMode, showPanel, userInfo,
             style={styles.profileInfo}
             underlayColor={Color(isDarkMode).underlayMask}
             onPress={() => {
-              navigation.navigate(NavTo.Profile, { profile: chat?.users[0]?.id } as never);
-              setShowingMessagePanel(false);
+              updateShowPanel(false);
+              setTimeout(() => {
+                navigation.navigate(NavTo.Profile, { profile: chat?.users[0]?.id, fromChat: 'true' } as never);
+              }, 0);
             }}
           >
             <View

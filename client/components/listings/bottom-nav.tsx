@@ -56,18 +56,47 @@ const BottomNavbar = (props: any) => {
     <View style={styles.container}>
       <TouchableHighlight 
         onPress={() => {
-          onSearch()
+          if (props.currentScreen !== Listings_Screen.all)
+            props.refresh();
+          onSearch();
         }} 
-        underlayColor = {Color(props.isDarkMode).contentDialogBackground} style={styles.button}>
+        underlayColor={Color(props.isDarkMode).contentDialogBackground}
+        style={styles.button}
+        >
         <View>
-          <FontAwesomeIcon style = {styles.icon} icon="list" size={24} color={props.currentScreen === Listings_Screen.all ? Color(props.isDarkMode).gold : Color(props.isDarkMode).black} />
+          <FontAwesomeIcon
+          style={styles.icon}
+          icon="list"
+          size={24}
+          color={props.currentScreen === Listings_Screen.all ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text}
+          />
         </View>
       </TouchableHighlight>
-      <TouchableHighlight underlayColor = {Color(props.isDarkMode).contentDialogBackground} onPress={() => onFavorite()} style={styles.button}>
-        <FontAwesomeIcon style = {styles.icon} icon={faStar} size={24} color={props.currentScreen === Listings_Screen.favorites ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text} />
+      <TouchableHighlight
+        underlayColor={Color(props.isDarkMode).contentDialogBackground}
+        onPress={() => {
+          if (props.currentScreen !== Listings_Screen.favorites)
+            props.refresh();
+          onFavorite();
+        }}
+        style={styles.button}
+        >
+        <FontAwesomeIcon
+        style={styles.icon}
+        icon={faStar} size={24}
+        color={props.currentScreen === Listings_Screen.favorites ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text}
+        />
       </TouchableHighlight>
-      <TouchableHighlight underlayColor = {Color(props.isDarkMode).contentDialogBackground} onPress={() => onCreate()} style={styles.button}>
-        <FontAwesomeIcon style = {styles.icon} icon={faPlusCircle} size={24} color={props.currentScreen === Listings_Screen.create ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text} />
+      <TouchableHighlight
+        underlayColor={Color(props.isDarkMode).contentDialogBackground}
+        onPress={() => onCreate()} style={styles.button}
+        >
+        <FontAwesomeIcon
+          style={styles.icon}
+          icon={faPlusCircle}
+          size={24}
+          color={props.currentScreen === Listings_Screen.create ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text}
+          />
       </TouchableHighlight>
     </View>
   );

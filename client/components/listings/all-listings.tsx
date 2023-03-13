@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { Color, FontSize } from '../../style';
 import ListingCard from './listing-card';
 
 const AllListingsView = (props: any) => {
   const [allListings, setAllListings] = useState<JSX.Element[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     generateListings();
@@ -25,6 +26,12 @@ const AllListingsView = (props: any) => {
       ));
 
     setAllListings(filteredListings);
+  };
+
+  const refresh = () => {
+    setRefreshing(true);
+    props.refresh();
+    setRefreshing(false);
   };
 
   const styles = StyleSheet.create({
@@ -59,7 +66,17 @@ const AllListingsView = (props: any) => {
 });
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+    style={styles.container}
+    refreshControl={
+      <RefreshControl
+      refreshing={refreshing}
+      onRefresh={refresh}
+      colors={[Color(props.isDarkMode).gold]}
+      progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+      />
+    }
+    >
       {allListings}
     </ScrollView>
   );

@@ -211,8 +211,8 @@ const CreateListing = (props: any) => {
     return distance;
   }
 
-  const calculateDistance = async (response: AxiosResponse<any, any>) => {
-    const listingData = response.data.results[0].locations[0].latLng;
+  const calculateDistance = async (response: any) => {
+    const listingData = response.results[0].locations[0].latLng;
     const UCF = { lat: 28.602427, lng: -81.200058 };
     let distUcf = Math.round(compareDistances(UCF.lat, UCF.lng, listingData.lat, listingData.lng));
       
@@ -228,22 +228,39 @@ const CreateListing = (props: any) => {
     }
   }
 
-  const checkAddressValidity = async (address: string): Promise<boolean> => {
-    const boundingBox = '24.396308,-81.786088,31.000652,-79.974309'; // bounding box for Florida
-    const response = await axios.get(`https://www.mapquestapi.com/geocoding/v1/address?key=UM9XiqmIBZmifAAiq32yTgaLbUDWJGBS&location=${encodeURIComponent(address)}&boundingBox=${encodeURIComponent(boundingBox)}`);
-    console.log(response)
-    console.log(response.data.results[0].locations.length)
-
-    const locationsInFlorida = response.data.results[0].locations.filter((location: { adminArea3: string; }) => {
-      return location.adminArea3 === 'FL';
-    });
-
-    if (locationsInFlorida.length > 0) {
-      calculateDistance(response);
-      return true;
-    } else {
-      return false;
+  const checkAddressValidity = async (address: string) => {
+    let hasError = false;
+    try
+    {   
+      let obj = {address: address};
+      let js = JSON.stringify(obj);
+      let tokenHeader = await authTokenHeader();
+      await fetch(`${env.URL}/listings/location`,
+      {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
+      let res = JSON.parse(await ret.text());
+        if (res.Error)
+        {
+          hasError = true;
+        }
+        else
+        {
+          const locationsInFlorida = res.results[0].locations.filter((location: { adminArea3: string; }) => {
+            return location.adminArea3 === 'FL';
+          });
+      
+          if (locationsInFlorida.length > 0) {
+            calculateDistance(res);
+          } else {
+            hasError = true;
+          }
+        }
+      });
     }
+    catch(e)
+    {
+      hasError = true;
+    }  
+    return !hasError;
   };
 
   const handleSubmitListing = async () => {
@@ -309,8 +326,8 @@ const CreateListing = (props: any) => {
       backgroundColor: Color(props.isDarkMode).actualWhite,
       borderColor: Color(props.isDarkMode).separator,
       borderWidth: 1,
-      height: 125,
-      width: 125,
+      height: 100,
+      width: 100,
       borderRadius: Radius.default
     },
     formContainer: {
@@ -468,7 +485,9 @@ const CreateListing = (props: any) => {
         </View>
       )}
       {
-      <><_Text style={styles.title}>Create Listing</_Text><ScrollView>
+      <>
+      <_Text style={styles.title}>Create Listing</_Text>
+      <ScrollView>
           <View style={styles.formContainer}>
             <_Group
               isDarkMode={props.isDarkMode}
@@ -562,6 +581,7 @@ const CreateListing = (props: any) => {
               onChangeText={(text: any) => handleChange('name', text)}
               value={formData.name}
               label="Title"
+              required={true}
               isDarkMode={props.isDarkMode} />
 
             <_TextInput
@@ -571,14 +591,15 @@ const CreateListing = (props: any) => {
               multiline={true}
               label="Description"
               height={100}
+              required={true}
               isDarkMode={props.isDarkMode} />
 
               <_TextInput
               containerStyle={styles.inputContainerStyle}
-              style={styles.input}
               onChangeText={(text: any) => handleChange('address', text)}
               value={formData.address}
               label="Address"
+              required={true}
               isDarkMode={props.isDarkMode} />
 
               <_TextInput
@@ -586,6 +607,7 @@ const CreateListing = (props: any) => {
               onChangeText={(text: any) => handleChange('city', text)}
               value={formData.city}
               label="City"
+              required={true}
               isDarkMode={props.isDarkMode} />
 
               <_TextInput
@@ -595,6 +617,7 @@ const CreateListing = (props: any) => {
               keyboardType="numeric"
               value={formData.zipcode}
               isDarkMode={props.isDarkMode}
+              required={true}
               label="Zip Code" />
 
               <_TextInput
@@ -605,6 +628,7 @@ const CreateListing = (props: any) => {
               keyboardType="numeric"
               placeholder="$0"
               label="Price (per month)"
+              required={true}
               isDarkMode={props.isDarkMode} />
 
             <_Dropdown
@@ -613,6 +637,7 @@ const CreateListing = (props: any) => {
               options={getHousingType()}
               value={formData.housing_type}
               setValue={(text: string) => handleChange('housing_type', text)}
+              required={true}
               label="Housing Type" />
 
               <_TextInput
@@ -622,6 +647,7 @@ const CreateListing = (props: any) => {
               value={String(formData.size)}
               keyboardType="numeric"
               label="Square Feet"
+              required={true}
               isDarkMode={props.isDarkMode} />
 
               <_Dropdown
@@ -630,6 +656,7 @@ const CreateListing = (props: any) => {
               options={getOptions()}
               value={formData.rooms}
               setValue={(text: string) => handleChange('rooms', parseInt(text))}
+              required={true}
               label="Rooms" />            
 
             <_Dropdown
@@ -638,20 +665,22 @@ const CreateListing = (props: any) => {
               options={getOptions()}
               value={formData.bathrooms}
               setValue={(text: string) => handleChange('bathrooms', parseInt(text))}
+              required={true}
               label="Bathrooms" />
 
             <_Dropdown
-              containerStyle={styles.inputContainerStyle}
+              containerStyle={[styles.inputContainerStyle, {marginBottom: 20}]}
               isDarkMode={props.isDarkMode}
               options={getYesNo()}
               value={formData.petsAllowed}
               setValue={(text: string) => handleChange('petsAllowed', text === 'Yes' ? true : false)}
+              required={true}
               label="Pets Allowed" />
               
             <View>
               <_Button
                 isDarkMode={props.isDarkMode}
-                style={[Style(props.isDarkMode).buttonGold,{margin:10}]}
+                style={[Style(props.isDarkMode).buttonGold]}
                 onPress={() => {handleSubmitListing();}}
               >
                 {'Create Listing'}

@@ -94,7 +94,7 @@ router.post('/registerFast', async (req:Request, res:Response, next:NextFunction
 
 router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, mobile } = req.body;
     if (!email || !password) {
       return res.status(422).json({"Error": "You must provide an email and password."});
     }
@@ -112,7 +112,7 @@ router.post('/login', async (req:Request, res:Response, next:NextFunction) => {
     }
 
     const jti = v4();
-    const { accessToken, refreshToken } = generateTokens(existingUser, jti);
+    const { accessToken, refreshToken } = generateTokens(existingUser, jti, mobile);
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: existingUser.id });
     delete existingUser.password;
 
@@ -305,7 +305,7 @@ router.post('/logout', async (req:Request, res:Response, next:NextFunction) => {
 
 router.post('/checkAuth', async (req:Request, res:Response, next:NextFunction) => {
   try {
-    const { accessToken, refreshToken } = req.body;
+    const { accessToken, refreshToken, mobile } = req.body;
     if (!accessToken || !refreshToken || accessToken === "undefined" || refreshToken === "undefined") {
       return res.status(401).json({"Error": "You must provide an accessToken and a refreshToken."});
     }
@@ -331,7 +331,7 @@ router.post('/checkAuth', async (req:Request, res:Response, next:NextFunction) =
       if (!user) {
         return res.status(401).json({"Error": "Refresh token is not valid."});
       }
-      const NewaccessToken = generateAccessToken(user);
+      const NewaccessToken = generateAccessToken(user, mobile);
       return res.status(200).json(
         {
           accessToken: NewaccessToken,
@@ -346,7 +346,7 @@ router.post('/checkAuth', async (req:Request, res:Response, next:NextFunction) =
 
 router.post('/refreshToken', async (req:Request, res:Response, next:NextFunction) => {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken, mobile } = req.body;
     if (!refreshToken) {
       return res.status(422).json({"Error": "You must provide a refresh token."});
     }
@@ -369,7 +369,7 @@ router.post('/refreshToken', async (req:Request, res:Response, next:NextFunction
       return res.status(401).json({"Error": "Refresh token is not valid."});
     }
 
-    const accessToken = generateAccessToken(user);
+    const accessToken = generateAccessToken(user, mobile);
     return res.status(200).json({
       accessToken,
     });

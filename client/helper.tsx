@@ -16,7 +16,7 @@ export const isMobile = () => {
 }
 
 const prod = {
-    URL: "https://roomfin.xyz"
+    URL: "https://api.roomfin.xyz"
 };
 
 const dev = {
@@ -368,4 +368,9 @@ export const isDarkMode = async () => {
   catch {
     return false;
   }
+}
+
+export let GetLocalIsDarkMode: boolean | null = null;
+export const SetLocalIsDarkMode = (darkmode: boolean) => {
+  GetLocalIsDarkMode = darkmode;
 }

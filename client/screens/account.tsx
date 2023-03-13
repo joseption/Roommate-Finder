@@ -13,6 +13,12 @@ const AccountScreen = (props: any) => {
     const navigation = useNavigation<navProp>();
 
     useEffect(() => {
+        if (props.isSetup) {
+            setView(AccountScreenType.info, false)
+        }
+    }, [props.isSetup])
+
+    useEffect(() => {
         let rt = route();
         if (rt && rt.params && rt.name && rt.name == NavTo.Account) {
             if (rt.params['view']) {
@@ -59,13 +65,15 @@ const AccountScreen = (props: any) => {
         return null;
     }
 
-    const setView = async (type: AccountScreenType) => {
+    const setView = async (type: AccountScreenType, navigate: boolean = true) => {
         var view = 'info';
         if (type == AccountScreenType.about)
             view = 'about'
         else if (type == AccountScreenType.survey)
             view = 'survey'
-        props.navigation.navigate(NavTo.Account, {view: view});
+
+        if (navigate)
+            props.navigation.navigate(NavTo.Account, {view: view});
         props.setAccountView(type);
     }
 
@@ -104,6 +112,7 @@ const AccountScreen = (props: any) => {
         isDarkMode={props.isDarkMode}
         setIsDarkMode={props.setIsDarkMode}
         setUpdatePicture={props.setUpdatePicture}
+        setForceUpdateAccount={props.setForceUpdateAccount}
         />
         :
         <View>
@@ -116,6 +125,7 @@ const AccountScreen = (props: any) => {
             isSetup={props.isSetup}
             unauthorized={unauthorized}
             isDarkMode={props.isDarkMode}
+            setForceUpdateAccount={props.setForceUpdateAccount}
             />
             :
             <View>

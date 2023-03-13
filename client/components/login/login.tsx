@@ -142,11 +142,12 @@ const Login = (props: any) => {
       }
 
       setMessage('');
-      let obj = {email:email,password:password};
+      let obj = {email:email.toLowerCase(), password:password, mobile:true};
       let js = JSON.stringify(obj);
 
       try
       {   
+        console.log(env.URL);
           await fetch(`${env.URL}/auth/login`,
           {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
@@ -165,7 +166,8 @@ const Login = (props: any) => {
       }
       catch(e: any)
       {
-        setMessage('An unknown error occurred');
+        console.log(e);
+        setMessage('An unexpected error occurred.');
       }    
       setLoading(false);
   };

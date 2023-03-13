@@ -11,7 +11,7 @@ interface Props {
   showPanel: boolean,
   updateShowPanel: Dispatch<SetStateAction<boolean>>,
   isDarkMode: boolean,
-  typing: any
+  typing: any,
 }
 
 const MessageTab = ({typing, chat, setCurrentChat, showPanel, updateShowPanel, isDarkMode}: Props) => {

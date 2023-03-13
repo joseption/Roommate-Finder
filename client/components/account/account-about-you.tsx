@@ -136,6 +136,7 @@ const AccountAbout = (props: any) => {
     }
 
     const completeSave = (loc :string) => {
+        props.setForceUpdateAccount(true);
         setIsLoading(false);
         setIsSaved(true);
         if (!props.isSetup) {

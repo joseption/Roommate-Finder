@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Animated, Platform, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View, Animated, Platform, ActivityIndicator, Easing, Dimensions } from 'react-native';
 import _Button from '../components/control/button';
 import _Image from '../components/control/image';
 import _Text from '../components/control/text';
@@ -18,9 +18,6 @@ const LoginScreen = (props:any) => {
   const [init, setInit] = useState(false);
   const [initScreen, setInitScreen] = useState(false);
   const [width, setWidth] = useState(0);
-  const [left, setLeft] = useState(0);
-  const [opacity, setOpacity] = useState(0);
-  const [moved, setMoved] = useState(false);
   const [activateEmailSent, setActivateEmailSent] = useState(false);
   const [register, setRegister] = useState(false);
   const [login, setLogin] = useState(false);
@@ -38,11 +35,12 @@ const LoginScreen = (props:any) => {
   const [autoResend, setAutoResend] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [forgotError, setForgotError] = useState('');
+  const [animate, setAnimate] = useState('left');
   const navigation = useNavigation<navProp>();
 
   useEffect(() => {
+    let duration = 0;
     if (!init) {
-      setup();
       setInit(true);
     }
     else if (props.accountAction) {
@@ -70,60 +68,61 @@ const LoginScreen = (props:any) => {
       props.setIsLoggedIn(false);
       props.setIsSetup(false);
     }
-  }, [left, init, navigation, props.accountAction, currentScreen, props.loginViewChanged]);
-
-  const setup = () => {
-    const oldOpacity = opacity;
-    setOpacity(1);
-    Animated.timing(new Animated.Value(oldOpacity), {
-      toValue: 1,
-      duration: 150,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const goLeft = (s: typeof LoginNavTo) => {
-      setMoved(true);
-      updateVisibleScreen(s, true);
-      setLeft(-width - 42);
-      Animated.timing(new Animated.Value(0), {
-        toValue: left,
-        duration: 150,
-        useNativeDriver: false,
-      }).start();
-
-       setTimeout(() => {
-        setMoved(false);
-        updateVisibleScreen(s);
-        setLeft(0);
-        Animated.timing(new Animated.Value(-width - 42), {
+    if (rt && rt.name == NavTo.Login) {
+      if (rt.params && rt.params['animate']) {
+        let animate = rt.params['animate'];
+        if (animate === 'right') {
+          setAnimate("right");
+          setTimeout(() => {
+            goRight();
+          }, 0);
+        }
+        else {
+          setAnimate("left");
+          setTimeout(() => {
+            goLeft();
+          }, 0);
+        }
+      }
+      else {  
+        duration = 1000;
+        Animated.timing(leftAnimation, {
           toValue: 0,
           duration: 0,
-          useNativeDriver: false,
+          easing: Easing.linear,
+          useNativeDriver: true,
         }).start();
-       }, 25);
+      }
+
+      Animated.timing(opacityAnimation, {
+        toValue: 1,
+        duration: duration,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [init, navigation, props.accountAction, currentScreen, props.loginViewChanged]);
+
+  const opacityAnimation = useRef(new Animated.Value(0)).current;
+  const leftAnimation = useRef(new Animated.Value(Dimensions.get('window').width / 2)).current;
+  const rightAnimation = useRef(new Animated.Value(-(Dimensions.get('window').width / 2))).current;
+
+  const goLeft = () => {
+      Animated.timing(leftAnimation, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }).start();
   };
     
-  const goRight = (s: typeof LoginNavTo) => {
-      setMoved(true);
-      updateVisibleScreen(s, true);
-      setLeft(width + 42);
-      Animated.timing(new Animated.Value(0), {
-      toValue: left,
-      duration: 150,
-      useNativeDriver: false,
+  const goRight = () => {
+      Animated.timing(rightAnimation, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.linear,
+        useNativeDriver: true,
       }).start();
-
-       setTimeout(() => {
-        setMoved(false);
-        updateVisibleScreen(s);
-        setLeft(0);
-        Animated.timing(new Animated.Value(width + 42), {
-          toValue: 0,
-          duration: 0,
-          useNativeDriver: false,
-        }).start();
-      }, 25);
   };
 
   const hasValidToken = async (token: any, type: any) => 
@@ -381,13 +380,6 @@ const LoginScreen = (props:any) => {
       flex: 1,
       marginLeft: -21
   },
-  animateContent: {
-    ...Platform.select({
-      web: {
-        transition: 'transform .15s ease, opacity 2s ease', // JA this is temporary and needs to be replaced with animation
-      }
-    }),
-  },
   panel: {
       width:'100%',
       marginLeft: 21,
@@ -430,7 +422,7 @@ const LoginScreen = (props:any) => {
           }
           <Animated.View
           onLayout={(e) => setLayout(e)}
-          style={[moved ? null : styles.animateContent, styles.content, {opacity: opacity, transform:[{translateX: left}]}]}>
+          style={[styles.content, {opacity: opacityAnimation, transform:[{translateX: animate === 'left' ? leftAnimation : rightAnimation}]}]}>
               <ActivateEmailSent
                 btnStyle={btnStyle}
                 setStopInterval={setStopInterval}
@@ -438,8 +430,7 @@ const LoginScreen = (props:any) => {
                 setEmail={setEmailValue}
                 email={emailValue}
                 registerPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.Register, email: emailValue} as never);
-                    goRight(LoginNavTo.Register);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.Register, email: emailValue, animate: 'right'} as never);
                   }
                 }
                 style={[styles.panel, activateEmailSent ? null : styles.hidden]}
@@ -451,8 +442,7 @@ const LoginScreen = (props:any) => {
                 setEmail={setEmailValue}
                 email={emailValue}
                 sendEmailPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.ActivateEmailSent, email: emailValue} as never);
-                    goLeft(LoginNavTo.ActivateEmailSent);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.ActivateEmailSent, email: emailValue, animate: 'left'} as never);
                   }
                 }
                 loginPressed={() => {
@@ -460,7 +450,6 @@ const LoginScreen = (props:any) => {
                       index: 0,
                       routes: [{name: NavTo.Login}],
                     });
-                    goRight(LoginNavTo.Login);
                   }
                 }
                 style={[styles.panel, register ? null : styles.hidden]}
@@ -471,13 +460,11 @@ const LoginScreen = (props:any) => {
                 url={url}
                 btnStyle={btnStyle}
                 forgotPasswordPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.ForgotPassword} as never);
-                    goRight(LoginNavTo.ForgotPassword);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.ForgotPassword, animate: 'right'} as never);
                   }
                 }
                 registerPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.Register} as never);
-                    goLeft(LoginNavTo.Register);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.Register, animate: 'left'} as never);
                   }
                 }
                 style={[styles.panel, login ? null : styles.hidden]}
@@ -493,8 +480,7 @@ const LoginScreen = (props:any) => {
                 setEmail={setEmailValue}
                 email={emailValue}
                 sendEmailPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.PasswordResetSent, email: emailValue} as never);
-                    goRight(LoginNavTo.PasswordResetSent);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.PasswordResetSent, email: emailValue, animate: 'right'} as never);
                   } 
                 }
                 loginPressed={() => {
@@ -502,7 +488,6 @@ const LoginScreen = (props:any) => {
                       index: 0,
                       routes: [{name: NavTo.Login}],
                     });
-                    goLeft(LoginNavTo.Login);
                   }
                 }
                 style={[styles.panel, forgotPassword ? null : styles.hidden]}
@@ -514,8 +499,7 @@ const LoginScreen = (props:any) => {
                 setStopInterval={setStopInterval}
                 stopInterval={stopInterval}
                 passwordPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.ForgotPassword, email: emailValue} as never);
-                    goLeft(LoginNavTo.ForgotPassword);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.ForgotPassword, email: emailValue, animate: 'left'} as never);
                   }
                 }
                 style={[styles.panel, passwordResetSent ? null : styles.hidden]}
@@ -525,8 +509,7 @@ const LoginScreen = (props:any) => {
               <UpdatePassword
                 btnStyle={btnStyle}
                 updatePasswordPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.PasswordUpdated} as never);
-                    goRight(LoginNavTo.PasswordUpdated);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.PasswordUpdated, animate: 'right'} as never);
                   }
                 }
                 loginPressed={() => {
@@ -534,7 +517,6 @@ const LoginScreen = (props:any) => {
                       index: 0,
                       routes: [{name: NavTo.Login}],
                     });
-                    goLeft(LoginNavTo.Login);
                   }
                 }
                 style={[styles.panel, updatePassword ? null : styles.hidden]}
@@ -543,8 +525,7 @@ const LoginScreen = (props:any) => {
                 email={emailValue}
                 setEmail={setEmailValue}
                 registerPressed={() => {
-                    navigation.push(NavTo.Login, {view: LoginNavTo.Register} as never);
-                    goLeft(LoginNavTo.Register);
+                    navigation.push(NavTo.Login, {view: LoginNavTo.Register, animate: 'left'} as never);
                   }
                 }
                 registerEmail={registerEmail}
@@ -559,7 +540,6 @@ const LoginScreen = (props:any) => {
                       index: 0,
                       routes: [{name: NavTo.Login}],
                     });
-                    goLeft(LoginNavTo.Login);
                   }
                 }
                 style={[styles.panel, passwordUpdated ? null : styles.hidden]}

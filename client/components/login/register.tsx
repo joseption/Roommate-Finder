@@ -49,7 +49,7 @@ const Register = (props: any, {navigation}:any) => {
       props.setEmail(props.email);
       setEmailError(false);
 
-      let obj = {email:props.email};
+      let obj = {email:props.email.toLowerCase()};
       let js = JSON.stringify(obj);
 
       try
@@ -73,7 +73,7 @@ const Register = (props: any, {navigation}:any) => {
       }
       catch(e)
       {
-        setMessage('An unknown error occurred');
+        setMessage('An unexpected error occurred');
         hasError = true;
       }    
       if (hasError) {

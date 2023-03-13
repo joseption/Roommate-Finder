@@ -5,6 +5,7 @@ import { uploadImage } from 'utils/uploadImage';
 
 const prisma = new PrismaClient();
 const router = require('express').Router();
+const fetch = (url: any, init?: any) => import('node-fetch').then(({default: fetch}) => fetch(url, init));
 router.use(isAuthenticated);
 
 // get all listings made by a given user
@@ -293,6 +294,25 @@ router.post('/unfavorite/:listingId', async (req: Request, res: Response) => {
     res.status(200).json('successfully unfavorited');
   } catch (err) {
     res.status(500).json({ Error: err.message });
+  }
+});
+
+router.post('/location', async (req: Request, res: Response) => {
+  const { address } = req.body;
+  if (address) {
+    const boundingBox = '24.396308,-81.786088,31.000652,-79.974309'; // bounding box for Florida
+    const url = `https://www.mapquestapi.com/geocoding/v1/address?key=${process.env.MAPQUEST_API_KEY}&location=${encodeURIComponent(address)}&boundingBox=${encodeURIComponent(boundingBox)}`;
+
+    try {
+      let response = await fetch(url);
+      response = await response.json();
+      res.status(200).json(response);
+    } catch (err) {
+      res.status(500).json({Error: err});
+    }
+  }
+  else {
+    res.status(500).json({ Error: "No address provided" });
   }
 });
 

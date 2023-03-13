@@ -82,6 +82,7 @@ const ListingsScreen = (props: any) => {
     disabled={currentScreen !== Listings_Screen.all || selectedFilter !== 'all'}
     setSearchPressed={setSearchPressed}
     currentScreen={currentScreen}
+    refresh={getAllListings}
   />
   }
 

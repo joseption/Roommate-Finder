@@ -142,7 +142,7 @@ const Login = (props: any) => {
       }
 
       setMessage('');
-      let obj = {email:email,password:password};
+      let obj = {email:email, password:password, mobile:true};
       let js = JSON.stringify(obj);
 
       try

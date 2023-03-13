@@ -1,18 +1,18 @@
 import jwt from 'jsonwebtoken';
 import { User } from '@prisma/client';
 
-export function generateAccessToken(user: { id: any; }) {
+export function generateAccessToken(user: { id: any; }, mobile: boolean = false) {
   return jwt.sign({ userId: user.id }, process.env.JWT_ACCESS_SECRET, {
-    expiresIn: '60m',
+    expiresIn: mobile ? '30d' : '60m',
   });
 }
 
-export function generateRefreshToken(user: { id: any; }, jti: any) {
+export function generateRefreshToken(user: { id: any; }, jti: any, mobile: boolean = false) {
   return jwt.sign({
     userId: user.id,
     jti
   }, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: '1800h',
+    expiresIn: mobile ? '30d' : '1800h',
   });
 }
 
@@ -34,9 +34,9 @@ export function generateResetToken(user: { id: any; }, jti: any) {
   });
 }
 
-export function generateTokens(user:User, jti: string) {
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user, jti);
+export function generateTokens(user:User, jti: string, mobile: boolean = false) {
+  const accessToken = generateAccessToken(user, mobile);
+  const refreshToken = generateRefreshToken(user, jti, mobile);
 
   return {
     accessToken,

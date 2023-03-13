@@ -540,7 +540,7 @@ export const App = (props: any) => {
       let hasError = false;
       let data = await getLocalStorage();
       if (data) {
-        let obj = {refreshToken:data.refreshToken, accessToken: data.accessToken};
+        let obj = {refreshToken:data.refreshToken, accessToken: data.accessToken, mobile: true};
         let js = JSON.stringify(obj);
 
         try

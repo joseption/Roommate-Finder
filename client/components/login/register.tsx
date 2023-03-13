@@ -49,7 +49,7 @@ const Register = (props: any, {navigation}:any) => {
       props.setEmail(props.email);
       setEmailError(false);
 
-      let obj = {email:props.email};
+      let obj = {email:props.email.toLowerCase()};
       let js = JSON.stringify(obj);
 
       try

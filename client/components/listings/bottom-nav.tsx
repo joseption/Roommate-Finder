@@ -68,7 +68,7 @@ const BottomNavbar = (props: any) => {
           style={styles.icon}
           icon="list"
           size={24}
-          color={props.currentScreen === Listings_Screen.all ? Color(props.isDarkMode).gold : Color(props.isDarkMode).black}
+          color={props.currentScreen === Listings_Screen.all ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text}
           />
         </View>
       </TouchableHighlight>

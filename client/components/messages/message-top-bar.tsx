@@ -145,7 +145,9 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
             underlayColor={Color(isDarkMode).underlayMask}
             onPress={() => {
               updateShowPanel(false);
-              navigation.navigate(NavTo.Profile, { profile: chat?.users[0]?.id, fromChat: 'true' } as never);
+              setTimeout(() => {
+                navigation.navigate(NavTo.Profile, { profile: chat?.users[0]?.id, fromChat: 'true' } as never);
+              }, 0);
             }}
           >
             <View

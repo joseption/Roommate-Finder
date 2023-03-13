@@ -60,7 +60,8 @@
 
                 <data
                     android:scheme="http"
-                    android:host="roomfin.xyz" />
+                    android:host="roomfin.xyz"
+                    android:pathPattern="/.*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -70,7 +71,8 @@
 
                 <data
                     android:scheme="https"
-                    android:host="roomfin.xyz" />
+                    android:host="roomfin.xyz"
+                    android:pathPattern="/.*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -80,7 +82,8 @@
 
                 <data
                     android:scheme="http"
-                    android:host="www.roomfin.xyz" />
+                    android:host="www.roomfin.xyz"
+                    android:pathPattern="/.*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -90,7 +93,8 @@
 
                 <data
                     android:scheme="https"
-                    android:host="www.roomfin.xyz" />
+                    android:host="www.roomfin.xyz"
+                    android:pathPattern="/.*" />
             </intent-filter>
         </activity>
         <activity

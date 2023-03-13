@@ -138,7 +138,12 @@ const MessagesScreen = (props: any) => {
   // End
 
   useEffect(() => {
-    updateShowPanel(props.showingMessagePanel);
+    if (props.showingMessagePanel != showPanel) {
+      // JA Hacky but works to avoid changing a bunch of code 31323
+      setTimeout(() => {
+        updateShowPanel(props.showingMessagePanel);
+      }, 0);
+    }
   }, [props.showingMessagePanel])
 
   useEffect(() => {

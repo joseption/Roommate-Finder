@@ -36,7 +36,8 @@ model User {
   bio               String?
   push_token        String?
   Listings          Listings[]         @relation(name: "ListingCreator")
-  matches           Matches[]
+  matches           Matches[]          @relation(name: "User")
+  matches2          Matches[]          @relation(name: "User2")
   Message           Message[]
   Notification      Notification[]
   refreshTokens     RefreshToken[]
@@ -149,10 +150,12 @@ model Message {
 }
 
 model Matches {
+  id              String @id @default(uuid())
   userOneId       String
   userTwoId       String
   matchPercentage Float
-  User            User   @relation(fields: [userOneId], references: [id])
+  User            User   @relation(fields: [userOneId], references: [id], name: "User")
+  User2           User   @relation(fields: [userTwoId], references: [id], name: "User2")
 
   @@unique([userOneId, userTwoId])
 }

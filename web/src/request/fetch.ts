@@ -114,3 +114,25 @@ export async function GetUserListings(userId: string) {
     true
   );
 }
+
+export async function ProfileSearch({
+  search = "",
+  limit = 16,
+  cursorId = "",
+  sortByMatchPercentage = false,
+}) {
+  const params = new URLSearchParams({
+    search,
+    limit: limit.toString(),
+    cursorId,
+    sortByMatchPercentage: sortByMatchPercentage.toString(),
+    // genderType: "Male", //gender filter working
+    //need to add filters for responsesonUser
+  });
+  return await doRequest<{ users: user[]; nextCursorId: string }>(
+    `${backend_api}/users/profileSearchV2?${params.toString()}`,
+    null,
+    "GET",
+    true
+  );
+}

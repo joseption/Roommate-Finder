@@ -11,7 +11,9 @@ export default function ProgessBar({
   ...rest
 }: Props) {
   //get the percentage of the progress bar in ratio of 6
-  const Percentage = (QuestionsAnswered / TotalnumberOfquestions) * 100;
+  let Percentage = (QuestionsAnswered / TotalnumberOfquestions) * 100;
+  //round percentage to nearest 10
+  Percentage = Math.round(Percentage / 10) * 10;
   let ratio = 0;
   if (Percentage < 10) {
     ratio = 10;

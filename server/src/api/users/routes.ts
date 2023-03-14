@@ -1,6 +1,30 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { isAuthenticated } from '../../middleware';
-import { findUserById, findUserByEmail, updateFirstName, updateLastName, updatePhoneNumber, updateGender, updateZip, updateCity, updateState, updateProfilePicture, UpdateTagsandBio, GetTagsandBio, updateSetupStep, completeSetupAndSetStep, updateBday, updateImage, updatePushToken, getOAuth, GetUsersByTags, GetMatches, GetUsersByGender, GetUsersByLocation, GetUsersBySharingPref } from './services';
+import {
+  findUserById,
+  findUserByEmail,
+  updateFirstName,
+  updateLastName,
+  updatePhoneNumber,
+  updateGender,
+  updateZip,
+  updateCity,
+  updateState,
+  updateProfilePicture,
+  UpdateTagsandBio,
+  GetTagsandBio,
+  updateSetupStep,
+  completeSetupAndSetStep,
+  updateBday,
+  updateImage,
+  updatePushToken,
+  getOAuth,
+  GetUsersByTags,
+  GetMatches,
+  GetUsersByGender,
+  GetUsersByLocation,
+  GetUsersBySharingPref,
+} from './services';
 import db from '../../utils/db';
 import { uploadImage } from 'utils/uploadImage';
 import { env } from 'process';
@@ -23,32 +47,29 @@ router.use(isAuthenticated); // ! Do this instead of adding isAuthenticated to e
 
 // ! changed the duplicate function to work using query params
 
- 
-router.get("/profile/:userId", async (req: Request, res: Response) => {
+router.get('/profile/:userId', async (req: Request, res: Response) => {
   try {
-    const { userId} = req.params;
+    const { userId } = req.params;
     const user = await db.user.findFirst({
       where: {
-        id: userId
-      }
+        id: userId,
+      },
     });
     if (!user) {
-      return res.status(400).json({ Error: "User not found" });
+      return res.status(400).json({ Error: 'User not found' });
     }
     return res.status(200).json(user);
   } catch (err) {
-    res.status(500).json({ Error: err});
+    res.status(500).json({ Error: err });
   }
 });
-
-
 
 //Get current user profile
 
 router.get('/me', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    //Get user id from payload 
-    const payload : payload = req.body[0];
+    //Get user id from payload
+    const payload: payload = req.body[0];
     const userId = payload.userId;
     const user = await findUserById(userId);
     if (!user) {
@@ -76,7 +97,7 @@ router.get('/myProfile', async (req: Request, res: Response) => {
 
 router.get('/profile', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.query; 
+    const { userId } = req.query;
     const user = await findUserById(userId);
     if (!user) {
       return res.status(400).json({ Error: 'User not found' });
@@ -96,15 +117,14 @@ router.get('/profileByEmail', async (req: Request, res: Response) => {
         email: email as string,
       },
       select: {
-        email: true
-      }
+        email: true,
+      },
     });
     let info;
     if (match && match.email) {
-      info = {email: match.email};
-    }
-    else {
-      info = {Error: "Does not exist"};
+      info = { email: match.email };
+    } else {
+      info = { Error: 'Does not exist' };
     }
     res.status(200).json(info);
   } catch (err) {
@@ -123,7 +143,85 @@ router.get('/profileSearch', async (req: Request, res: Response) => {
         },
       },
     });
+    //NEED TO DELETE PASSWORD...
+    //just use my search function below
     res.status(200).json(matches);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+router.get('/profileSearchV2', async (req, res) => {
+  try {
+    const { searchText, limit, cursorId, genderType } = req.query;
+    const sortByMatchPercentage = req.query.sortByMatchPercentage === 'true';
+    const search = (searchText && searchText.toString().trim()) || '';
+    console.log(genderType)
+    const gender = (genderType && genderType.toString().trim()) || '';
+    const userId = req.body[0].userId;
+
+    if (
+      Array.isArray(search) ||
+      Array.isArray(limit) ||
+      Array.isArray(cursorId) ||
+      Array.isArray(sortByMatchPercentage)
+    ) {
+      return res.status(400).json({ Error: 'Params cannot be a string array' });
+    }
+
+    const paginationParams = {
+      take: limit ? parseInt(limit.toString()) : undefined,
+      skip: cursorId ? 1 : 0,
+      cursor: cursorId ? { id: cursorId.toString() } : undefined,
+    };
+
+    const userSelect = {
+      id: true,
+      bio: true,
+      first_name: true,
+      last_name: true,
+      birthday: true,
+      tags: true,
+      image: true,
+      matches: {
+        where: {
+          OR: [{ userOneId: userId }, { userTwoId: userId }],
+        },
+      },
+    };
+    console.log(gender);
+    const genderFilter = gender ? { gender } : {};
+
+    const matches = sortByMatchPercentage
+      ? await db.matches
+      .findMany({
+        where: {
+          OR: [
+            { userOneId: userId, User: { ...genderFilter } },
+            { userTwoId: userId, User2: { ...genderFilter } },
+          ],
+        },
+        ...paginationParams,
+        select: {
+          User: { select: userSelect },
+          User2: { select: userSelect },
+        },
+      })
+      .then((matches) =>
+        matches.map((match) => (match.User.id === userId ? match.User2 : match.User))
+      )
+      : await db.user.findMany({
+        where: {
+          ...genderFilter,
+        },
+          ...paginationParams,
+          select: userSelect,
+        });
+
+    res.status(200).json({
+      users: matches,
+      nextCursorId: matches.length > 0 ? matches[matches.length - 1].id : null,
+    });
   } catch (err) {
     res.status(500).json(err);
   }
@@ -131,27 +229,25 @@ router.get('/profileSearch', async (req: Request, res: Response) => {
 
 router.get('/Allprofiles', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const payload:payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
-    const users = await db.user.findMany(
-      {
-        select:{
-          id: true,
-          bio: true,
-          first_name: true,
-          last_name: true,
-          birthday: true,
-          tags: true,
-          image: true,
-          matches: {
-            where:{
-              userTwoId: userId,
-            },
+    const users = await db.user.findMany({
+      select: {
+        id: true,
+        bio: true,
+        first_name: true,
+        last_name: true,
+        birthday: true,
+        tags: true,
+        image: true,
+        matches: {
+          where: {
+            userTwoId: userId,
           },
         },
       },
-    );
-  
+    });
+
     return res.json(users);
   } catch (err) {
     next(err);
@@ -162,36 +258,34 @@ router.get('/AllprofilesMob', async (req: Request, res: Response, next: NextFunc
   try {
     const payload = req.query;
     const mainUserId = payload.userId;
-    const users = await db.user.findMany(
-      {
-        select:{
-          id: true,
-          bio: true,
-          first_name: true,
-          last_name: true,
-          birthday: true,
-          tags: true,
-          image: true,
-          city : true,
-          state : true,
-          //matches: {
-            //where:{
-             // userTwoId: userId,
-           // },
-          //},
-        },
+    const users = await db.user.findMany({
+      select: {
+        id: true,
+        bio: true,
+        first_name: true,
+        last_name: true,
+        birthday: true,
+        tags: true,
+        image: true,
+        city: true,
+        state: true,
+        //matches: {
+        //where:{
+        // userTwoId: userId,
+        // },
+        //},
       },
-    );
-  
-    const userIds = users.map(x => x.id);
+    });
+
+    const userIds = users.map((x) => x.id);
     const matches = await GetMatches(mainUserId as string, userIds);
 
     const userMap: { [id: string]: any } = {};
-    users.forEach(user => {
+    users.forEach((user) => {
       userMap[user.id] = user;
     });
 
-    matches.forEach((match : any) => {
+    matches.forEach((match: any) => {
       const user = userMap[match.userTwoId];
       if (user) {
         user.matchPercentage = match.matchPercentage;
@@ -221,15 +315,14 @@ router.get('/profilesByTags', async (req: Request, res: Response) => {
     const lists = [userIds1, userIds2, userIds3, userIds4];
     const filterOptions = [filters, gender, location, sharingPref];
 
-    const nonEmptyLists = lists.filter(list => list !== undefined && list.length > 0);
-    const nonEmptyFilterOptions = filterOptions.filter(x => x !== undefined && x.length > 0);
+    const nonEmptyLists = lists.filter((list) => list !== undefined && list.length > 0);
+    const nonEmptyFilterOptions = filterOptions.filter((x) => x !== undefined && x.length > 0);
 
     let users;
 
     if (nonEmptyLists.length === 0 || nonEmptyFilterOptions.length === 0) {
       users = await db.user.findMany();
-    }
-    else {
+    } else {
       let userIdsCommon = nonEmptyLists[0];
       for (let i = 1; i < nonEmptyLists.length; i++) {
         if (nonEmptyFilterOptions[i] !== undefined && nonEmptyFilterOptions[i] !== 'undefined') {
@@ -248,15 +341,15 @@ router.get('/profilesByTags', async (req: Request, res: Response) => {
     }
 
     const mainUserId = req.query.userId;
-    const userIds = users.map(x => x.id);
+    const userIds = users.map((x) => x.id);
     const matches = await GetMatches(mainUserId as string, userIds);
 
     const userMap: { [id: string]: any } = {};
-    users.forEach(user => {
+    users.forEach((user) => {
       userMap[user.id] = user;
     });
 
-    matches.forEach(match => {
+    matches.forEach((match) => {
       const user = userMap[match.userTwoId];
       if (user) {
         user.matchPercentage = match.matchPercentage;
@@ -264,7 +357,6 @@ router.get('/profilesByTags', async (req: Request, res: Response) => {
     });
 
     return res.status(200).json(users);
-
   } catch (err) {
     return res.status(500).json({ Error: 'Server error' });
   }
@@ -275,9 +367,9 @@ router.post('/updateFirstName', async (req: Request, res: Response, next: NextFu
   try {
     const { firstName } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
-    if(!firstName) {
+    if (!firstName) {
       return res.status(400).json({ Error: 'First name is required' });
     }
 
@@ -286,7 +378,7 @@ router.post('/updateFirstName', async (req: Request, res: Response, next: NextFu
       return res.status(400).json({ Error: 'User not found' });
     }
     const update = await updateFirstName(userId, firstName);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
     return res.status(200).json({ message: 'Update successful' });
@@ -300,9 +392,9 @@ router.post('/updateLastName', async (req: Request, res: Response, next: NextFun
   try {
     const { lastName } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
-    if(!lastName) {
+    if (!lastName) {
       return res.status(400).json({ Error: 'Last name is required' });
     }
 
@@ -311,7 +403,7 @@ router.post('/updateLastName', async (req: Request, res: Response, next: NextFun
       return res.status(400).json({ Error: 'User not found' });
     }
     const update = await updateLastName(userId, lastName);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
     return res.status(200).json({ message: 'Update successful' });
@@ -325,24 +417,24 @@ router.post('/updatePhoneNumber', async (req: Request, res: Response, next: Next
   try {
     const { phoneNumber } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
-    if(!phoneNumber) {
+    if (!phoneNumber) {
       return res.status(400).json({ Error: 'Phone number is required' });
     }
-    phoneNumber.replace(/\D/g, '');    
+    phoneNumber.replace(/\D/g, '');
 
     //check for valid phone number using regex
-    if(phoneNumber.length != 10) {
+    if (phoneNumber.length != 10) {
       return res.status(400).json({ Error: 'Invalid phone number' });
     }
-    
+
     const user = await findUserById(userId);
     if (!user) {
       return res.status(400).json({ Error: 'User not found' });
     }
     const update = await updatePhoneNumber(userId, phoneNumber);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
     return res.status(200).json({ message: 'Update successful' });
@@ -351,25 +443,26 @@ router.post('/updatePhoneNumber', async (req: Request, res: Response, next: Next
   }
 });
 
-//update gender 
+//update gender
 
 router.post('/updateGender', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { gender } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
     //check for valid
-    if(gender != "Male" && gender != "Female" && gender != "Other"){
+    if (gender != 'Male' && gender != 'Female' && gender != 'Other') {
       return res.status(400).json({
-        Error:"Gender should be Male, Female, or Other"
-    });}
+        Error: 'Gender should be Male, Female, or Other',
+      });
+    }
     const user = await findUserById(userId);
     if (!user) {
       return res.status(400).json({ Error: 'User not found' });
-    } 
+    }
     const update = await updateGender(userId, gender);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
     return res.status(200).json({ message: 'Update successful' });
@@ -384,15 +477,15 @@ router.post('/updateBday', async (req: Request, res: Response, next: NextFunctio
   try {
     const { bday } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
     //check for valid
-    if(!bday) {
+    if (!bday) {
       return res.status(400).json({ Error: 'Birthday is required' });
     }
     //valid date format mm-dd-yyyy
     const dateRegex = /^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d$/;
-    if(!dateRegex.test(bday)) {
+    if (!dateRegex.test(bday)) {
       return res.status(400).json({ Error: 'Invalid date format. Date should be mm-dd-yyyy' });
     }
     const user = await findUserById(userId);
@@ -400,7 +493,7 @@ router.post('/updateBday', async (req: Request, res: Response, next: NextFunctio
       return res.status(400).json({ Error: 'User not found' });
     }
     const update = await updateBday(userId, bday);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
     return res.status(200).json({ message: 'Update successful' });
@@ -409,28 +502,27 @@ router.post('/updateBday', async (req: Request, res: Response, next: NextFunctio
   }
 });
 
-
-//update zip code 
+//update zip code
 router.post('/updateZip', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { zip_code } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
     //validate zip code
-    if(!zip_code) {
+    if (!zip_code) {
       return res.status(400).json({ Error: 'Zip code is required' });
     }
     //use regex to check for zip code
-    if(!/^\d{5}$/.test(zip_code)) {
+    if (!/^\d{5}$/.test(zip_code)) {
       return res.status(400).json({ Error: 'Zip code should be 5 digits' });
     }
     const user = await findUserById(userId);
     if (!user) {
       return res.status(400).json({ Error: 'User not found' });
-    } 
+    }
     const update = await updateZip(userId, zip_code);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
     return res.status(200).json({ message: 'Update successful' });
@@ -439,23 +531,22 @@ router.post('/updateZip', async (req: Request, res: Response, next: NextFunction
   }
 });
 
-
 router.post('/updateCity', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { city } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
     //validate zip code
-    if(!city) {
+    if (!city) {
       return res.status(400).json({ Error: 'city is required' });
     }
     const user = await findUserById(userId);
     if (!user) {
       return res.status(400).json({ Error: 'User not found' });
-    } 
+    }
     const update = await updateCity(userId, city);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
     return res.status(200).json({ message: 'Update successful' });
@@ -469,18 +560,18 @@ router.post('/updateCity', async (req: Request, res: Response, next: NextFunctio
   try {
     const { city } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
     //validate zip code
-    if(!city) {
+    if (!city) {
       return res.status(400).json({ Error: 'city is required' });
     }
     const user = await findUserById(userId);
     if (!user) {
       return res.status(400).json({ Error: 'User not found' });
-    } 
+    }
     const update = await updateCity(userId, city);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
     return res.status(200).json({ message: 'Update successful' });
@@ -494,18 +585,18 @@ router.post('/updateState', async (req: Request, res: Response, next: NextFuncti
   try {
     const { state } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
     //validate zip code
-    if(!state) {
+    if (!state) {
       return res.status(400).json({ Error: 'state is required' });
     }
     const user = await findUserById(userId);
     if (!user) {
       return res.status(400).json({ Error: 'User not found' });
-    } 
+    }
     const update = await updateState(userId, state);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
     return res.status(200).json({ message: 'Update successful' });
@@ -514,20 +605,20 @@ router.post('/updateState', async (req: Request, res: Response, next: NextFuncti
   }
 });
 
-//update proifile picture, accept url 
+//update proifile picture, accept url
 
 router.post('/updateProfilePicture', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { profile_picture } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
-    
-    if(!profile_picture) {
+
+    if (!profile_picture) {
       return res.status(400).json({ Error: 'Profile picture URL is required' });
     }
-    //check if profile_picture is a base64 image 
-    if(!/^data:image\/[a-z]+;base64,/.test(profile_picture)) {
+    //check if profile_picture is a base64 image
+    if (!/^data:image\/[a-z]+;base64,/.test(profile_picture)) {
       return res.status(400).json({ Error: 'Profile picture should be a base64 image' });
     }
 
@@ -537,11 +628,11 @@ router.post('/updateProfilePicture', async (req: Request, res: Response, next: N
     }
     //uploading image to s3 bucket
     const upload = await uploadImage(profile_picture);
-    if(!upload) {
+    if (!upload) {
       return res.status(400).json({ Error: 'Upload failed' });
     }
     const update = await updateProfilePicture(userId, upload);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
     return res.status(200).json({ message: upload });
@@ -550,34 +641,34 @@ router.post('/updateProfilePicture', async (req: Request, res: Response, next: N
   }
 });
 
-
 //Setup Profile
 
 router.post('/setupProfile', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { bio, tags, setup_step } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
     //validate bio
-    if(!bio) {
+    if (!bio) {
       return res.status(400).json({ Error: 'Bio is required!' });
     }
-    if(bio.length > 1000) {
+    if (bio.length > 1000) {
       return res.status(400).json({ Error: 'Bio should be less than 1000 characters' });
     }
     //validate tags
-    if(!tags) {
+    if (!tags) {
       return res.status(400).json({ Error: 'Select atleast 5 tags!' });
     }
-    if(tags.length < 5) {
+    if (tags.length < 5) {
       return res.status(400).json({ Error: 'Select atleast 5 tags!' });
     }
     const update = await UpdateTagsandBio(tags, userId, bio);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Error adding Bio and tags' });
     }
-    if (setup_step) { // JA Only required in account setup process
+    if (setup_step) {
+      // JA Only required in account setup process
       await updateSetupStep(userId, setup_step);
     }
     return res.status(200).json({ message: 'Bio and tags added successfully' });
@@ -590,7 +681,7 @@ router.post('/setupProfile', async (req: Request, res: Response, next: NextFunct
 router.get('/getBioAndTags', async (req: Request, res: Response) => {
   try {
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
     const user = await findUserById(userId);
     if (!user) {
@@ -624,14 +715,14 @@ router.post('/completeSetup', async (req: Request, res: Response, next: NextFunc
   try {
     const { setup_step } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
     //validate setup step
-    if(!setup_step) {
+    if (!setup_step) {
       return res.status(400).json({ Error: 'Setup step is required!' });
     }
     const complete = await completeSetupAndSetStep(userId, setup_step);
-    if(!complete) {
+    if (!complete) {
       return res.status(400).json({ Error: 'Error finishing account setup' });
     }
     return res.status(200).json({ message: 'Account setup successfully' });
@@ -642,8 +733,9 @@ router.post('/completeSetup', async (req: Request, res: Response, next: NextFunc
 
 router.post('/updateAllProfile', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { imageUri, imageURL, first_name, last_name, birthday, phone_number, zip_code, city, state, gender } = req.body;
-    const payload : payload = req.body[0];
+    const { imageUri, imageURL, first_name, last_name, birthday, phone_number, zip_code, city, state, gender } =
+      req.body;
+    const payload: payload = req.body[0];
     const userId = payload.userId;
 
     const user = await findUserById(userId);
@@ -733,7 +825,7 @@ router.post('/updateAllProfile', async (req: Request, res: Response, next: NextF
     if (!update_gender) {
       return res.status(400).json({ Error: 'Update gender failed' });
     }
-    
+
     return res.status(200).json({ message: 'Update successful' });
   } catch (err) {
     return res.status(500).json({ Error: 'Server error' });
@@ -745,14 +837,14 @@ router.post('/updatePushToken', async (req: Request, res: Response, next: NextFu
   try {
     const { pushToken } = req.body;
     //get payload from body[0]
-    const payload : payload = req.body[0];
+    const payload: payload = req.body[0];
     const userId = payload.userId;
-    if(!pushToken) {
+    if (!pushToken) {
       return res.status(400).json({ Error: 'Push token is required' });
     }
-    
+
     const update = await updatePushToken(userId, pushToken);
-    if(!update) {
+    if (!update) {
       return res.status(400).json({ Error: 'Update failed' });
     }
 

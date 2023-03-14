@@ -1,6 +1,6 @@
 const stats = [
-  { label: "Founded", value: "2021" },
-  { label: "Employees", value: "5" },
+  { label: "Founded", value: "2023" },
+  { label: "Team size", value: "6" },
   { label: "Beta Users", value: "521" },
   { label: "Raised", value: "$25M" },
 ];
@@ -376,7 +376,8 @@ export default function Example() {
 
                       <footer className="mt-4">
                         <p className="text-base font-semibold text-yellow-200">
-                          Sarah Williams, CEO at Workcation
+                          Person 1 giving personal bad experince finding
+                          roommates
                         </p>
                       </footer>
                     </blockquote>
@@ -392,21 +393,27 @@ export default function Example() {
                   How it works
                 </h2>
                 <div className="mt-6 space-y-6 text-gray-500">
-                  <p className="text-lg">stuff</p>
                   <p className="text-base leading-7">
-                    Sollicitudin tristique eros erat odio sed vitae, consequat
-                    turpis elementum. Lorem nibh vel, eget pretium arcu vitae.
-                    Eros eu viverra donec ut volutpat donec laoreet quam urna.
-                    Sollicitudin tristique eros erat odio sed vitae, consequat
-                    turpis elementum. Lorem nibh vel, eget pretium arcu vitae.
-                    Eros eu viverra donec ut volutpat donec laoreet quam urna.
+                    UCF students can sign up for an account with our service
+                    using an active @knights.ucf.edu email address. Once you
+                    have an account, you can create a profile and fill out a
+                    short survey indicating your preferences in a roommate. This
+                    will generate your match percentage to other users in our
+                    service. The survey is optional, but we recommend filling it
+                    out to get the best results.
                   </p>
                   <p className="text-base leading-7">
-                    Rhoncus nisl, libero egestas diam fermentum dui. At quis
-                    tincidunt vel ultricies. Vulputate aliquet velit faucibus
-                    semper. Pellentesque in venenatis vestibulum consectetur
-                    nibh id. In id ut tempus egestas. Enim sit aliquam nec, a.
-                    Morbi enim fermentum lacus in. Viverra.
+                    Now you can explore different profiles with the ability to
+                    filter on things you care about the most. If you aren&apos;t
+                    looking for a roommate, and just need housing, you can go
+                    straight to the listing portion of our app.
+                  </p>
+                  <p className="text-base leading-7">
+                    Once you&apos;ve found a potential roommate or listing that
+                    might be a good fit, you can directly message them through
+                    our service without having to reveal your personal phone or
+                    email. Then proceed to check out listings with your new
+                    potential roommate.
                   </p>
                 </div>
               </div>
@@ -447,11 +454,8 @@ export default function Example() {
                   Meet the team
                 </h2>
                 <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
-                  Sagittis scelerisque nulla cursus in enim consectetur quam.
-                  Dictum urna sed consectetur neque tristique pellentesque.
-                  Blandit amet, sed aenean erat arcu morbi. Cursus faucibus nunc
-                  nisl netus morbi vel porttitor vitae ut. Amet vitae fames
-                  senectus vitae.
+                  We&apos; a team of 6 students at the University of Central
+                  Florida.
                 </p>
                 <div className="mt-6">
                   <a href="#" className="text-base font-medium text-yellow-500">

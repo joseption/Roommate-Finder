@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.roomfin",
+    "sha256_cert_fingerprints":
+    ["CA:A0:A2:53:70:60:05:45:54:6E:53:4A:FA:35:75:34:7F:CF:87:E7:7B:2A:F3:B5:5B:7D:46:03:2C:45:2B:BA"]
+  }
+}]

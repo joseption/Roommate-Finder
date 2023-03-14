@@ -44,7 +44,7 @@ export default function ProfileList({
             >
               <AnimatePresence mode={"popLayout"}>
                 {profiles
-                  .filter((profile) => profile.image)
+                  // .filter((profile) => profile.image)
                   .map((profile, idx) => (
                     <motion.li
                       key={profile.id}

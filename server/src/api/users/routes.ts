@@ -197,8 +197,8 @@ router.get('/profileSearchV2', async (req, res) => {
       .findMany({
         where: {
           OR: [
-            { userOneId: userId, User: { ...genderFilter } },
-            { userTwoId: userId, User2: { ...genderFilter } },
+            { userOneId: userId, User: { ...genderFilter, is_setup: true } },
+            { userTwoId: userId, User2: { ...genderFilter, is_setup: true } },
           ],
         },
         ...paginationParams,
@@ -213,6 +213,7 @@ router.get('/profileSearchV2', async (req, res) => {
       : await db.user.findMany({
         where: {
           ...genderFilter,
+          is_setup: true,
         },
           ...paginationParams,
           select: userSelect,

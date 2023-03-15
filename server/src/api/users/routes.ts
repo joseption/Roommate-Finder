@@ -194,30 +194,30 @@ router.get('/profileSearchV2', async (req, res) => {
 
     const matches = sortByMatchPercentage
       ? await db.matches
-      .findMany({
-        where: {
-          OR: [
-            { userOneId: userId, User: { ...genderFilter, is_setup: true } },
-            { userTwoId: userId, User2: { ...genderFilter, is_setup: true } },
-          ],
-        },
-        ...paginationParams,
-        select: {
-          User: { select: userSelect },
-          User2: { select: userSelect },
-        },
-      })
-      .then((matches) =>
-        matches.map((match) => (match.User.id === userId ? match.User2 : match.User))
-      )
+        .findMany({
+          where: {
+            OR: [
+              { userOneId: userId, User: { ...genderFilter, is_setup: true } },
+              { userTwoId: userId, User2: { ...genderFilter, is_setup: true } },
+            ],
+          },
+          ...paginationParams,
+          select: {
+            User: { select: userSelect },
+            User2: { select: userSelect },
+          },
+        })
+        .then((matches) =>
+          matches.map((match) => (match.User.id === userId ? match.User2 : match.User))
+        )
       : await db.user.findMany({
         where: {
           ...genderFilter,
           is_setup: true,
         },
-          ...paginationParams,
-          select: userSelect,
-        });
+        ...paginationParams,
+        select: userSelect,
+      });
 
     res.status(200).json({
       users: matches,
@@ -270,7 +270,7 @@ router.get('/AllprofilesMob', async (req: Request, res: Response, next: NextFunc
         image: true,
         city: true,
         state: true,
-		is_setup: true,
+        is_setup: true,
         //matches: {
         //where:{
         // userTwoId: userId,

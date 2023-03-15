@@ -169,7 +169,9 @@ const MyProfileScreen = (props: any) => {
       paddingHorizontal: 15,
       color: Color(props.isDarkMode).text,
       fontSize: FontSize.default,
-      backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).holderSecondary,
+      backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).contentBackgroundSecondary,
+      borderColor: Color(props.isDarkMode).separator,
+      borderWidth: .5
     },
     mainContent: {
       marginTop: 50,

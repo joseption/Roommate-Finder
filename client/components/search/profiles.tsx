@@ -108,6 +108,7 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
             if (sorting) {
               res = sortProfiles(res);
             }
+            res = removeUnfinishedResults(res);
             setAllProfiles(res);
             setFetchedProfiles(true);
           }
@@ -131,6 +132,7 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
             if (sorting) {
               res = sortProfiles(res);
             }
+            res = removeUnfinishedResults(res);
             setAllProfiles(res);
             if (res.length > 0) {
               setFetchedProfiles(true);
@@ -143,6 +145,20 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
     }
   };
 
+  const removeUnfinishedResults = (data: any) => {
+    console.log(data);
+    let res: never[] = [];
+    if (data && data.length) {
+      data.forEach((x: any) => {
+        if (x.is_setup) {
+          res.push(x as never);
+        }
+      });
+    }
+    
+    return res;
+  }
+
   const containerStyle = () => {
     let style = [];
     if (!(isFetchedProfiles && allProfiles.length) || isPageLoading) {
@@ -152,13 +168,13 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
         justifyContent: 'center',
       });
     }
+    style.push({paddingHorizontal: 10});
 
     return style;
   }
 
   const styles = StyleSheet.create({
     profilesContainer: {
-      paddingHorizontal: 10,
       height: '100%'
     },
     msgText: {

@@ -612,7 +612,6 @@ const CreateListing = (props: any) => {
 
               <_TextInput
               containerStyle={styles.inputContainerStyle}
-              style={styles.input}
               onChangeText={(text: any) => handleChange('zipcode', text)}
               keyboardType="numeric"
               value={formData.zipcode}
@@ -622,7 +621,6 @@ const CreateListing = (props: any) => {
 
               <_TextInput
               containerStyle={styles.inputContainerStyle}
-              style={styles.input}
               onChangeText={(text: any) => handleChange('price', parseFloat(text))}
               value={`$${formData.price}`}
               keyboardType="numeric"
@@ -642,7 +640,6 @@ const CreateListing = (props: any) => {
 
               <_TextInput
               containerStyle={styles.inputContainerStyle}
-              style={styles.input}
               onChangeText={(text: any) => handleChange('size', parseInt(text))}
               value={String(formData.size)}
               keyboardType="numeric"

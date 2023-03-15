@@ -29,7 +29,7 @@ const Register = (props: any, {navigation}:any) => {
 
   const handleChange = (value: string) => {
     var error = !validateEmail(value);
-    setDisabled(false); // JA TEMP put back "error"
+    setDisabled(error);
     props.setEmail(value);
   };
 
@@ -92,7 +92,7 @@ const Register = (props: any, {navigation}:any) => {
       <_Text
       style={[Style(props.isDarkMode).textDefaultTertiary, LoginStyle(props.isDarkMode).actionText]}
       >
-        Create an account with your UCF email
+        Create an account with your email
       </_Text>
       {<_TextInput
       label="Email"

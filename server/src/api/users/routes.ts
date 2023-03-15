@@ -270,6 +270,7 @@ router.get('/AllprofilesMob', async (req: Request, res: Response, next: NextFunc
         image: true,
         city: true,
         state: true,
+		is_setup: true,
         //matches: {
         //where:{
         // userTwoId: userId,

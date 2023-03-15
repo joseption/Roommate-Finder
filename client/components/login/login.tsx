@@ -71,7 +71,7 @@ const Login = (props: any) => {
   const handleChange = (value: string, isEmail: boolean) => {
     let eValue = isEmail ? value : email;
     let pValue = !isEmail ? value : password;
-    //let emailError = !(validateEmail(eValue)); // ja temp for testing
+    let emailError = !(validateEmail(eValue));
     let passwordError = pValue.length == 0;
     setPassword(pValue);
     setEmail(eValue);
@@ -80,10 +80,9 @@ const Login = (props: any) => {
   };
 
   const emailBlur = (e: any) => {
-    return; // ja temp for testing
     let emailError = !(validateEmail(email))
     setEmailError(emailError);
-    setEmailErrorMsg(emailError ? 'must be a UCF Knights address' : '');
+    setEmailErrorMsg(emailError ? ' must be a valid address' : '');
   }
 
   const goRegister = () => {

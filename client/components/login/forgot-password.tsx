@@ -28,7 +28,7 @@ const ForgotPassword = (props: any, {navigation}:any) => {
 
     const handleChange = (value: string) => {
         var error = !validateEmail(value);
-        setDisabled(false); // JA TEMP put back "error"
+        setDisabled(error);
         props.setEmail(value);
     };
 

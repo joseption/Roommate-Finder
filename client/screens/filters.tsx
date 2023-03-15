@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TouchableHighlight } from 'react-native';
 import _Button from '../components/control/button';
+import _Group from '../components/control/group';
 import _Text from '../components/control/text';
 import { isDarkMode, navProp, NavTo } from '../helper';
 import { Color, FontSize, Radius, Style } from '../style';
@@ -144,7 +145,7 @@ const FiltersScreen = (props: any) => {
         let selected = active === filter;
         let style = [];
         style.push({
-            backgroundColor: selected ? Color(props.isDarkMode).gold : Color(props.isDarkMode).contentHolder,
+            backgroundColor: selected ? Color(props.isDarkMode).gold : props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).contentBackgroundSecondary,
         });
 
         return style;
@@ -164,7 +165,7 @@ const FiltersScreen = (props: any) => {
         let selected = selectedFilters.includes(filter);
         let style = [];
         style.push({
-            backgroundColor: selected ? Color(props.isDarkMode).gold : Color(props.isDarkMode).contentHolder,
+            backgroundColor: selected ? Color(props.isDarkMode).gold : props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).contentBackgroundSecondary,
         });
 
         return style;
@@ -182,21 +183,24 @@ const FiltersScreen = (props: any) => {
 
     const styles = StyleSheet.create({
         filterStyle: {
-            marginRight: 5,
-            marginBottom: 5,
+            marginRight: 7,
+            marginBottom: 7,
             borderRadius: Radius.round,
             paddingVertical: 5,
             paddingHorizontal: 15,
+            borderColor: Color(props.isDarkMode).separator,
+            borderWidth: .5
         },
         exploreContainer: {
-            padding: 10,
-            height: '100%'
+            paddingHorizontal: 10,
+        },
+        exploreContent: {
         },
         heading: {
             fontSize: FontSize.large,
             fontWeight: 'bold',
             color: Color(props.isDarkMode).text,
-            paddingBottom: 20,
+            padding: 10,
         },
         row: {
             flexDirection: 'row',
@@ -204,33 +208,43 @@ const FiltersScreen = (props: any) => {
             paddingTop: 20,
             width: '100%'
         },
-        rowContainer: {
-
+        buttons: {
+            flexDirection: 'row',
+            justifyContent: 'center',
+            margin: 10,
+            height: 40
         },
         filterContainer: {
             flexDirection: 'row',
             flexWrap: 'wrap',
             justifyContent: 'center',
             alignItems: 'center',
-            marginTop: 10,
-            marginBottom: 20
+            width: '100%',
+            marginBottom: -5
         },
         filterText: {
             color: Color(props.isDarkMode).text,
             fontSize: FontSize.default
         },
-        exploreContent: {
-            height: '100%'
-        },
         subheading: {
             fontWeight: 'bold'
+        },
+        group: {
+            marginBottom: 20
+        },
+        container: {
+            height: '100%',
+            flexDirection: 'column',
+            display: 'flex'
+        },
+        spacing: {
+            height: 1
         }
     });
 
     return (
-        <ScrollView
-        contentContainerStyle={styles.exploreContent}
-        style={styles.exploreContainer}
+        <View
+        style={styles.container}
         >
             <_Text
             style={styles.heading}
@@ -238,103 +252,103 @@ const FiltersScreen = (props: any) => {
             >
                 Filter Results
             </_Text>
-            {tagStyles ?
-                <View>
-                    <_Text
-                    style={styles.subheading}
-                    isDarkMode={props.isDarkMode}
-                    >
-                        Interests and Activities
-                    </_Text>
-                    <View
-                    style={styles.filterContainer}
-                    >
-                    {filters()}
-                    </View>
-                </View>
-                : null
-            }
-            {genderOptions ?
-                <View>
-                    <_Text
-                    style={styles.subheading}
-                    isDarkMode={props.isDarkMode}
-                    >
-                        Gender
-                    </_Text>
-                    <View
-                    style={styles.filterContainer}
-                    >
-                    {item(genderOptions, genderFilter, setGenderFilter)}
-                    </View>
-                </View>
-                : null
-            }
-            {locationOptions ?
-                <View>
-                    <_Text
-                    style={styles.subheading}
-                    isDarkMode={props.isDarkMode}
-                    >
-                        Location
-                    </_Text>
-                    <View
-                    style={styles.filterContainer}
-                    >
-                    {item(locationOptions, locationFilter, setLocationFilter)}
-                    </View>
-                </View>
-                : null
-            }
-            {sharingPrefOptions ?
-                <View>
-                    <_Text
-                    style={styles.subheading}
-                    isDarkMode={props.isDarkMode}
-                    >
-                        Sharing Preferences
-                        </_Text>
-                    <View
-                    style={styles.filterContainer}
-                    >
-                    {item(sharingPrefOptions, sharingPrefFilter, setSharingPrefFilter)}
-                    </View>
-                </View>
-                : null
-            }
-            <View
-            style={styles.rowContainer}
+            <ScrollView
+            contentContainerStyle={styles.exploreContent}
+            style={styles.exploreContainer}
             >
-                <View
-                style={styles.row}
-                >
-                    <_Button
-                    containerStyle={{flex: 1}}
-                    style={[Style(props.isDarkMode).buttonInverted, {marginRight: 5}]}
-                    textStyle={Style(props.isDarkMode).buttonInvertedText}
-                    onPress={() => {
-                        navigation.goBack()
-                    }}
+                {tagStyles ?
+                    <_Group
+                    containerStyle={styles.group}
+                    isDarkMode={props.isDarkMode}
+                    label="Interests and Activities"
+                    vertical={true}
                     >
-                        Cancel
-                    </_Button>
-                    <_Button
-                    containerStyle={{flex: 1}}
-                    style={Style(props.isDarkMode).buttonGold}
-                    onPress={() => {
-                        navigation.navigate(NavTo.Search, {
-                            key: Math.random(),
-                            filters: selectedFilters,
-                            genderFilter: genderFilter,
-                            locationFilter: locationFilter,
-                            sharingPrefFilter: sharingPrefFilter
-                        } as never)
-                    }}>
-                        Search
-                    </_Button>
-                </View>
+                        <View
+                        style={styles.filterContainer}
+                        >
+                            {filters()}
+                        </View>
+                    </_Group>
+                    : null
+                }
+                {genderOptions ?
+                    <_Group
+                    containerStyle={styles.group}
+                    isDarkMode={props.isDarkMode}
+                    label="Gender"
+                    vertical={true}
+                    >
+                        <View
+                        style={styles.filterContainer}
+                        >
+                            {item(genderOptions, genderFilter, setGenderFilter)}
+                        </View>
+                    </_Group>
+                    : null
+                }
+                {locationOptions ?
+                    <_Group
+                    containerStyle={styles.group}
+                    isDarkMode={props.isDarkMode}
+                    label="Location"
+                    vertical={true}
+                    >
+                        <View
+                        style={styles.filterContainer}
+                        >
+                            {item(locationOptions, locationFilter, setLocationFilter)}
+                        </View>
+                    </_Group>
+                    : null
+                }
+                {sharingPrefOptions ?
+                    <_Group
+                    containerStyle={styles.group}
+                    isDarkMode={props.isDarkMode}
+                    label="Sharing Preferences"
+                    vertical={true}
+                    >
+                        <View
+                        style={styles.filterContainer}
+                        >
+                            {item(sharingPrefOptions, sharingPrefFilter, setSharingPrefFilter)}
+                        </View>
+                    </_Group>
+                    : null
+                }
+                <View
+                style={styles.spacing}
+                />
+            </ScrollView >
+            <View
+            style={styles.buttons}
+            >
+                <_Button
+                containerStyle={{flex: 1}}
+                style={[Style(props.isDarkMode).buttonInverted, {marginRight: 5}]}
+                textStyle={Style(props.isDarkMode).buttonInvertedText}
+                onPress={() => {
+                    navigation.goBack()
+                }}
+                >
+                    Cancel
+                </_Button>
+                <_Button
+                containerStyle={{flex: 1}}
+                style={Style(props.isDarkMode).buttonGold}
+                onPress={() => {
+                    navigation.navigate(NavTo.Search, {
+                        key: Math.random(),
+                        filters: selectedFilters,
+                        genderFilter: genderFilter,
+                        locationFilter: locationFilter,
+                        sharingPrefFilter: sharingPrefFilter
+                    } as never)
+                }}>
+                    Search
+                </_Button>
             </View>
-        </ScrollView >
+        </View>
     );
 };
 

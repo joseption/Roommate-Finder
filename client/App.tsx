@@ -26,8 +26,6 @@ import { env } from 'process';
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 
-export const ThemeContext = React.createContext(null);
-
 Notifications.setNotificationHandler({
   handleNotification: async () => {
     return {
@@ -37,6 +35,8 @@ Notifications.setNotificationHandler({
     };
   },
 });
+
+export const ThemeContext = React.createContext(null);
 
 export const App = (props: any) => {
   const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io(environ.URL);
@@ -699,7 +699,7 @@ export const App = (props: any) => {
 
       // Don't add padding for message app on mobile
       let rn = getRouteName();
-      if (rn == NavTo.Messages || rn == NavTo.Listings || rn == NavTo.Search || rn == NavTo.Profile) {
+      if (rn == NavTo.Messages || rn == NavTo.Listings || rn == NavTo.Search || rn == NavTo.Profile || rn == NavTo.Filters) {
         paddingLeft = 0;
         paddingRight = 0;
         paddingTop = 0;
@@ -771,7 +771,7 @@ export const App = (props: any) => {
             scrollEventThrottle={100}
             onContentSizeChange={(w, h) => getScrollDims(w, h)}
             keyboardShouldPersistTaps={'handled'}
-            scrollEnabled={navSelector !== NavTo.Messages && navSelector !== NavTo.Listings && navSelector !== NavTo.Search}
+            scrollEnabled={navSelector !== NavTo.Messages && navSelector !== NavTo.Listings && navSelector !== NavTo.Search && navSelector !== NavTo.Filters}
             >
               <View
                 style={styles.stack}

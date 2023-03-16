@@ -9,8 +9,8 @@ import {
 } from "../../styles/motion-definitions";
 import type { user } from "../../types/auth.types";
 import CircularProgress from "../Feedback/CircularProgress";
+import CustomExploreFilterPopover from "../Surfaces/exploreFilters";
 import ProfileCard from "../Surfaces/ProfileCard";
-
 interface Props {
   profiles: user[] | undefined;
   arePostsLoading: boolean;
@@ -19,6 +19,10 @@ interface Props {
   className?: string;
 }
 
+import { FunnelIcon, PlusIcon } from "@heroicons/react/24/outline";
+
+import Button from "../Inputs/Button";
+import CustomPopover from "../Inputs/CustomPopover";
 export default function ProfileList({
   profiles,
   arePostsLoading,
@@ -60,6 +64,7 @@ export default function ProfileList({
                         bio={profile.bio}
                         authorName={profile.first_name}
                         tags={profile.tags}
+                        birthday={profile.birthday}
                         matches={profile.matches}
                       />
                     </motion.li>

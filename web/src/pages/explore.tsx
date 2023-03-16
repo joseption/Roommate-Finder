@@ -1,40 +1,16 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import Head from "next/head";
-import Link from "next/link";
 import { useState } from "react";
-import toast from "react-hot-toast";
 
-import ProfileList from "../components/Layout/ProfileList";
-import { GetAllUsers } from "../request/fetch";
-import useInfiniteQueryUsers from "../request/useInfiniteQueryUsers";
+import CustomExploreFilterPopover from "../components/Surfaces/exploreFilters";
+import ProfileListWithFilters from "../components/Surfaces/profileList";
 import { transitionVariants } from "../styles/motion-definitions";
-import { user } from "../types/auth.types";
 
-interface Props {
-  searchValue: string;
-  feedSortValue: "featured" | "recent";
-}
-
-export default function Explore({ searchValue, feedSortValue }: Props) {
-  // const { data, isLoading } = useQuery({
-  //   queryKey: ["GetAllUsers"],
-  //   queryFn: () => GetAllUsers(),
-  //   onError: (err: Error) => {
-  //     toast.error(err.message);
-  //   },
-  // });
-
-  const { posts, isFetching, isFetchingNextPage } = useInfiniteQueryUsers({
-    key: "feed_users",
-    searchValue,
-    // recentOnly: feedSortValue === "recent",
-    queryOptions: {
-      refetchOnMount: "always", // Refetch on mount regardless of staleness (e.g. if the user navigates back to the feed from another route)
-      staleTime: Infinity, // Never stale. Prevents unexpected layout shifts when the post order changes while navigating the feed
-    },
-  });
-
+export default function Explore() {
+  const [matchPercent, setMatchPercent] = useState(false);
+  const [gender, setGender] = useState("");
+  const [smokePreference, setSmokePreference] = useState("");
+  const [petPreference, setPetPreference] = useState("");
   return (
     <>
       <Head>
@@ -48,11 +24,27 @@ export default function Explore({ searchValue, feedSortValue }: Props) {
         custom={0.4}
         variants={transitionVariants}
       >
-        <ProfileList
-          arePostsLoading={isFetching && !isFetchingNextPage}
-          areMorePostsLoading={isFetchingNextPage}
-          profiles={posts}
-          className={"px-4 py-16 md:pb-8 lg:px-8"}
+        <div
+          className={
+            "relative mx-auto flex h-full  max-w-7xl items-center justify-end bg-white pr-8 pt-5"
+          }
+        >
+          <CustomExploreFilterPopover
+            gender={gender}
+            petPreference={petPreference}
+            smokePreference={smokePreference}
+            matchPercent={matchPercent}
+            setGender={setGender}
+            setMatchPercent={setMatchPercent}
+            setPetPreference={setPetPreference}
+            setSmokePreference={setSmokePreference}
+          />
+        </div>
+        <ProfileListWithFilters
+          sortByMatchPercentage={matchPercent}
+          genderType={gender}
+          smokingPreference={smokePreference}
+          petPreference={petPreference}
         />
       </motion.main>
     </>

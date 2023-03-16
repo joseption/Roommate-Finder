@@ -133,30 +133,12 @@ router.get('/profileByEmail', async (req: Request, res: Response) => {
 });
 
 // * added profile search functionality so people could search on partial text
-router.get('/profileSearch', async (req: Request, res: Response) => {
-  try {
-    const { searchText } = req.query;
-    const matches = await db.user.findMany({
-      where: {
-        email: {
-          contains: searchText as string,
-        },
-      },
-    });
-    //NEED TO DELETE PASSWORD...
-    //just use my search function below
-    res.status(200).json(matches);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-
 router.get('/profileSearchV2', async (req, res) => {
   try {
-    const { searchText, limit, cursorId, genderType } = req.query;
+    const { searchText, limit, cursorId, genderType, smokingPreference, petPreference } = req.query;
     const sortByMatchPercentage = req.query.sortByMatchPercentage === 'true';
     const search = (searchText && searchText.toString().trim()) || '';
-    console.log(genderType)
+    console.log(genderType);
     const gender = (genderType && genderType.toString().trim()) || '';
     const userId = req.body[0].userId;
 
@@ -189,19 +171,49 @@ router.get('/profileSearchV2', async (req, res) => {
         },
       },
     };
-    console.log(gender);
+
     const genderFilter = gender ? { gender } : {};
+
+    // Add smoking filter
+    const smokingFilter = smokingPreference
+      ? {
+        ResponsesOnUsers: {
+          some: {
+            questionId: '47193d33-b38e-40c6-8273-19b6b53cb097',
+            responseId:
+              smokingPreference === 'yes'
+                ? '91496c71-970e-4e75-9ed8-d0eb3e7eb1af'
+                : 'ad6ce5ba-ba1c-4993-a767-92a443f2eac2',
+          },
+        },
+      }
+      : {};
+
+    const petFilter = petPreference
+      ? {
+        ResponsesOnUsers: {
+          some: {
+            questionId: '66f23dd3-d2ec-44ea-847a-3e206d43f4b4',
+            responseId:
+              petPreference === 'yes'
+                ? { in: ['069d4ede-17e3-497e-af4e-7feb17cde1f8', '79670971-c4f5-47d0-b9d4-803173b718f7'] }
+                : 'bbf42a06-2aac-4cbb-9d44-d341474144ea',
+          },
+        },
+      }
+      : {};
 
     const matches = sortByMatchPercentage
       ? await db.matches
         .findMany({
           where: {
             OR: [
-              { userOneId: userId, User: { ...genderFilter, is_setup: true } },
-              { userTwoId: userId, User2: { ...genderFilter, is_setup: true } },
+              { userOneId: userId, User: { ...genderFilter, ...smokingFilter, ...petFilter, is_setup: true } },
+              { userTwoId: userId, User2: { ...genderFilter, ...smokingFilter, ...petFilter, is_setup: true } },
             ],
           },
           ...paginationParams,
+          orderBy: { matchPercentage: 'desc' },
           select: {
             User: { select: userSelect },
             User2: { select: userSelect },
@@ -213,12 +225,13 @@ router.get('/profileSearchV2', async (req, res) => {
       : await db.user.findMany({
         where: {
           ...genderFilter,
+          ...smokingFilter,
+          ...petFilter,
           is_setup: true,
         },
         ...paginationParams,
         select: userSelect,
       });
-
     res.status(200).json({
       users: matches,
       nextCursorId: matches.length > 0 ? matches[matches.length - 1].id : null,

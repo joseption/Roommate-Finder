@@ -39,7 +39,7 @@ Notifications.setNotificationHandler({
 export const ThemeContext = React.createContext(null);
 
 export const App = (props: any) => {
-  const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io(environ.URL);
+  const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap> | null>(null);
   const [navHeight,setNavHeight] = useState(0);
   const [navWidth,setNavWidth] = useState(0);
   const [containerStyle,setContainerStyle] = useState({});
@@ -81,6 +81,12 @@ export const App = (props: any) => {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
+
+  useEffect(() => {
+    const newSocket: Socket<DefaultEventsMap, DefaultEventsMap> = io(environ.URL);
+    setSocket(newSocket);
+    return () => {newSocket.close()};
+  }, [setSocket]);
 
   useEffect(() => {
     if (addMessageCount === 0) {
@@ -340,6 +346,8 @@ export const App = (props: any) => {
   }
 
   useEffect(() => {
+    if (socket === null) return;
+
     // Listen for messages being sent over socket
     socket.on('receive_message', (data: any) => {
       setReceiveMessage(data);

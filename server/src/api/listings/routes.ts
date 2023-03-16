@@ -198,7 +198,7 @@ router.delete('/:listingId', async (req: Request, res: Response) => {
 // * get all listings
 router.post('/all', async (req: Request, res: Response) => {
   try {
-    const { housing_type, price, petsAllowed, distanceToUcf, rooms, bathrooms } = req.body;
+    const { housing_type, price, petsAllowed, distanceToUcf, rooms, bathrooms, size } = req.body;
     const listings = await prisma.listings.findMany({
       where: {
         housing_type: housing_type || undefined,
@@ -207,6 +207,7 @@ router.post('/all', async (req: Request, res: Response) => {
         distanceToUcf: distanceToUcf ? { lte: distanceToUcf } : undefined,
         rooms: rooms || undefined,
         bathrooms: bathrooms || undefined,
+        size: size || undefined,
       },
     });
     res.status(200).json(listings);

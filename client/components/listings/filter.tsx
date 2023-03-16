@@ -1,45 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import { View, Alert, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList, Pressable} from 'react-native';
+import { View, StyleSheet, Platform} from 'react-native';
 import _Text from '../control/text';
 import { Color, FontSize, Radius, Style } from '../../style';
-import { env } from '../../helper';
-import { authTokenHeader, getLocalStorage } from '../../helper';
 import _Button from '../control/button';
-import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import _Image from '../control/image';
 import { ScrollView } from 'react-native-gesture-handler';
 import _Dropdown from '../control/dropdown';
-import axios, { AxiosResponse } from 'axios';
 import _TextInput from '../control/text-input';
 import _Group from '../control/group';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 const Filter = (props: any) => {
 
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [selectedSort, setSelectedSort] = useState('default');
-  const [housingType, setHousingType] = useState('');
-  const [priceMin, setPriceMin] = useState('');
-  const [priceMax, setPriceMax] = useState(''); 
-  const [petsAllowed, setPetsAllowed] = useState('');
-  const [rooms, setRooms] = useState('');
-  const [bathrooms, setBathrooms] = useState('');
-  const [size, setSize] = useState('');
-  const [distance, setDistance] = useState('');
+  const [housing_type, setHousingType] = useState();
+  const [price, setPrice] = useState<number | undefined>(props.filters.price);
+  const [petsAllowed, setPetsAllowed] = useState<boolean | undefined>(props.filters.petsAllowed);
+  const [rooms, setRooms] = useState<number | undefined>(props.filters.rooms);
+  const [bathrooms, setBathrooms] = useState<number | undefined>(props.filters.bathrooms);
+  const [distanceToUcf, setDistance] = useState<number | undefined>(props.filters.distanceToUcf);
 
   const handleApply = () => {
     props.onFilter({
-      housingType,
-      priceMin,
-      priceMax,
+      housing_type,
+      price,
       petsAllowed,
+      distanceToUcf,
       rooms,
       bathrooms,
-      size,
-      distance,
     });
-    props.setShowFilter(false);
+    onClose();
   };
+
+  useEffect(() => {
+    console.log("bruh")
+    console.log(props.filters)
+  }, []); 
 
   const getOptions = () => {
     return [
@@ -60,21 +54,43 @@ const Filter = (props: any) => {
 
   const getYesNo = () => {
     return [
-      { key: true, value: 'Yes' },
-      { key: false, value: 'No' },
-    ];
-  };
-
-  const getDistanceOptions = () => {
-    return [
-      { key: 1, value: '<3 miles' },
-      { key: 2, value: '<10 miles' },
-      { key: 3, value: '+10 miles' },
+      { key: 1, value: 'Yes' },
+      { key: 2, value: 'No' },
     ];
   };
 
   const onClose = () => {
     props.setShowFilter(false)
+  };
+
+  const handlePetsAllowedChange = (text: string) => {
+    if (text === 'Yes') 
+      setPetsAllowed(true);
+    else if (text === 'No')
+      setPetsAllowed(false);
+    else 
+      setPetsAllowed(undefined);
+  };
+  
+
+  const handlePriceChange = (text: string) => {
+    const num = parseFloat(text) || 0;
+    setPrice(num);
+  };
+
+  const handleRoomsChange = (text: string) => {
+    const num = parseInt(text);
+    setRooms(num);
+  };
+
+  const handleBathroomChange = (text: string) => {
+    const num = parseInt(text);
+    setBathrooms(num);
+  };
+
+  const handleDistanceChange = (text: string) => {
+    const num = parseInt(text) || 0;
+    setDistance(num);
   };
 
   const styles = StyleSheet.create({
@@ -282,44 +298,32 @@ const Filter = (props: any) => {
         <_Text style={styles.title}>Filter Listing</_Text>
         <View style={styles.formContainer}>
 
-            <View style={{ flexDirection: 'row' }}>
-            <_TextInput
-              containerStyle={{ flex: 1, marginRight: 8 }}
-              style={styles.input}
-              onChangeText={setPriceMin}
-              value={priceMin}
-              keyboardType="numeric"
-              placeholder="$0"
-              label="Min Price (per month)"
-              isDarkMode={props.isDarkMode}
-            />
-            <_TextInput
-              containerStyle={{ flex: 1, marginLeft: 8 }}
-              style={styles.input}
-              onChangeText={setPriceMax}
-              value={priceMax}
-              keyboardType="numeric"
-              placeholder="$0"
-              label="Max Price (per month)"
-              isDarkMode={props.isDarkMode}
-            />
-          </View>
-
           <_Dropdown
             containerStyle={styles.inputContainerStyle}
             isDarkMode={props.isDarkMode}
             options={getHousingType()}
-            value={housingType}
+            value={props.filters.housing_type}
             setValue={setHousingType}
             label="Housing Type"
-          />      
+          />   
+
+          <_TextInput
+            containerStyle={styles.inputContainerStyle}
+            style={styles.input}
+            onChangeText={handlePriceChange}
+            value={price !== undefined ? price.toString() : ""}
+            keyboardType="numeric"
+            placeholder="$0"
+            label="Max Price (per month)"
+            isDarkMode={props.isDarkMode}
+          />
           
           <_Dropdown
             containerStyle={styles.inputContainerStyle}
             isDarkMode={props.isDarkMode}
             options={getYesNo()}
-            value={petsAllowed}
-            setValue={setPetsAllowed}
+            value={petsAllowed !== null && petsAllowed !== undefined ? (petsAllowed? 'Yes' : 'No') : null}
+            setValue={handlePetsAllowedChange}
             label="Pets Allowed"
           />
 
@@ -327,8 +331,8 @@ const Filter = (props: any) => {
             containerStyle={styles.inputContainerStyle}
             isDarkMode={props.isDarkMode}
             options={getOptions()}
-            value={rooms}
-            setValue={setRooms}
+            value={rooms !== null && rooms !== undefined && !Number.isNaN(rooms) ? rooms.toString() : null}
+            setValue={handleRoomsChange}
             label="Rooms"
           />
 
@@ -336,18 +340,20 @@ const Filter = (props: any) => {
             containerStyle={styles.inputContainerStyle}
             isDarkMode={props.isDarkMode}
             options={getOptions()}
-            value={bathrooms}
-            setValue={setBathrooms}
+            value={bathrooms !== null && bathrooms !== undefined && !Number.isNaN(bathrooms) ? bathrooms.toString() : null}
+            setValue={handleBathroomChange}
             label="Bathrooms"
           />
 
-          <_Dropdown
+          <_TextInput
             containerStyle={styles.inputContainerStyle}
+            style={styles.input}
+            onChangeText={handleDistanceChange}
+            value={distanceToUcf !== undefined ? distanceToUcf.toString() : ""}
+            keyboardType="numeric"
+            placeholder="0 miles"
+            label="Max Distance from UCF"
             isDarkMode={props.isDarkMode}
-            options={getDistanceOptions()}
-            value={distance}
-            setValue={setDistance}
-            label="Distance"
           />
 
 <         View style={styles.submitContainer}>

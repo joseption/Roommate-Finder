@@ -13,13 +13,14 @@ const AllListingsView = (props: any) => {
 
   const generateListings = () => {
     const filteredListings = props.allListings
-      ?.filter((item: any) => (props.selectedFilter === 'all' ? true : item.category === props.selectedFilter))
+      ?.filter((item: any) => item.userId != props.userId)
       .map((item: any, key: any) => (
         <ListingCard
           isDarkMode={props.isDarkMode}
           setCurrentListing={props.setCurrentListing}
-          setListingID={props.setListingID}
-          setIsListing={props.setIsListing}
+          userId={props.userId}
+          userImage={props.userImage}
+          listingUserId={item.userId}
           key={key}
           item={item}
         />

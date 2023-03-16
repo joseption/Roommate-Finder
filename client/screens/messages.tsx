@@ -19,6 +19,7 @@ const MessagesScreen = (props: any) => {
   const [userInfo, setUserInfo] = useState<any>();
   const [chatsHaveLoaded, setChatsHaveLoaded] = useState<boolean>(false);
   const chatsRef = useRef(chats);
+  const userInfoRef = useRef(userInfo);
   const currentChatRef = useRef(currentChat);
   const showPanelRef = useRef(showPanel);
   const navigation = useNavigation<navProp>();
@@ -55,6 +56,7 @@ const MessagesScreen = (props: any) => {
   }, [])
   
   useEffect(() => {
+    userInfoRef.current = userInfo;
     getChats();
   }, [userInfo])
 
@@ -67,7 +69,7 @@ const MessagesScreen = (props: any) => {
 
   useEffect(() => {
     chatsRef.current = chats;
-    if (props?.route?.params?.user && !chatsHaveLoaded && userInfo) {
+    if (props?.route?.params?.user && !chatsHaveLoaded && userInfoRef.current) {
       openOrCreateChat(props?.route?.params?.user);
     }
   }, [chats]);
@@ -88,6 +90,7 @@ const MessagesScreen = (props: any) => {
     });
 
     props.socket.on('receive_notification', (data: any) => {
+      if (data.userId !== userInfoRef.current.id) return;
       const chats = chatsRef.current.map((chat) => {
         if (chat.id === data.chatId) {
           if (currentChatRef.current.id === chat.id && showPanelRef.current) {
@@ -147,7 +150,7 @@ const MessagesScreen = (props: any) => {
   }, [props.showingMessagePanel])
 
   useEffect(() => {
-    if (!props?.route?.params?.user || !userInfo) return;
+    if (!props?.route?.params?.user || !userInfoRef.current) return;
     openOrCreateChat(props?.route?.params?.user);
   }, [props?.route?.params?.requestId])
 
@@ -188,11 +191,11 @@ const MessagesScreen = (props: any) => {
       updateShowPanel(true);
       return;
     }
-    createChat(userInfo.id, userId);
+    createChat(userInfoRef.current.id, userId);
   };
 
   const deleteNotifications = async () => {
-    const obj = {userId: userInfo?.id, chatId: currentChatRef.current?.id};
+    const obj = {userId: userInfoRef.current?.id, chatId: currentChatRef.current?.id};
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
     return fetch(
@@ -337,10 +340,10 @@ const MessagesScreen = (props: any) => {
   }
 
   const getChats = async () => {
-    if (!userInfo?.id) return;
+    if (!userInfoRef.current?.id) return;
     const tokenHeader = await authTokenHeader();
     fetch(
-      `${env.URL}/chats?userId=${userInfo?.id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      `${env.URL}/chats?userId=${userInfoRef.current?.id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       const res = JSON.parse(await ret.text());
       if (res.Error) {
@@ -351,11 +354,11 @@ const MessagesScreen = (props: any) => {
         let totalNotifs = 0;
         for (let i = 0; i < res.length; i++) {
           const lastMessage = await getMessage(res[i].latestMessage);
-          const notifCount = await getNotifs(userInfo.id, res[i].id);
+          const notifCount = await getNotifs(userInfoRef.current.id, res[i].id);
           totalNotifs += notifCount;
           const users = []
           for (let j = 0; j < res[i].users.length; j++) {
-            if (res[i].users[j] === userInfo?.id) {
+            if (res[i].users[j] === userInfoRef.current?.id) {
               continue;
             }
             const user = await getUser(res[i].users[j])
@@ -471,7 +474,7 @@ const MessagesScreen = (props: any) => {
       <MessagePanel
         showPanel={showPanel}
         socket={props.socket}
-        userInfo={userInfo}
+        userInfo={userInfoRef.current}
         updateShowPanel={updateShowPanel}
         chat={currentChat}
         updateBlocked={updateBlocked}

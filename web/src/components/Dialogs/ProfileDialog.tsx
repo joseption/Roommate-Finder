@@ -21,6 +21,7 @@ import StyledDialog from "./StyledDialog";
 interface Props {
   id: string;
   src: string | null;
+  birthday: string | null | undefined;
   bio: string;
   authorName: string;
   isOpen: boolean;
@@ -37,6 +38,7 @@ export default function ProfileDialog({
   isOpen,
   tags,
   matches,
+  birthday,
   onClose,
 }: Props) {
   //#region Hooks
@@ -109,12 +111,17 @@ export default function ProfileDialog({
           <div className="flex flex-1 flex-col justify-center gap-2 p-4 md:p-6 lg:gap-4">
             {matches && matches.length > 0 && (
               <p className="text-lg font-semibold">
-                🔥 Match: {matches[0]?.matchPercentage}%
+                🔥 Match:{" "}
+                {matches[0]?.matchPercentage !== undefined &&
+                  Math.round(matches[0].matchPercentage)}
+                %
               </p>
             )}
 
             <h1 className="px-1 text-left text-5xl font-bold">
-              {authorName}, 21
+              {authorName}
+              {birthday && ", "}
+              {birthday && getAge(birthday)}
             </h1>
             <p className="overflow-y-auto px-1 text-left text-lg line-clamp-6 sm:text-xl md:text-xl lg:text-2xl">
               {bio}
@@ -176,4 +183,22 @@ export default function ProfileDialog({
       </Card>
     </StyledDialog>
   );
+}
+
+function getAge(birthdayString: string | null | undefined): number | null {
+  if (!birthdayString) return null;
+
+  const birthday = new Date(birthdayString);
+  const today = new Date();
+  let age = today.getFullYear() - birthday.getFullYear();
+  const monthDifference = today.getMonth() - birthday.getMonth();
+
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 && today.getDate() < birthday.getDate())
+  ) {
+    age--;
+  }
+
+  return age;
 }

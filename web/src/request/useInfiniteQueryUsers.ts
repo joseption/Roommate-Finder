@@ -11,6 +11,9 @@ interface Params {
   searchValue: string;
   sortByMatchPercentage?: boolean;
   limit?: number;
+  genderType?: string;
+  smokingPreference?: string;
+  petPreference?: string;
   queryOptions?: {
     refetchOnMount?: boolean | "always";
     staleTime?: number;
@@ -23,7 +26,10 @@ export default function useInfiniteQueryUsers({
   searchValue,
   limit = 32,
   sortByMatchPercentage,
+  genderType,
   queryOptions,
+  smokingPreference,
+  petPreference,
 }: Params) {
   const { scrollYProgress } = useScroll();
 
@@ -36,13 +42,25 @@ export default function useInfiniteQueryUsers({
     isFetching,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: [key, { search: debouncedSearchValue, sortByMatchPercentage }],
+    queryKey: [
+      key,
+      {
+        search: debouncedSearchValue,
+        sortByMatchPercentage,
+        genderType,
+        smokingPreference,
+        petPreference,
+      },
+    ],
     queryFn: ({ pageParam = "" }) =>
       ProfileSearch({
         search: searchValue,
         cursorId: pageParam as string,
         limit,
         sortByMatchPercentage,
+        genderType,
+        smokingFilter: smokingPreference,
+        petFilter: petPreference,
       }),
     getNextPageParam: (lastPage) => lastPage.nextCursorId,
     onError: (err: Error) => {
@@ -64,7 +82,6 @@ export default function useInfiniteQueryUsers({
       }
     });
   }, [fetchNextPage, hasNextPage, isFetchingNextPage, scrollYProgress]);
-  console.log(posts);
   return {
     posts,
     isFetching,

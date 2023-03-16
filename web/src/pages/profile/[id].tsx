@@ -48,6 +48,7 @@ export default function Myprofile() {
             {data && (
               <ProfileDialog
                 id={data.id}
+                birthday={data.birthday}
                 src={data.image}
                 bio={data.bio ? data.bio : "No bio 🙃"}
                 authorName={data.first_name}

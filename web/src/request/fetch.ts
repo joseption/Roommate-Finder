@@ -120,15 +120,26 @@ export async function ProfileSearch({
   limit = 16,
   cursorId = "",
   sortByMatchPercentage = false,
+  genderType = "",
+  smokingFilter = "",
+  petFilter = "",
 }) {
+  const gender = genderType ? { genderType: genderType } : undefined;
+  const smokingPreference = smokingFilter
+    ? { smokingPreference: smokingFilter }
+    : undefined;
+  const petPreference = petFilter ? { petPreference: petFilter } : undefined;
+  console.log(gender);
   const params = new URLSearchParams({
     search,
     limit: limit.toString(),
     cursorId,
     sortByMatchPercentage: sortByMatchPercentage.toString(),
-    // genderType: "Male", //gender filter working
-    //need to add filters for responsesonUser
+    ...smokingPreference,
+    ...petPreference,
+    ...gender,
   });
+  console.log(genderType, "genderType fetch");
   return await doRequest<{ users: user[]; nextCursorId: string }>(
     `${backend_api}/users/profileSearchV2?${params.toString()}`,
     null,

@@ -16,6 +16,7 @@ interface Props {
   className?: string;
   tags?: Tags[] | null;
   matches?: Matches[] | null;
+  birthday?: string | null;
 }
 
 export default function ProfileCard({
@@ -27,6 +28,7 @@ export default function ProfileCard({
   className = "",
   tags,
   matches,
+  birthday,
 }: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -81,7 +83,10 @@ export default function ProfileCard({
           </p>
           {matches && matches.length > 0 && (
             <p className="text-center text-lg">
-              Match: {matches[0]?.matchPercentage}%
+              Match:{" "}
+              {matches[0]?.matchPercentage !== undefined &&
+                Math.round(matches[0].matchPercentage)}
+              {"%"}
             </p>
           )}
           <Author
@@ -93,6 +98,7 @@ export default function ProfileCard({
       <ProfileDialog
         id={id}
         src={src}
+        birthday={birthday}
         bio={bio ? bio : "No bio 🙃"}
         authorName={authorName}
         isOpen={isDialogOpen}

@@ -77,6 +77,7 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
       } else {
         if (!res.id) return;
         const data = {
+          userId: obj.userId,
           chatId: chat.id,
         };
         socket.emit('send_notification', data);

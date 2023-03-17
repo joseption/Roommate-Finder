@@ -146,7 +146,6 @@ const Login = (props: any) => {
 
       try
       {   
-        console.log(env.URL);
           await fetch(`${env.URL}/auth/login`,
           {method:'POST',body:js,headers:{'Content-Type': 'application/json'}}).then(async ret => {
               let res = JSON.parse(await ret.text());
@@ -156,6 +155,7 @@ const Login = (props: any) => {
               }
               else
               {
+                props.setAskPermissions(true);
                 await setLocalStorage(res);
                 setMessage('');
                 navigateToLast(res);
@@ -165,7 +165,6 @@ const Login = (props: any) => {
       }
       catch(e: any)
       {
-        console.log(e);
         setMessage('An unexpected error occurred.');
       }    
       setLoading(false);

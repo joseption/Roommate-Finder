@@ -144,6 +144,17 @@ export const enum AccountScreenType {
   none, info, about, survey
 }
 
+export const getAge = (dateString: any) => {
+  var today = new Date();
+  var birthDate = new Date(dateString);
+  var age = today.getFullYear() - birthDate.getFullYear();
+  var m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+}
+
 export const getLocalStorage = async () => {
   try {
     const jsonValue = await AsyncStorage.getItem('@user_data');

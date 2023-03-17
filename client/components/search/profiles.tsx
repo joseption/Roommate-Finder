@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ProfileCard from './profile-card';
-import { env, authTokenHeader, navProp, NavTo } from '../../helper';
+import { env, authTokenHeader, navProp, NavTo, userId } from '../../helper';
 import { Color, Style } from '../../style';
 import _Text from '../control/text';
 import { useNavigation } from '@react-navigation/native';
@@ -108,7 +108,7 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
             if (sorting) {
               res = sortProfiles(res);
             }
-            res = removeUnfinishedResults(res);
+            res = await removeUnfinishedResults(res);
             setAllProfiles(res);
             setFetchedProfiles(true);
           }
@@ -132,7 +132,7 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
             if (sorting) {
               res = sortProfiles(res);
             }
-            res = removeUnfinishedResults(res);
+            res = await removeUnfinishedResults(res);
             setAllProfiles(res);
             if (res.length > 0) {
               setFetchedProfiles(true);
@@ -145,12 +145,12 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
     }
   };
 
-  const removeUnfinishedResults = (data: any) => {
-    console.log(data);
+  const removeUnfinishedResults = async (data: any) => {
     let res: never[] = [];
     if (data && data.length) {
+      let id = await userId();
       data.forEach((x: any) => {
-        if (x.is_setup) {
+        if (x.is_setup && x.id !== id) {
           res.push(x as never);
         }
       });

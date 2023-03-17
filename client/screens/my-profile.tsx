@@ -6,7 +6,7 @@ import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
 import { Style, Color, FontSize, Radius } from '../style';
 import _Image from '../components/control/image';
-import { env, navProp, NavTo, userId as getUserId, authTokenHeader, AccountScreenType, isDarkMode } from '../helper';
+import { env, navProp, NavTo, userId as getUserId, authTokenHeader, AccountScreenType, isDarkMode, getAge } from '../helper';
 import _Text from '../components/control/text';
 import _Group from '../components/control/group';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -51,17 +51,6 @@ const MyProfileScreen = (props: any) => {
     const userId = await getUserId();
     setUserId(userId);
   };
-
-  function getAge(dateString: any) {
-    var today = new Date();
-    var birthDate = new Date(dateString);
-    var age = today.getFullYear() - birthDate.getFullYear();
-    var m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  }
 
   const getProfile = async () => {
     try {
@@ -286,6 +275,7 @@ const MyProfileScreen = (props: any) => {
                 </FontAwesomeIcon>
               </TouchableHighlight>
             </View>
+            {profile?.age ?
             <View
             style={[styles.iconLabel, styles.firstLabelContainer]}
             >
@@ -302,6 +292,8 @@ const MyProfileScreen = (props: any) => {
                 {profile?.age} years old
               </_Text>
             </View>
+            : null }
+            {profile?.city && profile?.state ?
             <View
             style={styles.iconLabel}
             >
@@ -318,6 +310,7 @@ const MyProfileScreen = (props: any) => {
                 {profile?.city}, {profile?.state}
               </_Text>
             </View>
+            : null }
             {profile?.bio ?
             <View>
               <_Text

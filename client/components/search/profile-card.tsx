@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, TouchableHighlight } from 'react-native';
 import { Color, FontSize, Radius, Style } from '../../style';
-import { navProp, NavTo } from '../../helper';
+import { navProp, NavTo, getAge } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 import _Text from '../control/text';
 import _Image from '../control/image';
@@ -16,19 +16,12 @@ const ProfileCard = (props: any) => {
   const navigation = useNavigation<navProp>();
 
   useEffect(() => {
-    setProfile({ ...profile, age: profile.birthday ? getAge(profile.birthday) : 0 });
-  }, []);
+    let age = 0;
+    if (profile && profile.birthday)
+      age = getAge(profile.birthday);
 
-  function getAge(dateString: any) {
-    var today = new Date();
-    var birthDate = new Date(dateString);
-    var age = today.getFullYear() - birthDate.getFullYear();
-    var m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  }
+    setProfile({ ...profile, age: age });
+  }, []);
 
   const styles = StyleSheet.create({
     cardContainer: {
@@ -90,10 +83,18 @@ const ProfileCard = (props: any) => {
             <_Image height={100} width={100} style={styles.profileImg} source={{uri: profile.image}} />
           </View>
           <View style={styles.column2}>
+            {profile.first_name && profile.last_name ?
             <_Text style={styles.name}>{profile.first_name + " " + profile.last_name}</_Text>
+            : null }
+            {profile.age ?
             <_Text style={styles.regText}>{profile.age} years old</_Text>
+            : null }
+            {profile.city && profile.state ?
             <_Text style={styles.regText}>{profile.city + ", " + profile.state}</_Text>
+            : null }
+            {profile.bio ?
             <_Text numberOfLines={2} style={styles.regText}>{profile.bio}</_Text>
+            : null }
           </View>
           {profile.matchPercentage ?
           <View style={styles.column3}>

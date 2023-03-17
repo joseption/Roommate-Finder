@@ -9,7 +9,6 @@ import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-nat
 import _Image from '../control/image';
 import { ScrollView } from 'react-native-gesture-handler';
 import _Dropdown from '../control/dropdown';
-import axios, { AxiosResponse } from 'axios';
 import _TextInput from '../control/text-input';
 import _Group from '../control/group';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -224,6 +223,7 @@ const CreateListing = (props: any) => {
   const createListing = async () => {
     let res = await handleSubmit();
     if (res) {
+      props.refresh();
       props.onClose();
     }
   }
@@ -271,7 +271,7 @@ const CreateListing = (props: any) => {
     if (isValidAddress) {
       createListing();
       props.onClose();
-    } else {
+    } else if(isValidAddress == false){
       setIsLocationNotFound(true);
       console.error("Location not found");
     }
@@ -281,7 +281,7 @@ const CreateListing = (props: any) => {
     let style = [];
     style.push({backgroundColor: !props.isDarkMode ? Color(props.isDarkMode).holderMask : Color(props.isDarkMode).promptMaskMobile});
     return style;
-}
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -619,6 +619,15 @@ const CreateListing = (props: any) => {
               required={true}
               label="Zip Code" />
 
+              <_Dropdown
+              containerStyle={styles.inputContainerStyle}
+              isDarkMode={props.isDarkMode}
+              options={getHousingType()}
+              value={formData.housing_type}
+              setValue={(text: string) => handleChange('housing_type', text)}
+              required={true}
+              label="Housing Type" />
+
               <_TextInput
               containerStyle={styles.inputContainerStyle}
               onChangeText={(text: any) => handleChange('price', parseFloat(text))}
@@ -628,15 +637,6 @@ const CreateListing = (props: any) => {
               label="Price (per month)"
               required={true}
               isDarkMode={props.isDarkMode} />
-
-            <_Dropdown
-              containerStyle={styles.inputContainerStyle}
-              isDarkMode={props.isDarkMode}
-              options={getHousingType()}
-              value={formData.housing_type}
-              setValue={(text: string) => handleChange('housing_type', text)}
-              required={true}
-              label="Housing Type" />
 
               <_TextInput
               containerStyle={styles.inputContainerStyle}
@@ -678,7 +678,7 @@ const CreateListing = (props: any) => {
               <_Button
                 isDarkMode={props.isDarkMode}
                 style={[Style(props.isDarkMode).buttonGold]}
-                onPress={() => {handleSubmitListing();}}
+                onPress={() => {handleSubmitListing()}}
               >
                 {'Create Listing'}
               </_Button>

@@ -16,27 +16,26 @@ const FavoriteListings = (props: any) => {
 
   useEffect(() => {
     generateFavoriteListings();
-  }, [props.allListings, props.selectedFilter]);
+  }, [props.allListings]);
 
   const generateFavoriteListings = () => {
-    const filteredListings = props.allListings
-      ?.filter((item: any) => (
-        props.selectedFilter === 'all' ? true : item.category === props.selectedFilter
-      ))
+    const favoriteListings = props.allListings
       .filter((item: any) => item.userId === props.userId)
       .map((item: any, key: any) => (
         <ListingCard
           isDarkMode={props.isDarkMode}
           setCurrentListing={props.setCurrentListing}
-          setListingID={props.setListingID}
-          setIsListing={props.setIsListing}
+          userId={props.userId}
+          userImage={props.userImage}
+          listingUserId={item.userId}
           key={key}
           item={item}
         />
       ));
   
-    setFavoriteListings(filteredListings);
+    setFavoriteListings(favoriteListings);
   };
+  
 
   const styles = StyleSheet.create({
     container: {
@@ -72,7 +71,7 @@ const FavoriteListings = (props: any) => {
   return (
     
       <>
-        <_Text style={styles.title}>My Listings</_Text>
+        <_Text style={styles.title}>Favorite Listings</_Text>
         <ScrollView
         style={styles.container}
         refreshControl={

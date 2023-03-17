@@ -13,20 +13,18 @@ import { Color, FontSize, Radius, Style } from '../style';
 import _Button from '../components/control/button';
 import Filter from '../components/listings/filter';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faFilter } from '@fortawesome/free-solid-svg-icons';
 
 const ListingsScreen = (props: any) => {
-  const [isListing, setIsListing] = useState(false);
-  const [listingID, setListingID] = useState('');
   const [allListings, setAllListings] = useState([]);
+  const [unfilteredAllListings, setUnfilteredAllListings] = useState([]);
   const [init, setInit] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState('all');
   const [currentScreen, setCurrentScreen] = useState(Listings_Screen.all);
   const [searchPressed, setSearchPressed] = useState(false);
   const [currentListing, setCurrentListing] = useState(null);
   const [userInfo, setUserInfo] = useState<any>();
   const [showFilter, setShowFilter] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [filters, setFilters] = useState({});
 
   useEffect(() => {
     getUserInfo();
@@ -43,33 +41,50 @@ const ListingsScreen = (props: any) => {
     }
   }, [currentScreen]);
 
+  useEffect(() => {
+    getAllListings();
+  }, [filters]); 
+
   const getAllListings = async () => {
     setIsLoaded(false);
     try {
-      let obj = {}; // TODO: ERICK PUT ALL YOUR FILTERS HRE WHEN YOU ARE READY!
+      let obj = filters;
       let js = JSON.stringify(obj);
+  
       await fetch(`${env.URL}/listings/all`, {
         method: 'POST',
-        body:js,
-        headers: { 
-          'Content-Type': 'application/json', 
+        headers: {
+          'Content-Type': 'application/json',
           'authorization': await authTokenHeader(),
-      },
+        },
+      })
+        .then(async (ret) => {
+          let res = JSON.parse(await ret.text());
+          setUnfilteredAllListings(res);
+        });
+  
+      await fetch(`${env.URL}/listings/all`, {
+        method: 'POST',
+        body: js,
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': await authTokenHeader(),
+        },
       })
         .then(async (ret) => {
           let res = JSON.parse(await ret.text());
           setAllListings(res);
         });
     } catch (e) {
-      // Failed
+      return;
     }
     setIsLoaded(true);
   };
+  
 
   const handleNavigation = (screen: Listings_Screen) => {
     setCurrentScreen(screen);
     if (screen === Listings_Screen.all) {
-      setSelectedFilter('all');
       setSearchPressed(false);
     }
   };
@@ -79,7 +94,7 @@ const ListingsScreen = (props: any) => {
     isDarkMode={props.isDarkMode}
     setCurrentScreen={setCurrentScreen}
     handleNavigation={handleNavigation}
-    disabled={currentScreen !== Listings_Screen.all || selectedFilter !== 'all'}
+    disabled={currentScreen !== Listings_Screen.all}
     setSearchPressed={setSearchPressed}
     currentScreen={currentScreen}
     refresh={getAllListings}
@@ -93,6 +108,11 @@ const ListingsScreen = (props: any) => {
   const handleCloseFilterModal = () => {
     setShowFilter(false);
   };
+
+  const handleFilter = (filterValues: any) => {
+    setFilters(filterValues);
+  };
+  
 
   const styles = StyleSheet.create({
     container: {
@@ -192,7 +212,7 @@ return (
                   <TouchableHighlight
                   underlayColor={Color(props.isDarkMode).underlayMask}
                   style={styles.button}
-                  onPress={() => handleOpenFilterModal}
+                  onPress={handleOpenFilterModal}
                   >
                     <FontAwesomeIcon 
                     size={20} 
@@ -213,9 +233,8 @@ return (
             isDarkMode={props.isDarkMode}
             setCurrentListing={setCurrentListing}
             allListings={allListings}
-            setListingID={setListingID}
-            setIsListing={setIsListing}
-            selectedFilter={selectedFilter}
+            userId={userInfo?.id}
+            userImage={userInfo?.image}
             refresh={refresh}
           />
           }
@@ -231,6 +250,8 @@ return (
           isDarkMode={props.isDarkMode}
           setShowFilter = {setShowFilter}
           onClose={handleCloseFilterModal} 
+          onFilter={handleFilter}
+          filters={filters}
           />
         </View>
       </View>
@@ -245,11 +266,9 @@ return (
           <FavoriteListings 
             isDarkMode={props.isDarkMode}
             setCurrentListing={setCurrentListing}
-            allListings={allListings}
-            setListingID={setListingID}
-            setIsListing={setIsListing}
-            selectedFilter={selectedFilter}
+            allListings={unfilteredAllListings}
             userId={userInfo?.id}
+            userImage={userInfo?.image}
             refresh={refresh}
           />
           }
@@ -264,6 +283,7 @@ return (
           <CreateListing 
             isDarkMode={props.isDarkMode} 
             onClose={() => handleNavigation(Listings_Screen.all)}
+            refresh={refresh}
           />
           {bottomBarNav()}
         </View>
@@ -275,6 +295,7 @@ return (
         isDarkMode={props.isDarkMode}
         setCurrentListing={setCurrentListing}
         currentListing={currentListing}
+        refresh={refresh}
       />
     )}
   </View>

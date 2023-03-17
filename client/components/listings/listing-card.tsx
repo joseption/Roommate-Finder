@@ -6,7 +6,7 @@ import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useEffect, useState } from 'react';
-import { faStar, faMapMarkerAlt, faBed, faBath, faHome, faBuilding, faCity } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faMapMarkerAlt, faBed, faBath, faHome, faBuilding, faCity, faUser} from '@fortawesome/free-solid-svg-icons';
 import _Image from '../control/image';
 
 const ListingCard = (props: any) => {
@@ -95,11 +95,28 @@ const ListingCard = (props: any) => {
       color: Color(props.isDarkMode).textTertiary,
       marginLeft: 5,
     },
+    userImageContainer: {
+      position: "absolute",
+      top: 10,
+      right: 10,
+      zIndex: 1,
+      borderWidth: 2,
+      borderColor: Color(props.isDarkMode).actualWhite,
+      borderRadius: 17,
+      backgroundColor: Color(props.isDarkMode).actualWhite,
+    },
     favorite: {
       position: "absolute",
       top: 10,
       right: 10,
+      zIndex: 1,
     },
+    userImage: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+    },  
+    
     icon: {
       ...Platform.select({
         web: {
@@ -116,8 +133,6 @@ const ListingCard = (props: any) => {
       }),
     },
   });
-  
-  
   
 
   const viewListing = () => {
@@ -140,11 +155,24 @@ const ListingCard = (props: any) => {
     >
       <View>
         <Image source={{ uri: props.item.images[0] }} style={styles.image} />
-        {/* 
-        <Pressable style={styles.favorite} onPress={sendFavorite}>
-        <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()} />
-        </Pressable>
-        */}
+
+        {
+          props.listingUserId === props.userId ? (
+            <Pressable style={styles.userImageContainer}>
+              <Image
+                source={{ uri: props.userImage }}
+                style={styles.userImage}
+              />
+            </Pressable>
+          ) : (
+            <Pressable style={styles.favorite} onPress={sendFavorite}>
+              <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()} />
+              <FontAwesomeIcon style={styles.iconBorder} icon={faStar} size={32} color={Color(props.isDarkMode).actualWhite} />
+            </Pressable>
+          )
+        }
+
+        
         <View style={styles.headerContainer}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <_Text isDarkMode={props.isDarkMode} style={styles.header}>

@@ -17,7 +17,7 @@ import _Button from "../components/control/button";
 import _TextInput from "../components/control/text-input";
 import { Style, Color, FontSize, Radius } from "../style";
 import _Image from "../components/control/image";
-import { env, navProp, NavTo, authTokenHeader } from "../helper";
+import { env, navProp, NavTo, authTokenHeader, getAge } from "../helper";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import _Group from "../components/control/group";
 import _Text from "../components/control/text";
@@ -167,9 +167,7 @@ const ProfileScreen = (props: any) => {
       paddingHorizontal: 15,
       color: Color(props.isDarkMode).text,
       fontSize: FontSize.default,
-      backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).contentBackgroundSecondary,
-      borderColor: Color(props.isDarkMode).separator,
-      borderWidth: .5
+      backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).holderSecondary,
     },
     mainContent: {
       marginTop: 50,
@@ -345,6 +343,7 @@ const ProfileScreen = (props: any) => {
               <View
               style={styles.nameContainer}
               >
+                {profile?.first_name && profile?.last_name ?
                 <_Text
                 innerContainerStyle={styles.nameContent}
                 style={styles.name}
@@ -353,6 +352,7 @@ const ProfileScreen = (props: any) => {
                 >
                   {profile?.first_name + " " + profile?.last_name}
                 </_Text>
+                : null }
                 {match ?
                 <View
                 style={styles.outerMatchContainer}
@@ -392,6 +392,7 @@ const ProfileScreen = (props: any) => {
                 </FontAwesomeIcon>
               </TouchableHighlight>
             </View>
+            {profile?.birthday ?
             <View
             style={[styles.iconLabel, styles.firstLabelContainer]}
             >
@@ -405,9 +406,11 @@ const ProfileScreen = (props: any) => {
               <_Text
               isDarkMode={props.isDarkMode}
               >
-                {profile?.age} years old
+                {getAge(profile?.birthday)} years old
               </_Text>
             </View>
+            : null }
+            {profile?.city && profile?.state ?
             <View
             style={styles.iconLabel}
             >
@@ -424,6 +427,7 @@ const ProfileScreen = (props: any) => {
                 {profile?.city}, {profile?.state}
               </_Text>
             </View>
+            : null }
             {profile?.bio ?
             <View>
               <_Text

@@ -75,6 +75,7 @@ export const App = (props: any) => {
   const [receiveTyping,setReceiveTyping] = useState(null);
   const appState = useRef(AppState.currentState);
   const [forceUpdateAccount, setForceUpdateAccount] = useState(false);
+  const [askPermissions, setAskPermissions] = useState(false);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
@@ -166,7 +167,29 @@ export const App = (props: any) => {
 
   // Get device push notification permissions when the app launches
   useEffect(() => {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === 'android' && askPermissions) {
+      Notifications.setNotificationChannelAsync('Messaging', {
+        name: 'Messaging',
+        importance: Notifications.AndroidImportance.MAX,
+      });
+  
+      Notifications.setNotificationCategoryAsync('New Message', [
+        {
+          buttonTitle: 'Reply',
+          identifier: 'reply',
+          textInput: {
+            submitButtonTitle: 'Send'
+            /*
+            Breaks with placeholder, leave out (known bug)
+            Issue: https://github.com/expo/expo/issues/20500
+            */
+          },
+          options: {
+            opensAppToForeground: false
+          }
+        },
+      ])
+  
       Notifications.getPermissionsAsync()
       .then((statusObj) => {
         if (statusObj.status !== "granted") {
@@ -191,7 +214,7 @@ export const App = (props: any) => {
         return null;
       });
     }
-  }, []);
+  }, [askPermissions]);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -261,28 +284,6 @@ export const App = (props: any) => {
           });
       });
 
-      Notifications.setNotificationChannelAsync('Messaging', {
-        name: 'Messaging',
-        importance: Notifications.AndroidImportance.MAX,
-      });
-
-      Notifications.setNotificationCategoryAsync('New Message', [
-        {
-          buttonTitle: 'Reply',
-          identifier: 'reply',
-          textInput: {
-            submitButtonTitle: 'Send'
-            /*
-            Breaks with placeholder, leave out (known bug)
-            Issue: https://github.com/expo/expo/issues/20500
-            */
-          },
-          options: {
-            opensAppToForeground: false
-          }
-        },
-      ])
-
       return () => {
         backgroundSubscription.remove();
         foregroundSubscription.remove();
@@ -337,11 +338,13 @@ export const App = (props: any) => {
         {
           hasError = true;
         }
+        console.log(res);
       });
     }
     catch(e)
     {
       hasError = true;
+      console.log(e);
     }  
   }
 
@@ -833,6 +836,7 @@ export const App = (props: any) => {
                       isDarkMode={isDarkMode}
                       setIsDarkMode={setIsDarkMode}
                       keyboardVisible={keyboardVisible}
+                      setAskPermissions={setAskPermissions}
                       />}
                   </Stack.Screen>
                   <Stack.Screen

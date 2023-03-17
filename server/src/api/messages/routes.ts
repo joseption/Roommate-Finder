@@ -119,7 +119,6 @@ router.post('/', async (req: Request, res: Response) => {
                 push_token: true
               }
             });
-
             if (toUser.push_token) {
               let name = `${fromUser.first_name} ${fromUser.last_name}`;
               try {
@@ -146,11 +145,11 @@ router.post('/', async (req: Request, res: Response) => {
                   }),
                 }).then(async ret => {
                   let res = JSON.parse(await ret.text());
-
+                  console.log(res);
                 });
               }
               catch (e) {
-
+                console.log(e);
               }
             }
           }

@@ -338,13 +338,11 @@ export const App = (props: any) => {
         {
           hasError = true;
         }
-        console.log(res);
       });
     }
     catch(e)
     {
       hasError = true;
-      console.log(e);
     }  
   }
 

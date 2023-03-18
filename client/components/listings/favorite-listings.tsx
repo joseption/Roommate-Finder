@@ -1,12 +1,16 @@
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
-import { Color, FontSize } from '../../style';
+import { Listings_Screen } from '../../helper';
+import { Color, FontSize, Radius, Style } from '../../style';
+import _Button from '../control/button';
 import _Text from '../control/text';
 import ListingCard from './listing-card';
 
 const FavoriteListings = (props: any) => {
   const [favoriteListings, setFavoriteListings] = useState<JSX.Element[]>([]);
   const [refreshing, setRefreshing] = useState(false);  
+  const [count, setCount] = useState(0);  
 
   const refresh = () => {
     setRefreshing(true);
@@ -19,8 +23,14 @@ const FavoriteListings = (props: any) => {
   }, [props.allListings]);
 
   const generateFavoriteListings = () => {
-    const favoriteListings = props.allListings
-      .filter((item: any) => item.userId === props.userId)
+    let cnt = 0;
+    const favorites = props.allListings
+      .filter((item: any) => {
+        if (item.userId === props.userId)
+          cnt++;
+
+        return item.userId === props.userId;
+      })
       .map((item: any, key: any) => (
         <ListingCard
           isDarkMode={props.isDarkMode}
@@ -32,8 +42,9 @@ const FavoriteListings = (props: any) => {
           item={item}
         />
       ));
-  
-    setFavoriteListings(favoriteListings);
+    
+    setCount(cnt);
+    setFavoriteListings(favorites);
   };
   
 
@@ -42,6 +53,10 @@ const FavoriteListings = (props: any) => {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
+    },
+    innerContainer: {
+      justifyContent: 'center',
+      height: '100%'
     },
     content: {
       flex: 1,
@@ -65,6 +80,35 @@ const FavoriteListings = (props: any) => {
     },
     distanceContainer: {
       padding: 10,
+    },
+    noListingsContainer: {
+      display: 'flex',
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100%'
+    },
+    textStyle: {
+      fontWeight: 'bold',
+      textAlign: 'center',
+      color: Color(props.isDarkMode).text,
+      paddingBottom: 10
+    },
+    subTextStyle: {
+      fontWeight: 'normal',
+      marginTop: 10,
+      marginBottom: 20,
+      fontSize: FontSize.default
+    },
+    homeIcon: {
+      ...Platform.select({
+        web: {
+          outlineStyle: 'none'
+        }
+      }),
+    },
+    homeIconContainer: {
+      marginBottom: 20,
     }
 });
 
@@ -74,6 +118,7 @@ const FavoriteListings = (props: any) => {
         <_Text style={styles.title}>Favorite Listings</_Text>
         <ScrollView
         style={styles.container}
+        contentContainerStyle={count == 0 ? styles.innerContainer : null}
         refreshControl={
           <RefreshControl
           refreshing={refreshing}
@@ -83,7 +128,40 @@ const FavoriteListings = (props: any) => {
           />
         }
         >
+        {count > 0 ?
+        <>
         {favoriteListings}
+        </>
+        :
+        <View style={styles.noListingsContainer}>
+          <View
+          style={styles.homeIconContainer}
+          >
+            <FontAwesomeIcon 
+            size={100} 
+            color={Color(props.isDarkMode).gold} 
+            style={styles.homeIcon} 
+            icon="home"
+            >
+            </FontAwesomeIcon>
+          </View>
+          <_Text
+          style={styles.textStyle}
+          >
+            You currently don't have any listings
+          </_Text>
+          <_Button
+          style={Style(props.isDarkMode).buttonInverted}
+          textStyle={Style(props.isDarkMode).buttonInvertedText}
+          onPress={() => {
+            props.setCurrentScreen(Listings_Screen.create);
+          }}
+          isDarkMode={props.isDarkMode}
+          >
+            Create Listing
+          </_Button>
+        </View>
+        }
         </ScrollView>
       </>
     

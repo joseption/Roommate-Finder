@@ -57,7 +57,7 @@
 
                 <data
                     android:scheme="https"
-                    android:host="roomfin.xyz" />
+                    android:host="www.roomfin.xyz" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -67,7 +67,7 @@
 
                 <data
                     android:scheme="http"
-                    android:host="roomfin.xyz" />
+                    android:host="www.roomfin.xyz" />
             </intent-filter>
         </activity>
         <activity

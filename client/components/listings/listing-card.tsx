@@ -35,7 +35,7 @@ const ListingCard = (props: any) => {
       borderRadius: Radius.default,
     },
     image: {
-      width: "100%",
+      width: '100%',
       height: 150,
       borderTopLeftRadius: Radius.default,
       borderTopRightRadius: Radius.default,
@@ -45,35 +45,33 @@ const ListingCard = (props: any) => {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+    },
+    infoContainer: {
       padding: 10,
+      display: "flex",
+      width: '100%',
+      flexDirection: 'column'
     },
     header: {
       fontSize: FontSize.large,
       fontWeight: "bold",
       color: Color(props.isDarkMode).text,
-      lineHeight: 20,
-      maxHeight: 40,
-      flex: 1,
     },
     subHeaderContainer: {
       display: "flex",
       flexDirection: "row",
-      justifyContent: "space-between",
       alignItems: "center",
-      padding: 10,
-      paddingBottom: 0,
+      marginTop: 10
     },
     subHeader: {
       display: "flex",
       flexDirection: "row",
       alignItems: "center",
-      marginRight: 10,
     },
     subHeaderText: {
       fontSize: FontSize.default,
-      color: Color(props.isDarkMode).textTertiary,
+      color: Color(props.isDarkMode).text,
       marginLeft: 5,
-      marginRight: 10,
     },   
     priceContainer: {
       borderBottomLeftRadius: Radius.default,
@@ -90,31 +88,26 @@ const ListingCard = (props: any) => {
       fontWeight: "bold",
       alignSelf: "flex-start",
     },
-    priceText: {
-      fontSize: FontSize.default,
-      color: Color(props.isDarkMode).textTertiary,
-      marginLeft: 5,
-    },
     userImageContainer: {
       position: "absolute",
-      top: 10,
-      right: 10,
+      top: 5,
+      right: 5,
       zIndex: 1,
-      borderWidth: 2,
+      borderWidth: 1,
       borderColor: Color(props.isDarkMode).actualWhite,
-      borderRadius: 17,
+      borderRadius: Radius.round,
       backgroundColor: Color(props.isDarkMode).actualWhite,
     },
     favorite: {
       position: "absolute",
-      top: 10,
-      right: 10,
+      top: 5,
+      right: 5,
       zIndex: 1,
     },
     userImage: {
       width: 30,
       height: 30,
-      borderRadius: 15,
+      borderRadius: Radius.round,
     },  
     
     icon: {
@@ -132,6 +125,29 @@ const ListingCard = (props: any) => {
         },
       }),
     },
+    headerTextContainer: {
+      flex: 1
+    },
+    detail: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginRight: 5,
+      marginBottom: 5,
+      borderRadius: Radius.round,
+      paddingVertical: 5,
+      paddingHorizontal: 15,
+      color: Color(props.isDarkMode).text,
+      fontSize: FontSize.default,
+      backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).contentBackgroundSecondary,
+      borderColor: Color(props.isDarkMode).separator,
+      borderWidth: .5
+    },
+    distanceContent: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center'
+    }
   });
   
 
@@ -158,12 +174,12 @@ const ListingCard = (props: any) => {
 
         {
           props.listingUserId === props.userId ? (
-            <Pressable style={styles.userImageContainer}>
+            <View style={styles.userImageContainer}>
               <Image
                 source={{ uri: props.userImage }}
                 style={styles.userImage}
               />
-            </Pressable>
+            </View>
           ) : (
             <Pressable style={styles.favorite} onPress={sendFavorite}>
               <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()} />
@@ -172,45 +188,81 @@ const ListingCard = (props: any) => {
           )
         }
 
-        
-        <View style={styles.headerContainer}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <_Text isDarkMode={props.isDarkMode} style={styles.header}>
+        <View
+        style={styles.infoContainer}
+        >
+          <View style={styles.headerContainer}>
+            <_Text
+            containerStyle={styles.headerTextContainer}
+            numberOfLines={1}
+            isDarkMode={props.isDarkMode}
+            style={styles.header}>
                 {props.item.name}
             </_Text>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <FontAwesomeIcon
-              icon={housingIcons[props.item.housing_type]}
-              color={Color(props.isDarkMode).textTertiary}
-              style={{ marginRight: 5 }}
-            />
-            <_Text isDarkMode={props.isDarkMode} style={[styles.header, { color: Color(props.isDarkMode).textTertiary }]}>
-              {props.item.housing_type}
+            <_Text
+            isDarkMode={props.isDarkMode}
+            style={styles.header}>
+              {'$' + props.item.price} / mo
             </_Text>
           </View>
-
-        </View>
-        <View style={styles.subHeaderContainer}>
-          <View style={styles.subHeader}>
-            <FontAwesomeIcon icon={faMapMarkerAlt} color={Color(props.isDarkMode).textTertiary} />
-            <_Text isDarkMode={props.isDarkMode} style={styles.subHeaderText}>
+          <View
+          style={styles.distanceContent}
+          >
+            <FontAwesomeIcon
+            icon={faMapMarkerAlt}
+            color={Color(props.isDarkMode).text}
+            />
+            <_Text
+            isDarkMode={props.isDarkMode}
+            style={styles.subHeaderText}
+            >
               {props.item.distanceToUcf} {props.item.distanceToUcf === 1 ? "mile" : "miles"} from UCF
             </_Text>
           </View>
-          <View style={styles.subHeader}>
-            <FontAwesomeIcon icon={faBed} color={Color(props.isDarkMode).textTertiary} />
-            <_Text isDarkMode={props.isDarkMode} style={styles.subHeaderText}>{props.item.rooms + " bedrooms"}</_Text>
-            <FontAwesomeIcon icon={faBath} color={Color(props.isDarkMode).textTertiary} style={{ marginLeft: 10 }} />
-            <_Text isDarkMode={props.isDarkMode} style={styles.subHeaderText}>{props.item.bathrooms + " bathrooms"}</_Text>
-          </View>
-        </View>
-        <View style={styles.priceContainer}>
-        <_Text isDarkMode={props.isDarkMode} style={styles.price}>
-          {'$' + props.item.price}
-          <_Text isDarkMode={props.isDarkMode} style={styles.priceText}>/month</_Text>
-        </_Text>
+          <View style={styles.subHeaderContainer}>
 
+            <View
+            style={styles.detail}
+            >
+              <FontAwesomeIcon
+              icon={housingIcons[props.item.housing_type]}
+              color={Color(props.isDarkMode).text}
+              />
+              <_Text
+              isDarkMode={props.isDarkMode}
+              style={styles.subHeaderText}
+              >
+                {props.item.housing_type}
+              </_Text>
+            </View>
+            <View
+            style={styles.detail}
+            >
+              <FontAwesomeIcon
+              icon={faBed}
+              color={Color(props.isDarkMode).text}
+              />
+              <_Text
+              isDarkMode={props.isDarkMode}
+              style={styles.subHeaderText}
+              >
+                {props.item.rooms + " Bed"}
+              </_Text>
+            </View>
+            <View
+            style={styles.detail}
+            >
+              <FontAwesomeIcon
+              icon={faBath}
+              color={Color(props.isDarkMode).text} 
+              />
+              <_Text
+              isDarkMode={props.isDarkMode}
+              style={styles.subHeaderText}>
+                {props.item.bathrooms + " Bath"}
+              </_Text>
+            </View>
+          </View>
         </View>
       </View>
     </TouchableHighlight>

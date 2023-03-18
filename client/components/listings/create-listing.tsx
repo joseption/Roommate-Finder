@@ -18,8 +18,10 @@ const CreateListing = (props: any) => {
   const [userInfo, setUserInfo] = useState<any>();
   const [imageURLArray, setImageURLArray] = useState<string[]>([]);
   const [imageUriArray, setImageUriArray] = useState<string[]>([]);
-  const [imageErrorArray, setImageErrorArray] = useState<string[]>([]);
+  const [imageError, setImageError] = useState('');
   const [isLocationNotFound, setIsLocationNotFound] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDone, setIsDone] = useState(false);
   
   useEffect(() => {
     getUserInfo();
@@ -31,74 +33,59 @@ const CreateListing = (props: any) => {
 
   const [formData, setFormData] = useState({
     name: '',
-    images: [],
     city: '',
     housing_type: '',
     description: '',
     price: 0.0,
-    petsAllowed: false,
+    petsAllowed: null,
     address: '',
     bathrooms: 0,
     rooms: 0,
     size: 0,
     zipcode: '',
     distanceToUcf: 0,
+    images: []
   });
 
   
   const handleImage = (res: ImagePickerResponse) => {
-    setImageErrorArray([]);
+    setImageError('');
+    let UriImages = [] as string[];
+    let UrlImages = [] as string[];
     if (res && res.assets) {
       res.assets.forEach((asset) => {
-        setImageErrorArray((prev) => {
-          const newArray = [...prev, ''];
-          return newArray.filter(Boolean) as string[];
-        });
         if (Platform.OS === 'web') {
           if (asset.uri) {
-            setImageUriArray((prev) => {
-              const newArray = [...prev, asset.uri];
-              return newArray.filter(Boolean) as string[];
-            });
-            handleChange('images', asset.uri);
+            UriImages.push(asset.uri);
           } else {
-            setImageErrorArray((prev) => {
-              const newArray = [...prev, "Photo could not be attached"];
-              return newArray.filter(Boolean) as string[];
-            });
+            setImageError("Photo could not be attached");
           }
         } else {
           if (asset.base64) {
             if (asset.uri) {
-              setImageURLArray((prev) => {
-                const newArray = [...prev, asset.uri];
-                return newArray.filter(Boolean) as string[];
-              });
+              UrlImages.push(asset.uri);
             }
-            setImageUriArray((prev) => {
-              const newArray = [...prev, "data:image/jpeg;base64," + asset.base64];
-              return newArray.filter(Boolean) as string[];
-            });
-            handleChange('images', asset.uri);
+            UriImages.push("data:image/jpeg;base64," + asset.base64);
           } else {
-            setImageErrorArray((prev) => {
-              const newArray = [...prev, "Photo could not be attached"];
-              return newArray.filter(Boolean) as string[];
-            });
+            setImageError("Photo could not be attached");
           }
         }
       });
     } else if (res.errorCode) {
-      setImageErrorArray((prev) => {
-        const newArray = [...prev, "A problem occurred while attaching your photo, please try again"];
-        return newArray.filter(Boolean) as string[];
-      });
+      setImageError("A problem occurred while attaching your photo, please try again");
+    }
+
+    if (UriImages.length > 0) {
+      setImageUriArray(imageUriArray.concat(UriImages));
+    }
+    if (UrlImages.length > 0) {
+      setImageURLArray(imageURLArray.concat(UrlImages));
     }
   };
   
 
   const uploadPhotos = async () => {
-    launchImageLibrary({ mediaType: 'photo', maxHeight: 1000, maxWidth: 1000, includeBase64: true, multiple: true }, (res) => {
+    launchImageLibrary({ mediaType: 'photo', maxHeight: 1000, maxWidth: 1000, includeBase64: true, multiple: true }, (res) => {   
       handleImage(res);
     });
   };
@@ -112,21 +99,15 @@ const CreateListing = (props: any) => {
   };
 
   const handleChange = (key: string, value: any) => {
-    if (key === 'images') {
-      setFormData({
-        ...formData,
-        [key]: [...formData[key], value as never],
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [key]: value,
-      });
-    }
+    setFormData({
+      ...formData,
+      [key]: value,
+    });
   };
 
 
   const handleSubmit = async () => { 
+    formData.images = imageUriArray as never;
     try {
       let auth = await authTokenHeader();
       await fetch(`${env.URL}/listings`, {
@@ -138,16 +119,14 @@ const CreateListing = (props: any) => {
         body: JSON.stringify(formData),
       }).then(async ret => {
         let res = JSON.parse(await ret.text());
-        if (!res.Error) {
-          console.log(formData)
-          return true;
+        if (res.Error) {
+          return false;
         }
-        console.log(res);
       });
     } catch (err) {
-      console.error(err);
+      return false;
     }  
-    return false;
+    return true;
   };  
 
   const getOptions = () => {
@@ -175,13 +154,6 @@ const CreateListing = (props: any) => {
   };
 
   const handleDeletePhoto = (index: number) => {
-    let updatedImages = [...formData.images];
-    updatedImages.splice(index, 1);
-    setFormData({
-      ...formData,
-      images: updatedImages,
-    });
-  
     let updatedImageURLArray = [...imageURLArray];
     updatedImageURLArray.splice(index, 1);
     setImageURLArray(updatedImageURLArray);
@@ -189,6 +161,11 @@ const CreateListing = (props: any) => {
     let updatedImageUriArray = [...imageUriArray];
     updatedImageUriArray.splice(index, 1);
     setImageUriArray(updatedImageUriArray);
+
+    setFormData({
+      ...formData,
+      images: updatedImageUriArray as never[],
+    });
   };
 
   const compareDistances = (UCF_latitude: number, UCF_longitude: number, listing_latitude: number, listing_longitude: number) => {
@@ -222,13 +199,16 @@ const CreateListing = (props: any) => {
 
   const createListing = async () => {
     let res = await handleSubmit();
+    setIsLoading(false);
     if (res) {
+      setIsDone(true);
       props.refresh();
       props.onClose();
     }
   }
 
   const checkAddressValidity = async (address: string) => {
+    setIsLoading(true);
     let hasError = false;
     try
     {   
@@ -238,7 +218,7 @@ const CreateListing = (props: any) => {
       await fetch(`${env.URL}/listings/location`,
       {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
       let res = JSON.parse(await ret.text());
-        if (res.Error)
+      if (res.Error)
         {
           hasError = true;
         }
@@ -260,6 +240,7 @@ const CreateListing = (props: any) => {
     {
       hasError = true;
     }  
+    setIsLoading(false);
     return !hasError;
   };
 
@@ -270,8 +251,8 @@ const CreateListing = (props: any) => {
   
     if (isValidAddress) {
       createListing();
-      props.onClose();
-    } else if(isValidAddress == false){
+    } else {
+      setIsLoading(false);
       setIsLocationNotFound(true);
       console.error("Location not found");
     }
@@ -281,6 +262,14 @@ const CreateListing = (props: any) => {
     let style = [];
     style.push({backgroundColor: !props.isDarkMode ? Color(props.isDarkMode).holderMask : Color(props.isDarkMode).promptMaskMobile});
     return style;
+  }
+
+  const disabled = () => {
+    if (isDone) {
+      return true;
+    }
+    let formDataFilled = formData.address && formData.bathrooms && formData.city && formData.description && formData.housing_type && imageUriArray.length > 0 && formData.name && formData.petsAllowed != null && formData.price && formData.rooms && formData.size && formData.zipcode;
+    return !formDataFilled;
   }
 
   const styles = StyleSheet.create({
@@ -376,7 +365,9 @@ const CreateListing = (props: any) => {
       marginBottom: 15,
     },
     photoContent: {
-      flexWrap: 'wrap',
+      flexGrow: 0,
+    },
+    photoContentContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
@@ -387,15 +378,19 @@ const CreateListing = (props: any) => {
               outlineStyle: 'none'
           }
       }),
-      position: 'absolute',
-      top: 0,
-      right: 0
     },
     deleteButtonContainer: {
       position: 'absolute',
       top: 0,
       right: 0,
-      padding: 1
+    },
+    deleteIconContainer: {
+      padding: 1,
+      backgroundColor: Color(props.isDarkMode).danger,
+      borderRadius: Radius.round,
+      position: 'absolute',
+      top: -1,
+      right: -1
     },
     defaultImage: {
       display: 'flex',
@@ -426,7 +421,10 @@ const CreateListing = (props: any) => {
         flexWrap: 'wrap'
       },
       photoHoldingContainer: {
-        marginBottom: 10
+        marginBottom: 10,
+        width: '100%',
+        justifyContent: 'center',
+        flexDirection: 'row'
       },
       deleteIconShadow: {
         right: -2,
@@ -463,6 +461,13 @@ const CreateListing = (props: any) => {
       closeBtn: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
+      },
+      outerPhoto: {
+        flexDirection: 'row',
+        justifyContent: 'center'
+      },
+      error: {
+        marginBottom: 10
       }
   });
 
@@ -534,40 +539,50 @@ const CreateListing = (props: any) => {
                   </View>
                   :
                   <View
-                    style={styles.photoContent}
+                  style={styles.outerPhoto}
                   >
-                    {getPhotos().map((photo, index) => (
-                      <View key={index} style={styles.photoContainer}>
-                        <_Image
-                          style={styles.image}
-                          source={Platform.OS === 'web' ? photo : { uri: photo }}
-                          height={100}
-                          width={100} />
-                        <Pressable
-                          style={styles.deleteButtonContainer}
-                          onPress={(e: any) => handleDeletePhoto(index)}
-                        >
-                          <View>
-                            <FontAwesomeIcon
-                              size={26}
-                              color={Color(props.isDarkMode).actualBlack}
-                              icon="close"
-                              style={[styles.deleteIcon, styles.deleteIconShadow]}
+                    <ScrollView
+                      style={styles.photoContent}
+                      contentContainerStyle={styles.photoContentContainer}
+                      horizontal={true}
+                    >
+                      {getPhotos().map((photo, index) => (
+                        <View key={index} style={styles.photoContainer}>
+                          <_Image
+                            style={styles.image}
+                            source={Platform.OS === 'web' ? photo : { uri: photo }}
+                            height={100}
+                            width={100}
+                          />
+                          <Pressable
+                            style={styles.deleteButtonContainer}
+                            onPress={(e: any) => handleDeletePhoto(index)}
+                          >
+                            <View
+                            style={styles.deleteIconContainer}
                             >
-                            </FontAwesomeIcon>
-                            <FontAwesomeIcon
-                              size={25}
-                              color={Color(props.isDarkMode).actualWhite}
-                              icon="close"
-                              style={styles.deleteIcon}
-                            >
-                            </FontAwesomeIcon>
-                          </View>
-                        </Pressable>
-                      </View>
-                    ))}
-                  </View>}
+                              <FontAwesomeIcon
+                                size={20}
+                                color={Color(props.isDarkMode).actualWhite}
+                                icon="close"
+                                style={styles.deleteIcon}
+                              >
+                              </FontAwesomeIcon>
+                            </View>
+                          </Pressable>
+                        </View>
+                      ))}
+                    </ScrollView>
+                  </View>
+                  }
               </View>
+              {imageError ?
+              <_Text
+              style={[Style(props.isDarkMode).textDanger, styles.error]}
+              >
+                {imageError}
+              </_Text>
+              : null }
               <_Button
                 isDarkMode={props.isDarkMode}
                 onPress={(e: any) => { uploadPhotos(); } }
@@ -679,6 +694,8 @@ const CreateListing = (props: any) => {
                 isDarkMode={props.isDarkMode}
                 style={[Style(props.isDarkMode).buttonGold]}
                 onPress={() => {handleSubmitListing()}}
+                disabled={disabled()}
+                loading={isLoading}
               >
                 {'Create Listing'}
               </_Button>

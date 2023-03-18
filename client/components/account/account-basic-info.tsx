@@ -161,7 +161,7 @@ const AccountInfo = (props: any) => {
 
     const getYearOptions = () => {
         var years = [];
-        var year = new Date().getFullYear();
+        var year = new Date().getFullYear() - 15; // Age bumper, no children
         for (var i = 0; i < 100; i++) {
             years.push({key:year, value:year.toString()});
             year--;
@@ -517,8 +517,7 @@ const AccountInfo = (props: any) => {
             maxWidth: 400
         },
         imageError: {
-            marginBottom: 5,
-            height: 20
+            marginBottom: 10,
         },
         newUserIcon: {
             ...Platform.select({
@@ -565,7 +564,7 @@ const AccountInfo = (props: any) => {
             borderColor: Color(props.isDarkMode).separator,
             borderWidth: 1,
             borderRadius: Radius.round,
-            marginBottom: 5,
+            marginBottom: 10,
         },
         group: {
             backgroundColor: Color(props.isDarkMode).default
@@ -764,11 +763,13 @@ const AccountInfo = (props: any) => {
                     >
                     </_Image>
                     }
+                    {imageError ?
                     <_Text
                     style={[Style(props.isDarkMode).textSmallDanger, _styles.imageError]}
                     >
                         {imageError}
                     </_Text>
+                    : null }
                     <View
                     style={_styles.photoButtonContainer}
                     >

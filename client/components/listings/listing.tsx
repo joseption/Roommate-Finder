@@ -1,6 +1,6 @@
-import { ScrollView, StyleSheet, View, Image } from "react-native";
+import { ScrollView, StyleSheet, View, Image, TouchableHighlight, Platform, ActivityIndicator } from "react-native";
 import { Color, FontSize, Radius, Style } from "../../style";
-import { authTokenHeader, env, getLocalStorage} from "../../helper";
+import { authTokenHeader, env, getLocalStorage, navProp, NavTo, userId} from "../../helper";
 import _Button from "../control/button";
 import _Image from "../control/image";
 import _Text from "../control/text";
@@ -8,19 +8,22 @@ import { useState, useEffect } from "react";
 import Swiper from "react-native-swiper/src";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faHome, faBuilding, faCity, faBed, faBath, faRuler, faPaw, faMapMarkerAlt} from "@fortawesome/free-solid-svg-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const ListingView = (props: any) => {
-
+  const navigation = useNavigation<navProp>();
   const {currentListing} = props;
-  const [userInfo, setUserInfo] = useState<any>();
+  const [isMe, setIsMe] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const [creator, setCreator] = useState<{
     id: string;
     first_name: string;
+    last_name: string;
     image: string;
-  }>({ id: "", first_name: "", image: "" });
+  }>({ id: "", first_name: "", last_name: "", image: "" });
   
   const onClose = () => {
     props.setCurrentListing(null);
@@ -34,7 +37,7 @@ const ListingView = (props: any) => {
 
   const getUser = async (id: string) => {
     const tokenHeader = await authTokenHeader();
-    return fetch(`${env.URL}/users/profile?userId=${id}`, {
+    let res = await fetch(`${env.URL}/users/profile?userId=${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -47,12 +50,18 @@ const ListingView = (props: any) => {
       } else {
         const user = {
           first_name: res.first_name,
+          last_name: res.last_name,
           id: res.id,
           image: res.image,
         };
+        let myId = await userId()
+        setIsMe(myId === user.id);
         setCreator(user);
       }
     });
+
+    setIsLoaded(true);
+    return res;
   };
 
   const deleteListing = async () => {
@@ -122,13 +131,14 @@ const ListingView = (props: any) => {
           <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
             <_Button
               onPress={() => setShowDeleteConfirmation(false)}
-              style={[Style(props.isDarkMode).buttonDefault, { margin: 5 }]}
+              containerStyle={{ marginRight: 5 }}
+              style={Style(props.isDarkMode).buttonDefault}
             >
               Cancel
             </_Button>
             <_Button
               onPress={deleteListing}
-              style={[Style(props.isDarkMode).buttonDanger, { margin: 5 }]}
+              style={Style(props.isDarkMode).buttonDanger}
             >
               Delete
             </_Button>
@@ -138,20 +148,13 @@ const ListingView = (props: any) => {
     );
   };  
 
-  const getUserInfo = async () => {
-    setUserInfo(await getLocalStorage().then((res) => {return res.user}));
-  };
-
   useEffect(() => {
     getUser(props.currentListing.userId);
   }, [props.currentListing]);
 
-  useEffect(() => {
-    getUserInfo();
-  }, [userInfo?.id])
-
-
-  const isOwner = creator.id === userInfo?.id;
+  const generateRequestId = () => {
+    return Math.floor(Math.random() * 9999999) + 1;
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -173,22 +176,16 @@ const ListingView = (props: any) => {
     },
     creatorContainer: {
       flexDirection: "row",
-      alignItems: "center",
-      marginTop: 20,
-      marginBottom: 0,
+      alignItems: 'center'
     },
 
     creatorImage: {
       width: 100,
       height: 100,
-      borderRadius: 50,
-      marginRight: 20,
-      borderWidth: 2,
-      borderColor: Color(props.isDarkMode).border,
-      shadowColor: Color(props.isDarkMode).shadow,
-      shadowOpacity: 0.5,
-      shadowRadius: 2,
-      elevation: 2,
+      borderRadius: Radius.round,
+      marginRight: 10,
+      borderWidth: 1,
+      borderColor: Color(props.isDarkMode).separator,
     },
     creatorName: {
       fontSize: FontSize.default,
@@ -223,7 +220,7 @@ const ListingView = (props: any) => {
     sectionHeader: {
       fontSize: FontSize.large,
       fontWeight: "bold",
-      marginBottom: 10,
+      marginBottom: 5,
       color: Color(props.isDarkMode).text,
     },
     value: {
@@ -232,7 +229,7 @@ const ListingView = (props: any) => {
     },
     section: {
       marginTop: 10,
-      borderColor: Color(props.isDarkMode).border,
+      borderColor: Color(props.isDarkMode).separator,
       borderWidth: 1,
       borderRadius: Radius.default,
       padding: 10,
@@ -240,15 +237,13 @@ const ListingView = (props: any) => {
     detailRow: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 5,
+      marginBottom: 2,
     },
     detailLabel: {
-      flex: 1,
       fontSize: FontSize.default,
       color: Color(props.isDarkMode).text,
     },
     detailValue: {
-      flex: 1,
       fontSize: FontSize.default,
       color: Color(props.isDarkMode).text,
     },
@@ -260,20 +255,17 @@ const ListingView = (props: any) => {
     },
     description: {
       fontSize: FontSize.default,
-      fontStyle: "italic",
-      color: "#555",
+      color: Color(props.isDarkMode).text,
     },
     price: {
       fontSize: FontSize.large,
       fontWeight: "bold",
-      color: Color(props.isDarkMode).black,
-      flexDirection: "row",
-      alignItems: "center",
+      color: Color(props.isDarkMode).text,
     },
     bigTitle: {
       fontSize: FontSize.huge,
       fontWeight: "bold",
-      marginTop: 10,
+      marginTop: 5,
       color: Color(props.isDarkMode).text,
     },
     perMonth: {
@@ -330,22 +322,87 @@ const ListingView = (props: any) => {
     closeBtn: {
       flexDirection: 'row',
       justifyContent: 'flex-end',
-    }
+    },
+    buttonContainer: {
+      margin: 10
+    },
+    space: {
+      height: 30
+    },
+    msgButton: {
+      padding: 10,
+      borderRadius: Radius.round,
+      backgroundColor: Color(props.isDarkMode).default
+    },
+    profileButton: {
+      padding: 10,
+      borderRadius: Radius.round,
+      backgroundColor: Color(props.isDarkMode).gold
+    },
+    deleteButton: {
+      padding: 10,
+      borderRadius: Radius.round,
+      backgroundColor: Color(props.isDarkMode).danger
+    },
+    backIcon: {
+      ...Platform.select({
+        web: {
+          outlineStyle: 'none'
+        }
+      }),
+    },
+    contactContent: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    customButton: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 5
+    },
+    info: {
+      marginTop: 5,
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    myInfo: {
+      width: '100%',
+
+    },
+    loadingScreen: {
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1
+    },
   });
+
+  if (!isLoaded) {
+    return (
+      <View style={styles.loadingScreen}>
+        <ActivityIndicator
+        size="large"
+        color={Color(props.isDarkMode).gold}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.content}>
         <Swiper
           autoplay={true}
-          showsButtons={true}
+          showsButtons={currentListing?.images?.length > 1}
           scrollEnabled={true}
           style={styles.swiper}
           showsPagination={false}
         >
-          {currentListing.images.map((image, index) => (
+          {currentListing.images.map((image: any, index: any) => (
             <View key={index}>
-              <_Image source={{ uri: image }} style={styles.image} />
+              <Image source={{ uri: image }} style={styles.image} />
               <View style={styles.positionBox}>
                 <_Text style={styles.positionText}>
                   {index + 1}/{currentListing.images.length}
@@ -355,29 +412,23 @@ const ListingView = (props: any) => {
           ))}
         </Swiper>
 
-        <_Text isDarkMode={props.isDarkMode} style={styles.bigTitle}>
+        <_Text
+        isDarkMode={props.isDarkMode}
+        style={styles.bigTitle}>
           {currentListing.name}
         </_Text>
 
-        <View style={styles.price}>
-          <_Text isDarkMode={props.isDarkMode} style={styles.dollarSign}>
-            $
-          </_Text>
-          <_Text isDarkMode={props.isDarkMode} style={styles.price}>
-            {currentListing.price}
-          </_Text>
-
-          <_Text isDarkMode={props.isDarkMode} style={styles.perMonth}>
-            {"/month"}
-          </_Text>
-        </View>
-
-        <_Text isDarkMode={props.isDarkMode} style={styles.description}>
-          {currentListing.description}
+        <_Text
+        isDarkMode={props.isDarkMode}
+        style={styles.price}>
+          ${currentListing.price} / month
         </_Text>
 
         <View style={styles.section}>
-          <_Text isDarkMode={props.isDarkMode} style={styles.sectionHeader}>
+          <_Text
+          isDarkMode={props.isDarkMode}
+          style={styles.sectionHeader}
+          >
             Property Details
           </_Text>
 
@@ -387,7 +438,9 @@ const ListingView = (props: any) => {
               size={FontSize.default}
               style={styles.detailIcon}
             />
-            <_Text isDarkMode={props.isDarkMode} style={styles.detailValue}>
+            <_Text
+            isDarkMode={props.isDarkMode}
+            style={styles.detailValue}>
               {currentListing.housing_type}
             </_Text>
           </View>
@@ -398,8 +451,10 @@ const ListingView = (props: any) => {
               size={FontSize.default}
               style={styles.detailIcon}
             />
-            <_Text isDarkMode={props.isDarkMode} style={styles.detailValue}>
-              {currentListing.size} sq ft
+            <_Text
+            isDarkMode={props.isDarkMode}
+            style={styles.detailValue}>
+              {currentListing.size} sqft
             </_Text>
           </View>
 
@@ -410,7 +465,7 @@ const ListingView = (props: any) => {
               style={styles.detailIcon}
             />
             <_Text isDarkMode={props.isDarkMode} style={styles.detailValue}>
-              {currentListing.rooms} Bedrooms
+              {currentListing.rooms} Bedroom{currentListing.rooms > 1 ? 's' : ''}
             </_Text>
           </View>
 
@@ -421,7 +476,7 @@ const ListingView = (props: any) => {
               style={styles.detailIcon}
             />
             <_Text isDarkMode={props.isDarkMode} style={styles.detailValue}>
-              {currentListing.bathrooms} Bathrooms
+              {currentListing.bathrooms} Bathroom{currentListing.bathrooms > 1 ? 's' : ''}
             </_Text>
           </View>
 
@@ -446,68 +501,179 @@ const ListingView = (props: any) => {
               {currentListing.distanceToUcf} {currentListing.distanceToUcf === 1 ? "mile" : "miles"} from UCF
             </_Text>
           </View>
-        </View>        
-
-
+        </View>    
         <View style={styles.section}>
-          <_Text isDarkMode={props.isDarkMode} style={styles.sectionHeader}>
-            {isOwner ? "Your Information" : "Creator Information"}
+          <_Text
+          isDarkMode={props.isDarkMode}
+          style={styles.sectionHeader}
+          >
+            Overview
           </_Text>
+          <_Text
+          isDarkMode={props.isDarkMode}
+          style={styles.description}>
+            {currentListing.description}
+          </_Text>    
+        </View>  
 
-          {isOwner ? (
-            <View style={styles.creatorContainer}>
-              <_Image source={{ uri: creator.image }} style={styles.creatorImage} />
-              <View style={{ flex: 1 }}>
-                <View style={styles.messageButton}>
-                  <View style={{ flexDirection: "row" }}>
-                    <_Button
-                      style={[Style(props.isDarkMode).buttonGold, { margin: 5 }]}
-                      onPress={() => {}}
+        <>
+        {isLoaded ?
+        <View style={styles.section}>
+          {isMe ? (
+            <View>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              style={styles.sectionHeader}>
+                Your Listing Options
+              </_Text>
+              <View style={styles.creatorContainer}>
+                <View
+                style={[styles.info, styles.myInfo]}
+                >
+                  <TouchableHighlight
+                  underlayColor={Color(props.isDarkMode).defaultUnderlay}
+                  style={[styles.msgButton, {marginRight: 5}]}
+                  onPress={() => {}}
+                  >
+                    <View
+                    style={styles.customButton}
                     >
-                      {"Edit Listing"}
-                    </_Button>
-                    <_Button
-                      style={[
-                        Style(props.isDarkMode).buttonDanger,
-                        { margin: 5 },
-                      ]}
-                      onPress={() => setShowDeleteConfirmation(true)}
+                      <FontAwesomeIcon 
+                      size={20} 
+                      color={Color(props.isDarkMode).actualWhite} 
+                      style={styles.backIcon} 
+                      icon="pencil"
+                      >
+                      </FontAwesomeIcon>
+                      <_Text
+                      style={{color: Color(props.isDarkMode).actualWhite, marginLeft: 5}}
+                      >
+                        Edit
+                      </_Text>
+                    </View>
+                  </TouchableHighlight>
+                  <TouchableHighlight
+                  underlayColor={Color(props.isDarkMode).dangerUnderlay}
+                  style={styles.deleteButton}
+                  onPress={() => setShowDeleteConfirmation(true)}
+                  >
+                    <View
+                    style={styles.customButton}
                     >
-                      {"Delete Listing"}
-                    </_Button>
-                  </View>
+                      <FontAwesomeIcon 
+                      size={20} 
+                      color={Color(props.isDarkMode).actualWhite} 
+                      style={styles.backIcon} 
+                      icon="trash"
+                      >
+                      </FontAwesomeIcon>
+                      <_Text
+                      style={{color: Color(props.isDarkMode).actualWhite, marginLeft: 5}}
+                      >
+                        Delete
+                      </_Text>
+                    </View>
+                  </TouchableHighlight>
                 </View>
               </View>
             </View>
         ) : (
+          <View>
+            <View
+            style={styles.contactContent}
+            >
+              <_Text
+                isDarkMode={props.isDarkMode}
+                style={styles.sectionHeader}>
+                  Owner Information
+              </_Text>
+            </View>
             <View style={styles.creatorContainer}>
-              <_Image
+              <Image
                 source={{ uri: creator.image }}
                 style={styles.creatorImage}
               />
               <View>
-                <View style={styles.messageButton}>
-                  <_Button
-                    onPress={() => {}}
-                    style={[Style(props.isDarkMode).buttonDefault,{margin:10}]}
+                <_Text
+                style={[Style(props.isDarkMode).textDefault, {fontWeight: 'bold'}]}
+                >
+                  {creator.first_name} {creator.last_name}
+                </_Text>
+                <View
+                style={styles.info}
+                >
+                  <TouchableHighlight
+                  underlayColor={Color(props.isDarkMode).goldUnderlay}
+                  style={[styles.profileButton, {marginRight: 5}]}
+                  onPress={() => { navigation.navigate(NavTo.Profile, { profile: creator.id } as never) }}
                   >
-                    {"Message " + creator.first_name}
-                  </_Button>
+                    <View
+                    style={styles.customButton}
+                    >
+                      <FontAwesomeIcon 
+                      size={20} 
+                      color={Color(props.isDarkMode).actualWhite} 
+                      style={styles.backIcon} 
+                      icon="user"
+                      >
+                      </FontAwesomeIcon>
+                      <_Text
+                      style={{color: Color(props.isDarkMode).actualWhite, marginLeft: 5}}
+                      >
+                        Profile
+                      </_Text>
+                    </View>
+                  </TouchableHighlight>
+                  <TouchableHighlight
+                  underlayColor={Color(props.isDarkMode).defaultUnderlay}
+                  style={styles.msgButton}
+                  onPress={() => {
+                    props.setNavSelector(NavTo.Messages);
+                    navigation.navigate(NavTo.Messages, {user: creator.id, requestId: generateRequestId()} as never);
+                  }}
+                  >
+                    <View
+                    style={styles.customButton}
+                    >
+                      <FontAwesomeIcon 
+                      size={20} 
+                      color={Color(props.isDarkMode).actualWhite} 
+                      style={styles.backIcon} 
+                      icon="message"
+                      >
+                      </FontAwesomeIcon>
+                      <_Text
+                      style={{color: Color(props.isDarkMode).actualWhite, marginLeft: 5}}
+                      >
+                        Message
+                      </_Text>
+                    </View>
+                  </TouchableHighlight>
                 </View>
               </View>
             </View>
-            )} 
+          </View>
+          )} 
+        </View>
+        : null }
+        </>
+        <View
+        style={styles.space}
+        >
         </View>
       </ScrollView>
 
       {showDeleteConfirmation && confirmationModal()}
 
-      <View>
+      <View
+      style={styles.buttonContainer}
+      >
         <_Button
           onPress={() => onClose()}
-          style={[Style(props.isDarkMode).buttonDefault,{margin:10}]}
+          textStyle={Style(props.isDarkMode).buttonInvertedText}
+          style={[Style(props.isDarkMode).buttonInverted]}
         >
-          {"Go Back"}
+          {"Back to Listings"}
         </_Button>
       </View>
     </View>

@@ -31,7 +31,6 @@ const Filter = (props: any) => {
   };
 
   useEffect(() => {
-    console.log("bruh")
     console.log(props.filters)
   }, []); 
 
@@ -357,8 +356,8 @@ const Filter = (props: any) => {
           />
 
 <         View style={styles.submitContainer}>
-            <_Button containerStyle={{flex:1}}style={[Style(props.isDarkMode).buttonInverted,{marginRight:5}]}textStyle={Style(props.isDarkMode).buttonInvertedText}onPress={()=>{onClose()}}>Cancel</_Button>
-            <_Button containerStyle={{flex:1}}style={[Style(props.isDarkMode).buttonGold,{marginRight:5}]}onPress={()=>{handleApply()}}>Apply Filter</_Button>
+            <_Button containerStyle={{flex:1, marginRight:5}}style={[Style(props.isDarkMode).buttonInverted]}textStyle={Style(props.isDarkMode).buttonInvertedText}onPress={()=>{onClose()}}>Cancel</_Button>
+            <_Button containerStyle={{flex:1}}style={[Style(props.isDarkMode).buttonGold]}onPress={()=>{handleApply()}}>Apply Filter</_Button>
           </View>
         </View>
       </ScrollView>

@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, Pressable, Platform, ScrollView, Modal, Text } from 'react-native';
+import { View, TextInput, StyleSheet, Pressable, Platform, ScrollView, Modal, Text, Keyboard, TouchableHighlight } from 'react-native';
 import { Context, isMobile } from '../../helper';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from './button';
@@ -184,11 +184,11 @@ const _Dropdown = (props: any, {navigation}:any) => {
         if (props.options) {
             if (!value)
                 value = '';
-
+                
             var cnt = 0;
             var items = props.options.filter((x: any) => {
                 // Added !focus so that all options show when the menu is opened after being closed to show all options
-                if (x && x.value && x.value.trim().toLowerCase().includes(value.trim().toLowerCase()) || !value || !focus || isModal) {
+                if (!value || !focus || isModal || (x && x.value && x.value && x.value.trim().toLowerCase().includes(value.toString().trim().toLowerCase()))) {
                     if (cnt % 2 != 0)
                         x.background = Color(props.isDarkMode).holder;
                     else
@@ -227,6 +227,10 @@ const _Dropdown = (props: any, {navigation}:any) => {
     }
 
     const mappedItems = (value: string, isModal: boolean = false) => {
+        if (isModal) {
+            // Remove focus from input behind on mobile
+            Keyboard.dismiss();
+        }
         var fItems = filteredItems(value, isModal);
         if (!focus && value && fItems.filter((x: { value: string; }) => x.value === value).length == 0) {
             clearSelected();
@@ -284,36 +288,12 @@ const _Dropdown = (props: any, {navigation}:any) => {
         }
     }
 
-    const input = (isWeb: boolean = true) => {
-        return <TextInput
-            style={style()}
-            onChangeText={(e) => onValueChange(e)}
-            value={textValue}
-            placeholder={props.placeholder}
-            keyboardType={props.keyboardType}
-            ref={props.innerRef ? props.innerRef : inputRef}
-            onFocus={(e: any) => onfocus(e)}
-            onBlur={(e: any) => onblur(e)}
-            showSoftInputOnFocus={isWeb}
-            caretHidden={!isWeb}
-            selectTextOnFocus={isWeb}
-            placeholderTextColor={Color(props.isDarkMode).placeHolderText}
-            >
-            </TextInput>
-    }
-
-    const iconStyle = () => {
-        let style = [];
-        style.push(styles.iconContainer);
-        if (Platform.OS !== 'web')
-            style.push(styles.iconContainerMobile);
-
-            return style;
-    }
-
     const styles = StyleSheet.create({
-        closeModalButton: {
-            marginTop: 10,
+        inputContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            width: '100%',
+            alignItems: 'center'
         },
         menuContainer: {
             ...Platform.select({
@@ -379,6 +359,9 @@ const _Dropdown = (props: any, {navigation}:any) => {
             outlineStyle: 'none',
             marginRight: 2,
         },
+        deleteTextIcon: {
+            outlineStyle: 'none',
+        },
         iconContainer: {
             bottom: 0,
             right: 0,
@@ -405,7 +388,78 @@ const _Dropdown = (props: any, {navigation}:any) => {
             zIndex: 1,
             elevation: 1
         },
+        buttons: {
+            flexDirection: 'row',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 10,
+            width: '100%'
+        },
+        shellButton: {
+            width: '100%'
+        },
+        modal: {
+            width: '100%'
+        },
+        deleteTextButton: {
+            position: 'absolute',
+            right: 5,
+            borderRadius: Radius.small
+        }
       });
+
+    const input = (isWeb: boolean = true, isModal: boolean = false) => {
+        return <View
+            style={styles.inputContainer}
+            >
+            <TextInput
+            style={[style(), {flex: 1}, isModal ? {paddingRight: 40} : null]}
+            onChangeText={(e) => onValueChange(e)}
+            value={textValue}
+            placeholder={props.placeholder}
+            keyboardType={props.keyboardType}
+            ref={props.innerRef ? props.innerRef : inputRef}
+            onFocus={(e: any) => onfocus(e)}
+            onBlur={(e: any) => onblur(e)}
+            showSoftInputOnFocus={isWeb}
+            caretHidden={!isWeb}
+            selectTextOnFocus={isWeb}
+            placeholderTextColor={Color(props.isDarkMode).placeHolderText}
+            >
+            </TextInput>
+            {isModal ?
+            <TouchableHighlight
+            underlayColor={Color(props.isDarkMode).danger}
+            style={[styles.deleteTextButton]}
+            onPress={(e: any) => {
+                if (props.setValue) {
+                    setTextValue('');
+                    props.setValue('');
+                }
+                setFocus(false);
+            }}
+            >
+                <FontAwesomeIcon 
+                size={30} 
+                color={Color(props.isDarkMode).text} 
+                style={styles.deleteTextIcon} 
+                icon="xmark"
+                >
+                </FontAwesomeIcon>
+            </TouchableHighlight>
+            : null }
+            </View>
+    }
+
+    const iconStyle = () => {
+        let style = [];
+        style.push(styles.iconContainer);
+        if (Platform.OS !== 'web')
+            style.push(styles.iconContainerMobile);
+
+            return style;
+    }
 
     return (
     <View
@@ -474,11 +528,12 @@ const _Dropdown = (props: any, {navigation}:any) => {
             animationType='fade'
             transparent={true}
             onRequestClose={() => setFocus(false)}
+            style={styles.modal}
             >
                 <View
                 style={styles.modalMenuContainer}
                 >
-                    {input()}
+                    {input(true, true)}
                     <ScrollView
                         keyboardShouldPersistTaps={'handled'}
                         style={[styles.modalMenu]}
@@ -490,13 +545,18 @@ const _Dropdown = (props: any, {navigation}:any) => {
                         : null}
                         {options}
                     </ScrollView>
-                    <_Button
-                    isDarkMode={props.isDarkMode}
-                    onPress={(e: any) => setFocus(false)}
-                    style={[Style(props.isDarkMode).buttonDanger, styles.closeModalButton]}
+                    <View
+                    style={styles.buttons}
                     >
-                        Close
-                    </_Button>
+                        <_Button
+                        containerStyle={styles.shellButton}
+                        isDarkMode={props.isDarkMode}
+                        onPress={(e: any) => setFocus(false)}
+                        style={Style(props.isDarkMode).buttonDanger}
+                        >
+                            Close
+                        </_Button>
+                    </View>
                 </View>
             </Modal>
             }

@@ -49,8 +49,8 @@ router.post('/', async (req: Request, res: Response) => {
     if (!name) {
       return res.status(400).json({ Error: 'Name is required' });
     }
-    //check if images is an array
-    if (!images || !Array.isArray(images)) {
+    //check if images contains anything
+    if (!images || images.length == 0) {
       return res.status(400).json({ Error: 'Images are required' });
     } else {
       //check if images are base64 string

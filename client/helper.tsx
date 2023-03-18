@@ -5,9 +5,9 @@ import { createContext } from "react";
 import { Dimensions } from "react-native";
 import { Content } from "./style";
 import * as DeepLinking from 'expo-linking';
-import { faClose, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut, faUserPlus, faArrowLeft, faRefresh, faLock, faPowerOff, faKey, faHouse, faTreeCity, faBed, faSink, faFilter, faToggleOff, faToggleOn, faCertificate, faCakeCandles, faLocationDot, faPencil, faMagnifyingGlass, faList } from '@fortawesome/free-solid-svg-icons'
+import { faClose, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut, faUserPlus, faArrowLeft, faRefresh, faLock, faPowerOff, faKey, faHouse, faTreeCity, faBed, faSink, faFilter, faToggleOff, faToggleOn, faCertificate, faCakeCandles, faLocationDot, faPencil, faMagnifyingGlass, faList, faTrash, faDeleteLeft } from '@fortawesome/free-solid-svg-icons'
 import AsyncStorage from "@react-native-async-storage/async-storage";
-library.add(faList, faHouse, faMagnifyingGlass, faPencil, faLocationDot, faCakeCandles, faCertificate, faToggleOff, faToggleOn, faFilter, faSink, faBed, faTreeCity, faClose, faPowerOff, faKey, faRefresh, faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
+library.add(faDeleteLeft, faTrash, faList, faHouse, faMagnifyingGlass, faPencil, faLocationDot, faCakeCandles, faCertificate, faToggleOff, faToggleOn, faFilter, faSink, faBed, faTreeCity, faClose, faPowerOff, faKey, faRefresh, faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
 
 export const Stack = createNativeStackNavigator<Page>();
 

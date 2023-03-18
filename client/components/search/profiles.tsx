@@ -6,6 +6,7 @@ import { Color, Style } from '../../style';
 import _Text from '../control/text';
 import { useNavigation } from '@react-navigation/native';
 import _Button from '../control/button';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 interface Props {
   filters?: string[],
@@ -199,6 +200,16 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
       justifyContent: 'center',
       alignItems: 'center',
       flexDirection: 'column'
+    },
+    mainIcon: {
+      ...Platform.select({
+        web: {
+          outlineStyle: 'none'
+        }
+      }),
+    },
+    mainIconContainer: {
+      marginBottom: 20,
     }
   });
 
@@ -225,6 +236,17 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
           <View
           style={styles.noResults}
           >
+            <View
+            style={styles.mainIconContainer}
+            >
+              <FontAwesomeIcon 
+              size={100} 
+              color={Color(isDarkMode).gold} 
+              style={styles.mainIcon} 
+              icon="user"
+              >
+              </FontAwesomeIcon>
+            </View>
             <_Text 
             style={styles.msgText}
             >

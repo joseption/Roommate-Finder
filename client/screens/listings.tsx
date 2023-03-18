@@ -195,6 +195,16 @@ const loading = () => {
   </View>
 }
 
+const hasFilters = () => {
+  if (filters) {
+    return Object.values(filters).find(x => {
+      if (x)
+        return true;
+    })
+  }
+  return false;
+}
+
 return (
   <View style={styles.container}>
     {!currentListing && currentScreen === Listings_Screen.all && !showFilter && (
@@ -216,7 +226,7 @@ return (
                   >
                     <FontAwesomeIcon 
                     size={20} 
-                    color={false ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text} 
+                    color={hasFilters() ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text} 
                     style={styles.filterIcon} 
                     icon="filter"
                     >
@@ -236,6 +246,7 @@ return (
             userId={userInfo?.id}
             userImage={userInfo?.image}
             refresh={refresh}
+            setFilters={setFilters}
           />
           }
           {bottomBarNav()}
@@ -270,6 +281,7 @@ return (
             userId={userInfo?.id}
             userImage={userInfo?.image}
             refresh={refresh}
+            setCurrentScreen={setCurrentScreen}
           />
           }
           {bottomBarNav()}
@@ -296,6 +308,7 @@ return (
         setCurrentListing={setCurrentListing}
         currentListing={currentListing}
         refresh={refresh}
+        setNavSelector={props.setNavSelector}
       />
     )}
   </View>

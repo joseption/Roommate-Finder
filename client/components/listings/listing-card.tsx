@@ -1,4 +1,4 @@
-import { Pressable, View, StyleSheet, Image, Text, TouchableHighlight, Platform } from 'react-native';
+import { Pressable, View, StyleSheet, Image, Text, TouchableHighlight, Platform, BackHandler } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import _Text from '../control/text';
 import _Group from '../control/group';
@@ -8,9 +8,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useEffect, useState } from 'react';
 import { faStar, faMapMarkerAlt, faBed, faBath, faHome, faBuilding, faCity, faUser} from '@fortawesome/free-solid-svg-icons';
 import _Image from '../control/image';
+import { navProp, NavTo } from '../../helper';
 
 const ListingCard = (props: any) => {
-
+  const navigation = useNavigation<navProp>();
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
@@ -152,7 +153,7 @@ const ListingCard = (props: any) => {
   
 
   const viewListing = () => {
-    props.setCurrentListing(props.item)
+    props.setCurrentListing(props.item);
   };
 
   const sendFavorite = () => {

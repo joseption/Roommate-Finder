@@ -21,9 +21,11 @@ interface Props {
   forceGetProfiles: boolean,
   setForceGetProfiles: any,
   setSorting: any,
+  search: string,
+  setSearch: any,
 }
 
-const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults, filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting, isDarkMode, setNoResults }: Props) => {
+const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetProfiles, noResults, filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting, isDarkMode, setNoResults }: Props) => {
   /*
   Daniyal: This component will contain all of the profile card components
   and anything else that is needed for the overall profile view.F
@@ -35,12 +37,18 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
   const [isFetchedProfiles, setFetchedProfiles] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);  
+  const [hasVisibleProfiles, setHasVisibleProfiles] = useState(false);  
+  const [availableProfiles, setAvailableProfiles] = useState<JSX.Element[]>([]);
 
   const refreshMe = () => {
     setRefreshing(true);
     getProfiles();
     setRefreshing(false);
   };
+
+  useEffect(() => {
+    removeUnwantedResults(allProfiles, search);
+  }, [search]);
 
   useEffect(() => {
     if (forceGetProfiles) {
@@ -109,8 +117,7 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
             if (sorting) {
               res = sortProfiles(res);
             }
-            res = await removeUnfinishedResults(res);
-            setAllProfiles(res);
+            await removeUnwantedResults(res, search);
             setFetchedProfiles(true);
           }
         });
@@ -133,11 +140,8 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
             if (sorting) {
               res = sortProfiles(res);
             }
-            res = await removeUnfinishedResults(res);
-            setAllProfiles(res);
-            if (res.length > 0) {
-              setFetchedProfiles(true);
-            }
+            await removeUnwantedResults(res, search);
+            setFetchedProfiles(true);
           }
         });
     }
@@ -146,23 +150,36 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
     }
   };
 
-  const removeUnfinishedResults = async (data: any) => {
-    let res: never[] = [];
+  const removeUnwantedResults = async (data: any, find: string) => {
+    let count = 0;
     if (data && data.length) {
       let id = await userId();
+      if (!find)
+        find = '';
+
       data.forEach((x: any) => {
-        if (x.is_setup && x.id !== id) {
-          res.push(x as never);
+        let info = x.first_name + ' ' + x.last_name + ' ' + x.city + ' ' + x.state + ' ' + x.zip_code;
+        if (!info)
+          info = '';
+
+        if (x.is_setup && x.id !== id && (info.toLowerCase().trim().includes(find.toLowerCase().trim()))) {
+          x.is_visible = true;
+          count++;
         }
+        else
+          x.is_visible = false;
       });
     }
-    
-    return res;
+
+    setHasVisibleProfiles(count > 0);
+    setAllProfiles(data);
+    let filtered = getAvailableProfiles(data);
+    setAvailableProfiles(filtered);
   }
 
   const containerStyle = () => {
     let style = [];
-    if (!(isFetchedProfiles && allProfiles.length) || isPageLoading) {
+    if (!(isFetchedProfiles && hasVisibleProfiles) || isPageLoading) {
       style.push({
         height: '100%',
         flex: 1,
@@ -172,6 +189,20 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
     style.push({paddingHorizontal: 10});
 
     return style;
+  }
+
+  const getAvailableProfiles = (data: any) => {
+    if (data.length > 0) {
+      return data.map((profile: any, key: number) => {
+        if (profile.is_visible === true)
+          return <ProfileCard key={key} isDarkMode={isDarkMode} profileInfo={profile} />
+        else
+          return null;
+        }
+      );
+    }
+    else
+      return <></>
   }
 
   const styles = StyleSheet.create({
@@ -228,10 +259,10 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
     >
       {!isPageLoading ? 
       <View>
-      {isFetchedProfiles &&
-        (allProfiles.length ?
-          allProfiles.map((profile: any, index) =>
-            <ProfileCard key={index} isDarkMode={isDarkMode} profileInfo={profile} />)
+      {isFetchedProfiles && hasVisibleProfiles ?
+          <>
+          {availableProfiles}
+          </>
           :
           <View
           style={styles.noResults}
@@ -256,6 +287,7 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
               style={Style(isDarkMode).buttonInverted}
               textStyle={Style(isDarkMode).buttonInvertedText}
               onPress={(e: any) => {
+                setSearch('');
                 setAllProfiles([]);
                 setNoResults(true);
                 setFetchedProfiles(false);
@@ -267,7 +299,6 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
                 Clear Filters
             </_Button>
           </View>
-        )
       }
       </View>
       :

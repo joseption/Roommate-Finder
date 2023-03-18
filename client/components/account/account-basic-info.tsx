@@ -161,7 +161,7 @@ const AccountInfo = (props: any) => {
 
     const getYearOptions = () => {
         var years = [];
-        var year = new Date().getFullYear() - 15; // Age bumper, no children
+        var year = new Date().getFullYear() - 15; // Age bumper, no kids
         for (var i = 0; i < 100; i++) {
             years.push({key:year, value:year.toString()});
             year--;

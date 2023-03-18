@@ -93,7 +93,6 @@ const ProfileScreen = (props: any) => {
       if (res.Error) {
         console.warn("Error: ", res.Error);
       } else {
-        console.log(res)
         setProfile(res);
       }
     });

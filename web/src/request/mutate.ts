@@ -243,11 +243,12 @@ export async function MakeListings(
   price: number,
   city: string,
   housing_type: string,
-  rooms: number | undefined,
-  bathrooms: number | undefined,
-  size: number | undefined,
-  address: string | undefined,
-  petsAllowed: boolean
+  rooms: number,
+  bathrooms: number,
+  size: number,
+  address: string,
+  petsAllowed: boolean,
+  zipcode: string
 ) {
   return await doRequest<ListingInfo>(
     `${backend_api}/listings`,
@@ -263,6 +264,7 @@ export async function MakeListings(
       size,
       address,
       petsAllowed,
+      zipcode,
     },
     "POST",
     true

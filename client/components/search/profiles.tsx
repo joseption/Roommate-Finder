@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ProfileCard from './profile-card';
 import { env, authTokenHeader, navProp, NavTo, userId } from '../../helper';
 import { Color, Style } from '../../style';
@@ -102,13 +102,11 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
 
   const getFilteredProfiles = async () => {
     setFetchedProfiles(false);
-    let queryString = undefined;
     try {
-      if (filtersFetched && filters?.length !== 0) {
-        queryString = filters?.join(',');
-      }
-      await fetch(`${env.URL}/users/profilesByTags?userId=${"e6bb856a-9d91-40a7-8b2e-ca095b7389b8"}&filters=${queryString}&gender=${genderFilter}&location=${locationFilter}&sharingPref=${sharingPrefFilter}`,
-        { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
+      let obj = {filters: filters, gender: genderFilter, location: locationFilter, sharingPref: sharingPrefFilter};
+      let js = JSON.stringify(obj);
+      await fetch(`${env.URL}/users/profilesByTags`,
+        { method: 'POST', body:js, headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
           let res = JSON.parse(await ret.text());
           if (res.Error) {
             console.warn("Error: ", res.Error);
@@ -130,8 +128,8 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
   const getAllProfiles = async () => {
     setFetchedProfiles(false);
     try {
-      await fetch(`${env.URL}/users/AllprofilesMob?userId=${"e6bb856a-9d91-40a7-8b2e-ca095b7389b8"}`,
-        { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
+      await fetch(`${env.URL}/users/AllprofilesMob`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
           let res = JSON.parse(await ret.text());
           if (res.Error) {
             console.warn("Error: ", res.Error);
@@ -146,7 +144,6 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
         });
     }
     catch (e) {
-      return;
     }
   };
 

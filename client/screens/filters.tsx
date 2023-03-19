@@ -37,7 +37,7 @@ const FiltersScreen = (props: any) => {
         "🛍 Shopping"
     ];
 
-    const genderOptions = ["Male", "Female", "Does not matter"];
+    const genderOptions = ["Male", "Female", "Other"];
     const locationOptions = ["On Campus", "Oviedo", "Union Park", "Orlando", "Lake Nona"];
     const sharingPrefOptions = ["Never", "Sometimes", "Always"];
 

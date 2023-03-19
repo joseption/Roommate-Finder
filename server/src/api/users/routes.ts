@@ -268,9 +268,9 @@ router.get('/Allprofiles', async (req: Request, res: Response, next: NextFunctio
   }
 });
 
-router.get('/AllprofilesMob', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/AllprofilesMob', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const payload = req.query;
+    const payload: payload = req.body[0];
     const mainUserId = payload.userId;
     const users = await db.user.findMany({
       select: {
@@ -284,28 +284,44 @@ router.get('/AllprofilesMob', async (req: Request, res: Response, next: NextFunc
         city: true,
         state: true,
         is_setup: true,
-        //matches: {
-        //where:{
-        // userTwoId: userId,
-        // },
-        //},
+        createdAt: true,
+        matches2: {
+          select: {
+            matchPercentage: true
+          },
+          where: {
+            userOneId: mainUserId,
+          },
+        },
+        matches: {
+          select: {
+            matchPercentage: true
+          },
+          where: {
+            userTwoId: mainUserId,
+          },
+        },
+      },
+      where: {
+        is_setup: true,
+        NOT: {
+         id: mainUserId as string
+        },
+      },
+      orderBy: {
+        createdAt: 'desc'
       },
     });
 
-    const userIds = users.map((x) => x.id);
-    const matches = await GetMatches(mainUserId as string, userIds);
-
-    const userMap: { [id: string]: any } = {};
-    users.forEach((user) => {
-      userMap[user.id] = user;
-    });
-
-    matches.forEach((match: any) => {
-      const user = userMap[match.userTwoId];
-      if (user) {
-        user.matchPercentage = match.matchPercentage;
-      }
-    });
+    for (let i = 0; i < users.length; i++) {
+      if (users[i].matches.length > 0)
+        Object.assign(users[i], {matchPercentage: users[i].matches[0].matchPercentage});
+      else if (users[i].matches2.length > 0)
+        Object.assign(users[i], {matchPercentage: users[i].matches2[0].matchPercentage});
+      
+      delete users[i].matches;
+      delete users[i].matches2
+    }
 
     return res.json(users);
   } catch (err) {
@@ -314,15 +330,13 @@ router.get('/AllprofilesMob', async (req: Request, res: Response, next: NextFunc
 });
 
 //Get Users filtered by Tags
-router.get('/profilesByTags', async (req: Request, res: Response) => {
+router.post('/profilesByTags', async (req: Request, res: Response) => {
   try {
-    const gender = req.query.gender;
-    const location = req.query.location;
-    const sharingPref = req.query.sharingPref;
-    const filters = req.query.filters;
-    const filtersArray = (filters as string).split(',');
-
-    const userIds1 = await GetUsersByTags(filtersArray as string[]);
+    const payload: payload = req.body[0];
+    const mainUserId = payload.userId;
+    const { gender, location, sharingPref, filters } = req.body;
+    
+    const userIds1 = await GetUsersByTags(filters as string[]);
     const userIds2 = await GetUsersByGender(gender as string);
     const userIds3 = await GetUsersByLocation(location as string);
     const userIds4 = await GetUsersBySharingPref(sharingPref as string);
@@ -355,7 +369,6 @@ router.get('/profilesByTags', async (req: Request, res: Response) => {
       });
     }
 
-    const mainUserId = req.query.userId;
     const userIds = users.map((x) => x.id);
     const matches = await GetMatches(mainUserId as string, userIds);
 
@@ -370,7 +383,7 @@ router.get('/profilesByTags', async (req: Request, res: Response) => {
         user.matchPercentage = match.matchPercentage;
       }
     });
-
+console.log(users);
     return res.status(200).json(users);
   } catch (err) {
     return res.status(500).json({ Error: 'Server error' });

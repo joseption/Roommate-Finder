@@ -369,7 +369,7 @@ const ProfileScreen = (props: any) => {
                   containerStyle={styles.matchContainer}
                   innerContainerStyle={styles.matchInnerContent}
                   >
-                    {match}%
+                    {Math.ceil(match)}%
                   </_Text>
                 </View>
                 : null }

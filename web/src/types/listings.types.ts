@@ -12,7 +12,7 @@ export interface ListingInfo {
   rooms?: number;
   size?: number;
   description: string;
-  // distanceToUcf?: number;
+  distanceToUcf?: number;
   zipcode?: number;
 }
 export interface ListingRequest {
@@ -21,7 +21,7 @@ export interface ListingRequest {
   petsAllowed: boolean | undefined | null;
   rooms: number | undefined;
   bathrooms: number | undefined;
-  // distanceToUcf: number | undefined;
+  distanceToUcf: number | undefined;
 }
 
 export interface ListingData {

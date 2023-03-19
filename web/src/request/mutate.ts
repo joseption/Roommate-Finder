@@ -7,8 +7,8 @@ import { message } from "../types/message.types";
 import { getAuthSession } from "../utils/storage";
 import doRequest from "./request";
 
-const backend_api = "https://api.roomfin.xyz";
-// const backend_api = "http://localhost:8080";
+// const backend_api = "https://api.roomfin.xyz";
+const backend_api = "http://localhost:8080";
 
 export async function login(email: string, password: string) {
   return await doRequest<AuthSession>(
@@ -243,11 +243,12 @@ export async function MakeListings(
   price: number,
   city: string,
   housing_type: string,
-  rooms: number | undefined,
-  bathrooms: number | undefined,
-  size: number | undefined,
-  address: string | undefined,
-  petsAllowed: boolean
+  rooms: number,
+  bathrooms: number,
+  size: number,
+  address: string,
+  petsAllowed: boolean,
+  zipcode: string
 ) {
   return await doRequest<ListingInfo>(
     `${backend_api}/listings`,
@@ -263,6 +264,7 @@ export async function MakeListings(
       size,
       address,
       petsAllowed,
+      zipcode,
     },
     "POST",
     true

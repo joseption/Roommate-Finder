@@ -114,12 +114,12 @@ model Listings {
   price         Float
   petsAllowed   Boolean
   userId        String
-  address       String?
-  bathrooms     Int?
-  rooms         Int?
-  size          Int?
-  zipcode       String?
-  distanceToUcf Int?
+  address       String
+  bathrooms     Int
+  rooms         Int
+  size          Int
+  zipcode       String
+  distanceToUcf Int
   user          User     @relation(name: "ListingCreator", fields: [userId], references: [id])
   favoritedBy   User[]   @relation(name: "ListingsFavorited")
 }

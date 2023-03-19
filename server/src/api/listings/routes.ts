@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../middleware';
 import { uploadImage } from 'utils/uploadImage';
 
+const axios = require('axios');
 const prisma = new PrismaClient();
 const router = require('express').Router();
 const fetch = (url: any, init?: any) => import('node-fetch').then(({default: fetch}) => fetch(url, init));
@@ -22,13 +23,41 @@ router.get('/all/:userId', async (req: Request, res: Response) => {
   }
 });
 
+// Function to validate an address using MapQuest Geocoding API
+async function validateAddress(address: string) {
+  try {
+    const geocodingResponse = await axios.get(
+      `https://www.mapquestapi.com/geocoding/v1/address?key=${process.env.MAPQUEST_KEY}`,
+      {
+        params: {
+          location: address,
+        },
+      }
+    );
+
+    const locations = geocodingResponse.data.results[0].locations;
+
+    if (locations && locations.length > 0) {
+      const location = locations[0];
+      return location.geocodeQualityCode.startsWith('P1');
+    }
+
+    return false;
+  } catch (error) {
+    console.error(`Error validating address: ${error.message}`);
+    return false;
+  }
+}
+
 // listings REST API everything is under /listings
 // create listing
 router.post('/', async (req: Request, res: Response) => {
   try {
+    console.log("endpoint hit");
     const payload: payload = req.body[0];
     const userId = payload.userId;
 
+    const UCF_ADDRESS = 'University of Central Florida, Orlando, FL';
     const {
       name,
       images,
@@ -42,10 +71,22 @@ router.post('/', async (req: Request, res: Response) => {
       rooms,
       size,
       zipcode,
-      distanceToUcf,
     } = req.body;
     const uploadImages = [];
-
+    const fullAddress = `${address}, ${city}, FL ${zipcode}`;
+    if (await validateAddress(fullAddress) === false) {
+      return res.status(400).json({ Error: 'Invalid address' });
+    }
+    const distanceMatrixResponse = await axios.get(
+      `https://www.mapquestapi.com/directions/v2/routematrix?key=${process.env.MAPQUEST_KEY}`,
+      {
+        params: {
+          from: UCF_ADDRESS,
+          to: fullAddress,
+        },
+      }
+    );
+    const distanceToUcf = Math.round(distanceMatrixResponse.data.distance[1]);
     if (!name) {
       return res.status(400).json({ Error: 'Name is required' });
     }
@@ -102,7 +143,7 @@ router.post('/', async (req: Request, res: Response) => {
         rooms: (rooms as number) || undefined,
         size: (size as number) || undefined,
         zipcode: (zipcode as string) || undefined,
-        distanceToUcf: (distanceToUcf as number) || undefined,
+        distanceToUcf: distanceToUcf as number,
       },
     });
     res.status(200).json(listing);

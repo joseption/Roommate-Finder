@@ -22,6 +22,7 @@ const CreateListing = (props: any) => {
   const [isLocationNotFound, setIsLocationNotFound] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [error, setError] = useState('');
   
   useEffect(() => {
     getUserInfo();
@@ -37,7 +38,7 @@ const CreateListing = (props: any) => {
     housing_type: '',
     description: '',
     price: 0.0,
-    petsAllowed: null,
+    petsAllowed: undefined,
     address: '',
     bathrooms: 0,
     rooms: 0,
@@ -49,6 +50,7 @@ const CreateListing = (props: any) => {
 
   
   const handleImage = (res: ImagePickerResponse) => {
+    setError('');
     setImageError('');
     let UriImages = [] as string[];
     let UrlImages = [] as string[];
@@ -107,6 +109,10 @@ const CreateListing = (props: any) => {
 
 
   const handleSubmit = async () => { 
+    setError('');
+    setIsLoading(true);
+    let hasError = false;
+    setIsLocationNotFound(false);
     formData.images = imageUriArray as never;
     try {
       let auth = await authTokenHeader();
@@ -120,13 +126,15 @@ const CreateListing = (props: any) => {
       }).then(async ret => {
         let res = JSON.parse(await ret.text());
         if (res.Error) {
-          return false;
+          console.log(res.Error);
+          hasError = true;
         }
       });
     } catch (err) {
-      return false;
+      hasError = true;
     }  
-    return true;
+    setIsLoading(false);
+    return hasError;
   };  
 
   const getOptions = () => {
@@ -198,12 +206,15 @@ const CreateListing = (props: any) => {
   };
 
   const createListing = async () => {
-    let res = await handleSubmit();
+    let hasError = await handleSubmit();
     setIsLoading(false);
-    if (res) {
+    if (!hasError) {
       setIsDone(true);
-      props.refresh();
       props.onClose();
+      props.refresh();
+    }
+    else {
+      setError("A server error occurred, please try again")
     }
   }
 
@@ -214,6 +225,7 @@ const CreateListing = (props: any) => {
     {   
       let obj = {address: address};
       let js = JSON.stringify(obj);
+      console.log(obj);
       let tokenHeader = await authTokenHeader();
       await fetch(`${env.URL}/listings/location`,
       {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
@@ -245,16 +257,17 @@ const CreateListing = (props: any) => {
   };
 
   const handleSubmitListing = async () => {
-    const address = formData.address.replace(/\s/g, "%20")
-    const isValidAddress = await checkAddressValidity(address+formData.city+formData.zipcode);
-    console.log("valid:" + isValidAddress);
+    // Remove all white space and comma separate fields
+    let address = formData.address.trim().replace(/\s/g, '+');
+    let city = formData.city.trim().replace(/\s/g, '+');
+    let zipcode = formData.zipcode.trim().replace(/\s/g, '+');
+    const validAddress = await checkAddressValidity(address + "," + city + "," + zipcode);
   
-    if (isValidAddress) {
+    if (validAddress) {
       createListing();
     } else {
       setIsLoading(false);
       setIsLocationNotFound(true);
-      console.error("Location not found");
     }
   };
 
@@ -265,12 +278,32 @@ const CreateListing = (props: any) => {
   }
 
   const disabled = () => {
+    return false;
     if (isDone) {
       return true;
     }
-    let formDataFilled = formData.address && formData.bathrooms && formData.city && formData.description && formData.housing_type && imageUriArray.length > 0 && formData.name && formData.petsAllowed != null && formData.price && formData.rooms && formData.size && formData.zipcode;
+    let formDataFilled = formData.address && formData.bathrooms && formData.city && formData.description && formData.housing_type && imageUriArray.length > 0 && formData.name && formData.petsAllowed != undefined && formData.price && formData.rooms && formData.size && formData.zipcode;
     return !formDataFilled;
   }
+
+  const errorStyle = () => {
+    var style = [];
+    style.push(Style(props.isDarkMode).textDanger);
+    if (props.mobile)
+      style.push(Style(props.isDarkMode).errorText);        
+    return style;
+}
+
+const errorContainerStyle = () => {
+    var style = [];
+    if (props.mobile) {
+        style.push(Style(props.isDarkMode).errorMsgMobile);
+    }
+    else {
+        style.push(Style(props.isDarkMode).errorMsg);
+    }
+    return style;
+}
 
   const styles = StyleSheet.create({
     container: {
@@ -669,7 +702,7 @@ const CreateListing = (props: any) => {
               value={formData.rooms}
               setValue={(text: string) => handleChange('rooms', parseInt(text))}
               required={true}
-              label="Rooms" />            
+              label="Bedrooms" />            
 
             <_Dropdown
               containerStyle={styles.inputContainerStyle}
@@ -684,12 +717,21 @@ const CreateListing = (props: any) => {
               containerStyle={[styles.inputContainerStyle, {marginBottom: 20}]}
               isDarkMode={props.isDarkMode}
               options={getYesNo()}
-              value={formData.petsAllowed}
-              setValue={(text: string) => handleChange('petsAllowed', text === 'Yes' ? true : false)}
+              value={formData.petsAllowed ? 'Yes' : (formData.petsAllowed === false) ? 'No' : ''}
+              setValue={(text: string) => handleChange('petsAllowed', (text === 'Yes') ? true : (text === 'No') ? false : undefined)}
               required={true}
               label="Pets Allowed" />
               
             <View>
+              {error ?
+                <_Text 
+                containerStyle={errorContainerStyle()}
+                innerContainerStyle={{justifyContent: 'center'}} 
+                style={errorStyle()}
+                >
+                    {error}
+                    </_Text>
+              : null}
               <_Button
                 isDarkMode={props.isDarkMode}
                 style={[Style(props.isDarkMode).buttonGold]}

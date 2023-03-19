@@ -383,7 +383,7 @@ router.post('/profilesByTags', async (req: Request, res: Response) => {
         user.matchPercentage = match.matchPercentage;
       }
     });
-console.log(users);
+
     return res.status(200).json(users);
   } catch (err) {
     return res.status(500).json({ Error: 'Server error' });

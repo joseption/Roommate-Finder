@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ProfileCard from './profile-card';
 import { env, authTokenHeader, navProp, NavTo, userId } from '../../helper';
 import { Color, Style } from '../../style';
@@ -38,7 +38,13 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);  
   const [hasVisibleProfiles, setHasVisibleProfiles] = useState(false);  
-  const [availableProfiles, setAvailableProfiles] = useState<JSX.Element[]>([]);
+  const [rerender, setRerender] = useState(false); 
+
+  useEffect(() => {
+    if (rerender) {
+      setRerender(false);
+    }
+  }, [rerender]);
 
   const refreshMe = () => {
     setRefreshing(true);
@@ -53,7 +59,8 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
   useEffect(() => {
     if (forceGetProfiles) {
       if (allProfiles.length > 0) {
-        setAllProfiles(sortProfiles(allProfiles));
+        let data = sortProfiles(allProfiles);
+        removeUnwantedResults(data, search);
         setForceGetProfiles(false);
       }
       setSorting(true);
@@ -170,36 +177,33 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
 
     setHasVisibleProfiles(count > 0);
     setAllProfiles(data);
-    let filtered = getAvailableProfiles(data);
-    setAvailableProfiles(filtered);
+    setRerender(true);
   }
 
   const containerStyle = () => {
     let style = [];
-    if (!(isFetchedProfiles && hasVisibleProfiles) || isPageLoading) {
+    if (!hasVisibleProfiles|| isPageLoading) {
       style.push({
-        height: '100%',
-        flex: 1,
+        alignItems: 'center',
+        flexDirection: 'column',
         justifyContent: 'center',
       });
     }
-    style.push({paddingHorizontal: 10});
+    style.push({
+      height: '100%',
+      paddingHorizontal: 10,
+      width: '100%',
+      flex: 1
+    });
 
     return style;
   }
 
-  const getAvailableProfiles = (data: any) => {
-    if (data.length > 0) {
-      return data.map((profile: any, key: number) => {
-        if (profile.is_visible === true)
-          return <ProfileCard key={key} isDarkMode={isDarkMode} profileInfo={profile} />
-        else
-          return null;
-        }
-      );
-    }
+  const renderProfileCard = (item: any) => {
+    if (item.is_visible === true)
+      return <ProfileCard key={item.key} isDarkMode={isDarkMode} profileInfo={item} />
     else
-      return <></>
+      return null;
   }
 
   const styles = StyleSheet.create({
@@ -242,23 +246,26 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
   });
 
   return (
-    <ScrollView
-    style={styles.profilesContainer}
-    contentContainerStyle={containerStyle()}
-    refreshControl={
-      <RefreshControl
-      refreshing={refreshing}
-      onRefresh={refreshMe}
-      colors={[Color(isDarkMode).gold]}
-      progressBackgroundColor={Color(isDarkMode).contentHolder}
-      />
-    }
+    <View
+    style={containerStyle()}
     >
       {!isPageLoading ? 
-      <View>
+      <>
       {isFetchedProfiles && hasVisibleProfiles ?
           <>
-          {availableProfiles}
+          <FlatList
+          extraData={rerender}
+          data={allProfiles}
+          renderItem={({item}) => renderProfileCard(item)}
+          refreshControl={
+            <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refreshMe}
+            colors={[Color(isDarkMode).gold]}
+            progressBackgroundColor={Color(isDarkMode).contentHolder}
+            />
+          }
+          />
           </>
           :
           <View
@@ -297,7 +304,7 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
             </_Button>
           </View>
       }
-      </View>
+      </>
       :
       <View
       style={styles.loadingScreen}
@@ -309,7 +316,7 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
       />
       </View>
       }
-    </ScrollView>
+    </View>
   );
 }
 

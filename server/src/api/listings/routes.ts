@@ -27,7 +27,7 @@ router.get('/all/:userId', async (req: Request, res: Response) => {
 async function validateAddress(address: string) {
   try {
     const geocodingResponse = await axios.get(
-      `https://www.mapquestapi.com/geocoding/v1/address?key=${process.env.MAPQUEST_KEY}`,
+      `https://www.mapquestapi.com/geocoding/v1/address?key=${process.env.MAPQUEST_API_KEY}`,
       {
         params: {
           location: address,
@@ -78,7 +78,7 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ Error: 'Invalid address' });
     }
     const distanceMatrixResponse = await axios.get(
-      `https://www.mapquestapi.com/directions/v2/routematrix?key=${process.env.MAPQUEST_KEY}`,
+      `https://www.mapquestapi.com/directions/v2/routematrix?key=${process.env.MAPQUEST_API_KEY}`,
       {
         params: {
           from: UCF_ADDRESS,
@@ -343,7 +343,7 @@ router.post('/location', async (req: Request, res: Response) => {
   const { address } = req.body;
   if (address) {
     const boundingBox = '24.396308,-81.786088,31.000652,-79.974309'; // bounding box for Florida
-    const url = `https://www.mapquestapi.com/geocoding/v1/address?key=${process.env.MAPQUEST_API_KEY}&location=${encodeURIComponent(address)}&boundingBox=${encodeURIComponent(boundingBox)}`;
+    const url = `https://www.mapquestapi.com/geocoding/v1/address?key=${process.env.MAPQUEST_API_KEY}&location=${address}&boundingBox=${boundingBox}`;
 
     try {
       let response = await fetch(url);

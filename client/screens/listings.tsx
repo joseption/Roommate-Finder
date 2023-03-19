@@ -312,7 +312,7 @@ return (
         <View style={styles.contentContainer}>
           <CreateListing 
             isDarkMode={props.isDarkMode} 
-            onClose={() => handleNavigation(Listings_Screen.all)}
+            onClose={() => handleNavigation(Listings_Screen.favorites)}
             refresh={refresh}
           />
           {bottomBarNav()}

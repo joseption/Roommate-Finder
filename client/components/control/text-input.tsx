@@ -262,6 +262,8 @@ const _TextInput = (props: any) => {
         <View
         style={styles.text}
         >
+          {props.label ?
+          <>
           <Text
             style={labelStyle()}
           >
@@ -275,6 +277,8 @@ const _TextInput = (props: any) => {
           </Text>
           : null
           }
+          </>
+          : null }
           {props.required ?
             <Text
             style={labelStyle()}>

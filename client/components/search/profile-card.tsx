@@ -98,7 +98,7 @@ const ProfileCard = (props: any) => {
           </View>
           {profile.matchPercentage ?
           <View style={styles.column3}>
-            <_Text style={styles.match}>{profile.matchPercentage}%</_Text>
+            <_Text style={styles.match}>{Math.ceil(profile.matchPercentage)}%</_Text>
           </View>
           : null }
         </View>

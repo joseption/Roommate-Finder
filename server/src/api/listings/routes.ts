@@ -244,7 +244,7 @@ router.post('/all', async (req: Request, res: Response) => {
       where: {
         housing_type: housing_type || undefined,
         price: price ? { lte: price } : undefined,
-        petsAllowed: petsAllowed || undefined,
+        petsAllowed: petsAllowed as boolean,
         distanceToUcf: distanceToUcf ? { lte: distanceToUcf } : undefined,
         rooms: rooms || undefined,
         bathrooms: bathrooms || undefined,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform, TouchableHighlight, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableHighlight, ActivityIndicator, BackHandler } from 'react-native';
 import AllListingsView from '../components/listings/all-listings';
 import { authTokenHeader, env, Listings_Screen, getLocalStorage } from '../helper';
 import BottomNavbar from '../components/listings/bottom-nav';
@@ -25,6 +25,22 @@ const ListingsScreen = (props: any) => {
   const [showFilter, setShowFilter] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [filters, setFilters] = useState({});
+
+  useEffect(() => {
+    const back = BackHandler.addEventListener('hardwareBackPress', backPress);
+    return () => {
+      back.remove();
+    }
+  });
+
+  const backPress = () => {
+    if (currentListing) {
+      setCurrentListing(null);
+      return true;
+    }
+    else
+      false;
+  }
 
   useEffect(() => {
     getUserInfo();
@@ -98,6 +114,7 @@ const ListingsScreen = (props: any) => {
     setSearchPressed={setSearchPressed}
     currentScreen={currentScreen}
     refresh={getAllListings}
+    updatePicture={props.updatePicture}
   />
   }
 
@@ -263,6 +280,7 @@ return (
           onClose={handleCloseFilterModal} 
           onFilter={handleFilter}
           filters={filters}
+          showFilter={showFilter}
           />
         </View>
       </View>

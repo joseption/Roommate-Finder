@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TouchableHighlight } from 'react-native';
@@ -37,7 +38,7 @@ const FiltersScreen = (props: any) => {
         "🛍 Shopping"
     ];
 
-    const genderOptions = ["Male", "Female", "Does not matter"];
+    const genderOptions = ["Male", "Female", "Other"];
     const locationOptions = ["On Campus", "Oviedo", "Union Park", "Orlando", "Lake Nona"];
     const sharingPrefOptions = ["Never", "Sometimes", "Always"];
 
@@ -181,6 +182,17 @@ const FiltersScreen = (props: any) => {
         return style;
     }
 
+    const clearFilter = () => {
+        setGenderFilter('');
+        setLocationFilter('');
+        setSharingPrefFilter('');
+        setSelectedFilters([]);
+    }
+
+    const hasFilters = () => {
+        return genderFilter || locationFilter || sharingPrefFilter || selectedFilters.length > 0;
+    }
+
     const styles = StyleSheet.create({
         filterStyle: {
             marginRight: 7,
@@ -200,7 +212,6 @@ const FiltersScreen = (props: any) => {
             fontSize: FontSize.large,
             fontWeight: 'bold',
             color: Color(props.isDarkMode).text,
-            padding: 10,
         },
         row: {
             flexDirection: 'row',
@@ -239,19 +250,48 @@ const FiltersScreen = (props: any) => {
         },
         spacing: {
             height: 1
-        }
+        },
+        header: {
+            justifyContent: 'space-between',
+            display: 'flex',
+            alignItems: 'center',
+            flexDirection: 'row',
+            padding: 10
+        },
+        clearButton: {
+            paddingVertical: 2,
+            paddingHorizontal: 10,
+            borderRadius: Radius.round,
+        },
     });
 
     return (
         <View
         style={styles.container}
         >
+            <View
+            style={styles.header}
+            >
             <_Text
             style={styles.heading}
             isDarkMode={props.isDarkMode}
             >
                 Filter Results
             </_Text>
+            {hasFilters() ?
+            <TouchableHighlight
+            underlayColor={Color(props.isDarkMode).holderUnderlay}
+            style={[Style(props.isDarkMode).buttonInverted, styles.clearButton]}
+            onPress={() => clearFilter()}
+            >
+                <_Text
+                style={Style(props.isDarkMode).buttonInvertedText}
+                >
+                    Clear All
+                </_Text>
+            </TouchableHighlight>
+            : null }
+            </View>
             <ScrollView
             contentContainerStyle={styles.exploreContent}
             style={styles.exploreContainer}
@@ -324,8 +364,9 @@ const FiltersScreen = (props: any) => {
             style={styles.buttons}
             >
                 <_Button
-                containerStyle={{flex: 1}}
-                style={[Style(props.isDarkMode).buttonInverted, {marginRight: 5}]}
+                isDarkMode={props.isDarkMode}
+                containerStyle={{flex: 1, marginRight: 5}}
+                style={Style(props.isDarkMode).buttonInverted}
                 textStyle={Style(props.isDarkMode).buttonInvertedText}
                 onPress={() => {
                     navigation.goBack()
@@ -334,6 +375,7 @@ const FiltersScreen = (props: any) => {
                     Cancel
                 </_Button>
                 <_Button
+                isDarkMode={props.isDarkMode}
                 containerStyle={{flex: 1}}
                 style={Style(props.isDarkMode).buttonGold}
                 onPress={() => {
@@ -345,7 +387,7 @@ const FiltersScreen = (props: any) => {
                         sharingPrefFilter: sharingPrefFilter
                     } as never)
                 }}>
-                    Search
+                    Apply Filters
                 </_Button>
             </View>
         </View>

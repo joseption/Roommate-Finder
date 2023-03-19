@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ProfileCard from './profile-card';
 import { env, authTokenHeader, navProp, NavTo, userId } from '../../helper';
 import { Color, Style } from '../../style';
@@ -21,9 +21,11 @@ interface Props {
   forceGetProfiles: boolean,
   setForceGetProfiles: any,
   setSorting: any,
+  search: string,
+  setSearch: any,
 }
 
-const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults, filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting, isDarkMode, setNoResults }: Props) => {
+const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetProfiles, noResults, filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting, isDarkMode, setNoResults }: Props) => {
   /*
   Daniyal: This component will contain all of the profile card components
   and anything else that is needed for the overall profile view.F
@@ -35,6 +37,14 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
   const [isFetchedProfiles, setFetchedProfiles] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);  
+  const [hasVisibleProfiles, setHasVisibleProfiles] = useState(false);  
+  const [rerender, setRerender] = useState(false); 
+
+  useEffect(() => {
+    if (rerender) {
+      setRerender(false);
+    }
+  }, [rerender]);
 
   const refreshMe = () => {
     setRefreshing(true);
@@ -43,9 +53,14 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
   };
 
   useEffect(() => {
+    removeUnwantedResults(allProfiles, search);
+  }, [search]);
+
+  useEffect(() => {
     if (forceGetProfiles) {
       if (allProfiles.length > 0) {
-        setAllProfiles(sortProfiles(allProfiles));
+        let data = sortProfiles(allProfiles);
+        removeUnwantedResults(data, search);
         setForceGetProfiles(false);
       }
       setSorting(true);
@@ -94,13 +109,11 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
 
   const getFilteredProfiles = async () => {
     setFetchedProfiles(false);
-    let queryString = undefined;
     try {
-      if (filtersFetched && filters?.length !== 0) {
-        queryString = filters?.join(',');
-      }
-      await fetch(`${env.URL}/users/profilesByTags?userId=${"e6bb856a-9d91-40a7-8b2e-ca095b7389b8"}&filters=${queryString}&gender=${genderFilter}&location=${locationFilter}&sharingPref=${sharingPrefFilter}`,
-        { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
+      let obj = {filters: filters, gender: genderFilter, location: locationFilter, sharingPref: sharingPrefFilter};
+      let js = JSON.stringify(obj);
+      await fetch(`${env.URL}/users/profilesByTags`,
+        { method: 'POST', body:js, headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
           let res = JSON.parse(await ret.text());
           if (res.Error) {
             console.warn("Error: ", res.Error);
@@ -109,8 +122,7 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
             if (sorting) {
               res = sortProfiles(res);
             }
-            res = await removeUnfinishedResults(res);
-            setAllProfiles(res);
+            await removeUnwantedResults(res, search);
             setFetchedProfiles(true);
           }
         });
@@ -123,8 +135,8 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
   const getAllProfiles = async () => {
     setFetchedProfiles(false);
     try {
-      await fetch(`${env.URL}/users/AllprofilesMob?userId=${"e6bb856a-9d91-40a7-8b2e-ca095b7389b8"}`,
-        { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
+      await fetch(`${env.URL}/users/AllprofilesMob`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'authorization': await authTokenHeader() } }).then(async ret => {
           let res = JSON.parse(await ret.text());
           if (res.Error) {
             console.warn("Error: ", res.Error);
@@ -133,45 +145,65 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
             if (sorting) {
               res = sortProfiles(res);
             }
-            res = await removeUnfinishedResults(res);
-            setAllProfiles(res);
-            if (res.length > 0) {
-              setFetchedProfiles(true);
-            }
+            await removeUnwantedResults(res, search);
+            setFetchedProfiles(true);
           }
         });
     }
     catch (e) {
-      return;
     }
   };
 
-  const removeUnfinishedResults = async (data: any) => {
-    let res: never[] = [];
+  const removeUnwantedResults = async (data: any, find: string) => {
+    let count = 0;
     if (data && data.length) {
       let id = await userId();
+      if (!find)
+        find = '';
+
       data.forEach((x: any) => {
-        if (x.is_setup && x.id !== id) {
-          res.push(x as never);
+        let info = x.first_name + ' ' + x.last_name + ' ' + x.city + ' ' + x.state + ' ' + x.zip_code;
+        if (!info)
+          info = '';
+
+        if (x.is_setup && x.id !== id && (info.toLowerCase().trim().includes(find.toLowerCase().trim()))) {
+          x.is_visible = true;
+          count++;
         }
+        else
+          x.is_visible = false;
       });
     }
-    
-    return res;
+
+    setHasVisibleProfiles(count > 0);
+    setAllProfiles(data);
+    setRerender(true);
   }
 
   const containerStyle = () => {
     let style = [];
-    if (!(isFetchedProfiles && allProfiles.length) || isPageLoading) {
+    if (!hasVisibleProfiles|| isPageLoading) {
       style.push({
-        height: '100%',
-        flex: 1,
+        alignItems: 'center',
+        flexDirection: 'column',
         justifyContent: 'center',
       });
     }
-    style.push({paddingHorizontal: 10});
+    style.push({
+      height: '100%',
+      paddingHorizontal: 10,
+      width: '100%',
+      flex: 1
+    });
 
     return style;
+  }
+
+  const renderProfileCard = (item: any) => {
+    if (item.is_visible === true)
+      return <ProfileCard key={item.key} isDarkMode={isDarkMode} profileInfo={item} />
+    else
+      return null;
   }
 
   const styles = StyleSheet.create({
@@ -214,24 +246,27 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
   });
 
   return (
-    <ScrollView
-    style={styles.profilesContainer}
-    contentContainerStyle={containerStyle()}
-    refreshControl={
-      <RefreshControl
-      refreshing={refreshing}
-      onRefresh={refreshMe}
-      colors={[Color(isDarkMode).gold]}
-      progressBackgroundColor={Color(isDarkMode).contentHolder}
-      />
-    }
+    <View
+    style={containerStyle()}
     >
       {!isPageLoading ? 
-      <View>
-      {isFetchedProfiles &&
-        (allProfiles.length ?
-          allProfiles.map((profile: any, index) =>
-            <ProfileCard key={index} isDarkMode={isDarkMode} profileInfo={profile} />)
+      <>
+      {isFetchedProfiles && hasVisibleProfiles ?
+          <>
+          <FlatList
+          extraData={rerender}
+          data={allProfiles}
+          renderItem={({item}) => renderProfileCard(item)}
+          refreshControl={
+            <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refreshMe}
+            colors={[Color(isDarkMode).gold]}
+            progressBackgroundColor={Color(isDarkMode).contentHolder}
+            />
+          }
+          />
+          </>
           :
           <View
           style={styles.noResults}
@@ -256,6 +291,7 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
               style={Style(isDarkMode).buttonInverted}
               textStyle={Style(isDarkMode).buttonInvertedText}
               onPress={(e: any) => {
+                setSearch('');
                 setAllProfiles([]);
                 setNoResults(true);
                 setFetchedProfiles(false);
@@ -267,9 +303,8 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
                 Clear Filters
             </_Button>
           </View>
-        )
       }
-      </View>
+      </>
       :
       <View
       style={styles.loadingScreen}
@@ -281,7 +316,7 @@ const Profile = ({ setSorting, forceGetProfiles, setForceGetProfiles, noResults,
       />
       </View>
       }
-    </ScrollView>
+    </View>
   );
 }
 

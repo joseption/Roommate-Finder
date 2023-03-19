@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Platform} from 'react-native';
+import { View, StyleSheet, Platform, TouchableHighlight} from 'react-native';
 import _Text from '../control/text';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
@@ -31,8 +31,21 @@ const Filter = (props: any) => {
   };
 
   useEffect(() => {
-    console.log(props.filters)
-  }, []); 
+    setFilters();
+  }, [props.filters]); 
+
+  useEffect(() => {
+    setFilters();
+  }, [props.showFilter]); 
+
+  const setFilters = () => {
+    setHousingType(props.filters.housing_type);
+    setPrice(props.filters.price);
+    setPetsAllowed(props.filters.petsAllowed);
+    setRooms(props.filters.rooms);
+    setBathrooms(props.filters.bathrooms);
+    setDistance(props.filters.distanceToUcf);
+  }
 
   const getOptions = () => {
     return [
@@ -92,6 +105,19 @@ const Filter = (props: any) => {
     setDistance(num);
   };
 
+  const hasFilters = () => {
+    return bathrooms || distanceToUcf || housing_type || petsAllowed || price || rooms;
+  }
+
+  const clearFilter = () => {
+    setBathrooms(undefined);
+    setDistance(undefined);
+    setHousingType(undefined);
+    setPetsAllowed(undefined);
+    setPrice(undefined);
+    setRooms(undefined);
+  }
+
   const styles = StyleSheet.create({
     container: {
       display: 'flex',
@@ -125,7 +151,6 @@ const Filter = (props: any) => {
       fontSize: 16,
     },
     title: {
-      margin: 10,
       textAlign: 'center',
       fontFamily: 'Inter-SemiBold',
       fontSize: FontSize.large,
@@ -253,55 +278,54 @@ const Filter = (props: any) => {
         justifyContent: 'center',
         paddingBottom: 5
       },
-      modalOverlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        zIndex: 9999,
-        justifyContent: "center",
-        alignItems: "center",
-      },
-      modalBox: {
-        backgroundColor: "white",
-        width: 300,
-        padding: 24,
-        borderRadius: 8,
-        alignItems: "center",
-      },
-      modalTitle: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 16,
-      },
-      modalMessage: {
-        fontSize: 16,
-        marginBottom: 24,
-      },
-      modalCloseButton: {
-        backgroundColor: "#e0e0e0",
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 4,
-      },
-      modalCloseButtonText: {
-        fontSize: 16,
-      },
+      buttons: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        margin: 10,
+        height: 40
+    },
+    clearButton: {
+      paddingVertical: 2,
+      paddingHorizontal: 10,
+      borderRadius: Radius.round,
+    },
+    header: {
+      justifyContent: 'space-between',
+      display: 'flex',
+      alignItems: 'center',
+      flexDirection: 'row',
+      padding: 10
+  },
   });
 
   return (
     <View style={styles.container}>
       <ScrollView>
+        <View
+        style={styles.header}
+        >
         <_Text style={styles.title}>Filter Listing</_Text>
+        {hasFilters() ?
+        <TouchableHighlight
+        underlayColor={Color(props.isDarkMode).holderUnderlay}
+        style={[Style(props.isDarkMode).buttonInverted, styles.clearButton]}
+        onPress={() => clearFilter()}
+        >
+            <_Text
+            style={Style(props.isDarkMode).buttonInvertedText}
+            >
+                Clear All
+            </_Text>
+        </TouchableHighlight>
+        : null }
+        </View>
         <View style={styles.formContainer}>
 
           <_Dropdown
             containerStyle={styles.inputContainerStyle}
             isDarkMode={props.isDarkMode}
             options={getHousingType()}
-            value={props.filters.housing_type}
+            value={housing_type}
             setValue={setHousingType}
             label="Housing Type"
           />   
@@ -354,13 +378,29 @@ const Filter = (props: any) => {
             label="Max Distance from UCF"
             isDarkMode={props.isDarkMode}
           />
-
-<         View style={styles.submitContainer}>
-            <_Button containerStyle={{flex:1, marginRight:5}}style={[Style(props.isDarkMode).buttonInverted]}textStyle={Style(props.isDarkMode).buttonInvertedText}onPress={()=>{onClose()}}>Cancel</_Button>
-            <_Button containerStyle={{flex:1}}style={[Style(props.isDarkMode).buttonGold]}onPress={()=>{handleApply()}}>Apply Filter</_Button>
-          </View>
         </View>
       </ScrollView>
+      <View
+      style={styles.buttons}
+      >
+          <_Button
+          isDarkMode={props.isDarkMode}
+          containerStyle={{flex: 1, marginRight: 5}}
+          style={Style(props.isDarkMode).buttonInverted}
+          textStyle={Style(props.isDarkMode).buttonInvertedText}
+          onPress={() => onClose()}
+          >
+              Cancel
+          </_Button>
+          <_Button
+          isDarkMode={props.isDarkMode}
+          containerStyle={{flex: 1}}
+          style={Style(props.isDarkMode).buttonGold}
+          onPress={() => handleApply()}
+          >
+              Apply Filters
+          </_Button>
+      </View>
     </View>
   );
 };

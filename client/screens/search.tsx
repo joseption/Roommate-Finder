@@ -40,6 +40,7 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
   const [sharingPrefFilter, setSharingPrefFilter] = useState<string>(route.params?.sharingPrefFilter || "");
   const [sorting, setSorting] = useState(false);
   const [forceGetProfiles, setForceGetProfiles] = useState(false);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (!hasFilters() && noResults) {
@@ -167,6 +168,10 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
     matchContent: {
       borderRadius: Radius.round,
       padding: 5
+    },
+    searchContainer: {
+      paddingHorizontal: 10,
+      paddingBottom: 10,
     }
   });
 
@@ -254,6 +259,13 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
               </View>
             </View>
           </View>
+          <_TextInput
+            containerStyle={styles.searchContainer}
+            placeholder="Search..."
+            value={search}
+            setValue={setSearch}
+            isDarkMode={isDarkMode}
+          ></_TextInput>
         <Profile
         filters={filters}
         filtersFetched={filtersFetched}
@@ -267,6 +279,8 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
         setForceGetProfiles={setForceGetProfiles}
         forceGetProfiles={forceGetProfiles}
         setSorting={setSorting}
+        search={search}
+        setSearch={setSearch}
         />
         </View>
       </View>

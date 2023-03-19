@@ -20,6 +20,7 @@ export const FontSize = {
 
 export const Radius = {
   small:4,
+  medium:8,
   default:10,
   large:20,
   round:9999
@@ -512,6 +513,8 @@ function LightColor() {
     msgFromFG: '#050505',
     msgToFG: '#FFFFFF',
     underlayMask: '#F0F2F5bf',
+    dropdownOption: '#F9F9F9',
+    dropdownOptionAlt: '#FFFFFF'
   }
 }
 
@@ -1000,6 +1003,8 @@ function DarkColor() {
     msgFromFG: '#FFFFFF',
     msgToFG: '#FFFFFF',
     underlayMask: '#191919bf',
+    dropdownOption: '#202122',
+    dropdownOptionAlt: '#242526'
   }
 }
 

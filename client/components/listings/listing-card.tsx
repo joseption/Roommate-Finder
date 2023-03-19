@@ -182,10 +182,11 @@ const ListingCard = (props: any) => {
               />
             </View>
           ) : (
-            <Pressable style={styles.favorite} onPress={sendFavorite}>
-              <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()} />
-              <FontAwesomeIcon style={styles.iconBorder} icon={faStar} size={32} color={Color(props.isDarkMode).actualWhite} />
-            </Pressable>
+            null
+            // <Pressable style={styles.favorite} onPress={sendFavorite}>
+            //   <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()} />
+            //   <FontAwesomeIcon style={styles.iconBorder} icon={faStar} size={32} color={Color(props.isDarkMode).actualWhite} />
+            // </Pressable>
           )
         }
 

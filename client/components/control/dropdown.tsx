@@ -30,6 +30,13 @@ const _Dropdown = (props: any, {navigation}:any) => {
       }, [props.value, context.setParentFocus]);
 
     useEffect(() => {
+        if (!props.value) {
+            setKey('');
+            setTextValue('');
+        }
+    }, [props.value]);
+
+    useEffect(() => {
 
         if (props.value && !props.key && !dataInit && props.options) {
             let l_options = options;
@@ -190,9 +197,9 @@ const _Dropdown = (props: any, {navigation}:any) => {
                 // Added !focus so that all options show when the menu is opened after being closed to show all options
                 if (!value || !focus || isModal || (x && x.value && x.value && x.value.trim().toLowerCase().includes(value.toString().trim().toLowerCase()))) {
                     if (cnt % 2 != 0)
-                        x.background = Color(props.isDarkMode).holder;
+                        x.background = Color(props.isDarkMode).dropdownOption;
                     else
-                        x.background = Color(props.isDarkMode).holderSecondary;
+                        x.background = Color(props.isDarkMode).dropdownOptionAlt;
 
                     x.display = "block";
                     cnt++;
@@ -301,7 +308,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
                     position: 'absolute',
                     width: '100%'
                 }
-            })
+            }),
         },
         menuVoid: {
             backgroundColor: Color(props.isDarkMode).black,
@@ -335,13 +342,32 @@ const _Dropdown = (props: any, {navigation}:any) => {
             height: '100%',
             width: '100%',
             backgroundColor: Color(props.isDarkMode).promptMaskMobile,
-            padding: 20
+            padding: 20,
+            alignItems: 'center',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            display: 'flex',
+        },
+        modalContentHolder: {
+            backgroundColor: props.isDarkMode ? Color(props.isDarkMode).contentHolderSecondary : Color(props.isDarkMode).contentDialogBackground,
+            alignItems: 'center',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            display: 'flex',
+            padding: 10,
+            borderRadius: Radius.default,
+            borderWidth: .5,
+            borderColor: Color(props.isDarkMode).separator
+        },
+        modalInner: {
+            height: 300,
         },
         modalMenu: {
             backgroundColor: Color(props.isDarkMode).white,
             borderColor: Color(props.isDarkMode).border,
             borderWidth: 1,
-            marginTop: 10
+            marginTop: 10,
+            overflow: 'hidden',
         },
         text: {
             display: 'flex',
@@ -400,12 +426,13 @@ const _Dropdown = (props: any, {navigation}:any) => {
             width: '100%'
         },
         modal: {
-            width: '100%'
+            width: '100%',
         },
         deleteTextButton: {
             position: 'absolute',
-            right: 5,
-            borderRadius: Radius.small
+            right: 3,
+            borderRadius: Radius.medium,
+            padding: 2
         }
       });
 
@@ -414,7 +441,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
             style={styles.inputContainer}
             >
             <TextInput
-            style={[style(), {flex: 1}, isModal ? {paddingRight: 40} : null]}
+            style={[style(), {flex: 1}, isModal ? {paddingRight:38} : null]}
             onChangeText={(e) => onValueChange(e)}
             value={textValue}
             placeholder={props.placeholder}
@@ -428,9 +455,9 @@ const _Dropdown = (props: any, {navigation}:any) => {
             placeholderTextColor={Color(props.isDarkMode).placeHolderText}
             >
             </TextInput>
-            {isModal ?
+            {isModal && textValue ?
             <TouchableHighlight
-            underlayColor={Color(props.isDarkMode).danger}
+            underlayColor={props.isDarkMode ? Color(props.isDarkMode).whiteUnderlay : Color(props.isDarkMode).holderUnderlay}
             style={[styles.deleteTextButton]}
             onPress={(e: any) => {
                 if (props.setValue) {
@@ -444,7 +471,7 @@ const _Dropdown = (props: any, {navigation}:any) => {
                 size={30} 
                 color={Color(props.isDarkMode).text} 
                 style={styles.deleteTextIcon} 
-                icon="xmark"
+                icon="eraser"
                 >
                 </FontAwesomeIcon>
             </TouchableHighlight>
@@ -533,29 +560,37 @@ const _Dropdown = (props: any, {navigation}:any) => {
                 <View
                 style={styles.modalMenuContainer}
                 >
-                    {input(true, true)}
-                    <ScrollView
-                        keyboardShouldPersistTaps={'handled'}
-                        style={[styles.modalMenu]}
-                        >
-                        {visibleOptionCount === 0 ?
-                        <_Text
-                        style={styles.noResults}
-                        >No results</_Text>
-                        : null}
-                        {options}
-                    </ScrollView>
                     <View
-                    style={styles.buttons}
+                    style={styles.modalContentHolder}
                     >
-                        <_Button
-                        containerStyle={styles.shellButton}
-                        isDarkMode={props.isDarkMode}
-                        onPress={(e: any) => setFocus(false)}
-                        style={Style(props.isDarkMode).buttonDanger}
+                        <View
+                        style={styles.modalInner}
                         >
-                            Close
-                        </_Button>
+                            {input(true, true)}
+                            <ScrollView
+                                keyboardShouldPersistTaps={'handled'}
+                                style={[styles.modalMenu]}
+                                >
+                                {visibleOptionCount === 0 ?
+                                <_Text
+                                style={styles.noResults}
+                                >No results</_Text>
+                                : null}
+                                {options}
+                            </ScrollView>
+                        </View>
+                        <View
+                        style={styles.buttons}
+                        >
+                            <_Button
+                            containerStyle={styles.shellButton}
+                            isDarkMode={props.isDarkMode}
+                            onPress={(e: any) => setFocus(false)}
+                            style={Style(props.isDarkMode).buttonDanger}
+                            >
+                                Close
+                            </_Button>
+                        </View>
                     </View>
                 </View>
             </Modal>

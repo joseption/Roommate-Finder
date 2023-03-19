@@ -114,6 +114,7 @@ const ListingsScreen = (props: any) => {
     setSearchPressed={setSearchPressed}
     currentScreen={currentScreen}
     refresh={getAllListings}
+    updatePicture={props.updatePicture}
   />
   }
 
@@ -279,6 +280,7 @@ return (
           onClose={handleCloseFilterModal} 
           onFilter={handleFilter}
           filters={filters}
+          showFilter={showFilter}
           />
         </View>
       </View>

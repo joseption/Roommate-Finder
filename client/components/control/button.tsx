@@ -57,6 +57,10 @@ const _Button = (props: any) => {
          return style;
     }
 
+    const getUnderlay = () => {
+        return props.isDarkMode ? Color(props.isDarkMode).whiteUnderlay : Color(props.isDarkMode).holderUnderlay
+    }
+
     const styles = StyleSheet.create({
         text: {
             color: Color(props.isDarkMode).actualWhite,
@@ -87,7 +91,7 @@ const _Button = (props: any) => {
         <TouchableHighlight
         disabled={props.disabled || props.loading}
         onPress={() => press()}
-        underlayColor={Color(props.isDarkMode).white}
+        underlayColor={getUnderlay()}
         style={[{borderRadius: Radius.default, margin: 0, padding: 0}, props.containerStyle]}
         >
             <View

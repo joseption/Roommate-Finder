@@ -1,14 +1,24 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, TouchableHighlight, Platform } from 'react-native';
 import FavoriteListings from '../listings/favorite-listings';
 import CreateListing from '../listings/create-listing';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSearch, faStar, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { Color, Radius } from '../../style';
-import { Listings_Screen } from '../../helper';
+import { getLocalStorage, Listings_Screen } from '../../helper';
+import _Image from '../control/image';
 
 const BottomNavbar = (props: any) => {
   const [isListingScreenOpen, setIsListingScreenOpen] = React.useState(false);
+  const [image,setImage] = useState('');
+
+  useEffect(() => {
+    setNavImage();
+  }, []);
+
+  useEffect(() => {
+    setNavImage();
+  }, [props.updatePicture]);
 
   useEffect(() => {
   }, [props.currentScreen]);
@@ -28,6 +38,20 @@ const BottomNavbar = (props: any) => {
     setIsListingScreenOpen(!isListingScreenOpen)
   }
 
+  const profilePicture = async () => {
+    let data = await getLocalStorage();
+    if (data && data.user) {
+        setImage(data.user.image);
+    }
+  }
+
+  const setNavImage = () => {
+    if (props.updatePicture)
+    setImage(props.updatePicture);
+  else
+    profilePicture();
+  }
+
   const styles = StyleSheet.create({
     container: {
       flexDirection: 'row',
@@ -36,6 +60,7 @@ const BottomNavbar = (props: any) => {
       backgroundColor: Color(props.isDarkMode).contentBackgroundSecondary,
       borderTopWidth: 1,
       borderTopColor: Color(props.isDarkMode).separator,
+      alignItems: 'center'
     },
     button: {
       alignItems: 'center',
@@ -49,6 +74,28 @@ const BottomNavbar = (props: any) => {
           outlineStyle: 'none'
         }
       })
+    },
+    userIcon: {
+      borderRadius: Radius.round,
+      margin: 'auto',
+      ...Platform.select({
+          web: {
+          outlineStyle: 'none',
+          }
+      }),
+      borderWidth: .5,
+      borderColor: props.currentScreen === Listings_Screen.favorites ? Color(props.isDarkMode).gold : Color(props.isDarkMode).separator
+    },
+    iconContainer: {
+
+    },
+    favContainer: {
+      backgroundColor: Color(props.isDarkMode).separator,
+      borderRadius: Radius.round,
+      position: 'absolute',
+      bottom: -1,
+      right: -5,
+      padding: 2
     }
   });
 
@@ -81,11 +128,34 @@ const BottomNavbar = (props: any) => {
         }}
         style={styles.button}
         >
-        <FontAwesomeIcon
-        style={styles.icon}
-        icon={faStar} size={24}
-        color={props.currentScreen === Listings_Screen.favorites ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text}
-        />
+        <View
+        style={styles.iconContainer}
+        >
+        {image ?
+          <_Image
+          style={styles.userIcon}
+          source={{uri: image}}
+          height={30}
+          width={30}
+          />
+          :
+          <_Image
+          style={styles.userIcon}
+          source={props.isDarkMode ? require('../../assets/images/user_w.png') : require('../../assets/images/user.png')}
+          height={30}
+          width={30}
+          />
+        }
+        <View
+        style={styles.favContainer}
+        >
+          <FontAwesomeIcon
+          style={styles.icon}
+          icon={faStar} size={12}
+          color={props.currentScreen === Listings_Screen.favorites ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text}
+          />
+        </View>
+        </View>
       </TouchableHighlight>
       <TouchableHighlight
         underlayColor={Color(props.isDarkMode).contentDialogBackground}

@@ -17,11 +17,12 @@ export default function CreateListing() {
   const [rooms, setRooms] = useState<number>(1);
   const [size, setSize] = useState<number>(0);
   const [bathrooms, setBathrooms] = useState<number>(1);
-  // const [zipcode, setZipcode] = useState<string>("");
+  const [zipcode, setZipcode] = useState<string>("");
   const [petsAllowed, setPetsAllowed] = useState<boolean>(true);
+  const [streetAddress, setStreetAddress] = useState("");
 
   const { mutate: mutateListing, isLoading } = useMutation({
-    mutationFn: (fullAddress: string) =>
+    mutationFn: () =>
       MakeListings(
         name,
         description,
@@ -32,8 +33,9 @@ export default function CreateListing() {
         rooms,
         bathrooms,
         size,
-        fullAddress,
-        petsAllowed
+        streetAddress,
+        petsAllowed,
+        zipcode
       ),
     onSuccess: () => {
       void router.push("/listings");
@@ -46,18 +48,7 @@ export default function CreateListing() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const streetAddress = document.getElementById(
-      "street-address"
-    ) as HTMLInputElement;
-    const city = document.getElementById("city") as HTMLInputElement;
-    const state = document.getElementById("state") as HTMLInputElement;
-    const zip = document.getElementById("zip") as HTMLInputElement;
-    // setZipcode(zip.value);
-    const fullAddress = `${streetAddress.value}, ${city.value}, ${state.value} ${zip.value}`;
-    console.log(bathrooms, "bathrooms hs");
-    console.log(size, "size hs");
-
-    mutateListing(fullAddress);
+    mutateListing();
   };
 
   const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -299,6 +290,7 @@ export default function CreateListing() {
                       name="street-address"
                       id="street-address"
                       autoComplete="street-address"
+                      onChange={(e) => setStreetAddress(e.target.value)}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     />
                   </div>
@@ -354,6 +346,7 @@ export default function CreateListing() {
                       name="postal-code"
                       id="zip"
                       autoComplete="postal-code"
+                      onChange={(e) => setZipcode(e.target.value)}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     />
                   </div>

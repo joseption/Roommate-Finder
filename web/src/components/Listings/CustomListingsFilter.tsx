@@ -1,7 +1,6 @@
 import { FunnelIcon } from "@heroicons/react/24/outline";
 import { debounce } from "lodash";
-import { useRouter } from "next/router";
-import React, { ChangeEvent, useCallback, useState } from "react";
+import React, { ChangeEvent } from "react";
 
 import Button from "../Inputs/Button";
 import CustomPopover from "../Inputs/CustomPopover";
@@ -50,7 +49,7 @@ export default function CustomListingFilterPopover({
     }, 600)
   ).current;
 
-  const handlePriceChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     debouncedPrice(e);
   };
   const handleHousingTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {

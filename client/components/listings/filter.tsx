@@ -300,7 +300,9 @@ const Filter = (props: any) => {
 
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <ScrollView
+        keyboardShouldPersistTaps={'handled'}
+      >
         <View
         style={styles.header}
         >
@@ -332,9 +334,8 @@ const Filter = (props: any) => {
 
           <_TextInput
             containerStyle={styles.inputContainerStyle}
-            style={styles.input}
             onChangeText={handlePriceChange}
-            value={price !== undefined ? price.toString() : ""}
+            value={price !== undefined ? `$${price.toString()}` : ""}
             keyboardType="numeric"
             placeholder="$0"
             label="Max Price (per month)"
@@ -370,7 +371,6 @@ const Filter = (props: any) => {
 
           <_TextInput
             containerStyle={styles.inputContainerStyle}
-            style={styles.input}
             onChangeText={handleDistanceChange}
             value={distanceToUcf !== undefined ? distanceToUcf.toString() : ""}
             keyboardType="numeric"

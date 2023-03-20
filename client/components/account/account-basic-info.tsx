@@ -505,6 +505,7 @@ const AccountInfo = (props: any) => {
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'flex-end',
+            marginTop: 10
         },
         passwordDialog: {
             margin: 'auto',
@@ -598,7 +599,16 @@ const AccountInfo = (props: any) => {
         },
         darkModeCheck: {
             marginTop: 10
-        }
+        },
+        modalTitle: {
+            fontSize: FontSize.large,
+            fontWeight: "bold",
+            marginBottom: 5,
+        },
+         modalMessage: {
+            fontSize: FontSize.default,
+            marginBottom: 15
+        },
     });
 
     const toggleDarkMode = async (e: any) => {
@@ -624,9 +634,8 @@ const AccountInfo = (props: any) => {
                     <View>
                         {!passwordEmailSent ?
                         <View>
-                            <_Text
-                            style={_styles.passwordResetText}
-                            >Would you like to update your password? We will attempt to send a password update link to the email on file.</_Text>
+                            <_Text isDarkMode={props.isDarkMode} style={_styles.modalTitle}>Update Password</_Text>
+                            <_Text isDarkMode={props.isDarkMode} style={_styles.modalMessage}>Would you like to update your password? A reset link will be sent to your email.</_Text>
                             <View
                             style={_styles.passwordButtonContainer}
                             >

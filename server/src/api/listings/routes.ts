@@ -168,34 +168,49 @@ router.put('/:listingId', async (req: Request, res: Response) => {
       rooms,
       size,
       zipcode,
+      deleteImages,
       distanceToUcf,
     } = req.body;
-
-    const uploadImages = [];
-    //check if images is an array
-
-    //check if images are base64 string
-    //upload images to s3 bucket
-    //add image urls to uploadImages array
-    if (images && Array.isArray(images)) {
-      for (let i = 0; i < images.length; i++) {
-        const image = images[i];
-        if (!/^data:image\/[a-z]+;base64,/.test(image)) {
-          return res.status(400).json({ Error: 'Image should be a base64 image!' });
-        }
-        const uploadedImage = await uploadImage(image);
-
-        if (!uploadedImage) return res.status(400).json({ Error: 'Failed to upload image' });
-        uploadImages.push(uploadedImage);
-      }
-    }
 
     const listing = await prisma.listings.findFirst({
       where: {
         id: req.params.listingId as string,
       },
     });
+
+    const uploadImages: any[] = [];
     uploadImages.push(...listing.images);
+
+    // Check to see if the images already exist, if they weren't passed back then delete them from the DB
+    if (deleteImages.length > 0) {
+      for (let i = 0; i < deleteImages.length; i++) {
+        let cnt = 0;
+        uploadImages.find((x: any) => {
+          if (x == deleteImages[i]) {
+            // Remove the image from the DB
+            uploadImages.splice(cnt, 1);
+            listing.images.splice(cnt, 1);
+          }
+          cnt++;
+        });
+      }
+    }
+
+    // Upload image to S3 bucket
+    if (images && Array.isArray(images)) {
+      for (let i = 0; i < images.length; i++) {
+        if (!/^data:image\/[a-z]+;base64,/.test(images[i])) {
+          return res.status(400).json({ Error: 'Image should be a base64 image!' });
+        }
+        const uploadedImage = await uploadImage(images[i]);
+
+        if (!uploadedImage)
+          return res.status(400).json({ Error: 'Failed to upload image' });
+        console.log(uploadedImage);
+        uploadImages.push(uploadedImage);
+      }
+    }
+
     const updatedListing = await prisma.listings.update({
       where: {
         id: req.params.listingId as string,
@@ -207,7 +222,7 @@ router.put('/:listingId', async (req: Request, res: Response) => {
         housing_type: housing_type || undefined,
         description: description || undefined,
         price: price || undefined,
-        petsAllowed: petsAllowed || undefined,
+        petsAllowed: petsAllowed as boolean,
         address: address || undefined,
         bathrooms: bathrooms || undefined,
         rooms: rooms || undefined,

@@ -103,9 +103,17 @@ const BottomNavbar = (props: any) => {
     <View style={styles.container}>
       <TouchableHighlight 
         onPress={() => {
-          if (props.currentScreen !== Listings_Screen.all)
-            props.refresh();
-          onSearch();
+          let action = function() {
+            if (props.currentScreen !== Listings_Screen.all)
+              props.refresh();
+            onSearch();
+          }
+          if (props.currentScreen === Listings_Screen.create) {
+            props.setIsManualNavigate({action});
+          }
+          else {
+            action();
+          }
         }} 
         underlayColor={Color(props.isDarkMode).contentDialogBackground}
         style={styles.button}
@@ -122,9 +130,17 @@ const BottomNavbar = (props: any) => {
       <TouchableHighlight
         underlayColor={Color(props.isDarkMode).contentDialogBackground}
         onPress={() => {
-          if (props.currentScreen !== Listings_Screen.favorites)
-            props.refresh();
-          onFavorite();
+          let action = function() {
+            if (props.currentScreen !== Listings_Screen.favorites)
+              props.refresh();
+            onFavorite();
+          }
+          if (props.currentScreen === Listings_Screen.create) {
+            props.setIsManualNavigate({action});
+          }
+          else {
+            action();
+          }
         }}
         style={styles.button}
         >

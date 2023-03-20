@@ -24,7 +24,10 @@ const ListingsScreen = (props: any) => {
   const [userInfo, setUserInfo] = useState<any>();
   const [showFilter, setShowFilter] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [updatedListing, setUpdatedListing] = useState(false);
   const [filters, setFilters] = useState({});
+  const [isManualNavigate, setIsManualNavigate] = useState(null);
+  const [refreshListing, setRefreshListing] = useState(null);
 
   useEffect(() => {
     const back = BackHandler.addEventListener('hardwareBackPress', backPress);
@@ -54,6 +57,9 @@ const ListingsScreen = (props: any) => {
     if (!init) {
       getAllListings();
       setInit(true);
+    }
+    if (currentScreen === Listings_Screen.all) {
+      setCurrentListing(null);
     }
   }, [currentScreen]);
 
@@ -115,6 +121,7 @@ const ListingsScreen = (props: any) => {
     currentScreen={currentScreen}
     refresh={getAllListings}
     updatePicture={props.updatePicture}
+    setIsManualNavigate={setIsManualNavigate}
   />
   }
 
@@ -307,26 +314,38 @@ return (
       </View>
     )}
 
-    {!currentListing && currentScreen === Listings_Screen.create && (
+    {currentScreen === Listings_Screen.create && (
       <View style={styles.content}>
         <View style={styles.contentContainer}>
           <CreateListing 
+            currentListing={currentListing}
             isDarkMode={props.isDarkMode} 
             onClose={() => handleNavigation(Listings_Screen.favorites)}
             refresh={refresh}
+            currentScreen={currentScreen}
+            setUpdatedListing={setUpdatedListing}
+            setCurrentScreen={setCurrentScreen}
+            isManualNavigate={isManualNavigate}
+            setIsManualNavigate={setIsManualNavigate}
+            setCurrentListing={setCurrentListing}
+            refreshListing={refreshListing}
           />
           {bottomBarNav()}
         </View>
       </View>
     )}
 
-    {currentListing && (
+    {currentListing && (currentScreen !== Listings_Screen.create) && (
       <ListingView
         isDarkMode={props.isDarkMode}
         setCurrentListing={setCurrentListing}
         currentListing={currentListing}
         refresh={refresh}
         setNavSelector={props.setNavSelector}
+        setCurrentScreen={setCurrentScreen}
+        updatedListing={updatedListing}
+        setUpdatedListing={setUpdatedListing}
+        setRefreshListing={setRefreshListing}
       />
     )}
   </View>

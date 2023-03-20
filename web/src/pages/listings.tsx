@@ -1,15 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { debounce } from "lodash";
-import { useRouter } from "next/router";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 
 import CustomListingFilterPopover from "../components/Listings/CustomListingsFilter";
 import ListingContent from "../components/listingsContent";
-import Sidebar from "../components/sidebar";
-import { GetListings } from "../request/fetch";
 import { transitionVariants } from "../styles/motion-definitions";
-import { ListingRequest } from "../types/listings.types";
 
 export default function Listings() {
   const [price, setPrice] = useState<number>(100000);

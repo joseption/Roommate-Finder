@@ -42,12 +42,17 @@ const CreateListing = (props: any) => {
       setFormData(props.currentListing);
       setImageURLArray(props.currentListing.images);
 
-      // Bluff secondary array for index offset
-      let uris = [];
-      for (let i = 0; i < props.currentListing.images.length; i++) {
-        uris.push("");
+      if (Platform.OS !== 'web') {
+        // Bluff secondary array for index offset
+        let uris = [];
+        for (let i = 0; i < props.currentListing.images.length; i++) {
+          uris.push("");
+        }
+        setImageUriArray(uris);
       }
-      setImageUriArray(uris);
+      else {
+        setImageUriArray(props.currentListing.images);
+      }
 
       setTimeout(() => {
         setDirty(false);
@@ -140,11 +145,19 @@ const CreateListing = (props: any) => {
 
   const getCleanURIList = () => {
     let uris: any[] = [];
-    imageUriArray.forEach((x: any) => {
-      if (x.trim()) {
-        uris.push(x);
+    if (Platform.OS !== 'web') {
+      imageUriArray.forEach((x: any) => {
+        if (x.trim()) {
+          uris.push(x);
+        }
+      });
+    }
+    else {
+      for (let i = 0; i < imageUriArray.length; i++) {
+        if (!imageUriArray[i].startsWith('http'))
+          uris.push(imageUriArray[i]);
       }
-    });
+    }
     return uris;
   }
 
@@ -219,7 +232,7 @@ const CreateListing = (props: any) => {
     updatedImageUriArray.splice(index, 1);
     setImageUriArray(updatedImageUriArray);
 
-    if (props.currentListing && url[0].startsWith("http")) {
+    if (props.currentListing && url[0] && url[0].startsWith("http")) {
       let updatedDeleteImageURLs = [...deleteImageURLs];
       updatedDeleteImageURLs.push(url[0]);
       setDeleteImageURLs(updatedDeleteImageURLs);
@@ -635,20 +648,20 @@ const CreateListing = (props: any) => {
             style={styles.dialogButtonContainer}
             >
             <_Button
-            onPress={() => cancelPrompt()}
-            style={Style(props.isDarkMode).buttonDefault}
-            isDarkMode={props.isDarkMode}
-            containerStyle={[styles.closeBtn, {marginRight: 5}]}
-            >
-              Continue Working
-            </_Button>
-            <_Button
             onPress={() => close()}
             style={Style(props.isDarkMode).buttonDanger}
             isDarkMode={props.isDarkMode}
-            containerStyle={styles.closeBtn}
+            containerStyle={[styles.closeBtn, {marginRight: 5}]}
             >
               Leave
+            </_Button>
+            <_Button
+            onPress={() => cancelPrompt()}
+            style={Style(props.isDarkMode).buttonDefault}
+            isDarkMode={props.isDarkMode}
+            containerStyle={styles.closeBtn}
+            >
+              Continue Working
             </_Button>
             </View>
           </View>
@@ -656,8 +669,10 @@ const CreateListing = (props: any) => {
       )}
       {
       <>
-      <_Text style={styles.title}>Create Listing</_Text>
-      <ScrollView>
+      <_Text style={styles.title}>{props.currentListing ? 'Update' : 'Create'} {'Listing'}</_Text>
+      <ScrollView
+      keyboardShouldPersistTaps={'handled'}
+      >
           <View style={styles.formContainer}>
             <_Group
               isDarkMode={props.isDarkMode}
@@ -811,7 +826,7 @@ const CreateListing = (props: any) => {
               <_TextInput
               containerStyle={styles.inputContainerStyle}
               onChangeText={(text: any) => handleChange('price', parseFloat(text))}
-              value={`$${formData.price}`}
+              value={formData.price ? `$${formData.price}` : '$0'}
               keyboardType="numeric"
               placeholder="$0"
               label="Price (per month)"
@@ -821,7 +836,7 @@ const CreateListing = (props: any) => {
               <_TextInput
               containerStyle={styles.inputContainerStyle}
               onChangeText={(text: any) => handleChange('size', parseInt(text))}
-              value={String(formData.size)}
+              value={formData.size ? String(formData.size) : '0'}
               keyboardType="numeric"
               label="Square Feet"
               required={true}

@@ -19,12 +19,9 @@ export default function Listings() {
   const [petsAllowed, setPetsAllowed] = useState<string>("all");
   const [distanceToUCF, setDistanceToUCF] = useState<number>(100000);
 
-  const { data, isLoading } = useQuery(["listings"], () => GetListings());
   return (
     <div className="">
-      {isLoading || !data ? (
-        <div>Loading...</div>
-      ) : (
+      {
         <>
           <motion.main
             className={"min-h-screen bg-white"}
@@ -54,10 +51,17 @@ export default function Listings() {
                 setDistanceToUcf={setDistanceToUCF}
               />
             </div>
-            <ListingContent data={data} />
+            <ListingContent
+              price={price}
+              numberRooms={bedrooms}
+              numberBathrooms={bathrooms}
+              petsAllowed={petsAllowed}
+              housingType={housingType}
+              distanceToUcf={distanceToUCF}
+            />
           </motion.main>
         </>
-      )}
+      }
     </div>
   );
 }

@@ -110,7 +110,7 @@ export default function CustomListingFilterPopover({
                 value={housingType}
                 onChange={handleHousingTypeChange}
               >
-                <option value="">All</option>
+                <option value="all">All</option>
                 <option value="Apartment">Apartment</option>
                 <option value="House">House</option>
                 <option value="Condo">Condo</option>
@@ -126,7 +126,7 @@ export default function CustomListingFilterPopover({
                 value={numberRooms}
                 onChange={handleRoomsChange}
               >
-                <option value="">All</option>
+                <option value="all">All</option>
                 <option value={1}>1</option>
                 <option value={2}>2</option>
                 <option value={3}>3</option>
@@ -143,7 +143,7 @@ export default function CustomListingFilterPopover({
                 value={numberBathrooms}
                 onChange={handleBathroomsChange}
               >
-                <option value="">All</option>
+                <option value="all">All</option>
                 <option value={1}>1</option>
                 <option value={2}>2</option>
                 <option value={3}>3</option>

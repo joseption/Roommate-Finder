@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Alert, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList, Pressable} from 'react-native';
 import _Text from '../control/text';
 import { Color, FontSize, Radius, Style } from '../../style';
-import { env } from '../../helper';
+import { env, Listings_Screen } from '../../helper';
 import { authTokenHeader, getLocalStorage } from '../../helper';
 import _Button from '../control/button';
 import { ImagePickerResponse, launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -23,10 +23,42 @@ const CreateListing = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [error, setError] = useState('');
+  const [prompt, setPrompt] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [deleteImageURLs, setDeleteImageURLs] = useState<string[]>([]);
   
   useEffect(() => {
     getUserInfo();
   }, [userInfo?.id])
+
+  useEffect(() => {
+    if (props.isManualNavigate) {
+      cancel();
+    }
+  }, [props.isManualNavigate])
+
+  useEffect(() => {
+    if (props.currentScreen === Listings_Screen.create && props.currentListing) {
+      setFormData(props.currentListing);
+      setImageURLArray(props.currentListing.images);
+
+      if (Platform.OS !== 'web') {
+        // Bluff secondary array for index offset
+        let uris = [];
+        for (let i = 0; i < props.currentListing.images.length; i++) {
+          uris.push("");
+        }
+        setImageUriArray(uris);
+      }
+      else {
+        setImageUriArray(props.currentListing.images);
+      }
+
+      setTimeout(() => {
+        setDirty(false);
+      }, 0);
+    }
+  }, [props.currentScreen])
 
   const getUserInfo = async () => {
     setUserInfo(await getLocalStorage().then((res) => {return res.user}));
@@ -45,7 +77,8 @@ const CreateListing = (props: any) => {
     size: 0,
     zipcode: '',
     distanceToUcf: 0,
-    images: []
+    images: [],
+    deleteImages: []
   });
 
   
@@ -59,6 +92,7 @@ const CreateListing = (props: any) => {
         if (Platform.OS === 'web') {
           if (asset.uri) {
             UriImages.push(asset.uri);
+            setDirty(true);
           } else {
             setImageError("Photo could not be attached");
           }
@@ -66,6 +100,7 @@ const CreateListing = (props: any) => {
           if (asset.base64) {
             if (asset.uri) {
               UrlImages.push(asset.uri);
+              setDirty(true);
             }
             UriImages.push("data:image/jpeg;base64," + asset.base64);
           } else {
@@ -101,11 +136,30 @@ const CreateListing = (props: any) => {
   };
 
   const handleChange = (key: string, value: any) => {
+    setDirty(true);
     setFormData({
       ...formData,
       [key]: value,
     });
   };
+
+  const getCleanURIList = () => {
+    let uris: any[] = [];
+    if (Platform.OS !== 'web') {
+      imageUriArray.forEach((x: any) => {
+        if (x.trim()) {
+          uris.push(x);
+        }
+      });
+    }
+    else {
+      for (let i = 0; i < imageUriArray.length; i++) {
+        if (!imageUriArray[i].startsWith('http'))
+          uris.push(imageUriArray[i]);
+      }
+    }
+    return uris;
+  }
 
 
   const handleSubmit = async () => { 
@@ -113,11 +167,19 @@ const CreateListing = (props: any) => {
     setIsLoading(true);
     let hasError = false;
     setIsLocationNotFound(false);
-    formData.images = imageUriArray as never;
+    formData.images = getCleanURIList() as never;
+    let listing = "";
+    let method = "POST";
+    if (props.currentListing) {
+      listing = "/" + props.currentListing.id;
+      method = "PUT";
+      formData.deleteImages = deleteImageURLs as never;
+    }
+
     try {
       let auth = await authTokenHeader();
-      await fetch(`${env.URL}/listings`, {
-        method: 'POST',
+      await fetch(`${env.URL}/listings${listing}`, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
           'authorization': auth,
@@ -126,7 +188,6 @@ const CreateListing = (props: any) => {
       }).then(async ret => {
         let res = JSON.parse(await ret.text());
         if (res.Error) {
-          console.log(res.Error);
           hasError = true;
         }
       });
@@ -162,13 +223,20 @@ const CreateListing = (props: any) => {
   };
 
   const handleDeletePhoto = (index: number) => {
+    setDirty(true);
     let updatedImageURLArray = [...imageURLArray];
-    updatedImageURLArray.splice(index, 1);
+    let url = updatedImageURLArray.splice(index, 1);
     setImageURLArray(updatedImageURLArray);
   
     let updatedImageUriArray = [...imageUriArray];
     updatedImageUriArray.splice(index, 1);
     setImageUriArray(updatedImageUriArray);
+
+    if (props.currentListing && url[0] && url[0].startsWith("http")) {
+      let updatedDeleteImageURLs = [...deleteImageURLs];
+      updatedDeleteImageURLs.push(url[0]);
+      setDeleteImageURLs(updatedDeleteImageURLs);
+    }
 
     setFormData({
       ...formData,
@@ -205,10 +273,27 @@ const CreateListing = (props: any) => {
     handleChange('distanceToUcf', distUcf);
   };
 
+  const close = () => {
+    if (props.isManualNavigate) {
+      props.isManualNavigate?.action();
+      props.setIsManualNavigate(null);
+    } 
+    else { 
+      if (props.currentListing) 
+        props.setCurrentScreen(Listings_Screen.favorites);
+      else {
+        props.setCurrentScreen(Listings_Screen.all);
+      }
+    }
+  }
+
   const createListing = async () => {
     let hasError = await handleSubmit();
     setIsLoading(false);
     if (!hasError) {
+      if (props.currentListing) {
+        props.refreshListing?.getSingleListing();
+      }
       setIsDone(true);
       props.onClose();
       props.refresh();
@@ -225,7 +310,6 @@ const CreateListing = (props: any) => {
     {   
       let obj = {address: address};
       let js = JSON.stringify(obj);
-      console.log(obj);
       let tokenHeader = await authTokenHeader();
       await fetch(`${env.URL}/listings/location`,
       {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
@@ -278,11 +362,13 @@ const CreateListing = (props: any) => {
   }
 
   const disabled = () => {
-    return false;
+    if (props.currentListing && !dirty) {
+      return true;
+    }
     if (isDone) {
       return true;
     }
-    let formDataFilled = formData.address && formData.bathrooms && formData.city && formData.description && formData.housing_type && imageUriArray.length > 0 && formData.name && formData.petsAllowed != undefined && formData.price && formData.rooms && formData.size && formData.zipcode;
+    let formDataFilled = formData.address && formData.bathrooms && formData.city && formData.description && formData.housing_type && (imageUriArray.length > 0 || imageURLArray.length > 0) && formData.name && formData.petsAllowed != undefined && formData.price && formData.rooms && formData.size && formData.zipcode;
     return !formDataFilled;
   }
 
@@ -292,9 +378,9 @@ const CreateListing = (props: any) => {
     if (props.mobile)
       style.push(Style(props.isDarkMode).errorText);        
     return style;
-}
+  }
 
-const errorContainerStyle = () => {
+  const errorContainerStyle = () => {
     var style = [];
     if (props.mobile) {
         style.push(Style(props.isDarkMode).errorMsgMobile);
@@ -303,7 +389,26 @@ const errorContainerStyle = () => {
         style.push(Style(props.isDarkMode).errorMsg);
     }
     return style;
-}
+  }
+
+  const cancel = () => {
+    if (dirty) {
+      setPrompt(true);
+    }
+    else {
+      props.setIsManualNavigate(null);
+      close();
+    }
+  }
+
+  const cancelPrompt = () => {
+    setPrompt(false);
+    if (props.isManualNavigate) {
+      props.setIsManualNavigate(null);
+    }    
+  }
+
+
 
   const styles = StyleSheet.create({
     container: {
@@ -501,6 +606,18 @@ const errorContainerStyle = () => {
       },
       error: {
         marginBottom: 10
+      },
+      buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%'
+      },
+      dialogButtonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        marginTop: 10
       }
   });
 
@@ -522,10 +639,40 @@ const errorContainerStyle = () => {
           </View>
         </View>
       )}
+      {prompt && (
+        <View style={[styles.modalOverlay, dialogStyle()]}>
+          <View style={styles.modalBox}>
+            <_Text isDarkMode={props.isDarkMode} style={styles.modalTitle}>Unsaved Changes</_Text>
+            <_Text isDarkMode={props.isDarkMode} style={styles.modalMessage}>There are unsaved changes, are you sure you want to leave this screen and lose your work?</_Text>
+            <View
+            style={styles.dialogButtonContainer}
+            >
+            <_Button
+            onPress={() => close()}
+            style={Style(props.isDarkMode).buttonDanger}
+            isDarkMode={props.isDarkMode}
+            containerStyle={[styles.closeBtn, {marginRight: 5}]}
+            >
+              Leave
+            </_Button>
+            <_Button
+            onPress={() => cancelPrompt()}
+            style={Style(props.isDarkMode).buttonDefault}
+            isDarkMode={props.isDarkMode}
+            containerStyle={styles.closeBtn}
+            >
+              Continue Working
+            </_Button>
+            </View>
+          </View>
+        </View>
+      )}
       {
       <>
-      <_Text style={styles.title}>Create Listing</_Text>
-      <ScrollView>
+      <_Text style={styles.title}>{props.currentListing ? 'Update' : 'Create'} {'Listing'}</_Text>
+      <ScrollView
+      keyboardShouldPersistTaps={'handled'}
+      >
           <View style={styles.formContainer}>
             <_Group
               isDarkMode={props.isDarkMode}
@@ -679,7 +826,7 @@ const errorContainerStyle = () => {
               <_TextInput
               containerStyle={styles.inputContainerStyle}
               onChangeText={(text: any) => handleChange('price', parseFloat(text))}
-              value={`$${formData.price}`}
+              value={formData.price ? `$${formData.price}` : '$0'}
               keyboardType="numeric"
               placeholder="$0"
               label="Price (per month)"
@@ -689,7 +836,7 @@ const errorContainerStyle = () => {
               <_TextInput
               containerStyle={styles.inputContainerStyle}
               onChangeText={(text: any) => handleChange('size', parseInt(text))}
-              value={String(formData.size)}
+              value={formData.size ? String(formData.size) : '0'}
               keyboardType="numeric"
               label="Square Feet"
               required={true}
@@ -699,7 +846,7 @@ const errorContainerStyle = () => {
               containerStyle={styles.inputContainerStyle}
               isDarkMode={props.isDarkMode}
               options={getOptions()}
-              value={formData.rooms}
+              value={formData.rooms ? formData.rooms.toString() : ''}
               setValue={(text: string) => handleChange('rooms', parseInt(text))}
               required={true}
               label="Bedrooms" />            
@@ -708,7 +855,7 @@ const errorContainerStyle = () => {
               containerStyle={styles.inputContainerStyle}
               isDarkMode={props.isDarkMode}
               options={getOptions()}
-              value={formData.bathrooms}
+              value={formData.bathrooms ? formData.bathrooms.toString() : ''}
               setValue={(text: string) => handleChange('bathrooms', parseInt(text))}
               required={true}
               label="Bathrooms" />
@@ -732,15 +879,28 @@ const errorContainerStyle = () => {
                     {error}
                     </_Text>
               : null}
-              <_Button
-                isDarkMode={props.isDarkMode}
-                style={[Style(props.isDarkMode).buttonGold]}
-                onPress={() => {handleSubmitListing()}}
-                disabled={disabled()}
-                loading={isLoading}
+              <View
+              style={styles.buttonContainer}
               >
-                {'Create Listing'}
-              </_Button>
+                <_Button
+                  isDarkMode={props.isDarkMode}
+                  containerStyle={{marginRight: 5, flex: 1}}
+                  style={[Style(props.isDarkMode).buttonDanger]}
+                  onPress={() => cancel()}
+                >
+                  {'Cancel'}
+                </_Button>
+                <_Button
+                  isDarkMode={props.isDarkMode}
+                  containerStyle={{flex: 1}}
+                  style={[Style(props.isDarkMode).buttonDefault]}
+                  onPress={() => {handleSubmitListing()}}
+                  disabled={disabled()}
+                  loading={isLoading}
+                >
+                  {props.currentListing ? 'Update' : 'Create'} {'Listing'}
+                </_Button>
+              </View>
             </View>
           </View>
         </ScrollView></>

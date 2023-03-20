@@ -1,6 +1,6 @@
-import { ScrollView, StyleSheet, View, Image, TouchableHighlight, Platform, ActivityIndicator } from "react-native";
+import { ScrollView, StyleSheet, View, Image, TouchableHighlight, Platform, ActivityIndicator, RefreshControl } from "react-native";
 import { Color, FontSize, Radius, Style } from "../../style";
-import { authTokenHeader, env, getLocalStorage, navProp, NavTo, userId} from "../../helper";
+import { authTokenHeader, env, getLocalStorage, Listings_Screen, navProp, NavTo, userId} from "../../helper";
 import _Button from "../control/button";
 import _Image from "../control/image";
 import _Text from "../control/text";
@@ -17,6 +17,18 @@ const ListingView = (props: any) => {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [autoPlaySpeed, setAutoPlaySpeed] = useState(2);
+
+  const refresh = () => {
+    setRefreshing(true);
+    getSingleListing();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    props.setRefreshListing({getSingleListing});
+  }, []);
 
   const [creator, setCreator] = useState<{
     id: string;
@@ -33,6 +45,28 @@ const ListingView = (props: any) => {
     House: faHome,
     Apartment: faBuilding,
     Condo: faCity,
+  };
+
+  const getSingleListing = async () => {
+    let id = props.currentListing.id;
+    if (id) {
+      const tokenHeader = await authTokenHeader();
+      let res = await fetch(`${env.URL}/listings/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: tokenHeader,
+        },
+      }).then(async (ret) => {
+        const res = JSON.parse(await ret.text());
+        if (res.Error) {
+          console.warn("Error: ", res.Error);
+        } else {
+          console.log(res.petsAllowed);
+          props.setCurrentListing(res);
+        }
+      });
+    }
   };
 
   const getUser = async (id: string) => {
@@ -150,11 +184,32 @@ const ListingView = (props: any) => {
 
   useEffect(() => {
     getUser(props.currentListing.userId);
+    slideOnce();
   }, [props.currentListing]);
+
+  useEffect(() => {
+    if (props.updatedListing) {
+      getSingleListing();
+      props.setUpdatedListing(false);
+    }
+  }, [props.updatedListing]);
 
   const generateRequestId = () => {
     return Math.floor(Math.random() * 9999999) + 1;
   };
+
+  const editListing = () => {
+    props.setCurrentScreen(Listings_Screen.create);
+  }
+
+  const slideOnce = () => {
+    if (autoPlaySpeed != 2)
+      setAutoPlaySpeed(2);
+    setTimeout(() => {
+      if (autoPlaySpeed != 7)
+        setAutoPlaySpeed(7);
+    }, 1000);
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -392,9 +447,19 @@ const ListingView = (props: any) => {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.content}>
+      <ScrollView style={styles.content}
+      refreshControl={
+        <RefreshControl
+        refreshing={refreshing}
+        onRefresh={refresh}
+        colors={[Color(props.isDarkMode).gold]}
+        progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+        />
+      }
+      >
         <Swiper
           autoplay={true}
+          autoplayTimeout={autoPlaySpeed}
           showsButtons={currentListing?.images?.length > 1}
           scrollEnabled={true}
           style={styles.swiper}
@@ -533,7 +598,7 @@ const ListingView = (props: any) => {
                   <TouchableHighlight
                   underlayColor={Color(props.isDarkMode).defaultUnderlay}
                   style={[styles.msgButton, {marginRight: 5}]}
-                  onPress={() => {}}
+                  onPress={() => editListing()}
                   >
                     <View
                     style={styles.customButton}

@@ -9,8 +9,8 @@ import { message } from "../types/message.types";
 import { SurveyInfo } from "../types/survey.types";
 import { BioAndTags } from "../types/tags.types";
 import doRequest from "./request";
-const backend_api = "https://api.roomfin.xyz";
 // const backend_api = "http://localhost:8080";
+const backend_api = "https://api.roomfin.xyz";
 
 export async function GetCurrentUserInfo() {
   return await doRequest<user>(`${backend_api}/users/me`, null, "GET", true);
@@ -64,10 +64,24 @@ export async function GetAllUsers() {
   );
 }
 
-export async function GetListings(body: ListingRequest) {
+export async function GetListings(
+  price: number | undefined,
+  housing_type: string | undefined,
+  petsAllowed: boolean | undefined | null,
+  rooms: number | undefined,
+  bathrooms: number | undefined,
+  distanceToUcf: number | undefined
+) {
   return await doRequest<ListingInfo[]>(
     `${backend_api}/listings/all`,
-    body,
+    {
+      price,
+      housing_type,
+      petsAllowed,
+      rooms,
+      bathrooms,
+      distanceToUcf,
+    },
     "POST",
     true
   );

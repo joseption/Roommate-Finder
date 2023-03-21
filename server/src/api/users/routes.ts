@@ -232,9 +232,11 @@ router.get('/profileSearchV2', async (req, res) => {
         ...paginationParams,
         select: userSelect,
       });
+    //remove the user from the search results
+    const filteredMatches = matches.filter((match) => match.id !== userId);
     res.status(200).json({
-      users: matches,
-      nextCursorId: matches.length > 0 ? matches[matches.length - 1].id : null,
+      users: filteredMatches,
+      nextCursorId: filteredMatches.length > 0 ? filteredMatches[filteredMatches.length - 1].id : null,
     });
   } catch (err) {
     res.status(500).json(err);
@@ -305,7 +307,7 @@ router.post('/AllprofilesMob', async (req: Request, res: Response, next: NextFun
       where: {
         is_setup: true,
         NOT: {
-         id: mainUserId as string
+          id: mainUserId as string
         },
       },
       orderBy: {
@@ -315,10 +317,10 @@ router.post('/AllprofilesMob', async (req: Request, res: Response, next: NextFun
 
     for (let i = 0; i < users.length; i++) {
       if (users[i].matches.length > 0)
-        Object.assign(users[i], {matchPercentage: users[i].matches[0].matchPercentage});
+        Object.assign(users[i], { matchPercentage: users[i].matches[0].matchPercentage });
       else if (users[i].matches2.length > 0)
-        Object.assign(users[i], {matchPercentage: users[i].matches2[0].matchPercentage});
-      
+        Object.assign(users[i], { matchPercentage: users[i].matches2[0].matchPercentage });
+
       delete users[i].matches;
       delete users[i].matches2
     }
@@ -335,7 +337,7 @@ router.post('/profilesByTags', async (req: Request, res: Response) => {
     const payload: payload = req.body[0];
     const mainUserId = payload.userId;
     const { gender, location, sharingPref, filters } = req.body;
-    
+
     const userIds1 = await GetUsersByTags(filters as string[]);
     const userIds2 = await GetUsersByGender(gender as string);
     const userIds3 = await GetUsersByLocation(location as string);

@@ -138,7 +138,7 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
       <_Text
       style={[Style(props.isDarkMode).textHuge, Style(props.isDarkMode).boldFont]}
       >
-        {props.autoResend ? "Activation Email Sent" : "Activation Email Resent"}
+        {!props.autoResend ? "Activation Email Sent" : "Activation Email Resent"}
       </_Text>
       <_Text
       style={[Style(props.isDarkMode).textDefaultTertiary, LoginStyle(props.isDarkMode).actionText]}

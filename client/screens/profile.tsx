@@ -435,9 +435,27 @@ const ProfileScreen = (props: any) => {
                 </FontAwesomeIcon>
               </TouchableHighlight>
             </View>
-            {profile?.birthday ?
+            {profile?.gender ?
             <View
             style={[styles.iconLabel, styles.firstLabelContainer]}
+            >
+              <FontAwesomeIcon 
+                size={15} 
+                color={Color(props.isDarkMode).text} 
+                style={[styles.backIcon, styles.labelIcon]} 
+                icon={profile?.gender === "Female" ? 'person-dress' : 'person'}
+                >
+              </FontAwesomeIcon>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              >
+                {profile?.gender === "Other" ? "Non-Binary" : profile?.gender}
+              </_Text>
+            </View>
+            : null }
+            {profile?.birthday ?
+            <View
+            style={styles.iconLabel}
             >
               <FontAwesomeIcon 
                 size={15} 

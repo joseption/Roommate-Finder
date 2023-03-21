@@ -135,7 +135,7 @@ const FiltersScreen = (props: any) => {
                     <_Text
                     style={[styles.filterText, filterTextStyle(item, filter)]}
                     >
-                        {item}
+                        {item === "Other" ? "Non-Binary" : item}
                     </_Text>
                 </TouchableHighlight>
                 );
@@ -315,7 +315,7 @@ const FiltersScreen = (props: any) => {
                     <_Group
                     containerStyle={styles.group}
                     isDarkMode={props.isDarkMode}
-                    label="Gender"
+                    label="Gender Preference"
                     vertical={true}
                     >
                         <View
@@ -330,7 +330,7 @@ const FiltersScreen = (props: any) => {
                     <_Group
                     containerStyle={styles.group}
                     isDarkMode={props.isDarkMode}
-                    label="Location"
+                    label="Location Preference"
                     vertical={true}
                     >
                         <View
@@ -345,7 +345,7 @@ const FiltersScreen = (props: any) => {
                     <_Group
                     containerStyle={styles.group}
                     isDarkMode={props.isDarkMode}
-                    label="Sharing Preferences"
+                    label="Sharing Preference"
                     vertical={true}
                     >
                         <View

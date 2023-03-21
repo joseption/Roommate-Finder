@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, TouchableHighlight } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, TouchableHighlight, Platform } from 'react-native';
 import { Color, FontSize, Radius, Style } from '../../style';
 import { navProp, NavTo, getAge } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 import _Text from '../control/text';
 import _Image from '../control/image';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 
 const ProfileCard = (props: any) => {
@@ -68,7 +69,23 @@ const ProfileCard = (props: any) => {
       color: Color(props.isDarkMode).text,
       fontStyle: 'italic',
       fontWeight: 'bold'
-    }
+    },
+    backIcon: {
+      ...Platform.select({
+        web: {
+          outlineStyle: 'none'
+        }
+      }),
+    },
+    iconLabel: {
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    labelIcon: {
+      marginRight: 5
+    },
+    firstLabelContainer: {
+    },
   });
 
   return (
@@ -83,18 +100,70 @@ const ProfileCard = (props: any) => {
             <_Image height={100} width={100} style={styles.profileImg} source={{uri: profile.image}} />
           </View>
           <View style={styles.column2}>
-            {profile.first_name && profile.last_name ?
+          {profile.first_name && profile.last_name ?
             <_Text style={styles.name}>{profile.first_name + " " + profile.last_name}</_Text>
             : null }
-            {profile.age ?
-            <_Text style={styles.regText}>{profile.age} years old</_Text>
+          {profile?.gender ?
+            <View
+            style={[styles.iconLabel, styles.firstLabelContainer]}
+            >
+              <FontAwesomeIcon 
+                size={15} 
+                color={Color(props.isDarkMode).text} 
+                style={[styles.backIcon, styles.labelIcon]} 
+                icon={profile?.gender === "Female" ? 'person-dress' : 'person'}
+                >
+              </FontAwesomeIcon>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              >
+                {profile?.gender === "Other" ? "Non-Binary" : profile?.gender}
+              </_Text>
+            </View>
             : null }
-            {profile.city && profile.state ?
-            <_Text style={styles.regText}>{profile.city + ", " + profile.state}</_Text>
+            {profile?.birthday ?
+            <View
+            style={styles.iconLabel}
+            >
+              <FontAwesomeIcon 
+                size={15} 
+                color={Color(props.isDarkMode).text} 
+                style={[styles.backIcon, styles.labelIcon]} 
+                icon="cake-candles"
+                >
+              </FontAwesomeIcon>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              >
+                {getAge(profile?.birthday)} years old
+              </_Text>
+            </View>
             : null }
-            {profile.bio ?
-            <_Text numberOfLines={2} style={styles.regText}>{profile.bio}</_Text>
+            {profile?.city && profile?.state ?
+            <View
+            style={styles.iconLabel}
+            >
+              <FontAwesomeIcon 
+                size={15} 
+                color={Color(props.isDarkMode).text} 
+                style={[styles.backIcon, styles.labelIcon]} 
+                icon="location-dot"
+                >
+              </FontAwesomeIcon>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              >
+                {profile?.city}, {profile?.state}
+              </_Text>
+            </View>
             : null }
+            {!profile?.city && !profile?.state && !profile?.birthday && !profile?.gender ?
+              <_Text
+              isDarkMode={props.isDarkMode}
+              >
+                {profile?.bio}
+              </_Text>
+              : null }
           </View>
           {profile.matchPercentage ?
           <View style={styles.column3}>

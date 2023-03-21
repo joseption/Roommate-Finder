@@ -109,10 +109,10 @@ const _TextInput = (props: any) => {
   const errorMessage = () => {
     if (props.error == true) {
       if (!props.errorMessage) {
-        return "is required"
+        return " is required"
       }
       else {
-        return props.errorMessage;
+        return " " + props.errorMessage;
       }
     }
   }
@@ -327,6 +327,13 @@ const _TextInput = (props: any) => {
         onFocus={props.onFocus}
         onLayout={props.onLayout}
         onContentSizeChange={props.onContentSizeChange}
+        onScroll={props.onScroll}
+        onPointerDownCapture={props.onPointerDownCapture}
+        onPointerUpCapture={props.onPointerUpCapture}   
+        onPressIn={props.onPressIn}
+        onPressOut={props.onPressOut}
+        onPointerUp={props.onPointerUp}
+        onTouchEnd={props.onTouchEnd}
         />
       </View>
     </View>

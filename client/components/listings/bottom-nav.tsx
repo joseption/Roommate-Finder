@@ -10,18 +10,14 @@ import _Image from '../control/image';
 
 const BottomNavbar = (props: any) => {
   const [isListingScreenOpen, setIsListingScreenOpen] = React.useState(false);
-  const [image,setImage] = useState('');
-
-  useEffect(() => {
-    setNavImage();
-  }, []);
-
-  useEffect(() => {
-    setNavImage();
-  }, [props.updatePicture]);
+  const [image, setImage] = useState<any>(null);
 
   useEffect(() => {
   }, [props.currentScreen]);
+
+  useEffect(() => {
+    getImage();
+  }, [props.userImage, props.isDarkMode]);
 
   const onSearch = () => {
     props.setCurrentScreen(Listings_Screen.all)
@@ -38,18 +34,13 @@ const BottomNavbar = (props: any) => {
     setIsListingScreenOpen(!isListingScreenOpen)
   }
 
-  const profilePicture = async () => {
-    let data = await getLocalStorage();
-    if (data && data.user) {
-        setImage(data.user.image);
+  const getImage = () => {
+    if (props.userImage) {
+      setImage({uri: props.userImage});
     }
-  }
-
-  const setNavImage = () => {
-    if (props.updatePicture)
-    setImage(props.updatePicture);
-  else
-    profilePicture();
+    else {
+      setImage(props.isDarkMode ? require('../../assets/images/user_w.png') : require('../../assets/images/user.png'));
+    }
   }
 
   const styles = StyleSheet.create({
@@ -76,6 +67,8 @@ const BottomNavbar = (props: any) => {
       })
     },
     userIcon: {
+      height: 30,
+      width: 30,
       borderRadius: Radius.round,
       margin: 'auto',
       ...Platform.select({
@@ -147,21 +140,12 @@ const BottomNavbar = (props: any) => {
         <View
         style={styles.iconContainer}
         >
-        {image ?
-          <_Image
-          style={styles.userIcon}
-          source={{uri: image}}
-          height={30}
-          width={30}
-          />
-          :
-          <_Image
-          style={styles.userIcon}
-          source={props.isDarkMode ? require('../../assets/images/user_w.png') : require('../../assets/images/user.png')}
-          height={30}
-          width={30}
-          />
-        }
+        <_Image
+        style={styles.userIcon}
+        source={image}
+        height={30}
+        width={30}
+        />
         <View
         style={styles.favContainer}
         >

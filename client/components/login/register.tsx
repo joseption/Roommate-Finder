@@ -65,7 +65,7 @@ const Register = (props: any, {navigation}:any) => {
               else
               {
                   setEmailError(false);
-                  setDisabled(true);
+                  setDisabled(false);
                   props.sendEmailPressed();
               }
               setDisabled(false);

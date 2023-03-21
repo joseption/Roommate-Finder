@@ -417,7 +417,6 @@ export const LightLoginStyle = StyleSheet.create({
   },
   timerText: {
     marginTop: 5,
-    marginBottom: 40,
     marginRight: 0,
     marginLeft: 'auto',
     height: 15
@@ -514,7 +513,8 @@ function LightColor() {
     msgToFG: '#FFFFFF',
     underlayMask: '#F0F2F5bf',
     dropdownOption: '#F9F9F9',
-    dropdownOptionAlt: '#FFFFFF'
+    dropdownOptionAlt: '#FFFFFF',
+    transparentMask: '#00000020',
   }
 }
 
@@ -1004,7 +1004,8 @@ function DarkColor() {
     msgToFG: '#FFFFFF',
     underlayMask: '#191919bf',
     dropdownOption: '#202122',
-    dropdownOptionAlt: '#242526'
+    dropdownOptionAlt: '#242526',
+    transparentMask: '#00000020',
   }
 }
 

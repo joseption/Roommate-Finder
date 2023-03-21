@@ -368,7 +368,7 @@ const CreateListing = (props: any) => {
     if (isDone) {
       return true;
     }
-    let formDataFilled = formData.address && formData.bathrooms && formData.city && formData.description && formData.housing_type && (imageUriArray.length > 0 || imageURLArray.length > 0) && formData.name && formData.petsAllowed != undefined && formData.price && formData.rooms && formData.size && formData.zipcode;
+    let formDataFilled = formData.address && formData.bathrooms && formData.city && formData.description && formData.housing_type && (imageUriArray.length > 0 || imageURLArray.length > 0) && formData.name && formData.petsAllowed != undefined && formData.price && formData.rooms && formData.zipcode;
     return !formDataFilled;
   }
 
@@ -839,7 +839,6 @@ const CreateListing = (props: any) => {
               value={formData.size ? String(formData.size) : '0'}
               keyboardType="numeric"
               label="Square Feet"
-              required={true}
               isDarkMode={props.isDarkMode} />
 
               <_Dropdown

@@ -688,20 +688,22 @@ export const App = (props: any) => {
     var backgroundColor = Color(isDarkMode).background;
     var paddingLeft = 0;
     var paddingRight = 0;
+    var paddingBottom = 0;
     var translate = !mobile ? adjustedPos : 0;
 
     if (mobile) {
       backgroundColor = Color(isDarkMode).contentBackgroundSecondary;
-      paddingLeft = 10;
-      paddingRight = 10;
+      //paddingLeft = 10;
+      //paddingRight = 10;
 
       // Don't add padding for message app on mobile
-      let rn = getRouteName();
-      if (rn == NavTo.Messages || rn == NavTo.Listings || rn == NavTo.Search || rn == NavTo.Profile || rn == NavTo.Filters) {
+      //let rn = getRouteName();
+      //if (rn == NavTo.Messages || rn == NavTo.Listings || rn == NavTo.Search || rn == NavTo.Profile || rn == NavTo.Filters || rn == NavTo.MyProfile) {
         paddingLeft = 0;
         paddingRight = 0;
         paddingTop = 0;
-      }
+        paddingBottom = 0;
+      //}
     }
 
     var content = {
@@ -710,6 +712,7 @@ export const App = (props: any) => {
       paddingRight: paddingRight,
       transform: [{translateX: translate}],
       paddingTop: paddingTop,
+      paddingBottom: paddingBottom
     }
     
     style.push(content);

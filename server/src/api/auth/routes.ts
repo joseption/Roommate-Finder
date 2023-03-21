@@ -136,7 +136,7 @@ router.post('/resetPassword',async (req:Request, res:Response, next:NextFunction
     const existingUser = await findUserByEmail(email);
 
     if (!existingUser) {
-      return res.status(200).json({"Error": "Something went wrong."});
+      return res.status(200).json({"Error": "Something went wrong, please try again."});
     }
     else{
       const jti = v4(); 
@@ -150,7 +150,7 @@ router.post('/resetPassword',async (req:Request, res:Response, next:NextFunction
       });
     }
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."})
+    return res.status(500).json({"Error": "Something went wrong, please try again."})
   }
 });
 
@@ -164,7 +164,7 @@ router.post('/setPassword',async (req:Request, res:Response, next:NextFunction) 
     const existingUser = await findUserByEmail(email);
 
     if (!existingUser) {
-      return res.status(200).json({"Error": "Something went wrong."});
+      return res.status(200).json({"Error": "Something went wrong, please try again."});
     }
     else {
       const jti = v4(); 
@@ -186,7 +186,7 @@ router.post('/setPassword',async (req:Request, res:Response, next:NextFunction) 
       }
     }
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."})
+    return res.status(500).json({"Error": "Something went wrong, please try again."})
   }
 });
 
@@ -211,7 +211,7 @@ router.post('/validateResetToken',async (req:Request, res:Response, next:NextFun
       });
     }
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."})
+    return res.status(500).json({"Error": "Something went wrong, please try again."})
   }
 });
 
@@ -236,7 +236,7 @@ router.post('/updatePassword',async (req:Request, res:Response, next:NextFunctio
         });
       }
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."})
+    return res.status(500).json({"Error": "Something went wrong, please try again."})
   }
 });
 
@@ -259,7 +259,7 @@ router.post('/confirmEmail',async (req:Request, res:Response, next:NextFunction)
           message: "Account verified."
         });
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."})
+    return res.status(500).json({"Error": "Something went wrong, please try again."})
   }
 });
 
@@ -281,7 +281,7 @@ router.post('/sendConfirmationEmail',async (req:Request, res:Response, next:Next
         message: "Email sent."
       });
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."})
+    return res.status(500).json({"Error": "Something went wrong, please try again."})
   }
 });
 
@@ -299,7 +299,7 @@ router.post('/logout', async (req:Request, res:Response, next:NextFunction) => {
     await deleteRefreshToken(id);
     return res.status(200).json({"OK": "Token have been revoked."});
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."});
+    return res.status(500).json({"Error": "Something went wrong, please try again."});
   }
 });
 
@@ -341,7 +341,7 @@ router.post('/checkAuth', async (req:Request, res:Response, next:NextFunction) =
       );
     }
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."});
+    return res.status(500).json({"Error": "Something went wrong, please try again."});
 }});
 
 router.post('/refreshToken', async (req:Request, res:Response, next:NextFunction) => {
@@ -384,7 +384,7 @@ router.post('/revokeRefreshTokens', async (req:Request, res:Response, next:NextF
     await revokeTokens(userId);
     return res.json({ message: `Tokens revoked for user with id #${userId}` });
   } catch (err) {
-    return res.status(500).json({"Error": "Something went wrong."});  
+    return res.status(500).json({"Error": "Something went wrong, please try again."});  
   }
 });
 

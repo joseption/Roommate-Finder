@@ -176,17 +176,23 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
   });
 
   const hasFilters = () => {
-      if (route && route.params) {
-        if ((route.params.filters && route.params.filters.length > 0) ||
-        route.params.genderFilter ||
-        route.params.locationFilter ||
-        route.params.sharingPrefFilter) {
-          return true;
-      }
-      else {
-        return false;
-      }
+      if ((filters && filters.length > 0) ||
+      genderFilter ||
+      locationFilter ||
+      sharingPrefFilter) {
+        return true;
     }
+    else {
+      return false;
+    }
+  }
+
+  const clearFilters = () => {
+    setFilters([]);
+    setGenderFilter("");
+    setLocationFilter("");
+    setSharingPrefFilter("");
+    setNoResults(false);
   }
 
   const handleToggleButtonPress = () => {
@@ -281,6 +287,7 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
         setSorting={setSorting}
         search={search}
         setSearch={setSearch}
+        clearFilters={clearFilters}
         />
         </View>
       </View>

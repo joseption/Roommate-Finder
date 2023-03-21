@@ -1,4 +1,4 @@
-import { ActivityIndicator, Platform, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Platform, RefreshControl, ScrollView, StyleSheet, TextInput, TouchableHighlight, View } from 'react-native';
 import _TextInput from '../control/text-input';
 import _Dropdown from '../control/dropdown';
 import _Checkbox from '../control/checkbox';
@@ -616,6 +616,22 @@ const AccountInfo = (props: any) => {
             fontSize: FontSize.default,
             marginBottom: 15
         },
+        backIcon: {
+        ...Platform.select({
+            web: {
+            outlineStyle: 'none'
+            }
+        }),
+        },
+        button: {
+            padding: 5,
+            borderRadius: Radius.round,
+            zIndex: 5,
+        },
+        headContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        }
     });
 
     const toggleDarkMode = async (e: any) => {
@@ -623,6 +639,10 @@ const AccountInfo = (props: any) => {
         let settings = {is_darkmode: e};
         await setLocalAppSettings(settings);
         SetLocalIsDarkMode(e);
+    }
+
+    const goBack = () => {
+        navigation.goBack();
     }
 
     return (
@@ -736,11 +756,30 @@ const AccountInfo = (props: any) => {
                 <View
                 style={_styles.titleContainer}
                 >
-                    <_Text
-                    style={_styles.title}
+                    <View
+                    style={_styles.headContainer}
                     >
-                        {title()}
-                    </_Text>
+                        {props.isSetup ?
+                        <TouchableHighlight
+                        underlayColor={props.isDarkMode ? Color(props.isDarkMode).whiteUnderlay : Color(props.isDarkMode).holderUnderlay}
+                        style={_styles.button}
+                        onPress={() => goBack() }
+                        >
+                            <FontAwesomeIcon 
+                            size={20} 
+                            color={Color(props.isDarkMode).actualWhite} 
+                            style={_styles.backIcon} 
+                            icon="arrow-left"
+                            >
+                            </FontAwesomeIcon>
+                        </TouchableHighlight>
+                        : null }
+                        <_Text
+                        style={_styles.title}
+                        >
+                            {title()}
+                        </_Text>
+                    </View>
                     {props.isSetup ?
                     <_Button
                     style={Style(props.isDarkMode).buttonInverted}

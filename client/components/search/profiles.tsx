@@ -23,9 +23,10 @@ interface Props {
   setSorting: any,
   search: string,
   setSearch: any,
+  clearFilters: any
 }
 
-const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetProfiles, noResults, filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting, isDarkMode, setNoResults }: Props) => {
+const Profile = ({ clearFilters, setSearch, search, setSorting, forceGetProfiles, setForceGetProfiles, noResults, filters, filtersFetched, genderFilter, locationFilter, sharingPrefFilter, sorting, isDarkMode, setNoResults }: Props) => {
   /*
   Daniyal: This component will contain all of the profile card components
   and anything else that is needed for the overall profile view.F
@@ -295,8 +296,8 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
                 setAllProfiles([]);
                 setNoResults(true);
                 setFetchedProfiles(false);
-                getAllProfiles();
-                navigation.navigate(NavTo.Search);
+                clearFilters();
+                getAllProfiles();      
               }}
               isDarkMode={isDarkMode}
               >

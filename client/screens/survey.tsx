@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import _Button from '../components/control/button';
 import _Image from '../components/control/image';
 import _Progress from '../components/control/progress';
@@ -36,6 +36,7 @@ const SurveyScreen = (props: any) => {
     const [isLoaded,setIsLoaded] = useState(false);
     const [reviewMode,setReviewMode] = useState(false);
     const navigation = useNavigation<navProp>();
+    const [refreshing, setRefreshing] = useState(false); 
     
     useEffect(() => {
         if (!init) {
@@ -148,7 +149,7 @@ const SurveyScreen = (props: any) => {
         setNextButton(next);
     }
 
-    const setupQuestions = (res: any, goto: number = 0, restart: boolean = false, init: boolean = false) => {
+    const setupQuestions = (res: any, goto: number = 0, restart: boolean = false, init: boolean = false, refreshing: boolean = false) => {
         let isSet = false;
         let progressCnt = 0;
         setQuestions(res);
@@ -156,6 +157,11 @@ const SurveyScreen = (props: any) => {
         if (restart) {
             setComplete(false);
             prepareQuestion(res[0], 0, res.length);
+        }
+        else if (refreshing) {
+            let idx = res.findIndex((x: any) => x.id == questionId);
+            prepareQuestion(res[idx], idx, res.length);
+            return;
         }
         else if (questionId && goto != 0) {
             let idx = res.findIndex((x: any) => x.id == questionId);
@@ -189,7 +195,7 @@ const SurveyScreen = (props: any) => {
         }
     }
 
-    const getQuestions = async (goto: number, restart: boolean = false, init: boolean = false) => {
+    const getQuestions = async (goto: number, restart: boolean = false, init: boolean = false, refreshing: boolean = false) => {
         let hasError = false;
         setError('');
         try
@@ -209,7 +215,7 @@ const SurveyScreen = (props: any) => {
                         hasError = true;
                     }
                     else {
-                        setupQuestions(res, goto, restart, init);
+                        setupQuestions(res, goto, restart, init, refreshing);
                     }
                 });
             }
@@ -349,6 +355,12 @@ const SurveyScreen = (props: any) => {
         else
             return Style(props.isDarkMode).maskPrompt;
     }
+
+    const refresh = () => {
+        setRefreshing(true);
+        getQuestions(0, false, false, true);
+        setRefreshing(false);
+    };
 
     const _styles = StyleSheet.create({
         finishButton: {
@@ -497,7 +509,18 @@ const SurveyScreen = (props: any) => {
     });
     
     return (
-    <View>
+    <ScrollView        
+    refreshControl={
+        <RefreshControl
+        refreshing={refreshing}
+        onRefresh={refresh}
+        colors={[Color(props.isDarkMode).gold]}
+        progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+        enabled={!complete && !generating}
+        />
+        }
+    style={{padding: 10}}
+    >
         <View
         style={_styles.titleContainer}
         >
@@ -707,7 +730,7 @@ const SurveyScreen = (props: any) => {
             </_Text>
         : null}
         </View>
-    </View>
+    </ScrollView>
     );
 };
 

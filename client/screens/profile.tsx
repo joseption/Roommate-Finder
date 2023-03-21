@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Platform,
   TouchableHighlight,
+  RefreshControl,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -34,13 +35,25 @@ const ProfileScreen = (props: any) => {
   const [tagsFetched, setTagsFetched] = useState(false);
   const [match, setMatch] = useState(0);
   const navigation = useNavigation<navProp>();
+  const [refreshing, setRefreshing] = useState(false); 
+  const [user, setUser] = useState(''); 
+
+  const refresh = () => {
+    setRefreshing(true);
+    getUser(user);
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    getUser(user);
+  }, [user]);
 
   useEffect(() => {
     let rt = route();
     if (rt && rt.params && rt.name && rt.name == NavTo.Profile) {
       if (rt.params['profile']) {
         props.setNavSelector(NavTo.Search);
-        getUser(rt.params['profile']);
+        setUser(rt.params['profile']);
       }
       setMatch(rt.params['match'] ? rt.params['match'] : 0);
     }
@@ -130,12 +143,15 @@ const ProfileScreen = (props: any) => {
       justifyContent: 'space-between',
     },
     profileImg: {
-      width: 300,
+      width: '100%',
       height: 300,
-      borderWidth: 1,
-      borderRadius: Radius.large,
+      overflow: 'hidden',
+      borderWidth: .5,
+      borderRadius: Radius.default,
       borderColor: Color(props.isDarkMode).separator,
-      backgroundColor: Color(props.isDarkMode).userIcon
+      backgroundColor: Color(props.isDarkMode).userIcon,
+      paddingBottom: 20,
+
     },
     name: {
       fontSize: FontSize.large,
@@ -169,22 +185,20 @@ const ProfileScreen = (props: any) => {
       backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).holderSecondary,
     },
     mainContent: {
-      marginTop: 50,
       width: '100%',
       flex: 1,
     },
     group: {
       flex: 1,
-      marginTop: -50,
     },
     imageContainer: {
       zIndex: 3,
       display: 'flex',
       flexDirection: 'row',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      overflow: 'hidden',
     },
     view: {
-      flexDirection: 'column-reverse',
       padding: 10,
       flex: 1
     },
@@ -224,9 +238,10 @@ const ProfileScreen = (props: any) => {
     button: {
       padding: 10,
       borderRadius: Radius.round,
-      margin: 5,
+      margin: 15,
       position: 'absolute',
-      zIndex: 5
+      zIndex: 5,
+      backgroundColor: Color(props.isDarkMode).transparentMask
     },
     bio: {
       width: '100%'
@@ -256,7 +271,7 @@ const ProfileScreen = (props: any) => {
       height: '100%'
     },
     container: {
-      flex: 1,
+      height: '100%'
     },
     iconLabel: {
       flexDirection: 'row',
@@ -279,6 +294,15 @@ const ProfileScreen = (props: any) => {
     nameContent: {
       flex: 1,
       alignItems:'center'
+    },
+    imageContent: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      flex: 1,
+      marginBottom: 10
+    },
+    mainInnerContent: {
+      height: '100%',
     }
   });
 
@@ -307,7 +331,14 @@ const ProfileScreen = (props: any) => {
 
   return (
     <ScrollView
-    contentContainerStyle={styles.container}
+    refreshControl={
+      <RefreshControl
+      refreshing={refreshing}
+      onRefresh={refresh}
+      colors={[Color(props.isDarkMode).gold]}
+      progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+      />
+      }
     >
       {navigation.canGoBack() ?
       <TouchableHighlight
@@ -317,7 +348,7 @@ const ProfileScreen = (props: any) => {
       >
         <FontAwesomeIcon 
         size={20} 
-        color={Color(props.isDarkMode).text} 
+        color={Color(props.isDarkMode).actualWhite} 
         style={styles.backIcon} 
         icon="arrow-left"
         >
@@ -327,15 +358,19 @@ const ProfileScreen = (props: any) => {
       <View
       style={styles.view}
       >
-        <_Group
-        containerStyle={styles.group}
-        isDarkMode={props.isDarkMode}
-        vertical={true}
-        style={styles.innerGroup}
-        >
-          <ScrollView
+          <View
           style={styles.mainContent}
           >
+            <View
+            style={styles.imageContent}
+            >
+              <Image
+              style={styles.profileImg}
+              source={{uri: profile?.image}}
+              containerStyle={styles.imageContainer}
+              resizeMode={Platform.OS !== 'web' ? 'contain' : 'cover'}
+              />
+            </View>
             <View
             style={styles.rowContent}
             >
@@ -461,19 +496,7 @@ const ProfileScreen = (props: any) => {
                 />
               </View>
             }
-            <View
-              style={styles.empty}
-            />
-          </ScrollView>
-        </_Group>
-        <_Image
-        height={300}
-        width={300}
-        style={styles.profileImg}
-        source={{uri: profile?.image}}
-        containerStyle={styles.imageContainer}
-        isDarkMode={props.isDarkMode}
-        />
+          </View>
       </View>
     </ScrollView>
   );

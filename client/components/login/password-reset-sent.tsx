@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { env } from '../../helper';
-import { LoginStyle, Style } from '../../style';
+import { Color, FontSize, LoginStyle, Radius, Style } from '../../style';
 import _TextInput from '../control/text-input';
 
 const PasswordResetSent = (props: any, {navigation}:any) => {
@@ -95,6 +95,33 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
       }  
       setLoading(false);  
   };
+
+  const styles = StyleSheet.create({
+    btn: {
+      marginBottom: 5
+    },
+    container: {
+      padding: 20,
+      backgroundColor: Color(props.isDarkMode).contentHolder,
+      borderRadius: Radius.default,
+    },
+    timerText: {
+      marginTop: 5,
+      marginRight: 0,
+      marginLeft: 'auto',
+    },
+    msgText: {
+      fontSize: FontSize.default,
+      marginBottom: 40,
+      color: Color(props.isDarkMode).text,
+    },
+    msgHeaderText: {
+      fontSize: FontSize.large,
+      color: Color(props.isDarkMode).text,
+      fontWeight: 'bold',
+      marginBottom: 5
+    }
+  });
   
   return (
     <View
@@ -109,32 +136,46 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
       >
         Check your email for reset instructions
       </_Text>
-      <View
-      style={LoginStyle(props.isDarkMode).mainContent}
-      >
-        <_Text
-        style={[Style(props.isDarkMode).textSmallSecondary, LoginStyle(props.isDarkMode).resendText]}
-        >
-          Still haven't received an email yet?
-        </_Text>
+      <View>
         <View
-        style={Style(props.isDarkMode).alignRight}
+        style={styles.container}
         >
-          <_Button
-          isDarkMode={props.isDarkMode}
-          style={[props.btnStyle(disabled), styles.btn]}
-          onPress={() => doResendEmail()}
-          value={!disabled ? 'Resend Email' : 'Email Sent'}
-          disabled={disabled}
-          loading={loading}
+          <_Text
+          style={styles.msgHeaderText}
           >
-          </_Button>
-      </View>
-      <_Text
-        style={[Style(props.isDarkMode).textTinyTertiary, LoginStyle(props.isDarkMode).timerText]}
-        >
-          {counter}
-        </_Text>
+            Almost there!
+          </_Text>
+          <_Text
+          style={styles.msgText}
+          >
+            You're just a step away from getting back into your account! A password reset link was sent to your inbox.
+          </_Text>
+          <_Text
+          style={[Style(props.isDarkMode).textSmallSecondary, LoginStyle(props.isDarkMode).resendText]}
+          >
+            Still haven't received an email yet?
+          </_Text>
+          <View
+          style={Style(props.isDarkMode).alignRight}
+          >
+            <_Button
+            isDarkMode={props.isDarkMode}
+            style={props.btnStyle(disabled)}
+            onPress={() => doResendEmail()}
+            value={!disabled ? 'Resend Email' : 'Email Sent'}
+            disabled={disabled}
+            loading={loading}
+            >
+            </_Button>
+        </View>
+        {counter ?
+        <_Text
+          style={[Style(props.isDarkMode).textTinyTertiary, styles.timerText]}
+          >
+            {counter}
+          </_Text>
+        : null }
+        </View>
         <_Text
         style={LoginStyle(props.isDarkMode).errorMessage}
         >
@@ -157,11 +198,5 @@ const PasswordResetSent = (props: any, {navigation}:any) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  btn: {
-    marginBottom: 5
-  },
-});
 
 export default PasswordResetSent;

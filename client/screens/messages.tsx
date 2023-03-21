@@ -79,7 +79,7 @@ const MessagesScreen = (props: any) => {
   }, [showPanel]);
 
   useEffect(() => {
-    const chats = chatsRef.current.filter(chat => chat.id === props.receiveMessage.chatId);
+    const chats = chatsRef.current.filter(chat => chat.id === props.receiveMessage?.chatId);
     if (chats.length !== 0 && chats[0].blocked) return;
     updateTabs(props.receiveMessage);
   }, [props.receiveMessage])

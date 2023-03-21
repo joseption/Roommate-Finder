@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, ActivityIndicator, TouchableHighlight, Platform } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView, ActivityIndicator, TouchableHighlight, Platform, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import _Button from '../components/control/button';
@@ -23,6 +23,7 @@ const MyProfileScreen = (props: any) => {
   const [profile, setProfile] = useState<any>({});
   const [tags, setTags] = useState<any[]>([]);
   const [tagsFetched, setTagsFetched] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);  
 
   const navigation = useNavigation<navProp>();
   useEffect(() => {
@@ -92,6 +93,12 @@ const MyProfileScreen = (props: any) => {
     }
   };
 
+  const refresh = () => {
+    setRefreshing(true);
+    getProfile();
+    setRefreshing(false);
+  };
+
   const tag = () => {
     return tags.map((tag, index) =>
     <_Text
@@ -115,15 +122,6 @@ const MyProfileScreen = (props: any) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      width: '100%'
-    },
-    profileImg: {
-      width: 300,
-      height: 300,
-      borderWidth: 1,
-      borderRadius: Radius.large,
-      borderColor: Color(props.isDarkMode).separator,
-      backgroundColor: Color(props.isDarkMode).userIcon
     },
     name: {
       fontSize: FontSize.large,
@@ -158,16 +156,13 @@ const MyProfileScreen = (props: any) => {
       paddingHorizontal: 15,
       color: Color(props.isDarkMode).text,
       fontSize: FontSize.default,
-      backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).contentBackgroundSecondary,
-      borderColor: Color(props.isDarkMode).separator,
-      borderWidth: .5
+      backgroundColor: props.isDarkMode ? Color(props.isDarkMode).holder : Color(props.isDarkMode).holderSecondary,
     },
     mainContent: {
-      marginTop: 50,
-      width: '100%'
+      width: '100%',
+      padding: 10
     },
     group: {
-      marginTop: -50,
       flex: 1
     },
     groupContent: {
@@ -177,7 +172,8 @@ const MyProfileScreen = (props: any) => {
       zIndex: 3,
       display: 'flex',
       flexDirection: 'row',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      overflow: 'hidden',
     },
     view: {
       flexDirection: 'column-reverse',
@@ -220,6 +216,25 @@ const MyProfileScreen = (props: any) => {
       height: '100%',
       flex: 1,
     },
+    profileImg: {
+      width: '100%',
+      height: 300,
+      overflow: 'hidden',
+      borderWidth: .5,
+      borderRadius: Radius.default,
+      borderColor: Color(props.isDarkMode).separator,
+      backgroundColor: Color(props.isDarkMode).userIcon,
+      paddingBottom: 20,
+    },
+    imageContent: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      flex: 1,
+      marginBottom: 10
+    },
+    mainInnerContent: {
+      height: '100%',
+    }
   });
 
   if (!profile.id) {
@@ -235,128 +250,123 @@ const MyProfileScreen = (props: any) => {
 
   return (
     <ScrollView
-    style={styles.container}
-    contentContainerStyle={styles.contentContainer}
+    refreshControl={
+      <RefreshControl
+      refreshing={refreshing}
+      onRefresh={refresh}
+      colors={[Color(props.isDarkMode).gold]}
+      progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+      />
+      }
     >
       <View
-      style={styles.view}
+      style={styles.mainContent}
       >
-        <_Group
-        style={styles.groupContent}
-        containerStyle={styles.group}
-        isDarkMode={props.isDarkMode}
-        vertical={true}
+        <View
+        style={styles.imageContent}
         >
-          <ScrollView
-          style={styles.mainContent}
-          >
-            <View
-            style={styles.rowContent}
-            >
-              <_Text
-              style={styles.name}
-              isDarkMode={props.isDarkMode}
-              numberOfLines={1}
-              containerStyle={styles.nameContent}
-              >
-                {profile?.first_name + " " + profile?.last_name}
-              </_Text>
-              <TouchableHighlight
-                underlayColor={Color(props.isDarkMode).defaultUnderlay}
-                style={styles.editButton}
-                onPress={() => { navigation.navigate(NavTo.Account, { view: 'info' } as never) }}
-                >
-                  <FontAwesomeIcon 
-                  size={20} 
-                  color={Color(props.isDarkMode).actualWhite} 
-                  style={styles.backIcon} 
-                  icon="pencil"
-                  >
-                </FontAwesomeIcon>
-              </TouchableHighlight>
-            </View>
-            {profile?.age ?
-            <View
-            style={[styles.iconLabel, styles.firstLabelContainer]}
-            >
-              <FontAwesomeIcon 
-                size={15} 
-                color={Color(props.isDarkMode).text} 
-                style={[styles.backIcon, styles.labelIcon]} 
-                icon="cake-candles"
-                >
-              </FontAwesomeIcon>
-              <_Text
-              isDarkMode={props.isDarkMode}
-              >
-                {profile?.age} years old
-              </_Text>
-            </View>
-            : null }
-            {profile?.city && profile?.state ?
-            <View
-            style={styles.iconLabel}
-            >
-              <FontAwesomeIcon 
-                size={15} 
-                color={Color(props.isDarkMode).text} 
-                style={[styles.backIcon, styles.labelIcon]} 
-                icon="location-dot"
-                >
-              </FontAwesomeIcon>
-              <_Text
-              isDarkMode={props.isDarkMode}
-              >
-                {profile?.city}, {profile?.state}
-              </_Text>
-            </View>
-            : null }
-            {profile?.bio ?
-            <View>
-              <_Text
-              style={styles.heading}
-              isDarkMode={props.isDarkMode}
-              >
-                About
-              </_Text>
-              <_Text
-              isDarkMode={props.isDarkMode}
-              style={styles.bio}
-              >
-                {profile?.bio}
-              </_Text>
-            </View>
-            : null }
-            <_Text
-            style={styles.interestsHeading}
-            isDarkMode={props.isDarkMode}
-            >
-              Interests and Hobbies
-            </_Text>
-            {tagsFetched ?
-            <View style={styles.tagsRow}>
-              {tag()}
-            </View>
-              :
-              <View>
-                <ActivityIndicator
-                color={Color(props.isDarkMode).gold}
-                size="large"
-                />
-              </View>
-            }
-            <View
-              style={styles.empty}
-            />
-          </ScrollView>
-        </_Group>
-        <_Image
-        height={300}
-        width={300}
+        <Image
         style={styles.profileImg}
         source={{uri: profile?.image}}
         containerStyle={styles.imageContainer}
+        resizeMode={Platform.OS !== 'web' ? 'contain' : 'cover'}
         />
+        </View>
+        <View
+        style={styles.rowContent}
+        >
+          <_Text
+          style={styles.name}
+          isDarkMode={props.isDarkMode}
+          numberOfLines={1}
+          containerStyle={styles.nameContent}
+          >
+            {profile?.first_name + " " + profile?.last_name}
+          </_Text>
+          <TouchableHighlight
+            underlayColor={Color(props.isDarkMode).defaultUnderlay}
+            style={styles.editButton}
+            onPress={() => { navigation.navigate(NavTo.Account, { view: 'info' } as never) }}
+            >
+              <FontAwesomeIcon 
+              size={20} 
+              color={Color(props.isDarkMode).actualWhite} 
+              style={styles.backIcon} 
+              icon="pencil"
+              >
+            </FontAwesomeIcon>
+          </TouchableHighlight>
+        </View>
+        {profile?.age ?
+        <View
+        style={[styles.iconLabel, styles.firstLabelContainer]}
+        >
+          <FontAwesomeIcon 
+            size={15} 
+            color={Color(props.isDarkMode).text} 
+            style={[styles.backIcon, styles.labelIcon]} 
+            icon="cake-candles"
+            >
+          </FontAwesomeIcon>
+          <_Text
+          isDarkMode={props.isDarkMode}
+          >
+            {profile?.age} years old
+          </_Text>
+        </View>
+        : null }
+        {profile?.city && profile?.state ?
+        <View
+        style={styles.iconLabel}
+        >
+          <FontAwesomeIcon 
+            size={15} 
+            color={Color(props.isDarkMode).text} 
+            style={[styles.backIcon, styles.labelIcon]} 
+            icon="location-dot"
+            >
+          </FontAwesomeIcon>
+          <_Text
+          isDarkMode={props.isDarkMode}
+          >
+            {profile?.city}, {profile?.state}
+          </_Text>
+        </View>
+        : null }
+        {profile?.bio ?
+        <View>
+          <_Text
+          style={styles.heading}
+          isDarkMode={props.isDarkMode}
+          >
+            About
+          </_Text>
+          <_Text
+          isDarkMode={props.isDarkMode}
+          style={styles.bio}
+          >
+            {profile?.bio}
+          </_Text>
+        </View>
+        : null }
+        <_Text
+        style={styles.interestsHeading}
+        isDarkMode={props.isDarkMode}
+        >
+          Interests and Hobbies
+        </_Text>
+        {tagsFetched ?
+        <View style={styles.tagsRow}>
+          {tag()}
+        </View>
+          :
+          <View>
+            <ActivityIndicator
+            color={Color(props.isDarkMode).gold}
+            size="large"
+            />
+          </View>
+        }
       </View>
     </ScrollView>
   );

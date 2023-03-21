@@ -28,6 +28,7 @@ const ListingsScreen = (props: any) => {
   const [filters, setFilters] = useState({});
   const [isManualNavigate, setIsManualNavigate] = useState(null);
   const [refreshListing, setRefreshListing] = useState(null);
+  const [image, setImage] = useState<any>(null);
 
   useEffect(() => {
     const back = BackHandler.addEventListener('hardwareBackPress', backPress);
@@ -48,6 +49,10 @@ const ListingsScreen = (props: any) => {
   useEffect(() => {
     getUserInfo();
   }, [userInfo?.id])
+
+  useEffect(() => {
+    setImage(userInfo?.image);
+  }, [userInfo?.image])
 
   const getUserInfo = async () => {
     setUserInfo(await getLocalStorage().then((res) => {return res.user}));
@@ -120,8 +125,8 @@ const ListingsScreen = (props: any) => {
     setSearchPressed={setSearchPressed}
     currentScreen={currentScreen}
     refresh={getAllListings}
-    updatePicture={props.updatePicture}
     setIsManualNavigate={setIsManualNavigate}
+    userImage={image}
   />
   }
 
@@ -268,7 +273,7 @@ return (
             setCurrentListing={setCurrentListing}
             allListings={allListings}
             userId={userInfo?.id}
-            userImage={userInfo?.image}
+            userImage={image}
             refresh={refresh}
             setFilters={setFilters}
           />
@@ -304,7 +309,7 @@ return (
             setCurrentListing={setCurrentListing}
             allListings={unfilteredAllListings}
             userId={userInfo?.id}
-            userImage={userInfo?.image}
+            userImage={image}
             refresh={refresh}
             setCurrentScreen={setCurrentScreen}
           />

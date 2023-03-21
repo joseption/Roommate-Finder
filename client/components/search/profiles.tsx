@@ -251,7 +251,7 @@ const Profile = ({ setSearch, search, setSorting, forceGetProfiles, setForceGetP
     >
       {!isPageLoading ? 
       <>
-      {isFetchedProfiles && hasVisibleProfiles ?
+      {hasVisibleProfiles ?
           <>
           <FlatList
           extraData={rerender}

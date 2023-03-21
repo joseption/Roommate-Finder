@@ -15,7 +15,7 @@ const _Group = (props: any, {navigation}:any) => {
     const [isGroup, setIsGroup] = useState(true);
     const setParentFocus = useCallback((value: any) => { 
         setFocus(value);
-      }, []);
+    }, []);
 
     const containerStyle = () => {
         var style = [];

@@ -115,7 +115,7 @@ const FavoriteListings = (props: any) => {
   return (
     
       <>
-        <_Text style={styles.title}>Favorite Listings</_Text>
+        <_Text style={styles.title}>My Listings</_Text>
         <ScrollView
         style={styles.container}
         contentContainerStyle={count == 0 ? styles.innerContainer : null}

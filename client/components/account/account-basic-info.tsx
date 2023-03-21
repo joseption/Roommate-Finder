@@ -1,4 +1,4 @@
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Platform, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import _TextInput from '../control/text-input';
 import _Dropdown from '../control/dropdown';
 import _Checkbox from '../control/checkbox';
@@ -45,6 +45,7 @@ const AccountInfo = (props: any) => {
     const zipRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
     const cityRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
     const stateRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
+    const [refreshing, setRefreshing] = useState(false);  
     useEffect(() => {
         if (!init) {
             onLoad();
@@ -55,6 +56,12 @@ const AccountInfo = (props: any) => {
             setIsComplete(false);
         }
     }, [props.isSetup, isLoaded, imageURL, imageUri, isComplete])
+
+    const refresh = () => {
+        setRefreshing(true);
+        onLoad();
+        setRefreshing(false);
+    };
     
     const errorStyle = () => {
         var style = [];
@@ -531,7 +538,7 @@ const AccountInfo = (props: any) => {
             display: 'flex'
         },
         passwordButton: {
-            marginRight: 5,
+            marginRight: 3,
         },
         buttonContainer: {
             display: 'flex',
@@ -715,6 +722,14 @@ const AccountInfo = (props: any) => {
         </View>
         : null}
         <ScrollView
+        refreshControl={
+            <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            colors={[Color(props.isDarkMode).gold]}
+            progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+            />
+            }
         keyboardShouldPersistTaps={'handled'}
         >
             <View>
@@ -983,7 +998,8 @@ const AccountInfo = (props: any) => {
                     {props.mobile ?
                     <_Button
                     isDarkMode={props.isDarkMode}
-                    style={[Style(props.isDarkMode).buttonDanger, _styles.passwordButton]}
+                    containerStyle={_styles.passwordButton}
+                    style={Style(props.isDarkMode).buttonDanger}
                     onPress={(e: any) => logout()}
                     >
                         <FontAwesomeIcon
@@ -997,7 +1013,8 @@ const AccountInfo = (props: any) => {
                     {props.isSetup ?
                     <_Button
                     isDarkMode={props.isDarkMode}
-                    style={[Style(props.isDarkMode).buttonDefault, _styles.passwordButton]}
+                    containerStyle={_styles.passwordButton}
+                    style={Style(props.isDarkMode).buttonDefault}
                     onPress={(e: any) => triggerPrompt()}
                     >
                         {props.mobile ?

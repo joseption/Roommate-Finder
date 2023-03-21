@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import AccountAbout from '../components/account/account-about-you';
 import AccountInfo from '../components/account/account-basic-info';
 import StartSurvey from '../components/account/start-survey';
@@ -91,6 +91,9 @@ const AccountScreen = (props: any) => {
     const containerStyle = () => {
         if (!props.mobile) {
             return {paddingBottom: 20};
+        }
+        else {
+            return {padding: 10};
         }
         return {};
     }

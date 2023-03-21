@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import _Button from '../../components/control/button';
 import _Text from '../../components/control/text';
 import { env } from '../../helper';
-import { LoginStyle, Style } from '../../style';
+import { Color, FontSize, LoginStyle, Radius, Style } from '../../style';
 import _TextInput from '../control/text-input';
 
 const ActivateEmailSent = (props: any, {navigation}:any) => {
@@ -16,9 +16,9 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
 
   useEffect(() => {
       if (props.autoResend)
-          setSentMsg("The verification link either doesn't exist or is expired. An email with a link to activate your account has been sent to you.");
+          setSentMsg(`The verification link either doesn't exist or has expired. A new email with a link to activate your account has been sent to you.`);
       else
-          setSentMsg("An email with a link to activate your account has been sent to you.");
+          setSentMsg(`You're just a step away from finding your ideal roommates! An email with a link to activate your account has been sent to you.`);
 
       if (!autoResent && props.autoResend) {
         setAutoResent(true);
@@ -104,6 +104,33 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
       }    
       setLoading(false);
   };
+
+  const styles = StyleSheet.create({
+    btn: {
+      marginBottom: 5
+    },
+    container: {
+      padding: 20,
+      backgroundColor: Color(props.isDarkMode).contentHolder,
+      borderRadius: Radius.default,
+    },
+    timerText: {
+      marginTop: 5,
+      marginRight: 0,
+      marginLeft: 'auto',
+    },
+    msgText: {
+      fontSize: FontSize.default,
+      marginBottom: 40,
+      color: Color(props.isDarkMode).text,
+    },
+    msgHeaderText: {
+      fontSize: FontSize.large,
+      color: Color(props.isDarkMode).text,
+      fontWeight: 'bold',
+      marginBottom: 5
+    }
+  });
   
   return (
     <View
@@ -118,14 +145,20 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
       >
         Check your email to verify your account
       </_Text>
-      <_Text
-      containerStyle={{marginLeft: 'auto', marginRight: 'auto'}}
-      style={LoginStyle(props.isDarkMode).sentText}
-      >
-        {sentMsg}
-      </_Text>
       <View
-      style={LoginStyle(props.isDarkMode).mainContent}>
+      style={styles.container}
+      >
+        <_Text
+        style={styles.msgHeaderText}
+        >
+          {!props.autoResend ? 'Almost there!' : 'Let\'s try this again...' }
+        </_Text>
+        <_Text
+        style={styles.msgText}
+        >
+          {sentMsg}
+        </_Text>
+      <View>
         <_Text
         style={[Style(props.isDarkMode).textSmallSecondary, LoginStyle(props.isDarkMode).resendText]}
         >
@@ -134,27 +167,30 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
         <View
         style={Style(props.isDarkMode).alignRight}
         >
-            <_Button
-            isDarkMode={props.isDarkMode}
-            style={[props.btnStyle(disabled), styles.btn]}
-            onPress={() => doResendEmail()}
-            disabled={disabled}
-            loading={loading}
-            >
-            Resend Email
-            </_Button>
+          <_Button
+          isDarkMode={props.isDarkMode}
+          style={[props.btnStyle(disabled), styles.btn]}
+          onPress={() => doResendEmail()}
+          disabled={disabled}
+          loading={loading}
+          >
+          Resend Email
+          </_Button>
         </View>
+        {counter ?
         <_Text
-        style={[Style(props.isDarkMode).textTinyTertiary, LoginStyle(props.isDarkMode).timerText]}
+        style={[Style(props.isDarkMode).textTinyTertiary, styles.timerText]}
         >
           {counter}
         </_Text>
+        : null }
+        </View>
+      </View>
         <_Text
         style={LoginStyle(props.isDarkMode).errorMessage}
         >
             {message}
         </_Text>
-      </View>
         <View
         style={LoginStyle(props.isDarkMode).previousPageText}
         >
@@ -171,11 +207,5 @@ const ActivateEmailSent = (props: any, {navigation}:any) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  btn: {
-    marginBottom: 5
-  },
-});
 
 export default ActivateEmailSent;

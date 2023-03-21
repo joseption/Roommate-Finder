@@ -7,7 +7,7 @@ import _Button from '../control/button';
 import _Image from '../control/image';
 import _Cluster from '../control/cluster';
 import _ClusterOption from '../control/cluster-option';
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { AccountScreenType, authTokenHeader, env, navProp, NavTo } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -23,6 +23,8 @@ const AccountAbout = (props: any) => {
     const [isLoaded,setIsLoaded] = useState(false);
     const [isComplete,setIsComplete] = useState(false);
     const [tagsAmount,setTagsAmount] = useState(0);
+    const [refreshing, setRefreshing] = useState(false); 
+    const [scroll, setScroll] = useState(false); 
     const tags = [
         "✈️ Travel",
         "📷 Photography",
@@ -55,6 +57,12 @@ const AccountAbout = (props: any) => {
             setIsComplete(false);
         }
     }, [props.isSetup, bioForm, tagForm, isLoaded, isComplete])
+
+    const refresh = () => {
+        setRefreshing(true);
+        onLoad();
+        setRefreshing(false);
+    };
 
     const setupPage = (data: any) => {
         setBio(data.bio);
@@ -297,9 +305,24 @@ const AccountAbout = (props: any) => {
         },
     });
 
+    const scrollField = (scrolling: boolean) => {
+        console.log(scrolling);
+        setScroll(scrolling);
+    }
+
     return (
     <View>
         <ScrollView
+        onTouchEnd={(e: any) => scrollField(false)}
+        refreshControl={
+            <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            colors={[Color(props.isDarkMode).gold]}
+            progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+            enabled={!scroll}
+            />
+            }
         keyboardShouldPersistTaps={'handled'}
         >
             <View>
@@ -342,6 +365,7 @@ const AccountAbout = (props: any) => {
                 onChangeText={(e: any) => setBio(e)}
                 value={bioForm}
                 isDarkMode={props.isDarkMode}
+                onPressIn={(e: any) => scrollField(true)}
                 >
 
                 </_TextInput>

@@ -514,7 +514,7 @@ function LightColor() {
     underlayMask: '#F0F2F5bf',
     dropdownOption: '#F9F9F9',
     dropdownOptionAlt: '#FFFFFF',
-    transparentMask: '#00000020',
+    transparentMask: '#00000040',
   }
 }
 
@@ -1005,7 +1005,7 @@ function DarkColor() {
     underlayMask: '#191919bf',
     dropdownOption: '#202122',
     dropdownOptionAlt: '#242526',
-    transparentMask: '#00000020',
+    transparentMask: '#00000040',
   }
 }
 

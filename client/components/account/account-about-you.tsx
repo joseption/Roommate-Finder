@@ -7,7 +7,7 @@ import _Button from '../control/button';
 import _Image from '../control/image';
 import _Cluster from '../control/cluster';
 import _ClusterOption from '../control/cluster-option';
-import { ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, TouchableHighlight, View } from 'react-native';
 import { AccountScreenType, authTokenHeader, env, navProp, NavTo } from '../../helper';
 import { useNavigation } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -63,6 +63,10 @@ const AccountAbout = (props: any) => {
         onLoad();
         setRefreshing(false);
     };
+
+    const goBack = () => {
+        navigation.goBack();
+    }
 
     const setupPage = (data: any) => {
         setBio(data.bio);
@@ -303,6 +307,22 @@ const AccountAbout = (props: any) => {
             alignItems: 'center',
             width: '100%',
         },
+        backIcon: {
+            ...Platform.select({
+                web: {
+                outlineStyle: 'none'
+                }
+            }),
+        },
+        button: {
+            padding: 5,
+            borderRadius: Radius.round,
+            zIndex: 5,
+        },
+        headContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        }
     });
 
     const scrollField = (scrolling: boolean) => {
@@ -329,11 +349,30 @@ const AccountAbout = (props: any) => {
                 <View
                 style={_styles.titleContainer}
                 >
+                  <View
+                    style={_styles.headContainer}
+                    >
+                        {props.isSetup ?
+                        <TouchableHighlight
+                        underlayColor={props.isDarkMode ? Color(props.isDarkMode).whiteUnderlay : Color(props.isDarkMode).holderUnderlay}
+                        style={_styles.button}
+                        onPress={() => goBack() }
+                        >
+                            <FontAwesomeIcon 
+                            size={20} 
+                            color={Color(props.isDarkMode).actualWhite} 
+                            style={_styles.backIcon} 
+                            icon="arrow-left"
+                            >
+                            </FontAwesomeIcon>
+                        </TouchableHighlight>
+                        : null }
                     <_Text
                     style={_styles.title}
                     >
                         {title()}
                     </_Text>
+                    </View>
                     {props.isSetup ?
                     <_Button
                     style={Style(props.isDarkMode).buttonInverted}

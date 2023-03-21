@@ -269,7 +269,7 @@ const MyProfileScreen = (props: any) => {
         style={styles.profileImg}
         source={{uri: profile?.image}}
         containerStyle={styles.imageContainer}
-        resizeMode={Platform.OS !== 'web' ? 'contain' : 'cover'}
+        resizeMode='cover'
         />
         </View>
         <View

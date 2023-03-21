@@ -98,17 +98,19 @@ const ProfileScreen = (props: any) => {
   };
 
   const getUser = async (id: string) => {
-    const tokenHeader = await authTokenHeader();
-    return fetch(
-      `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
-    ).then(async ret => {
-      const res = JSON.parse(await ret.text());
-      if (res.Error) {
-        console.warn("Error: ", res.Error);
-      } else {
-        setProfile(res);
-      }
-    });
+    if (id) {
+      const tokenHeader = await authTokenHeader();
+      return fetch(
+        `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      ).then(async ret => {
+        const res = JSON.parse(await ret.text());
+        if (res.Error) {
+          console.warn("Error: ", res.Error);
+        } else {
+          setProfile(res);
+        }
+      });
+    }
   }
 
   const generateRequestId = () => {
@@ -314,6 +316,13 @@ const ProfileScreen = (props: any) => {
       navigation.navigate(NavTo.Messages, {user: rt.params['profile'], requestId: generateRequestId()} as never);
     }
     else {
+      let routes = navigation.getState()?.routes;
+      if (routes && routes[routes.length - 2]?.name === NavTo.Listings) {
+        props.setNavSelector(NavTo.Listings);
+      }
+      else {
+        props.setNavSelector(NavTo.Search);
+      }
       navigation.goBack();
     }
   }
@@ -368,7 +377,7 @@ const ProfileScreen = (props: any) => {
               style={styles.profileImg}
               source={{uri: profile?.image}}
               containerStyle={styles.imageContainer}
-              resizeMode={Platform.OS !== 'web' ? 'contain' : 'cover'}
+              resizeMode='cover'
               />
             </View>
             <View

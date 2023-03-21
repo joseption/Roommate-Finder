@@ -155,6 +155,8 @@ const MessagesScreen = (props: any) => {
   }, [props?.route?.params?.requestId])
 
   const createChat = async (userIdOne: string, userIdTwo: string) => {
+    if (userIdOne === userIdTwo) return;
+
     const obj = {userIdOne: userIdOne, userIdTwo: userIdTwo};
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();

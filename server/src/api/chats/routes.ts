@@ -12,6 +12,11 @@ router.use(isAuthenticated);
 router.post('/', async (req: Request, res: Response) => {
   try {
     const { userIdOne, userIdTwo } = req.body;
+    
+    if (userIdOne === userIdTwo) {
+      return res.status(400).json({Error: "Cannot chat with yourself"});
+    }
+
     // validate users exist
     const userOne = await db.user.findUnique({
       where: {

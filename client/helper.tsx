@@ -7,7 +7,8 @@ import { Content } from "./style";
 import * as DeepLinking from 'expo-linking';
 import { faClose, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut, faUserPlus, faArrowLeft, faRefresh, faLock, faPowerOff, faKey, faHouse, faTreeCity, faBed, faSink, faFilter, faToggleOff, faToggleOn, faCertificate, faCakeCandles, faLocationDot, faPencil, faMagnifyingGlass, faList, faTrash, faDeleteLeft, faEraser } from '@fortawesome/free-solid-svg-icons'
 import AsyncStorage from "@react-native-async-storage/async-storage";
-library.add(faEraser, faDeleteLeft, faTrash, faList, faHouse, faMagnifyingGlass, faPencil, faLocationDot, faCakeCandles, faCertificate, faToggleOff, faToggleOn, faFilter, faSink, faBed, faTreeCity, faClose, faPowerOff, faKey, faRefresh, faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
+import { io } from "socket.io-client";
+library.add(faList, faHouse, faMagnifyingGlass, faPencil, faLocationDot, faCakeCandles, faCertificate, faToggleOff, faToggleOn, faFilter, faSink, faBed, faTreeCity, faClose, faPowerOff, faKey, faRefresh, faArrowLeft, faUserPlus, faCheck, faXmark, faMessage, faCaretDown, faUser, faPoll, faHouseFlag, faCheckDouble, faEdit, faGlobe, faSignOut)
 
 export const Stack = createNativeStackNavigator<Page>();
 
@@ -23,6 +24,8 @@ const dev = {
    URL: "http://localhost:8080"
 };
 export const env = process.env.NODE_ENV === "development" ? dev : prod;
+
+export const socket = io(env.URL);
 
 export const validateEmail = (email: string) => {
     return String(email)

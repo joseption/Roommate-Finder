@@ -3,7 +3,7 @@ import HomeScreen from './screens/home';
 import { useFonts } from 'expo-font';
 import Navigation from './components/navigation/navigation';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, AppState, BackHandler, Button, Dimensions, Easing, Keyboard, KeyboardAvoidingView, Linking, Platform, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import { AppState, BackHandler, Dimensions, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import 'react-native-gesture-handler';
 import AccountScreen from './screens/account';
 import ProfileScreen from './screens/profile';
@@ -14,7 +14,7 @@ import SearchScreen from './screens/search';
 import FiltersScreen from './screens/filters';
 import MyProfileScreen from './screens/my-profile';
 import { Color, Content } from './style';
-import { env as environ, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isLoggedIn as isLoggedInHelper, isDarkMode as isDarkModeHelper, navProp, authTokenHeader, userId, setLocalAppSettingsPushMessageToken, getPushMessageToken, getCurrentChat, setLocalAppSettingsCurrentChat, setLocalAppSettingsOpenPushChat, getOpenPushChat } from './helper';
+import { env as environ, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isDarkMode as isDarkModeHelper, authTokenHeader, userId, setLocalAppSettingsPushMessageToken, getPushMessageToken, getCurrentChat, setLocalAppSettingsCurrentChat, socket } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
@@ -22,9 +22,6 @@ import _Button from './components/control/button';
 import AuthScreen from './screens/auth';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
-import { env } from 'process';
-import { io, Socket } from "socket.io-client";
-import { DefaultEventsMap } from '@socket.io/component-emitter';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
@@ -39,7 +36,6 @@ Notifications.setNotificationHandler({
 export const ThemeContext = React.createContext(null);
 
 export const App = (props: any) => {
-  const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap> | null>(null);
   const [navHeight,setNavHeight] = useState(0);
   const [navWidth,setNavWidth] = useState(0);
   const [containerStyle,setContainerStyle] = useState({});
@@ -69,7 +65,6 @@ export const App = (props: any) => {
   const [messageData,setMessageData] = useState({});
   const [currentChat,setCurrentChat] = useState('');
   const [showingMessagePanel,setShowingMessagePanel] = useState(false);
-  const [enableScroll,setEnableScroll] = useState(true);
   const [openChatFromPush,setOpenChatFromPush] = useState('');
   const [receiveMessage,setReceiveMessage] = useState(null);
   const [receiveTyping,setReceiveTyping] = useState(null);
@@ -82,12 +77,6 @@ export const App = (props: any) => {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
-
-  useEffect(() => {
-    const newSocket: Socket<DefaultEventsMap, DefaultEventsMap> = io(environ.URL);
-    setSocket(newSocket);
-    return () => {newSocket.close()};
-  }, [setSocket]);
 
   useEffect(() => {
     if (addMessageCount === 0) {
@@ -292,6 +281,20 @@ export const App = (props: any) => {
   }, []);
 
   useEffect(() => {
+    if (socket === null) return;
+
+    // Listen for messages being sent over socket
+    socket.on('receive_message', (data: any) => {
+      setReceiveMessage(data);
+    });
+
+    // Listen for typing indicator socket
+    socket.on('receive_typing', (data: any) => {
+      setReceiveTyping(data);
+    });
+  }, []);
+
+  useEffect(() => {
     const dimsChanged = Dimensions.addEventListener("change", (e) => setMobile(isMobile()));
     const back = BackHandler.addEventListener('hardwareBackPress', onBackPress);
     return () => {
@@ -345,20 +348,6 @@ export const App = (props: any) => {
       hasError = true;
     }  
   }
-
-  useEffect(() => {
-    if (socket === null) return;
-
-    // Listen for messages being sent over socket
-    socket.on('receive_message', (data: any) => {
-      setReceiveMessage(data);
-    });
-
-    // Listen for typing indicator socket
-    socket.on('receive_typing', (data: any) => {
-      setReceiveTyping(data);
-    });
-  }, [socket]);
 
   // Resend all combined unread messages as one to the current user
   const updateGroupedPushNotification = async (title: any, message: any, tag: string) => {

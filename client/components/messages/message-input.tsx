@@ -68,19 +68,17 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
     const obj = {userId: chat?.users[0].id, chatId: chat.id};
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
+    const data = {
+      userId: obj.userId,
+      chatId: chat.id,
+    };
+    socket.emit('send_notification', data);
     return fetch(
       `${env.URL}/notifications`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
         console.warn("Error: ", res.Error);
-      } else {
-        if (!res.id) return;
-        const data = {
-          userId: obj.userId,
-          chatId: chat.id,
-        };
-        socket.emit('send_notification', data);
       }
     });
   };

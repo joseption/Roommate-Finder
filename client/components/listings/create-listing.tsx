@@ -785,7 +785,7 @@ const CreateListing = (props: any) => {
               value={formData.description}
               multiline={true}
               label="Description"
-              height={100}
+              height={200}
               required={true}
               isDarkMode={props.isDarkMode} />
 

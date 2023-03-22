@@ -318,7 +318,7 @@ const Filter = (props: any) => {
     },
     clearButton: {
       paddingVertical: 2,
-      paddingHorizontal: 10,
+      paddingHorizontal: 15,
       borderRadius: Radius.round,
     },
     header: {

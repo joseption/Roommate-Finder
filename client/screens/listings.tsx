@@ -127,6 +127,7 @@ const ListingsScreen = (props: any) => {
     refresh={getAllListings}
     setIsManualNavigate={setIsManualNavigate}
     userImage={image}
+    mobile={props.mobile}
   />
   }
 
@@ -199,7 +200,8 @@ const ListingsScreen = (props: any) => {
     headerContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center'
+      alignItems: 'center',
+      marginTop: !props.mobile ? -10 : 0,
     },
     loading: {
       position: 'relative',
@@ -276,6 +278,7 @@ return (
             userImage={image}
             refresh={refresh}
             setFilters={setFilters}
+            mobile={props.mobile}
           />
           }
           {bottomBarNav()}
@@ -293,6 +296,7 @@ return (
           onFilter={handleFilter}
           filters={filters}
           showFilter={showFilter}
+          mobile={props.mobile}
           />
         </View>
       </View>
@@ -312,6 +316,7 @@ return (
             userImage={image}
             refresh={refresh}
             setCurrentScreen={setCurrentScreen}
+            mobile={props.mobile}
           />
           }
           {bottomBarNav()}
@@ -334,6 +339,7 @@ return (
             setIsManualNavigate={setIsManualNavigate}
             setCurrentListing={setCurrentListing}
             refreshListing={refreshListing}
+            mobile={props.mobile}
           />
           {bottomBarNav()}
         </View>
@@ -351,6 +357,7 @@ return (
         updatedListing={updatedListing}
         setUpdatedListing={setUpdatedListing}
         setRefreshListing={setRefreshListing}
+        mobile={props.mobile}
       />
     )}
   </View>

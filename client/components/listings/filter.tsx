@@ -118,6 +118,38 @@ const Filter = (props: any) => {
     setRooms(undefined);
   }
 
+  const containerStyle = () => {
+    var container = Color(props.isDarkMode).contentBackground;
+    var padding = 10;
+    var borderRadius = Radius.large;
+    var borderColor = Color(props.isDarkMode).border;
+    var borderWidth = 1;
+    var marginTop = 10;
+    var marginBottom = 0;
+    var flex = 1;
+    if (props.mobile) {
+        padding = 0;
+        borderRadius = 0;
+        borderWidth = 0;
+        marginTop = 0
+        container = Color(props.isDarkMode).contentBackgroundSecondary;
+    }
+    else {
+      marginBottom = 20
+    }
+
+    return {
+        padding: padding,
+        borderRadius: borderRadius,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        marginTop: marginTop,
+        backgroundColor: container,
+        flex: flex,
+        marginBottom: marginBottom
+    }
+  }
+
   const styles = StyleSheet.create({
     container: {
       display: 'flex',
@@ -294,92 +326,95 @@ const Filter = (props: any) => {
       display: 'flex',
       alignItems: 'center',
       flexDirection: 'row',
-      padding: 10
+      padding: props.mobile ? 10 : 0
   },
   });
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        keyboardShouldPersistTaps={'handled'}
+      <View
+      style={styles.header}
       >
-        <View
-        style={styles.header}
+      <_Text style={styles.title}>Filter Listing</_Text>
+      {hasFilters() ?
+      <TouchableHighlight
+      underlayColor={Color(props.isDarkMode).holderUnderlay}
+      style={[Style(props.isDarkMode).buttonInverted, styles.clearButton]}
+      onPress={() => clearFilter()}
+      >
+          <_Text
+          style={Style(props.isDarkMode).buttonInvertedText}
+          >
+              Clear All
+          </_Text>
+      </TouchableHighlight>
+      : null }
+      </View>
+      <View
+      style={containerStyle()}
+      >
+        <ScrollView
+          keyboardShouldPersistTaps={'handled'}
         >
-        <_Text style={styles.title}>Filter Listing</_Text>
-        {hasFilters() ?
-        <TouchableHighlight
-        underlayColor={Color(props.isDarkMode).holderUnderlay}
-        style={[Style(props.isDarkMode).buttonInverted, styles.clearButton]}
-        onPress={() => clearFilter()}
-        >
-            <_Text
-            style={Style(props.isDarkMode).buttonInvertedText}
-            >
-                Clear All
-            </_Text>
-        </TouchableHighlight>
-        : null }
-        </View>
-        <View style={styles.formContainer}>
+          <View style={styles.formContainer}>
 
-          <_Dropdown
-            containerStyle={styles.inputContainerStyle}
-            isDarkMode={props.isDarkMode}
-            options={getHousingType()}
-            value={housing_type}
-            setValue={setHousingType}
-            label="Housing Type"
-          />   
+            <_Dropdown
+              containerStyle={styles.inputContainerStyle}
+              isDarkMode={props.isDarkMode}
+              options={getHousingType()}
+              value={housing_type}
+              setValue={setHousingType}
+              label="Housing Type"
+            />   
 
-          <_TextInput
-            containerStyle={styles.inputContainerStyle}
-            onChangeText={handlePriceChange}
-            value={price !== undefined ? `$${price.toString()}` : ""}
-            keyboardType="numeric"
-            placeholder="$0"
-            label="Max Price (per month)"
-            isDarkMode={props.isDarkMode}
-          />
-          
-          <_Dropdown
-            containerStyle={styles.inputContainerStyle}
-            isDarkMode={props.isDarkMode}
-            options={getYesNo()}
-            value={petsAllowed !== null && petsAllowed !== undefined ? (petsAllowed? 'Yes' : 'No') : null}
-            setValue={handlePetsAllowedChange}
-            label="Pets Allowed"
-          />
+            <_TextInput
+              containerStyle={styles.inputContainerStyle}
+              onChangeText={handlePriceChange}
+              value={price !== undefined ? `$${price.toString()}` : ""}
+              keyboardType="numeric"
+              placeholder="$0"
+              label="Max Price (per month)"
+              isDarkMode={props.isDarkMode}
+            />
+            
+            <_Dropdown
+              containerStyle={styles.inputContainerStyle}
+              isDarkMode={props.isDarkMode}
+              options={getYesNo()}
+              value={petsAllowed !== null && petsAllowed !== undefined ? (petsAllowed? 'Yes' : 'No') : null}
+              setValue={handlePetsAllowedChange}
+              label="Pets Allowed"
+            />
 
-          <_Dropdown
-            containerStyle={styles.inputContainerStyle}
-            isDarkMode={props.isDarkMode}
-            options={getOptions()}
-            value={rooms !== null && rooms !== undefined && !Number.isNaN(rooms) ? rooms.toString() : null}
-            setValue={handleRoomsChange}
-            label="Rooms"
-          />
+            <_Dropdown
+              containerStyle={styles.inputContainerStyle}
+              isDarkMode={props.isDarkMode}
+              options={getOptions()}
+              value={rooms !== null && rooms !== undefined && !Number.isNaN(rooms) ? rooms.toString() : null}
+              setValue={handleRoomsChange}
+              label="Rooms"
+            />
 
-          <_Dropdown
-            containerStyle={styles.inputContainerStyle}
-            isDarkMode={props.isDarkMode}
-            options={getOptions()}
-            value={bathrooms !== null && bathrooms !== undefined && !Number.isNaN(bathrooms) ? bathrooms.toString() : null}
-            setValue={handleBathroomChange}
-            label="Bathrooms"
-          />
+            <_Dropdown
+              containerStyle={styles.inputContainerStyle}
+              isDarkMode={props.isDarkMode}
+              options={getOptions()}
+              value={bathrooms !== null && bathrooms !== undefined && !Number.isNaN(bathrooms) ? bathrooms.toString() : null}
+              setValue={handleBathroomChange}
+              label="Bathrooms"
+            />
 
-          <_TextInput
-            containerStyle={styles.inputContainerStyle}
-            onChangeText={handleDistanceChange}
-            value={distanceToUcf !== undefined ? distanceToUcf.toString() : ""}
-            keyboardType="numeric"
-            placeholder="0 miles"
-            label="Max Distance from UCF"
-            isDarkMode={props.isDarkMode}
-          />
-        </View>
-      </ScrollView>
+            <_TextInput
+              containerStyle={styles.inputContainerStyle}
+              onChangeText={handleDistanceChange}
+              value={distanceToUcf !== undefined ? distanceToUcf.toString() : ""}
+              keyboardType="numeric"
+              placeholder="0 miles"
+              label="Max Distance from UCF"
+              isDarkMode={props.isDarkMode}
+            />
+          </View>
+        </ScrollView>
       <View
       style={styles.buttons}
       >
@@ -401,6 +436,7 @@ const Filter = (props: any) => {
               Apply Filters
           </_Button>
       </View>
+    </View>
     </View>
   );
 };

@@ -1,5 +1,8 @@
+import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
+import { toast } from "react-hot-toast";
 
+import { SendSMSLink } from "../request/mutate";
 const stats = [
   { label: "Founded", value: "2023" },
   { label: "Team size", value: "6" },
@@ -94,6 +97,26 @@ export default function Example() {
       (prevIndex) => (prevIndex - 1 + images.length) % images.length
     );
   };
+  const [phoneNumber, setPhoneNumber] = useState("");
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber("+1" + e.target.value);
+  };
+  console.log(phoneNumber);
+
+  const { mutate: sendSMS, isLoading: smsLoading } = useMutation({
+    mutationFn: (phoneNumber: string) => SendSMSLink(phoneNumber),
+    onSuccess: () => {
+      toast.success("SMS sent");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+      console.log(err);
+    },
+  });
+  const handleFormsubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    sendSMS(phoneNumber);
+  };
 
   return (
     <div className="bg-white">
@@ -149,16 +172,18 @@ export default function Example() {
                 <form
                   action="#"
                   className="mt-12 sm:flex sm:w-full sm:max-w-lg"
+                  onSubmit={(e) => handleFormsubmit(e)}
                 >
                   <div className="min-w-0 flex-1">
                     <label htmlFor="hero-email" className="sr-only">
                       phone number
                     </label>
                     <input
-                      id="hero-email"
-                      type="email"
+                      id="hero-number"
+                      type="number"
                       className="block w-full rounded-md border border-gray-300 px-5 py-3 text-base text-gray-900 shadow-sm placeholder:text-gray-500 focus:border-yellow-500 focus:ring-yellow-500"
                       placeholder="Enter your number"
+                      onChange={(e) => handlePhoneChange(e)}
                     />
                   </div>
                   <div className="mt-4 sm:mt-0 sm:ml-3">

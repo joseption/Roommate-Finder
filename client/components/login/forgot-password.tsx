@@ -11,12 +11,13 @@ const ForgotPassword = (props: any, {navigation}:any) => {
     const [disabled,setDisabled] = useState(true);
     const [emailError,setEmailError] = useState(false);
     const [loading,setLoading] = useState(false);
+    const [error,setError] = useState(false);
 
     useEffect(() => {
-      if (props.emailValue) {
+      if (props.email && !error) {
         setDisabled(false);
       }
-    }, [props.emailValue]);
+    }, [props.email]);
 
     const backToLogin = () => {
         setMessage('');
@@ -28,6 +29,7 @@ const ForgotPassword = (props: any, {navigation}:any) => {
 
     const handleChange = (value: string) => {
         var error = !validateEmail(value);
+        setError(error);
         setDisabled(error);
         props.setEmail(value);
     };

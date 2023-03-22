@@ -18,7 +18,6 @@ const ListingView = (props: any) => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [autoPlaySpeed, setAutoPlaySpeed] = useState(2);
 
   const refresh = () => {
     setRefreshing(true);
@@ -46,6 +45,39 @@ const ListingView = (props: any) => {
     Apartment: faBuilding,
     Condo: faCity,
   };
+
+  const containerStyle = () => {
+    var container = Color(props.isDarkMode).contentBackground;
+    var padding = 0;
+    var borderRadius = Radius.large;
+    var borderColor = Color(props.isDarkMode).border;
+    var borderWidth = 1;
+    var marginTop = 10;
+    var marginBottom = 20;
+    var paddingBottom = 10;
+    var flex = 1;
+    if (props.mobile) {
+        padding = 0;
+        borderRadius = 0;
+        borderWidth = 0;
+        marginTop = 0
+        container = Color(props.isDarkMode).contentBackgroundSecondary;
+        marginBottom = 0;
+        paddingBottom = 0;
+    }
+
+    return {
+        padding: padding,
+        borderRadius: borderRadius,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        marginTop: marginTop,
+        backgroundColor: container,
+        marginBottom: marginBottom,
+        paddingBottom: paddingBottom,
+        flex: flex
+    }
+  }
 
   const getSingleListing = async () => {
     let id = props.currentListing.id;
@@ -184,7 +216,6 @@ const ListingView = (props: any) => {
 
   useEffect(() => {
     getUser(props.currentListing.userId);
-    slideOnce();
   }, [props.currentListing]);
 
   useEffect(() => {
@@ -202,21 +233,11 @@ const ListingView = (props: any) => {
     props.setCurrentScreen(Listings_Screen.create);
   }
 
-  const slideOnce = () => {
-    if (autoPlaySpeed != 2)
-      setAutoPlaySpeed(2);
-    setTimeout(() => {
-      if (autoPlaySpeed != 7)
-        setAutoPlaySpeed(7);
-    }, 1000);
-  }
-
   const styles = StyleSheet.create({
     container: {
       height: "100%",
     },
     content: {
-      padding: 10,
       height: "100%",
     },
     header: {
@@ -379,7 +400,8 @@ const ListingView = (props: any) => {
       justifyContent: 'flex-end',
     },
     buttonContainer: {
-      margin: 10
+      margin: 10,
+      marginBottom: props.mobile ? 10 : 0
     },
     space: {
       height: 30
@@ -432,6 +454,9 @@ const ListingView = (props: any) => {
       alignItems: 'center',
       flex: 1
     },
+    innerContent: {
+      padding: 10,
+    }
   });
 
   if (!isLoaded) {
@@ -446,8 +471,9 @@ const ListingView = (props: any) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle()]}>
       <ScrollView style={styles.content}
+      contentContainerStyle={styles.innerContent}
       refreshControl={
         <RefreshControl
         refreshing={refreshing}
@@ -459,7 +485,7 @@ const ListingView = (props: any) => {
       >
         <Swiper
           autoplay={true}
-          autoplayTimeout={autoPlaySpeed}
+          autoplayTimeout={10}
           showsButtons={currentListing?.images?.length > 1}
           scrollEnabled={true}
           style={styles.swiper}

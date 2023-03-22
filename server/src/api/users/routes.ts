@@ -287,6 +287,7 @@ router.post('/AllprofilesMob', async (req: Request, res: Response, next: NextFun
         state: true,
         is_setup: true,
         createdAt: true,
+        gender: true,
         matches2: {
           select: {
             matchPercentage: true

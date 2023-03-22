@@ -355,3 +355,29 @@ export async function AccessChat(userIdOne: string, userIdTwo: string) {
     true
   );
 }
+
+export async function SendSMSLink(phoneNumber: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/sms`,
+    { phoneNumber },
+    "POST",
+    true
+  );
+}
+
+export async function FavoriteListing(listingId: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/listings/favorite/${listingId}`,
+    null,
+    "POST",
+    true
+  );
+}
+export async function UnfavoriteListing(listingId: string) {
+  return await doRequest<{ message: string }>(
+    `${backend_api}/listings/unfavorite/${listingId}`,
+    null,
+    "POST",
+    true
+  );
+}

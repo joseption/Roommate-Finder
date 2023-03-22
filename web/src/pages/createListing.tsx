@@ -48,6 +48,31 @@ export default function CreateListing() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!name) {
+      return toast.error("Please enter a title for your listing.");
+    }
+    if (!description) {
+      return toast.error("Please enter a description for your listing.");
+    }
+    if (!price) {
+      return toast.error("Please enter a price for your listing.");
+    }
+    if (!city) {
+      return toast.error("Please enter a city for your listing.");
+    }
+    if (!zipcode) {
+      return toast.error("Please enter a zipcode for your listing.");
+    }
+    if (!streetAddress) {
+      return toast.error("Please enter a street address for your listing.");
+    }
+    if (!images.length) {
+      return toast.error("Please upload at least one image for your listing.");
+    }
+    if (!size) {
+      return toast.error("Please enter a size for your listing.");
+    }
+
     mutateListing();
   };
 

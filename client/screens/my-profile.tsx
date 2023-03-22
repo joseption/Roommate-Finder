@@ -248,127 +248,180 @@ const MyProfileScreen = (props: any) => {
     );
   }
 
+  const containerStyle = () => {
+    var container = Color(props.isDarkMode).contentBackground;
+    var padding = 10;
+    var borderRadius = Radius.large;
+    var borderColor = Color(props.isDarkMode).border;
+    var borderWidth = 1;
+    var marginTop = 10;
+    var marginBottom = 20;
+    var flex = 1;
+    if (props.mobile) {
+        padding = 0;
+        borderRadius = 0;
+        borderWidth = 0;
+        marginTop = 0
+        container = Color(props.isDarkMode).contentBackgroundSecondary;
+        marginBottom = 0;
+    }
+
+    return {
+        padding: padding,
+        borderRadius: borderRadius,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        marginTop: marginTop,
+        backgroundColor: container,
+        marginBottom: marginBottom,
+        flex: flex
+    }
+  }
+
   return (
-    <ScrollView
-    refreshControl={
-      <RefreshControl
-      refreshing={refreshing}
-      onRefresh={refresh}
-      colors={[Color(props.isDarkMode).gold]}
-      progressBackgroundColor={Color(props.isDarkMode).contentHolder}
-      />
-      }
+    <View
+    style={containerStyle()}
     >
-      <View
-      style={styles.mainContent}
+      <ScrollView
+      contentContainerStyle={{paddingBottom: 20}}
+      refreshControl={
+        <RefreshControl
+        refreshing={refreshing}
+        onRefresh={refresh}
+        colors={[Color(props.isDarkMode).gold]}
+        progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+        />
+        }
       >
         <View
-        style={styles.imageContent}
+        style={styles.mainContent}
         >
-        <Image
-        style={styles.profileImg}
-        source={{uri: profile?.image}}
-        containerStyle={styles.imageContainer}
-        resizeMode='cover'
-        />
-        </View>
-        <View
-        style={styles.rowContent}
-        >
-          <_Text
-          style={styles.name}
-          isDarkMode={props.isDarkMode}
-          numberOfLines={1}
-          containerStyle={styles.nameContent}
+          <View
+          style={styles.imageContent}
           >
-            {profile?.first_name + " " + profile?.last_name}
-          </_Text>
-          <TouchableHighlight
-            underlayColor={Color(props.isDarkMode).defaultUnderlay}
-            style={styles.editButton}
-            onPress={() => { navigation.navigate(NavTo.Account, { view: 'info' } as never) }}
+          <Image
+          style={styles.profileImg}
+          source={{uri: profile?.image}}
+          containerStyle={styles.imageContainer}
+          resizeMode='cover'
+          />
+          </View>
+          <View
+          style={styles.rowContent}
+          >
+            <_Text
+            style={styles.name}
+            isDarkMode={props.isDarkMode}
+            numberOfLines={1}
+            containerStyle={styles.nameContent}
             >
-              <FontAwesomeIcon 
-              size={20} 
-              color={Color(props.isDarkMode).actualWhite} 
-              style={styles.backIcon} 
-              icon="pencil"
+              {profile?.first_name + " " + profile?.last_name}
+            </_Text>
+            <TouchableHighlight
+              underlayColor={Color(props.isDarkMode).defaultUnderlay}
+              style={styles.editButton}
+              onPress={() => { navigation.navigate(NavTo.Account, { view: 'info' } as never) }}
+              >
+                <FontAwesomeIcon 
+                size={20} 
+                color={Color(props.isDarkMode).actualWhite} 
+                style={styles.backIcon} 
+                icon="pencil"
+                >
+              </FontAwesomeIcon>
+            </TouchableHighlight>
+          </View>
+          {profile?.gender ?
+              <View
+              style={[styles.iconLabel, styles.firstLabelContainer]}
+              >
+                <FontAwesomeIcon 
+                  size={15} 
+                  color={Color(props.isDarkMode).text} 
+                  style={[styles.backIcon, styles.labelIcon]} 
+                  icon={profile?.gender === "Female" ? 'person-dress' : 'person'}
+                  >
+                </FontAwesomeIcon>
+                <_Text
+                isDarkMode={props.isDarkMode}
+                >
+                  {profile?.gender === "Other" ? "Non-Binary" : profile?.gender}
+                </_Text>
+              </View>
+              : null }
+          {profile?.age ?
+          <View
+          style={styles.iconLabel}
+          >
+            <FontAwesomeIcon 
+              size={15} 
+              color={Color(props.isDarkMode).text} 
+              style={[styles.backIcon, styles.labelIcon]} 
+              icon="cake-candles"
               >
             </FontAwesomeIcon>
-          </TouchableHighlight>
-        </View>
-        {profile?.age ?
-        <View
-        style={[styles.iconLabel, styles.firstLabelContainer]}
-        >
-          <FontAwesomeIcon 
-            size={15} 
-            color={Color(props.isDarkMode).text} 
-            style={[styles.backIcon, styles.labelIcon]} 
-            icon="cake-candles"
+            <_Text
+            isDarkMode={props.isDarkMode}
             >
-          </FontAwesomeIcon>
-          <_Text
-          isDarkMode={props.isDarkMode}
-          >
-            {profile?.age} years old
-          </_Text>
-        </View>
-        : null }
-        {profile?.city && profile?.state ?
-        <View
-        style={styles.iconLabel}
-        >
-          <FontAwesomeIcon 
-            size={15} 
-            color={Color(props.isDarkMode).text} 
-            style={[styles.backIcon, styles.labelIcon]} 
-            icon="location-dot"
-            >
-          </FontAwesomeIcon>
-          <_Text
-          isDarkMode={props.isDarkMode}
-          >
-            {profile?.city}, {profile?.state}
-          </_Text>
-        </View>
-        : null }
-        {profile?.bio ?
-        <View>
-          <_Text
-          style={styles.heading}
-          isDarkMode={props.isDarkMode}
-          >
-            About
-          </_Text>
-          <_Text
-          isDarkMode={props.isDarkMode}
-          style={styles.bio}
-          >
-            {profile?.bio}
-          </_Text>
-        </View>
-        : null }
-        <_Text
-        style={styles.interestsHeading}
-        isDarkMode={props.isDarkMode}
-        >
-          Interests and Hobbies
-        </_Text>
-        {tagsFetched ?
-        <View style={styles.tagsRow}>
-          {tag()}
-        </View>
-          :
-          <View>
-            <ActivityIndicator
-            color={Color(props.isDarkMode).gold}
-            size="large"
-            />
+              {profile?.age} years old
+            </_Text>
           </View>
-        }
-      </View>
-    </ScrollView>
+          : null }
+          {profile?.city && profile?.state ?
+          <View
+          style={styles.iconLabel}
+          >
+            <FontAwesomeIcon 
+              size={15} 
+              color={Color(props.isDarkMode).text} 
+              style={[styles.backIcon, styles.labelIcon]} 
+              icon="location-dot"
+              >
+            </FontAwesomeIcon>
+            <_Text
+            isDarkMode={props.isDarkMode}
+            >
+              {profile?.city}, {profile?.state}
+            </_Text>
+          </View>
+          : null }
+          {profile?.bio ?
+          <View>
+            <_Text
+            style={styles.heading}
+            isDarkMode={props.isDarkMode}
+            >
+              About
+            </_Text>
+            <_Text
+            isDarkMode={props.isDarkMode}
+            style={styles.bio}
+            >
+              {profile?.bio}
+            </_Text>
+          </View>
+          : null }
+          <_Text
+          style={styles.interestsHeading}
+          isDarkMode={props.isDarkMode}
+          >
+            Interests and Hobbies
+          </_Text>
+          {tagsFetched ?
+          <View style={styles.tagsRow}>
+            {tag()}
+          </View>
+            :
+            <View>
+              <ActivityIndicator
+              color={Color(props.isDarkMode).gold}
+              size="large"
+              />
+            </View>
+          }
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 

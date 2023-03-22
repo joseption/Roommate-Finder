@@ -352,7 +352,7 @@ const AccountAbout = (props: any) => {
                   <View
                     style={_styles.headContainer}
                     >
-                        {props.isSetup ?
+                        {props.isSetup && props.mobile ?
                         <TouchableHighlight
                         underlayColor={props.isDarkMode ? Color(props.isDarkMode).whiteUnderlay : Color(props.isDarkMode).holderUnderlay}
                         style={_styles.button}
@@ -360,7 +360,7 @@ const AccountAbout = (props: any) => {
                         >
                             <FontAwesomeIcon 
                             size={20} 
-                            color={Color(props.isDarkMode).actualWhite} 
+                            color={Color(props.isDarkMode).text} 
                             style={_styles.backIcon} 
                             icon="arrow-left"
                             >

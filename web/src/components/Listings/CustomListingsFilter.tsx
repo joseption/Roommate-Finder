@@ -18,6 +18,8 @@ interface props {
   setHousingType: (value: string) => void;
   distanceToUcf: number;
   setDistanceToUcf: (value: number) => void;
+  isFavorited: boolean;
+  setIsFavorited: (value: boolean) => void;
 }
 
 export default function CustomListingFilterPopover({
@@ -33,6 +35,8 @@ export default function CustomListingFilterPopover({
   setHousingType,
   distanceToUcf,
   setDistanceToUcf,
+  isFavorited,
+  setIsFavorited,
 }: props) {
   const clearFilters = () => {
     setPrice(100000);
@@ -41,6 +45,7 @@ export default function CustomListingFilterPopover({
     setNumberBathrooms("all");
     setPetsAllowed("all");
     setDistanceToUcf(100000);
+    setIsFavorited(false);
   };
 
   const debouncedPrice = React.useRef(
@@ -74,6 +79,10 @@ export default function CustomListingFilterPopover({
     setPetsAllowed(event.target.value);
   };
 
+  const handleIsFavoritedChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setIsFavorited(!isFavorited);
+  };
+
   return (
     <div>
       <CustomPopover
@@ -98,6 +107,18 @@ export default function CustomListingFilterPopover({
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onChange={handlePriceChange}
               />
+            </div>
+            <div className="flex items-center">
+              <input
+                id="price"
+                type="checkbox"
+                className="text-primary focus:ring-primary rounded"
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onChange={handleIsFavoritedChange}
+              />
+              <label htmlFor="favorited" className="ml-4 block">
+                Favorited Only
+              </label>
             </div>
             <div>
               <label htmlFor="housing_type" className="block">
@@ -176,7 +197,7 @@ export default function CustomListingFilterPopover({
                 value={petsAllowed}
                 onChange={handlePetPreferenceChange}
               >
-                <option value="">All</option>
+                <option value="all">All</option>
                 <option value="yes">Allowed</option>
                 <option value="no">Not Allowed</option>
               </select>

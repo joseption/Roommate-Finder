@@ -308,6 +308,36 @@ const ProfileScreen = (props: any) => {
     }
   });
 
+  const containerStyle = () => {
+    var container = Color(props.isDarkMode).contentBackground;
+    var padding = 10;
+    var borderRadius = Radius.large;
+    var borderColor = Color(props.isDarkMode).border;
+    var borderWidth = 1;
+    var marginTop = 10;
+    var marginBottom = 20;
+    var flex = 1;
+    if (props.mobile) {
+        padding = 0;
+        borderRadius = 0;
+        borderWidth = 0;
+        marginTop = 0
+        container = Color(props.isDarkMode).contentBackgroundSecondary;
+        marginBottom = 0;
+    }
+
+    return {
+        padding: padding,
+        borderRadius: borderRadius,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        marginTop: marginTop,
+        backgroundColor: container,
+        marginBottom: marginBottom,
+        flex: flex
+    }
+  }
+
   const goBack = () => {
     let rt = route();
     if (rt && rt.params && rt.name && rt.name == NavTo.Profile &&
@@ -339,175 +369,198 @@ const ProfileScreen = (props: any) => {
   }
 
   return (
-    <ScrollView
-    refreshControl={
-      <RefreshControl
-      refreshing={refreshing}
-      onRefresh={refresh}
-      colors={[Color(props.isDarkMode).gold]}
-      progressBackgroundColor={Color(props.isDarkMode).contentHolder}
-      />
-      }
+    <View
+    style={containerStyle()}
     >
-      {navigation.canGoBack() ?
-      <TouchableHighlight
-      underlayColor={Color(props.isDarkMode).underlayMask}
-      style={styles.button}
-      onPress={() => goBack() }
+      <ScrollView
+      contentContainerStyle={{paddingBottom: 20}}
+      refreshControl={
+        <RefreshControl
+        refreshing={refreshing}
+        onRefresh={refresh}
+        colors={[Color(props.isDarkMode).gold]}
+        progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+        />
+        }
       >
-        <FontAwesomeIcon 
-        size={20} 
-        color={Color(props.isDarkMode).actualWhite} 
-        style={styles.backIcon} 
-        icon="arrow-left"
+        {navigation.canGoBack() ?
+        <TouchableHighlight
+        underlayColor={Color(props.isDarkMode).underlayMask}
+        style={styles.button}
+        onPress={() => goBack() }
         >
-        </FontAwesomeIcon>
-      </TouchableHighlight>
-      : null }
-      <View
-      style={styles.view}
-      >
-          <View
-          style={styles.mainContent}
+          <FontAwesomeIcon 
+          size={20} 
+          color={Color(props.isDarkMode).actualWhite} 
+          style={styles.backIcon} 
+          icon="arrow-left"
           >
+          </FontAwesomeIcon>
+        </TouchableHighlight>
+        : null }
+        <View
+        style={styles.view}
+        >
             <View
-            style={styles.imageContent}
-            >
-              <Image
-              style={styles.profileImg}
-              source={{uri: profile?.image}}
-              containerStyle={styles.imageContainer}
-              resizeMode='cover'
-              />
-            </View>
-            <View
-            style={styles.rowContent}
+            style={styles.mainContent}
             >
               <View
-              style={styles.nameContainer}
+              style={styles.imageContent}
               >
-                {profile?.first_name && profile?.last_name ?
-                <_Text
-                innerContainerStyle={styles.nameContent}
-                style={styles.name}
-                isDarkMode={props.isDarkMode}
-                numberOfLines={1}
-                >
-                  {profile?.first_name + " " + profile?.last_name}
-                </_Text>
-                : null }
-                {match ?
-                <View
-                style={styles.outerMatchContainer}
-                >
-                  <FontAwesomeIcon 
-                  size={35} 
-                  color={Color(props.isDarkMode).gold} 
-                  style={styles.backIcon} 
-                  icon="certificate"
-                  >
-                  </FontAwesomeIcon>
-                  <_Text
-                  isDarkMode={props.isDarkMode}
-                  style={styles.matchText}
-                  containerStyle={styles.matchContainer}
-                  innerContainerStyle={styles.matchInnerContent}
-                  >
-                    {Math.ceil(match)}%
-                  </_Text>
-                </View>
-                : null }
-                </View>
-                <TouchableHighlight
-                underlayColor={Color(props.isDarkMode).defaultUnderlay}
-                style={styles.msgButton}
-                onPress={() => {
-                  props.setNavSelector(NavTo.Messages);
-                  navigation.navigate(NavTo.Messages, {user: profile.id, requestId: generateRequestId()} as never);
-                }}
-                >
-                  <FontAwesomeIcon 
-                  size={20} 
-                  color={Color(props.isDarkMode).actualWhite} 
-                  style={styles.backIcon} 
-                  icon="message"
-                  >
-                </FontAwesomeIcon>
-              </TouchableHighlight>
-            </View>
-            {profile?.birthday ?
-            <View
-            style={[styles.iconLabel, styles.firstLabelContainer]}
-            >
-              <FontAwesomeIcon 
-                size={15} 
-                color={Color(props.isDarkMode).text} 
-                style={[styles.backIcon, styles.labelIcon]} 
-                icon="cake-candles"
-                >
-              </FontAwesomeIcon>
-              <_Text
-              isDarkMode={props.isDarkMode}
-              >
-                {getAge(profile?.birthday)} years old
-              </_Text>
-            </View>
-            : null }
-            {profile?.city && profile?.state ?
-            <View
-            style={styles.iconLabel}
-            >
-              <FontAwesomeIcon 
-                size={15} 
-                color={Color(props.isDarkMode).text} 
-                style={[styles.backIcon, styles.labelIcon]} 
-                icon="location-dot"
-                >
-              </FontAwesomeIcon>
-              <_Text
-              isDarkMode={props.isDarkMode}
-              >
-                {profile?.city}, {profile?.state}
-              </_Text>
-            </View>
-            : null }
-            {profile?.bio ?
-            <View>
-              <_Text
-              style={styles.heading}
-              isDarkMode={props.isDarkMode}
-              >
-                About
-              </_Text>
-              <_Text
-              isDarkMode={props.isDarkMode}
-              style={styles.bio}
-              >
-                {profile?.bio}
-              </_Text>
-            </View>
-            : null }
-            <_Text
-            style={styles.interestsHeading}
-            isDarkMode={props.isDarkMode}
-            >
-              Interests and Hobbies
-            </_Text>
-            {tagsFetched ?
-            <View style={styles.tagsRow}>
-              {tag()}
-            </View>
-              :
-              <View>
-                <ActivityIndicator
-                color={Color(props.isDarkMode).gold}
-                size="large"
+                <Image
+                style={styles.profileImg}
+                source={{uri: profile?.image}}
+                containerStyle={styles.imageContainer}
+                resizeMode='cover'
                 />
               </View>
-            }
-          </View>
-      </View>
-    </ScrollView>
+              <View
+              style={styles.rowContent}
+              >
+                <View
+                style={styles.nameContainer}
+                >
+                  {profile?.first_name && profile?.last_name ?
+                  <_Text
+                  innerContainerStyle={styles.nameContent}
+                  style={styles.name}
+                  isDarkMode={props.isDarkMode}
+                  numberOfLines={1}
+                  >
+                    {profile?.first_name + " " + profile?.last_name}
+                  </_Text>
+                  : null }
+                  {match ?
+                  <View
+                  style={styles.outerMatchContainer}
+                  >
+                    <FontAwesomeIcon 
+                    size={35} 
+                    color={Color(props.isDarkMode).gold} 
+                    style={styles.backIcon} 
+                    icon="certificate"
+                    >
+                    </FontAwesomeIcon>
+                    <_Text
+                    isDarkMode={props.isDarkMode}
+                    style={styles.matchText}
+                    containerStyle={styles.matchContainer}
+                    innerContainerStyle={styles.matchInnerContent}
+                    >
+                      {Math.ceil(match)}%
+                    </_Text>
+                  </View>
+                  : null }
+                  </View>
+                  <TouchableHighlight
+                  underlayColor={Color(props.isDarkMode).defaultUnderlay}
+                  style={styles.msgButton}
+                  onPress={() => {
+                    props.setNavSelector(NavTo.Messages);
+                    navigation.navigate(NavTo.Messages, {user: profile.id, requestId: generateRequestId()} as never);
+                  }}
+                  >
+                    <FontAwesomeIcon 
+                    size={20} 
+                    color={Color(props.isDarkMode).actualWhite} 
+                    style={styles.backIcon} 
+                    icon="message"
+                    >
+                  </FontAwesomeIcon>
+                </TouchableHighlight>
+              </View>
+              {profile?.gender ?
+              <View
+              style={[styles.iconLabel, styles.firstLabelContainer]}
+              >
+                <FontAwesomeIcon 
+                  size={15} 
+                  color={Color(props.isDarkMode).text} 
+                  style={[styles.backIcon, styles.labelIcon]} 
+                  icon={profile?.gender === "Female" ? 'person-dress' : 'person'}
+                  >
+                </FontAwesomeIcon>
+                <_Text
+                isDarkMode={props.isDarkMode}
+                >
+                  {profile?.gender === "Other" ? "Non-Binary" : profile?.gender}
+                </_Text>
+              </View>
+              : null }
+              {profile?.birthday ?
+              <View
+              style={styles.iconLabel}
+              >
+                <FontAwesomeIcon 
+                  size={15} 
+                  color={Color(props.isDarkMode).text} 
+                  style={[styles.backIcon, styles.labelIcon]} 
+                  icon="cake-candles"
+                  >
+                </FontAwesomeIcon>
+                <_Text
+                isDarkMode={props.isDarkMode}
+                >
+                  {getAge(profile?.birthday)} years old
+                </_Text>
+              </View>
+              : null }
+              {profile?.city && profile?.state ?
+              <View
+              style={styles.iconLabel}
+              >
+                <FontAwesomeIcon 
+                  size={15} 
+                  color={Color(props.isDarkMode).text} 
+                  style={[styles.backIcon, styles.labelIcon]} 
+                  icon="location-dot"
+                  >
+                </FontAwesomeIcon>
+                <_Text
+                isDarkMode={props.isDarkMode}
+                >
+                  {profile?.city}, {profile?.state}
+                </_Text>
+              </View>
+              : null }
+              {profile?.bio ?
+              <View>
+                <_Text
+                style={styles.heading}
+                isDarkMode={props.isDarkMode}
+                >
+                  About
+                </_Text>
+                <_Text
+                isDarkMode={props.isDarkMode}
+                style={styles.bio}
+                >
+                  {profile?.bio}
+                </_Text>
+              </View>
+              : null }
+              <_Text
+              style={styles.interestsHeading}
+              isDarkMode={props.isDarkMode}
+              >
+                Interests and Hobbies
+              </_Text>
+              {tagsFetched ?
+              <View style={styles.tagsRow}>
+                {tag()}
+              </View>
+                :
+                <View>
+                  <ActivityIndicator
+                  color={Color(props.isDarkMode).gold}
+                  size="large"
+                  />
+                </View>
+              }
+            </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 

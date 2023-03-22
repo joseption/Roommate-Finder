@@ -12,6 +12,7 @@ interface Props {
   petsAllowed: string;
   housingType: string;
   distanceToUcf: number;
+  isFavorited: boolean;
 }
 
 function ListingContent({
@@ -21,6 +22,7 @@ function ListingContent({
   petsAllowed,
   housingType,
   distanceToUcf,
+  isFavorited,
 }: Props) {
   const { data, isLoading } = useQuery(
     [
@@ -32,6 +34,7 @@ function ListingContent({
         petsAllowed,
         housingType,
         distanceToUcf,
+        isFavorited,
       },
     ],
     () =>
@@ -45,7 +48,8 @@ function ListingContent({
           : undefined,
         numberRooms !== "all" ? Number(numberRooms) : undefined,
         numberBathrooms !== "all" ? Number(numberBathrooms) : undefined,
-        distanceToUcf !== 100000 ? distanceToUcf : undefined
+        distanceToUcf !== 100000 ? distanceToUcf : undefined,
+        isFavorited
       )
   );
 

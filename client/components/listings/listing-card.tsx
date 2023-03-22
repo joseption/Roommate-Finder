@@ -26,7 +26,7 @@ const ListingCard = (props: any) => {
 
   const styles = StyleSheet.create({
     container: {
-      margin: 10,
+      marginBottom: 10,
       shadowColor: Color(props.isDarkMode).contentHolderSecondary,
       shadowOffset: { width: -3, height: 3 },
       shadowOpacity: 1,
@@ -148,6 +148,9 @@ const ListingCard = (props: any) => {
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'center'
+    },
+    card: {
+      marginHorizontal: 10
     }
   });
   
@@ -165,109 +168,113 @@ const ListingCard = (props: any) => {
   }
 
   return (
-    <TouchableHighlight
-      underlayColor={Color(props.isDarkMode).holderUnderlay}
-      onPress={viewListing}
-      style={styles.container}
+    <View
+    style={styles.card}
     >
-      <View>
-        <Image source={{ uri: props.item.images[0] }} style={styles.image} />
+      <TouchableHighlight
+        underlayColor={Color(props.isDarkMode).holderUnderlay}
+        onPress={viewListing}
+        style={styles.container}
+      >
+        <View>
+          <Image source={{ uri: props.item.images[0] }} style={styles.image} />
 
-        {
-          props.listingUserId === props.userId ? (
-            <View style={styles.userImageContainer}>
-              <Image
-                source={{ uri: props.userImage }}
-                style={styles.userImage}
-              />
-            </View>
-          ) : (
-            null
-            // <Pressable style={styles.favorite} onPress={sendFavorite}>
-            //   <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()} />
-            //   <FontAwesomeIcon style={styles.iconBorder} icon={faStar} size={32} color={Color(props.isDarkMode).actualWhite} />
-            // </Pressable>
-          )
-        }
+          {
+            props.listingUserId === props.userId ? (
+              <View style={styles.userImageContainer}>
+                <Image
+                  source={{ uri: props.userImage }}
+                  style={styles.userImage}
+                />
+              </View>
+            ) : (
+              null
+              // <Pressable style={styles.favorite} onPress={sendFavorite}>
+              //   <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()} />
+              //   <FontAwesomeIcon style={styles.iconBorder} icon={faStar} size={32} color={Color(props.isDarkMode).actualWhite} />
+              // </Pressable>
+            )
+          }
 
-        <View
-        style={styles.infoContainer}
-        >
-          <View style={styles.headerContainer}>
-            <_Text
-            containerStyle={styles.headerTextContainer}
-            numberOfLines={1}
-            isDarkMode={props.isDarkMode}
-            style={styles.header}>
-                {props.item.name}
-            </_Text>
-            <_Text
-            isDarkMode={props.isDarkMode}
-            style={styles.header}>
-              {'$' + props.item.price} / mo
-            </_Text>
-          </View>
           <View
-          style={styles.distanceContent}
+          style={styles.infoContainer}
           >
-            <FontAwesomeIcon
-            icon={faMapMarkerAlt}
-            color={Color(props.isDarkMode).text}
-            />
-            <_Text
-            isDarkMode={props.isDarkMode}
-            style={styles.subHeaderText}
+            <View style={styles.headerContainer}>
+              <_Text
+              containerStyle={styles.headerTextContainer}
+              numberOfLines={1}
+              isDarkMode={props.isDarkMode}
+              style={styles.header}>
+                  {props.item.name}
+              </_Text>
+              <_Text
+              isDarkMode={props.isDarkMode}
+              style={styles.header}>
+                {'$' + props.item.price} / mo
+              </_Text>
+            </View>
+            <View
+            style={styles.distanceContent}
             >
-              {props.item.distanceToUcf} {props.item.distanceToUcf === 1 ? "mile" : "miles"} from UCF
-            </_Text>
-          </View>
-          <View style={styles.subHeaderContainer}>
+              <FontAwesomeIcon
+              icon={faMapMarkerAlt}
+              color={Color(props.isDarkMode).text}
+              />
+              <_Text
+              isDarkMode={props.isDarkMode}
+              style={styles.subHeaderText}
+              >
+                {props.item.distanceToUcf} {props.item.distanceToUcf === 1 ? "mile" : "miles"} from UCF
+              </_Text>
+            </View>
+            <View style={styles.subHeaderContainer}>
 
-            <View
-            style={styles.detail}
-            >
-              <FontAwesomeIcon
-              icon={housingIcons[props.item.housing_type]}
-              color={Color(props.isDarkMode).text}
-              />
-              <_Text
-              isDarkMode={props.isDarkMode}
-              style={styles.subHeaderText}
+              <View
+              style={styles.detail}
               >
-                {props.item.housing_type}
-              </_Text>
-            </View>
-            <View
-            style={styles.detail}
-            >
-              <FontAwesomeIcon
-              icon={faBed}
-              color={Color(props.isDarkMode).text}
-              />
-              <_Text
-              isDarkMode={props.isDarkMode}
-              style={styles.subHeaderText}
+                <FontAwesomeIcon
+                icon={housingIcons[props.item.housing_type]}
+                color={Color(props.isDarkMode).text}
+                />
+                <_Text
+                isDarkMode={props.isDarkMode}
+                style={styles.subHeaderText}
+                >
+                  {props.item.housing_type}
+                </_Text>
+              </View>
+              <View
+              style={styles.detail}
               >
-                {props.item.rooms + " Bed"}
-              </_Text>
-            </View>
-            <View
-            style={styles.detail}
-            >
-              <FontAwesomeIcon
-              icon={faBath}
-              color={Color(props.isDarkMode).text} 
-              />
-              <_Text
-              isDarkMode={props.isDarkMode}
-              style={styles.subHeaderText}>
-                {props.item.bathrooms + " Bath"}
-              </_Text>
+                <FontAwesomeIcon
+                icon={faBed}
+                color={Color(props.isDarkMode).text}
+                />
+                <_Text
+                isDarkMode={props.isDarkMode}
+                style={styles.subHeaderText}
+                >
+                  {props.item.rooms + " Bed"}
+                </_Text>
+              </View>
+              <View
+              style={styles.detail}
+              >
+                <FontAwesomeIcon
+                icon={faBath}
+                color={Color(props.isDarkMode).text} 
+                />
+                <_Text
+                isDarkMode={props.isDarkMode}
+                style={styles.subHeaderText}>
+                  {props.item.bathrooms + " Bath"}
+                </_Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
-    </TouchableHighlight>
+      </TouchableHighlight>
+    </View>
   );
   
 };

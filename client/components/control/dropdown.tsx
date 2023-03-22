@@ -463,15 +463,15 @@ const _Dropdown = (props: any, {navigation}:any) => {
                 if (props.setValue) {
                     setTextValue('');
                     props.setValue('');
+                    onValueChange('');
                 }
-                setFocus(false);
             }}
             >
                 <FontAwesomeIcon 
                 size={30} 
                 color={Color(props.isDarkMode).text} 
                 style={styles.deleteTextIcon} 
-                icon="eraser"
+                icon="xmark"
                 >
                 </FontAwesomeIcon>
             </TouchableHighlight>

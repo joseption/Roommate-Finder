@@ -43,6 +43,22 @@ const BottomNavbar = (props: any) => {
     }
   }
 
+  const container = () => {
+    let style = []
+    if (!props.mobile) {
+      style.push({
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderLeftColor: Color(props.isDarkMode).separator,
+        borderRightColor: Color(props.isDarkMode).separator,
+        borderTopStartRadius: Radius.large,
+        borderTopEndRadius: Radius.large
+      });
+    }
+
+    return style;
+  }
+
   const styles = StyleSheet.create({
     container: {
       flexDirection: 'row',
@@ -51,7 +67,7 @@ const BottomNavbar = (props: any) => {
       backgroundColor: Color(props.isDarkMode).contentBackgroundSecondary,
       borderTopWidth: 1,
       borderTopColor: Color(props.isDarkMode).separator,
-      alignItems: 'center'
+      alignItems: 'center',
     },
     button: {
       alignItems: 'center',
@@ -93,7 +109,7 @@ const BottomNavbar = (props: any) => {
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, container()]}>
       <TouchableHighlight 
         onPress={() => {
           let action = function() {

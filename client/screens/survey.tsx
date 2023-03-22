@@ -519,7 +519,7 @@ const SurveyScreen = (props: any) => {
         enabled={!complete && !generating}
         />
         }
-    style={{padding: 10}}
+    contentContainerStyle={props.mobile ? {padding: 10} : null}
     >
         <View
         style={_styles.titleContainer}

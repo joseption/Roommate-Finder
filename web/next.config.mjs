@@ -7,15 +7,15 @@
 
 /** @type {import("next").NextConfig} */
 const config = {
-  redirects: () => {
-    return Promise.resolve([
-      {
-        source: "/",
-        destination: "/explore",
-        permanent: true,
-      },
-    ]);
-  },
+  // redirects: () => {
+  //   return Promise.resolve([
+  //     {
+  //       source: "/",
+  //       destination: "/explore",
+  //       permanent: true,
+  //     },
+  //   ]);
+  // },
   images: {
     domains: [
       "foyr.com",

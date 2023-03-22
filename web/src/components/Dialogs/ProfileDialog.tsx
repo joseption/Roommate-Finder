@@ -88,7 +88,7 @@ export default function ProfileDialog({
             " flex w-full flex-col justify-center gap-2 p-4 md:p-6 lg:gap-4"
           }
         >
-          <div
+          {/* <div
             className={"mx-auto w-full items-center justify-center text-center"}
           >
             <div className="mx-auto flex w-full items-center justify-end  ">
@@ -100,7 +100,7 @@ export default function ProfileDialog({
                 Message
               </Button>
             </div>
-          </div>
+          </div> */}
           {/* <AnimatePresence>
             <motion.div
               variants={variants}

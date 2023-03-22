@@ -6,7 +6,7 @@ import { uploadImage } from 'utils/uploadImage';
 const axios = require('axios');
 const prisma = new PrismaClient();
 const router = require('express').Router();
-const fetch = (url: any, init?: any) => import('node-fetch').then(({default: fetch}) => fetch(url, init));
+const fetch = (url: any, init?: any) => import('node-fetch').then(({ default: fetch }) => fetch(url, init));
 router.use(isAuthenticated);
 
 // get all listings made by a given user
@@ -53,7 +53,7 @@ async function validateAddress(address: string) {
 // create listing
 router.post('/', async (req: Request, res: Response) => {
   try {
-    console.log("endpoint hit");
+    console.log('endpoint hit');
     const payload: payload = req.body[0];
     const userId = payload.userId;
 
@@ -74,7 +74,7 @@ router.post('/', async (req: Request, res: Response) => {
     } = req.body;
     const uploadImages = [];
     const fullAddress = `${address}, ${city}, FL ${zipcode}`;
-    if (await validateAddress(fullAddress) === false) {
+    if ((await validateAddress(fullAddress)) === false) {
       return res.status(400).json({ Error: 'Invalid address' });
     }
     const distanceMatrixResponse = await axios.get(
@@ -204,8 +204,7 @@ router.put('/:listingId', async (req: Request, res: Response) => {
         }
         const uploadedImage = await uploadImage(images[i]);
 
-        if (!uploadedImage)
-          return res.status(400).json({ Error: 'Failed to upload image' });
+        if (!uploadedImage) return res.status(400).json({ Error: 'Failed to upload image' });
         console.log(uploadedImage);
         uploadImages.push(uploadedImage);
       }
@@ -254,21 +253,64 @@ router.delete('/:listingId', async (req: Request, res: Response) => {
 // * get all listings
 router.post('/all', async (req: Request, res: Response) => {
   try {
-    const { housing_type, price, petsAllowed, distanceToUcf, rooms, bathrooms, size } = req.body;
-    const listings = await prisma.listings.findMany({
-      where: {
-        housing_type: housing_type || undefined,
-        price: price ? { lte: price } : undefined,
-        petsAllowed: petsAllowed as boolean,
-        distanceToUcf: distanceToUcf ? { lte: distanceToUcf } : undefined,
-        rooms: rooms || undefined,
-        bathrooms: bathrooms || undefined,
-        size: size || undefined,
-      },
-    });
-    res.status(200).json(listings);
+    const { housing_type, price, petsAllowed, distanceToUcf, rooms, bathrooms, size, isFavorited } = req.body;
+    const payload: payload = req.body[0];
+    const userId = payload.userId;
+    if (isFavorited) {
+      const listings = await prisma.listings.findMany({
+        where: {
+          housing_type: housing_type || undefined,
+          price: price ? { lte: price } : undefined,
+          petsAllowed: petsAllowed as boolean,
+          distanceToUcf: distanceToUcf ? { lte: distanceToUcf } : undefined,
+          rooms: rooms || undefined,
+          bathrooms: bathrooms || undefined,
+          size: size || undefined,
+          favoritedBy: { some: { id: userId } },
+        },
+      });
+      res.status(200).json(listings);
+    } else {
+      const listings = await prisma.listings.findMany({
+        where: {
+          housing_type: housing_type || undefined,
+          price: price ? { lte: price } : undefined,
+          petsAllowed: petsAllowed as boolean,
+          distanceToUcf: distanceToUcf ? { lte: distanceToUcf } : undefined,
+          rooms: rooms || undefined,
+          bathrooms: bathrooms || undefined,
+          size: size || undefined,
+        },
+      });
+      res.status(200).json(listings);
+    }
   } catch (err) {
     res.status(500).json(err);
+  }
+});
+
+router.post('/checkFavorited', async (req: Request, res: Response) => {
+  try {
+    const { userId, listingId } = req.body;
+    const favorited = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        favoritedListings: {
+          where: { id: listingId },
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (favorited && favorited.favoritedListings.length > 0) {
+      res.status(200).json({ isFavorited: true });
+    } else {
+      res.status(200).json({ isFavorited: false });
+    }
+  } catch (err) {
+    res.status(500).json({ Error: err.message });
   }
 });
 
@@ -365,11 +407,10 @@ router.post('/location', async (req: Request, res: Response) => {
       response = await response.json();
       res.status(200).json(response);
     } catch (err) {
-      res.status(500).json({Error: err});
+      res.status(500).json({ Error: err });
     }
-  }
-  else {
-    res.status(500).json({ Error: "No address provided" });
+  } else {
+    res.status(500).json({ Error: 'No address provided' });
   }
 });
 

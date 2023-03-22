@@ -13,6 +13,7 @@ export default function UseAuthRedirect() {
   const { refetch } = useQuery({
     queryKey: ["refreshToken", "accessToken", "userId"],
     queryFn: authenticateUser,
+    refetchOnMount: true,
     onSuccess: (data) => {
       storeAuthSession(data);
       if (data.user && !data.user.is_verified) {

@@ -161,3 +161,12 @@ export async function ProfileSearch({
     true
   );
 }
+
+export async function CheckFavorited(userId: string, listingId: string) {
+  return await doRequest<{ isFavorited: boolean }>(
+    `${backend_api}/listings/checkFavorited`,
+    { userId, listingId },
+    "POST",
+    true
+  );
+}

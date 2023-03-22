@@ -143,6 +143,38 @@ const CreateListing = (props: any) => {
     });
   };
 
+  const containerStyle = () => {
+    var container = Color(props.isDarkMode).contentBackground;
+    var padding = 20;
+    var borderRadius = Radius.large;
+    var borderColor = Color(props.isDarkMode).border;
+    var borderWidth = 1;
+    var marginBottom = 0;
+    var marginTop = 10;
+    var flex = 1;
+    if (props.mobile) {
+        padding = 0;
+        borderRadius = 0;
+        borderWidth = 0;
+        marginTop = 0;
+        container = Color(props.isDarkMode).contentBackgroundSecondary;
+    }
+    else {
+      marginBottom = 20
+    }
+
+    return {
+        padding: padding,
+        borderRadius: borderRadius,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        backgroundColor: container,
+        flex: flex,
+        marginBottom: marginBottom,
+        marginTop: marginTop,
+    }
+  }
+
   const getCleanURIList = () => {
     let uris: any[] = [];
     if (Platform.OS !== 'web') {
@@ -437,7 +469,7 @@ const CreateListing = (props: any) => {
       fontSize: 16,
     },
     title: {
-      margin: 10,
+      margin: props.mobile ? 10 : 0,
       textAlign: 'center',
       fontWeight: 'bold',
       fontSize: FontSize.large,
@@ -458,7 +490,7 @@ const CreateListing = (props: any) => {
       borderRadius: Radius.default
     },
     formContainer: {
-      paddingLeft: 10,
+      paddingLeft: props.mobile ? 10 : 0,
       paddingRight: 10,
       paddingBottom: 10
     },
@@ -668,241 +700,248 @@ const CreateListing = (props: any) => {
         </View>
       )}
       {
-      <>
-      <_Text style={styles.title}>{props.currentListing ? 'Update' : 'Create'} {'Listing'}</_Text>
-      <ScrollView
-      keyboardShouldPersistTaps={'handled'}
+      <View
+      style={{flex: 1}}
       >
-          <View style={styles.formContainer}>
-            <_Group
-              isDarkMode={props.isDarkMode}
-              vertical={true}
-              style={styles.imageContainer}
-            >
-              <View
-                style={styles.photoHoldingContainer}
-              >
-                {!getPhotos() || getPhotos().length == 0 ?
-                  <View
-                    style={styles.holderImages}
-                  >
-                    <View
-                      style={[styles.holderImage, styles.defaultImage]}
-                    >
-                      <FontAwesomeIcon
-                        style={styles.holderImageIcon}
-                        size={40} color={Color(props.isDarkMode).userIcon}
-                        icon="bed"
-                      >
-                      </FontAwesomeIcon>
-                    </View>
-                    <View
-                      style={[styles.holderImage, styles.defaultImage]}
-                    >
-                      <FontAwesomeIcon
-                        style={styles.holderImageIcon}
-                        size={40} color={Color(props.isDarkMode).userIcon}
-                        icon="tree-city"
-                      >
-                      </FontAwesomeIcon>
-                    </View>
-                    <View
-                      style={[styles.holderImage, styles.defaultImage]}
-                    >
-                      <FontAwesomeIcon
-                        style={styles.holderImageIcon}
-                        size={40} color={Color(props.isDarkMode).userIcon}
-                        icon="sink"
-                      >
-                      </FontAwesomeIcon>
-                    </View>
-                  </View>
-                  :
-                  <View
-                  style={styles.outerPhoto}
-                  >
-                    <ScrollView
-                      style={styles.photoContent}
-                      contentContainerStyle={styles.photoContentContainer}
-                      horizontal={true}
-                    >
-                      {getPhotos().map((photo, index) => (
-                        <View key={index} style={styles.photoContainer}>
-                          <_Image
-                            style={styles.image}
-                            source={Platform.OS === 'web' ? photo : { uri: photo }}
-                            height={100}
-                            width={100}
-                          />
-                          <Pressable
-                            style={styles.deleteButtonContainer}
-                            onPress={(e: any) => handleDeletePhoto(index)}
-                          >
-                            <View
-                            style={styles.deleteIconContainer}
-                            >
-                              <FontAwesomeIcon
-                                size={20}
-                                color={Color(props.isDarkMode).actualWhite}
-                                icon="close"
-                                style={styles.deleteIcon}
-                              >
-                              </FontAwesomeIcon>
-                            </View>
-                          </Pressable>
-                        </View>
-                      ))}
-                    </ScrollView>
-                  </View>
-                  }
-              </View>
-              {imageError ?
-              <_Text
-              style={[Style(props.isDarkMode).textDanger, styles.error]}
-              >
-                {imageError}
-              </_Text>
-              : null }
-              <_Button
+      <_Text style={styles.title}>{props.currentListing ? 'Update' : 'Create'} {'Listing'}</_Text>
+      <View
+      style={containerStyle()}
+      >
+        <ScrollView
+        keyboardShouldPersistTaps={'handled'}
+        >
+            <View style={styles.formContainer}>
+              <_Group
                 isDarkMode={props.isDarkMode}
-                onPress={(e: any) => { uploadPhotos(); } }
-                style={Style(props.isDarkMode).buttonDefault}
+                vertical={true}
+                style={styles.imageContainer}
               >
-                {'Upload Photos'}
-              </_Button>
-            </_Group>
-            <_TextInput
-              containerStyle={styles.inputContainerStyle}
-              onChangeText={(text: any) => handleChange('name', text)}
-              value={formData.name}
-              label="Title"
-              required={true}
-              isDarkMode={props.isDarkMode} />
-
-            <_TextInput
-              containerStyle={styles.inputContainerStyle}
-              onChangeText={(text: any) => handleChange('description', text)}
-              value={formData.description}
-              multiline={true}
-              label="Description"
-              height={100}
-              required={true}
-              isDarkMode={props.isDarkMode} />
-
-              <_TextInput
-              containerStyle={styles.inputContainerStyle}
-              onChangeText={(text: any) => handleChange('address', text)}
-              value={formData.address}
-              label="Address"
-              required={true}
-              isDarkMode={props.isDarkMode} />
-
-              <_TextInput
-              containerStyle={styles.inputContainerStyle}
-              onChangeText={(text: any) => handleChange('city', text)}
-              value={formData.city}
-              label="City"
-              required={true}
-              isDarkMode={props.isDarkMode} />
-
-              <_TextInput
-              containerStyle={styles.inputContainerStyle}
-              onChangeText={(text: any) => handleChange('zipcode', text)}
-              keyboardType="numeric"
-              value={formData.zipcode}
-              isDarkMode={props.isDarkMode}
-              required={true}
-              label="Zip Code" />
-
-              <_Dropdown
-              containerStyle={styles.inputContainerStyle}
-              isDarkMode={props.isDarkMode}
-              options={getHousingType()}
-              value={formData.housing_type}
-              setValue={(text: string) => handleChange('housing_type', text)}
-              required={true}
-              label="Housing Type" />
-
-              <_TextInput
-              containerStyle={styles.inputContainerStyle}
-              onChangeText={(text: any) => handleChange('price', parseFloat(text))}
-              value={formData.price ? `$${formData.price}` : '$0'}
-              keyboardType="numeric"
-              placeholder="$0"
-              label="Price (per month)"
-              required={true}
-              isDarkMode={props.isDarkMode} />
-
-              <_TextInput
-              containerStyle={styles.inputContainerStyle}
-              onChangeText={(text: any) => handleChange('size', parseInt(text))}
-              value={formData.size ? String(formData.size) : '0'}
-              keyboardType="numeric"
-              label="Square Feet"
-              isDarkMode={props.isDarkMode} />
-
-              <_Dropdown
-              containerStyle={styles.inputContainerStyle}
-              isDarkMode={props.isDarkMode}
-              options={getOptions()}
-              value={formData.rooms ? formData.rooms.toString() : ''}
-              setValue={(text: string) => handleChange('rooms', parseInt(text))}
-              required={true}
-              label="Bedrooms" />            
-
-            <_Dropdown
-              containerStyle={styles.inputContainerStyle}
-              isDarkMode={props.isDarkMode}
-              options={getOptions()}
-              value={formData.bathrooms ? formData.bathrooms.toString() : ''}
-              setValue={(text: string) => handleChange('bathrooms', parseInt(text))}
-              required={true}
-              label="Bathrooms" />
-
-            <_Dropdown
-              containerStyle={[styles.inputContainerStyle, {marginBottom: 20}]}
-              isDarkMode={props.isDarkMode}
-              options={getYesNo()}
-              value={formData.petsAllowed ? 'Yes' : (formData.petsAllowed === false) ? 'No' : ''}
-              setValue={(text: string) => handleChange('petsAllowed', (text === 'Yes') ? true : (text === 'No') ? false : undefined)}
-              required={true}
-              label="Pets Allowed" />
-              
-            <View>
-              {error ?
-                <_Text 
-                containerStyle={errorContainerStyle()}
-                innerContainerStyle={{justifyContent: 'center'}} 
-                style={errorStyle()}
+                <View
+                  style={styles.photoHoldingContainer}
                 >
-                    {error}
-                    </_Text>
-              : null}
-              <View
-              style={styles.buttonContainer}
-              >
+                  {!getPhotos() || getPhotos().length == 0 ?
+                    <View
+                      style={styles.holderImages}
+                    >
+                      <View
+                        style={[styles.holderImage, styles.defaultImage]}
+                      >
+                        <FontAwesomeIcon
+                          style={styles.holderImageIcon}
+                          size={40} color={Color(props.isDarkMode).userIcon}
+                          icon="bed"
+                        >
+                        </FontAwesomeIcon>
+                      </View>
+                      <View
+                        style={[styles.holderImage, styles.defaultImage]}
+                      >
+                        <FontAwesomeIcon
+                          style={styles.holderImageIcon}
+                          size={40} color={Color(props.isDarkMode).userIcon}
+                          icon="tree-city"
+                        >
+                        </FontAwesomeIcon>
+                      </View>
+                      <View
+                        style={[styles.holderImage, styles.defaultImage]}
+                      >
+                        <FontAwesomeIcon
+                          style={styles.holderImageIcon}
+                          size={40} color={Color(props.isDarkMode).userIcon}
+                          icon="sink"
+                        >
+                        </FontAwesomeIcon>
+                      </View>
+                    </View>
+                    :
+                    <View
+                    style={styles.outerPhoto}
+                    >
+                      <ScrollView
+                        style={styles.photoContent}
+                        contentContainerStyle={styles.photoContentContainer}
+                        horizontal={true}
+                      >
+                        {getPhotos().map((photo, index) => (
+                          <View key={index} style={styles.photoContainer}>
+                            <_Image
+                              style={styles.image}
+                              source={Platform.OS === 'web' ? photo : { uri: photo }}
+                              height={100}
+                              width={100}
+                            />
+                            <Pressable
+                              style={styles.deleteButtonContainer}
+                              onPress={(e: any) => handleDeletePhoto(index)}
+                            >
+                              <View
+                              style={styles.deleteIconContainer}
+                              >
+                                <FontAwesomeIcon
+                                  size={20}
+                                  color={Color(props.isDarkMode).actualWhite}
+                                  icon="close"
+                                  style={styles.deleteIcon}
+                                >
+                                </FontAwesomeIcon>
+                              </View>
+                            </Pressable>
+                          </View>
+                        ))}
+                      </ScrollView>
+                    </View>
+                    }
+                </View>
+                {imageError ?
+                <_Text
+                style={[Style(props.isDarkMode).textDanger, styles.error]}
+                >
+                  {imageError}
+                </_Text>
+                : null }
                 <_Button
                   isDarkMode={props.isDarkMode}
-                  containerStyle={{marginRight: 5, flex: 1}}
-                  style={[Style(props.isDarkMode).buttonDanger]}
-                  onPress={() => cancel()}
+                  onPress={(e: any) => { uploadPhotos(); } }
+                  style={Style(props.isDarkMode).buttonDefault}
                 >
-                  {'Cancel'}
+                  {'Upload Photos'}
                 </_Button>
-                <_Button
-                  isDarkMode={props.isDarkMode}
-                  containerStyle={{flex: 1}}
-                  style={[Style(props.isDarkMode).buttonDefault]}
-                  onPress={() => {handleSubmitListing()}}
-                  disabled={disabled()}
-                  loading={isLoading}
+              </_Group>
+              <_TextInput
+                containerStyle={styles.inputContainerStyle}
+                onChangeText={(text: any) => handleChange('name', text)}
+                value={formData.name}
+                label="Title"
+                required={true}
+                isDarkMode={props.isDarkMode} />
+
+              <_TextInput
+                containerStyle={styles.inputContainerStyle}
+                onChangeText={(text: any) => handleChange('description', text)}
+                value={formData.description}
+                multiline={true}
+                label="Description"
+                height={200}
+                required={true}
+                isDarkMode={props.isDarkMode} />
+
+                <_TextInput
+                containerStyle={styles.inputContainerStyle}
+                onChangeText={(text: any) => handleChange('address', text)}
+                value={formData.address}
+                label="Address"
+                required={true}
+                isDarkMode={props.isDarkMode} />
+
+                <_TextInput
+                containerStyle={styles.inputContainerStyle}
+                onChangeText={(text: any) => handleChange('city', text)}
+                value={formData.city}
+                label="City"
+                required={true}
+                isDarkMode={props.isDarkMode} />
+
+                <_TextInput
+                containerStyle={styles.inputContainerStyle}
+                onChangeText={(text: any) => handleChange('zipcode', text)}
+                keyboardType="numeric"
+                value={formData.zipcode}
+                isDarkMode={props.isDarkMode}
+                required={true}
+                label="Zip Code" />
+
+                <_Dropdown
+                containerStyle={styles.inputContainerStyle}
+                isDarkMode={props.isDarkMode}
+                options={getHousingType()}
+                value={formData.housing_type}
+                setValue={(text: string) => handleChange('housing_type', text)}
+                required={true}
+                label="Housing Type" />
+
+                <_TextInput
+                containerStyle={styles.inputContainerStyle}
+                onChangeText={(text: any) => handleChange('price', parseFloat(text))}
+                value={formData.price ? `$${formData.price}` : '$0'}
+                keyboardType="numeric"
+                placeholder="$0"
+                label="Price (per month)"
+                required={true}
+                isDarkMode={props.isDarkMode} />
+
+                <_TextInput
+                containerStyle={styles.inputContainerStyle}
+                onChangeText={(text: any) => handleChange('size', parseInt(text))}
+                value={formData.size ? String(formData.size) : '0'}
+                keyboardType="numeric"
+                label="Square Feet"
+                isDarkMode={props.isDarkMode} />
+
+                <_Dropdown
+                containerStyle={styles.inputContainerStyle}
+                isDarkMode={props.isDarkMode}
+                options={getOptions()}
+                value={formData.rooms ? formData.rooms.toString() : ''}
+                setValue={(text: string) => handleChange('rooms', parseInt(text))}
+                required={true}
+                label="Bedrooms" />            
+
+              <_Dropdown
+                containerStyle={styles.inputContainerStyle}
+                isDarkMode={props.isDarkMode}
+                options={getOptions()}
+                value={formData.bathrooms ? formData.bathrooms.toString() : ''}
+                setValue={(text: string) => handleChange('bathrooms', parseInt(text))}
+                required={true}
+                label="Bathrooms" />
+
+              <_Dropdown
+                containerStyle={[styles.inputContainerStyle, {marginBottom: 20}]}
+                isDarkMode={props.isDarkMode}
+                options={getYesNo()}
+                value={formData.petsAllowed ? 'Yes' : (formData.petsAllowed === false) ? 'No' : ''}
+                setValue={(text: string) => handleChange('petsAllowed', (text === 'Yes') ? true : (text === 'No') ? false : undefined)}
+                required={true}
+                label="Pets Allowed" />
+                
+              <View>
+                {error ?
+                  <_Text 
+                  containerStyle={errorContainerStyle()}
+                  innerContainerStyle={{justifyContent: 'center'}} 
+                  style={errorStyle()}
+                  >
+                      {error}
+                      </_Text>
+                : null}
+                <View
+                style={styles.buttonContainer}
                 >
-                  {props.currentListing ? 'Update' : 'Create'} {'Listing'}
-                </_Button>
+                  <_Button
+                    isDarkMode={props.isDarkMode}
+                    containerStyle={{marginRight: 5, flex: 1}}
+                    style={[Style(props.isDarkMode).buttonDanger]}
+                    onPress={() => cancel()}
+                  >
+                    {'Cancel'}
+                  </_Button>
+                  <_Button
+                    isDarkMode={props.isDarkMode}
+                    containerStyle={{flex: 1}}
+                    style={[Style(props.isDarkMode).buttonDefault]}
+                    onPress={() => {handleSubmitListing()}}
+                    disabled={disabled()}
+                    loading={isLoading}
+                  >
+                    {props.currentListing ? 'Update' : 'Create'} {'Listing'}
+                  </_Button>
+                </View>
               </View>
             </View>
-          </View>
-        </ScrollView></>
+          </ScrollView>
+        </View>
+      </View>
     }
   </View>
   )

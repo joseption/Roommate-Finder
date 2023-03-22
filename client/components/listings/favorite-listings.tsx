@@ -40,6 +40,7 @@ const FavoriteListings = (props: any) => {
           listingUserId={item.userId}
           key={key}
           item={item}
+          mobile={props.mobile}
         />
       ));
     
@@ -47,6 +48,37 @@ const FavoriteListings = (props: any) => {
     setFavoriteListings(favorites);
   };
   
+  const containerStyle = () => {
+    var container = Color(props.isDarkMode).contentBackground;
+    var padding = 20;
+    var borderRadius = Radius.large;
+    var borderColor = Color(props.isDarkMode).border;
+    var borderWidth = 1;
+    var marginBottom = 0;
+    var marginTop = 10;
+    var flex = 1;
+    if (props.mobile) {
+        padding = 0;
+        borderRadius = 0;
+        borderWidth = 0;
+        marginTop = 0;
+        container = Color(props.isDarkMode).contentBackgroundSecondary;
+    }
+    else {
+      marginBottom = 20
+    }
+
+    return {
+        padding: padding,
+        borderRadius: borderRadius,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        backgroundColor: container,
+        flex: flex,
+        marginBottom: marginBottom,
+        marginTop: marginTop
+    }
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -69,7 +101,7 @@ const FavoriteListings = (props: any) => {
       backgroundColor: 'white',
     },
     title: {
-      margin: 10,
+      margin: props.mobile ? 10 : 0,
       textAlign: 'center',
       fontWeight: 'bold',
       fontSize: FontSize.large,
@@ -109,13 +141,20 @@ const FavoriteListings = (props: any) => {
     },
     homeIconContainer: {
       marginBottom: 20,
+    },
+    listings: {
+      marginLeft: props.mobile ? 0 : -10
     }
 });
 
   return (
-    
-      <>
-        <_Text style={styles.title}>My Listings</_Text>
+    <View
+    style={{flex: 1}}
+    >
+    <_Text style={styles.title}>My Listings</_Text>
+      <View
+      style={containerStyle()}
+      >
         <ScrollView
         style={styles.container}
         contentContainerStyle={count == 0 ? styles.innerContainer : null}
@@ -129,9 +168,11 @@ const FavoriteListings = (props: any) => {
         }
         >
         {count > 0 ?
-        <>
+        <View
+        style={styles.listings}
+        >
         {favoriteListings}
-        </>
+        </View>
         :
         <View style={styles.noListingsContainer}>
           <View
@@ -163,9 +204,8 @@ const FavoriteListings = (props: any) => {
         </View>
         }
         </ScrollView>
-      </>
-    
-    
+      </View> 
+    </View>
   );
 };
 

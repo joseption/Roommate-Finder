@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
-import { Color, FontSize, Style } from '../../style';
+import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
 import _Text from '../control/text';
 import ListingCard from './listing-card';
@@ -33,6 +33,7 @@ const AllListingsView = (props: any) => {
           listingUserId={item.userId}
           key={key}
           item={item}
+          mobile={props.mobile}
         />
       ));
 
@@ -45,6 +46,35 @@ const AllListingsView = (props: any) => {
     props.refresh();
     setRefreshing(false);
   };
+
+  const containerStyle = () => {
+    var container = Color(props.isDarkMode).contentBackground;
+    var padding = 20;
+    var borderRadius = Radius.large;
+    var borderColor = Color(props.isDarkMode).border;
+    var borderWidth = 1;
+    var marginBottom = 0;
+    var flex = 1;
+    if (props.mobile) {
+        padding = 0;
+        borderRadius = 0;
+        borderWidth = 0;
+        container = Color(props.isDarkMode).contentBackgroundSecondary;
+    }
+    else {
+      marginBottom = 20
+    }
+
+    return {
+        padding: padding,
+        borderRadius: borderRadius,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        backgroundColor: container,
+        flex: flex,
+        marginBottom: marginBottom
+    }
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -102,54 +132,63 @@ const AllListingsView = (props: any) => {
       justifyContent: 'center',
       height: '100%'
     },
+    listings: {
+      marginLeft: props.mobile ? 0 : -10
+    }
 });
 
   return (
-    <ScrollView
-    style={styles.container}
-    contentContainerStyle={count == 0 ? styles.innerContainer : null}
-    refreshControl={
-      <RefreshControl
-      refreshing={refreshing}
-      onRefresh={refresh}
-      colors={[Color(props.isDarkMode).gold]}
-      progressBackgroundColor={Color(props.isDarkMode).contentHolder}
-      />
-    }
+    <View
+    style={[containerStyle()]}
     >
-      {count > 0 ?
-      <>
-      {allListings}
-      </>
-      :
-      <View style={styles.noResultsContainer}>
-        <View
-        style={styles.mainIconContainer}
-        >
-          <FontAwesomeIcon 
-          size={100} 
-          color={Color(props.isDarkMode).gold} 
-          style={styles.mainIcon} 
-          icon="home"
-          >
-          </FontAwesomeIcon>
-        </View>
-        <_Text
-        style={styles.textStyle}
-        >
-          No listings match the applied filters
-        </_Text>
-        <_Button
-        style={Style(props.isDarkMode).buttonInverted}
-        textStyle={Style(props.isDarkMode).buttonInvertedText}
-        onPress={() => props.setFilters({})}
-        isDarkMode={props.isDarkMode}
-        >
-          Clear Filters
-        </_Button>
-      </View>
+      <ScrollView
+      style={styles.container}
+      contentContainerStyle={count == 0 ? styles.innerContainer : null}
+      refreshControl={
+        <RefreshControl
+        refreshing={refreshing}
+        onRefresh={refresh}
+        colors={[Color(props.isDarkMode).gold]}
+        progressBackgroundColor={Color(props.isDarkMode).contentHolder}
+        />
       }
-    </ScrollView>
+      >
+        {count > 0 ?
+        <View
+        style={styles.listings}
+        >
+        {allListings}
+        </View>
+        :
+        <View style={styles.noResultsContainer}>
+          <View
+          style={styles.mainIconContainer}
+          >
+            <FontAwesomeIcon 
+            size={100} 
+            color={Color(props.isDarkMode).gold} 
+            style={styles.mainIcon} 
+            icon="home"
+            >
+            </FontAwesomeIcon>
+          </View>
+          <_Text
+          style={styles.textStyle}
+          >
+            No listings match the applied filters
+          </_Text>
+          <_Button
+          style={Style(props.isDarkMode).buttonInverted}
+          textStyle={Style(props.isDarkMode).buttonInvertedText}
+          onPress={() => props.setFilters({})}
+          isDarkMode={props.isDarkMode}
+          >
+            Clear Filters
+          </_Button>
+        </View>
+        }
+      </ScrollView>
+    </View>
   );
 };
 

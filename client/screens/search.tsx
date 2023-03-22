@@ -132,7 +132,7 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'space-between',
-      padding: 10
+      padding: mobile ? 10 : 0
     },
     container: {
       height: '100%',
@@ -170,7 +170,8 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
       padding: 5
     },
     searchContainer: {
-      paddingHorizontal: 10,
+      paddingRight: 10,
+      paddingLeft: 10,
       paddingBottom: 10,
     }
   });
@@ -198,6 +199,41 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
   const handleToggleButtonPress = () => {
     setSorting(!sorting);
   };
+
+  const containerStyle = () => {
+    var container = Color(isDarkMode).contentBackground;
+    var padding = 10;
+    var paddingVertical = 20
+    var borderRadius = Radius.large;
+    var borderColor = Color(isDarkMode).border;
+    var borderWidth = 1;
+    var marginTop = 10;
+    var marginBottom = 0;
+    var flex = 1;
+    if (mobile) {
+        padding = 0;
+        borderRadius = 0;
+        borderWidth = 0;
+        marginTop = 0
+        paddingVertical = 0;
+        container = Color(isDarkMode).contentBackgroundSecondary;
+    }
+    else {
+      marginBottom = 20
+    }
+
+    return {
+        padding: padding,
+        borderRadius: borderRadius,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+        marginTop: marginTop,
+        backgroundColor: container,
+        flex: flex,
+        marginBottom: marginBottom,
+        paddingVertical: paddingVertical
+    }
+  }
 
   return (
     <View
@@ -265,6 +301,9 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
               </View>
             </View>
           </View>
+          <View
+          style={containerStyle()}
+          >
           <_TextInput
             containerStyle={styles.searchContainer}
             placeholder="Search..."
@@ -273,6 +312,7 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
             isDarkMode={isDarkMode}
           ></_TextInput>
         <Profile
+        mobile={mobile}
         filters={filters}
         filtersFetched={filtersFetched}
         genderFilter={genderFilter}
@@ -291,6 +331,7 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
         />
         </View>
       </View>
+    </View>
   );
 };
 

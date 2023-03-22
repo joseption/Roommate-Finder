@@ -70,7 +70,8 @@ export async function GetListings(
   petsAllowed: boolean | undefined | null,
   rooms: number | undefined,
   bathrooms: number | undefined,
-  distanceToUcf: number | undefined
+  distanceToUcf: number | undefined,
+  isFavorited: boolean | undefined
 ) {
   return await doRequest<ListingInfo[]>(
     `${backend_api}/listings/all`,
@@ -81,6 +82,7 @@ export async function GetListings(
       rooms,
       bathrooms,
       distanceToUcf,
+      isFavorited,
     },
     "POST",
     true

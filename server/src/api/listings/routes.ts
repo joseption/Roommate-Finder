@@ -253,19 +253,37 @@ router.delete('/:listingId', async (req: Request, res: Response) => {
 // * get all listings
 router.post('/all', async (req: Request, res: Response) => {
   try {
-    const { housing_type, price, petsAllowed, distanceToUcf, rooms, bathrooms, size } = req.body;
-    const listings = await prisma.listings.findMany({
-      where: {
-        housing_type: housing_type || undefined,
-        price: price ? { lte: price } : undefined,
-        petsAllowed: petsAllowed as boolean,
-        distanceToUcf: distanceToUcf ? { lte: distanceToUcf } : undefined,
-        rooms: rooms || undefined,
-        bathrooms: bathrooms || undefined,
-        size: size || undefined,
-      },
-    });
-    res.status(200).json(listings);
+    const { housing_type, price, petsAllowed, distanceToUcf, rooms, bathrooms, size, isFavorited } = req.body;
+    const payload: payload = req.body[0];
+    const userId = payload.userId;
+    if (isFavorited) {
+      const listings = await prisma.listings.findMany({
+        where: {
+          housing_type: housing_type || undefined,
+          price: price ? { lte: price } : undefined,
+          petsAllowed: petsAllowed as boolean,
+          distanceToUcf: distanceToUcf ? { lte: distanceToUcf } : undefined,
+          rooms: rooms || undefined,
+          bathrooms: bathrooms || undefined,
+          size: size || undefined,
+          favoritedBy: { some: { id: userId } },
+        },
+      });
+      res.status(200).json(listings);
+    } else {
+      const listings = await prisma.listings.findMany({
+        where: {
+          housing_type: housing_type || undefined,
+          price: price ? { lte: price } : undefined,
+          petsAllowed: petsAllowed as boolean,
+          distanceToUcf: distanceToUcf ? { lte: distanceToUcf } : undefined,
+          rooms: rooms || undefined,
+          bathrooms: bathrooms || undefined,
+          size: size || undefined,
+        },
+      });
+      res.status(200).json(listings);
+    }
   } catch (err) {
     res.status(500).json(err);
   }
@@ -285,14 +303,14 @@ router.post('/checkFavorited', async (req: Request, res: Response) => {
         },
       },
     });
-    
+
     if (favorited && favorited.favoritedListings.length > 0) {
-      res.status(200).json({isFavorited: true});
+      res.status(200).json({ isFavorited: true });
     } else {
-      res.status(200).json({isFavorited: false});
+      res.status(200).json({ isFavorited: false });
     }
   } catch (err) {
-    res.status(500).json({Error: err.message});
+    res.status(500).json({ Error: err.message });
   }
 });
 

@@ -14,6 +14,7 @@ export default function Listings() {
   const [bathrooms, setBathrooms] = useState<string>("all");
   const [petsAllowed, setPetsAllowed] = useState<string>("all");
   const [distanceToUCF, setDistanceToUCF] = useState<number>(100000);
+  const [isFavorited, setIsFavorited] = useState(false);
   const router = useRouter();
   const handleCreateListingClick = () => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -52,6 +53,8 @@ export default function Listings() {
                 setHousingType={setHousingType}
                 distanceToUcf={distanceToUCF}
                 setDistanceToUcf={setDistanceToUCF}
+                isFavorited={isFavorited}
+                setIsFavorited={setIsFavorited}
               />
             </div>
             <ListingContent
@@ -61,6 +64,7 @@ export default function Listings() {
               petsAllowed={petsAllowed}
               housingType={housingType}
               distanceToUcf={distanceToUCF}
+              isFavorited={isFavorited}
             />
           </motion.main>
         </>

@@ -16,6 +16,7 @@ import { Socket } from 'socket.io';
 
 const port = process.env.PORT || 8080;
 const app = express();
+const twilio = require('twilio');
 app.use(bodyParser.json({ limit: '10mb' }));
 const cors = require('cors');
 app.use(cors());
@@ -37,6 +38,25 @@ app.get('/', (req: Request, res: Response) => {
 app.use(express.json());
 
 //use routes here
+app.post('/sms', async (req: Request, res: Response) => {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const client = twilio(accountSid, authToken);
+  await client.messages
+    .create({
+      body: 'Here is the link to Roomfin: https://play.google.com/store/apps/details?id=com.roomfin&hl=en&gl=US',
+      from: 'process.env.TWILIO_PHONE_NUMBER',
+      to: req.body.phoneNumber,
+    })
+    .then((message: any) => {
+      console.log(message.sid, `message sent to ${req.body.phoneNumber} with sid: ${message.sid}`);
+    })
+    .catch((err: any) => {
+      res.status(500).json({Error: err.message})
+    });
+  res.status(200).json({ message: 'Message sent' });
+});
+
 app.use(publicRoute);
 app.use(privateRoute);
 app.use('/auth', auth);

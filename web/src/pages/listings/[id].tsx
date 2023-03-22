@@ -2,14 +2,22 @@ import { Tab } from "@headlessui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { AiFillEdit } from "react-icons/ai";
 import { FaTrashAlt } from "react-icons/fa";
 
-import { GetCurrentUserInfo, GetListing } from "../../request/fetch";
-import { AccessChat, DeleteListing } from "../../request/mutate";
-
+import {
+  CheckFavorited,
+  GetCurrentUserInfo,
+  GetListing,
+} from "../../request/fetch";
+import {
+  AccessChat,
+  DeleteListing,
+  FavoriteListing,
+  UnfavoriteListing,
+} from "../../request/mutate";
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
@@ -17,11 +25,12 @@ function classNames(...classes: string[]) {
 export default function IndividualListingPage() {
   const router = useRouter();
   const { id } = router.query;
+  const [isfavorited, setIsfavorited] = useState<boolean>(false);
   const { data, isLoading } = useQuery({
     queryKey: ["listing", id],
     queryFn: () => GetListing(id as string),
     onSuccess: (data) => {
-      console.log(data);
+      // console.log(data);
     },
     onError: (err) => {
       console.log(err);
@@ -30,8 +39,21 @@ export default function IndividualListingPage() {
   const { data: userData, isLoading: userLoading } = useQuery({
     queryKey: ["userInfo"],
     queryFn: () => GetCurrentUserInfo(),
+    onSuccess: (data) => {},
+    onError: (err) => {
+      console.log(err);
+    },
+  });
+  const {
+    data: hasFavoritedData,
+    isLoading: favoriteLoading,
+    refetch: refetchSecondData,
+  } = useQuery({
+    queryKey: ["hasFavorited", userData?.id],
+    queryFn: () => CheckFavorited(userData ? userData?.id : "", id as string),
     onSuccess: (data) => {
-      // console.log(data);
+      setIsfavorited(data.isFavorited);
+      console.log(data);
     },
     onError: (err) => {
       console.log(err);
@@ -58,6 +80,28 @@ export default function IndividualListingPage() {
       AccessChat(data?.userId as string, userData?.id as string),
     onSuccess: () => {
       void router.push("/messages");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+
+  const { mutate: favoriteListingMutation } = useMutation({
+    mutationFn: () => FavoriteListing(id as string),
+    onSuccess: () => {
+      console.log("favorited");
+      setIsfavorited(true);
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+
+  const { mutate: unfavoriteListingMutation } = useMutation({
+    mutationFn: () => UnfavoriteListing(id as string),
+    onSuccess: () => {
+      console.log("unfavorited");
+      setIsfavorited(false);
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -180,13 +224,34 @@ export default function IndividualListingPage() {
               />
             </div>
 
-            <div className="mt-10 flex sm:flex-col">
+            <div className="mt-10 flex">
               <button
                 onClick={messageOwner}
                 className="flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-400 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
               >
                 Message Owner
               </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill={isfavorited ? "#F1BA43" : "none"}
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="my-auto ml-4 h-8 w-8"
+                onClick={() => {
+                  if (isfavorited) {
+                    unfavoriteListingMutation();
+                  } else {
+                    favoriteListingMutation();
+                  }
+                }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                />
+              </svg>
             </div>
 
             <section aria-labelledby="details-heading" className="mt-12">

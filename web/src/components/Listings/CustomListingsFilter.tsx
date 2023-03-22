@@ -176,7 +176,7 @@ export default function CustomListingFilterPopover({
                 value={petsAllowed}
                 onChange={handlePetPreferenceChange}
               >
-                <option value="">All</option>
+                <option value="all">All</option>
                 <option value="yes">Allowed</option>
                 <option value="no">Not Allowed</option>
               </select>

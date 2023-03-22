@@ -322,7 +322,12 @@ const AccountAbout = (props: any) => {
         headContainer: {
             flexDirection: 'row',
             alignItems: 'center',
-        }
+        },
+        clearButton: {
+            paddingVertical: 5,
+            paddingHorizontal: 15,
+            borderRadius: Radius.round,
+          },
     });
 
     const scrollField = (scrolling: boolean) => {
@@ -374,14 +379,17 @@ const AccountAbout = (props: any) => {
                     </_Text>
                     </View>
                     {props.isSetup ?
-                    <_Button
-                    style={Style(props.isDarkMode).buttonInverted}
-                    textStyle={Style(props.isDarkMode).buttonInvertedText}
+                    <TouchableHighlight
+                    underlayColor={Color(props.isDarkMode).holderUnderlay}
+                    style={[Style(props.isDarkMode).buttonInverted, _styles.clearButton]}
                     onPress={(e: any) => onSave('info')}
-                    isDarkMode={props.isDarkMode}
                     >
-                        Edit Account
-                    </_Button>
+                        <_Text
+                        style={Style(props.isDarkMode).buttonInvertedText}
+                        >
+                            Edit Account
+                        </_Text>
+                    </TouchableHighlight>
                     : null }
                 </View>
             </View>

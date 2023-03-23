@@ -57,7 +57,7 @@ router.post('/', async (req: Request, res: Response) => {
     const payload: payload = req.body[0];
     const userId = payload.userId;
 
-    const UCF_ADDRESS = 'University of Central Florida, Orlando, FL';
+    const UCF_ADDRESS = '4000 Central Florida BlvdOrlando, FL 32816';
     const {
       name,
       images,
@@ -182,7 +182,7 @@ router.put('/:listingId', async (req: Request, res: Response) => {
     uploadImages.push(...listing.images);
 
     // Check to see if the images already exist, if they weren't passed back then delete them from the DB
-    if (deleteImages.length > 0) {
+    if (deleteImages && deleteImages.length > 0) {
       for (let i = 0; i < deleteImages.length; i++) {
         let cnt = 0;
         uploadImages.find((x: any) => {

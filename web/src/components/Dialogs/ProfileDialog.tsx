@@ -2,11 +2,15 @@ import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
 } from "@heroicons/react/24/outline";
+import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion, useAnimation } from "framer-motion";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import { MdLibraryAdd } from "react-icons/md";
 
 import { useMediaQuery } from "../../hooks/useMediaQuery";
+import { AccessChat } from "../../request/mutate";
 import { transitions } from "../../styles/motion-definitions";
 import { Matches } from "../../types/auth.types";
 import { Tags } from "../../types/tags.types";
@@ -43,7 +47,7 @@ export default function ProfileDialog({
 }: Props) {
   //#region Hooks
   const md = useMediaQuery("(min-width: 768px)");
-
+  const router = useRouter();
   const handleDialogClose = () => {
     onClose();
   };
@@ -56,6 +60,16 @@ export default function ProfileDialog({
       setSelectedStyles(SelectedTags);
     }
   }, []);
+
+  const sendMessage = useMutation({
+    mutationFn: () => AccessChat(id),
+    onSuccess: () => {
+      void router.push("/messages");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
 
   return (
     <StyledDialog isOpen={isOpen} onClose={handleDialogClose}>
@@ -88,7 +102,7 @@ export default function ProfileDialog({
             " flex w-full flex-col justify-center gap-2 p-4 md:p-6 lg:gap-4"
           }
         >
-          {/* <div
+          <div
             className={"mx-auto w-full items-center justify-center text-center"}
           >
             <div className="mx-auto flex w-full items-center justify-end  ">
@@ -96,11 +110,13 @@ export default function ProfileDialog({
                 overRideStyle={
                   "bg-white text-black hover:bg-slate-300 focus-visible:bg-indigo-700 "
                 }
+                onClick={() => void sendMessage.mutate()}
+                loading={sendMessage.isLoading}
               >
                 Message
               </Button>
             </div>
-          </div> */}
+          </div>
           {/* <AnimatePresence>
             <motion.div
               variants={variants}

@@ -205,7 +205,7 @@ export const SingleChat = ({
               justifyContent={{ base: "space-between" }}
               alignItems="center"
             >
-              {selectedChatUser?.email}
+              {selectedChatUser?.first_name}
             </Text>
             <IconButton
               aria-label="block button"
@@ -222,7 +222,7 @@ export const SingleChat = ({
             flexDir="column"
             justifyContent="flex-end"
             p={3}
-            bg="lightgray"
+            bg="gray.100"
             w="100%"
             h="100%"
             borderRadius="lg"

@@ -26,6 +26,7 @@ const navigation = [
   { name: "Explore", href: "/explore" },
   { name: "Listings", href: "/listings" },
   { name: "My Listings", href: "/mylistings" },
+  { name: "Messaging", href: "/messages" },
 ];
 const userNavigation = [
   {

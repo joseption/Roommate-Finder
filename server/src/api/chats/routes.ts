@@ -79,6 +79,82 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+// get all chats for a logged in user, sorted by newest
+router.get('/allChats', async (req: Request, res: Response) => {
+  try {
+    // const { userId } = req.query;
+    const payload: payload = req.body[0];
+    const userId = payload.userId;
+    const chats = await db.chat.findMany({
+      where: {
+        users: {
+          has: userId as string,
+        },
+      },
+      include: {
+        Notification: true
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
+
+    let messageIds = [];
+    for (let i = 0; i < chats.length; i++) {
+      messageIds.push(chats[i].latestMessage);
+    }
+
+    const messages = await db.message.findMany({
+      where: {
+        id: {
+          in: messageIds,
+        },
+      },
+    });
+
+    for (let i = 0; i < chats.length; i++) {
+      let otherId = '';
+
+      // Find anyone's ID but my own
+      for (let j = 0; j < chats[i].users.length; j++) {
+        if (chats[i].users[j] !== userId) {
+          otherId = chats[i].users[j];
+          break;
+        }
+      }
+
+      if (otherId) {
+        const users = await db.user.findUnique({
+          where: {
+            id: otherId, // Just get the first user
+          },
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            image: true,
+            email: true,
+          }
+        });
+
+        Object.assign(chats[i], { userInfo: users });
+      }
+    }
+
+    for (let i = 0; i < chats.length; i++) {
+      for (let j = 0; j < messages.length; j++) {
+        if (chats[i].latestMessage === messages[j].id) {
+          Object.assign(chats[i], { lastMessage: messages[j]});
+        }
+      }
+    }
+
+    return res.status(200).json(chats);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
 // create a group
 router.post('/group', async (req: Request, res: Response) => {
   try {
@@ -215,6 +291,24 @@ router.get('/:chatId', async (req: Request, res: Response) => {
   try {
     const { chatId } = req.params;
     const chatInfo = await db.chat.findFirst({
+      where: {
+        id: chatId as string,
+      },
+    });
+    return res.status(200).json(chatInfo);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
+// given a chatId return info on the chat /chats/status/chatId
+router.get('/status/:chatId', async (req: Request, res: Response) => {
+  try {
+    const { chatId } = req.params;
+    const chatInfo = await db.chat.findFirst({
+      select: {
+        muted: true
+      },
       where: {
         id: chatId as string,
       },

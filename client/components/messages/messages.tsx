@@ -19,32 +19,58 @@ interface Props {
   typing: any
 }
 
-const Messages = ({typing, receiveTyping, receiveMessage, chat, userInfo, socket, isDarkMode, image}: Props) => {
+const Messages = ({typing, receiveMessage, chat, userInfo, isDarkMode, image}: Props) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const chatRef = useRef(chat);
-  const userInfoRef = useRef(userInfo);
-  const messagesRef = useRef(messages);
+  const [typeToggle, setTypeToggle] = useState(false);
   
   useEffect(() => {
-    chatRef.current = chat
     getMessages(chat.id);
-    if (messages?.length !== 0 && messages[0].chatId != chatRef.current.id) {
+    if (messages?.length !== 0 && messages[0].chatId != chat?.id) {
       setLoading(true);
     }
   }, [chat]);
 
   useEffect(() => {
-    userInfoRef.current = userInfo
-  }, [userInfo])
+    if (messages && messages.length > 0) {
+      let msgs = messages;
+      if (msgs[0]?.userId !== userInfo.id) {
+          Object.assign(msgs[0], {showImg: !isTyping()});
+      }
+
+      setTypeToggle(!typeToggle);
+      setMessages(msgs);
+    }
+  }, [typing]);
 
   useEffect(() => {
-    messagesRef.current = messages;
-  }, [messages])
+    if (!receiveMessage || receiveMessage.chatId !== chat?.id) 
+      return;
 
-  useEffect(() => {
-    if (!receiveMessage || receiveMessage.chatId !== chatRef.current.id) return;
-    setMessages([receiveMessage, ...messagesRef.current]);
+    let idx = messages.length;
+    Object.assign(receiveMessage, {index: idx});
+    let id = userInfo?.id;
+    if (id) {
+      if (messages[0] && messages[0].userId != receiveMessage.userId) {
+        receiveMessage.firstFromInBlock = true;
+      }
+      else {
+        receiveMessage.firstFromInBlock = false;
+      }
+      if (receiveMessage.userId != id) {
+        receiveMessage.showImg = true;
+        receiveMessage.lastFromMsg = true;
+        messages[0].showImg = false;
+        messages[0].lastFromMsg = false;
+      }
+      else {
+        receiveMessage.showImg = false;
+        receiveMessage.lastFromMsg = false;
+      }
+    }
+
+    setMessages([receiveMessage, ...messages]);
+
   }, [receiveMessage])
 
   const getMessages = async (id: string) => {
@@ -62,6 +88,29 @@ const Messages = ({typing, receiveTyping, receiveMessage, chat, userInfo, socket
         return {};
       }
       else {
+        for (let i = 0; i < res.length; i++) {
+          // Give last message an icon from other user
+          let id = userInfo?.id;
+          if (id) {
+            if (res[i].userId != id && 
+                (res[i - 1] && res[i - 1].userId == id) ||
+                !res[i - 1] ||
+                res[i - 1]?.typingIndicator) {
+                  res[i].showImg = true;
+                  res[i].lastFromMsg = !res[i - 1];
+            }
+            else {
+              res[i].showImg = false;
+            }
+            if (res[i].userId != id && res[i + 1] && res[i + 1].userId == id) {
+              res[i].firstFromInBlock = true;
+            }
+            else {
+              res[i].firstFromInBlock = false;
+            }
+          }
+          Object.assign(res[i], {index: i});
+        }
         setMessages(res);
         setLoading(false);
       }
@@ -69,13 +118,13 @@ const Messages = ({typing, receiveTyping, receiveMessage, chat, userInfo, socket
   }
 
   const isTyping = () => {
-    if (chatRef && chatRef.current && typing) {
-      if (chatRef.current.blocked) {
+    if (chat && typing) {
+      if (chat.blocked) {
         return false;
       }
       
       let chattingUser = typing.find((x: any) => {
-        return x.chat === chatRef.current.id && x.user !== userInfoRef.current.id;
+        return x.chat === chat?.id && x.user !== userInfo?.id;
       });
 
       return chattingUser;
@@ -85,42 +134,18 @@ const Messages = ({typing, receiveTyping, receiveMessage, chat, userInfo, socket
     }
   }
 
-  const renderItem = useCallback(({item}:any) => {
-    let idx = messages.findIndex(x => item.id === x.id);
-    if (idx > -1) {
-      // Give last message an icon from other user
-      let id = userInfoRef?.current?.id;
-      if (id && messages && messages.length > 0) {
-        if (item.userId != id && 
-            (messages[idx - 1] && messages[idx - 1].userId == id) ||
-            !messages[idx - 1] ||
-            messages[idx - 1]?.typingIndicator) {
-              item.showImg = true;
-              item.lastFromMsg = !messages[idx - 1];
-        }
-        else {
-          item.showImg = false;
-        }
-        if (item.userId != id && messages[idx + 1] && messages[idx + 1].userId == id) {
-          item.firstFromInBlock = true;
-        }
-        else {
-          item.firstFromInBlock = false;
-        }
-      }
-    }
-
+  const renderItem = ({item}:any) => {
     return (
       <Message
         message={item}
-        userInfo={userInfoRef.current}
-        key={item.id}
+        userInfo={userInfo}
         isTypingIndicator={item?.typingIndicator}
         isDarkMode={isDarkMode}
+        key={item.id}
         image={image}
       />
     )
-  }, [isDarkMode, messagesRef?.current]);
+  }
 
   const styles = StyleSheet.create({
     loading: {
@@ -156,13 +181,13 @@ const Messages = ({typing, receiveTyping, receiveMessage, chat, userInfo, socket
       backgroundColor: Color(isDarkMode).msgToBG,
       color: Color(isDarkMode).msgToFG,
       alignSelf: 'flex-end',
-      maxWidth: '60%'
+      maxWidth: '80%'
     },
     theirMessage: {
       backgroundColor: Color(isDarkMode).msgFromBG,
       alignSelf: 'flex-start',
       color: Color(isDarkMode).msgFromFG,
-      maxWidth: '60%',
+      maxWidth: '80%',
     },
   });
 
@@ -207,10 +232,11 @@ const Messages = ({typing, receiveTyping, receiveMessage, chat, userInfo, socket
   return (
     <View style={{flex: 1, zIndex: 1, backgroundColor: Color(isDarkMode).contentBackgroundSecondary}}>
       <FlatList
+        extraData={typeToggle}
         data={messages}
         renderItem={renderItem}
         initialNumToRender={50}
-        removeClippedSubviews
+        removeClippedSubviews={true}
         ListHeaderComponent={indicator()}
         inverted
         style={{padding: 10}}

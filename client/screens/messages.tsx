@@ -5,10 +5,8 @@ import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
 import { authTokenHeader, env, getLocalStorage, navProp, NavTo, setLocalAppSettingsCurrentChat } from '../helper';
-import io, { Socket } from 'socket.io-client'
-import { DefaultEventsMap } from '@socket.io/component-emitter';
 import WavingHand from '../assets/images/waving_hand_svg';
-import { Color, DarkStyle, FontSize, Style } from '../style';
+import { Color, FontSize, Style } from '../style';
 import _Text from '../components/control/text';
 import { useNavigation } from '@react-navigation/native';
 
@@ -18,12 +16,93 @@ const MessagesScreen = (props: any) => {
   const [chats, setChats] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState<any>();
   const [chatsHaveLoaded, setChatsHaveLoaded] = useState<boolean>(false);
-  const chatsRef = useRef(chats);
-  const userInfoRef = useRef(userInfo);
-  const currentChatRef = useRef(currentChat);
-  const showPanelRef = useRef(showPanel);
   const navigation = useNavigation<navProp>();
   const [typing, setTyping] = useState<any>([]);
+
+  // Initiate by getting the user info
+  useEffect(() => {
+    getUserInfo();
+  }, [])
+
+  const getUserInfo = async () => {
+    const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
+    // join own user room
+    props.socket.emit('join_room', userInfo.id)
+    setUserInfo(userInfo);
+  }
+  
+  useEffect(() => {
+    getChats();
+  }, [userInfo])
+
+  const getChats = async () => {
+    if (!userInfo?.id)
+      return;
+
+    const tokenHeader = await authTokenHeader();
+    fetch(
+      `${env.URL}/chats/allChats`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      const res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      }
+      else {
+        let totalNotifications = 0;
+        for (let i = 0; i < res.length; i++) {
+          let muted = res[i].muted.find((x: any) => x === userInfo?.id);
+          let count = 0;
+          if (!muted) {
+            if (res[i]?.Notification) {
+              res[i]?.Notification.map((x: any) => {
+                if (x.userId === userInfo?.id)
+                  count++;
+              })
+
+
+              totalNotifications += count;
+            }
+          }
+          Object.assign(res[i], {notificationCount: count});
+        }
+        connectToChatRooms(res);
+        setChats(res);
+        setChatsHaveLoaded(true);
+        props.setMessageCount(totalNotifications);
+      }
+    });
+  }
+
+  const getUser = async (id: string) => {
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      const res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      }
+      else {
+        const user = {
+          first_name: res.first_name,
+          last_name: res.last_name,
+          id: res.id,
+          email: res.email,
+          image: res.image,
+        };
+        return user;
+      }
+    });
+  }
+
+  const connectToChatRooms = async (chats: any) => {
+    if (chats.length === 0)
+      return;
+    const rooms = await chats.map((chat: any) => {
+      return chat.id;
+    })
+    props.socket.emit('join_room', rooms)
+  }
 
   useEffect(() => {
     if (props.receiveTyping) {
@@ -52,65 +131,40 @@ const MessagesScreen = (props: any) => {
   }, [props.receiveTyping])
 
   useEffect(() => {
-    getUserInfo();
-  }, [])
-  
-  useEffect(() => {
-    userInfoRef.current = userInfo;
-    getChats();
-  }, [userInfo])
-
-  useEffect(() => {
-    currentChatRef.current = currentChat;
-    if (currentChatRef.current && currentChatRef.current?.id) {
+    if (currentChat.id) {
       deleteNotifications();
     }
   }, [currentChat]);
 
   useEffect(() => {
-    chatsRef.current = chats;
-    if (props?.route?.params?.user && !chatsHaveLoaded && userInfoRef.current) {
+    if (props?.route?.params?.user && !chatsHaveLoaded && userInfo) {
       openOrCreateChat(props?.route?.params?.user);
     }
   }, [chats]);
 
   useEffect(() => {
-    showPanelRef.current = showPanel;
-  }, [showPanel]);
+    if (props.receiveMessage) {
+      const newMsg = chats.find(chat => chat.id === props.receiveMessage?.chatId);
+      if (newMsg && newMsg.blocked)
+        return;
 
-  useEffect(() => {
-    const chats = chatsRef.current.filter(chat => chat.id === props.receiveMessage?.chatId);
-    if (chats.length !== 0 && chats[0].blocked) return;
-    updateTabs(props.receiveMessage);
+      updateTabs(props.receiveMessage);
+    }
   }, [props.receiveMessage])
-  
+
   useEffect(() => {
-    props.socket.on('receive_block', (data: any) => {
-      updateBlocked(data.chat);
-    });
+    if (props.receiveBlock) {
+      updateBlocked(props.receiveBlock.chat);
+    }
+  }, [props.receiveBlock])
 
-    props.socket.on('receive_notification', (data: any) => {
-      if (data.userId !== userInfoRef.current.id) return;
-      const chats = chatsRef.current.map((chat) => {
-        if (chat.id === data.chatId) {
-          if (currentChatRef.current.id === chat.id && showPanelRef.current) {
-            deleteNotifications();
-            return chat;
-          };
-          props.setAddMessageCount(1);
-          return {...chat, notifCount: (chat.notifCount + 1)};
-        }
-        return chat;
-      });
-      setChats(chats);
-    });
-
-    props.socket.on('receive_chat', (data: any) => {
-      props.socket.emit('join_room', data.id);
-      const newChats= [data, ...chatsRef.current];
+  useEffect(() => {
+    if (props.receiveChat) {
+      props.socket.emit('join_room', props.receiveChat.id);
+      const newChats= [props.receiveChat, ...chats];
       setChats(newChats);
-    })
-  }, [props.socket])
+    }
+  }, [props.receiveChat])
 
   // Start - Added by Joseph for push notifications
   useEffect(() => {
@@ -123,6 +177,31 @@ const MessagesScreen = (props: any) => {
       }
     }
   }, [chats, props.openChatFromPush]);
+
+  useEffect(() => {
+    if (props.receiveNotification) {
+      if (props.receiveNotification.userId !== userInfo?.id)
+        return;
+
+      const rcvChats = chats.map((chat) => {
+        if (chat.id === props.receiveNotification.chatId) {
+          if (currentChat.id === chat.id && showPanel) {
+            deleteNotifications();
+            return chat;
+          };
+          
+          let count = 0;
+          let muted = chat.muted.find((x: any) => x === userInfo?.id);
+          if (!muted) {
+            count = 1;
+          }
+          return {...chat, notificationCount: (chat.notificationCount + count)};
+        }
+        return chat;
+      });
+      setChats(rcvChats);
+    }
+  }, [props.receiveNotification]);
 
   useEffect(() => {
     props.socket.emit('send_message', props.messageData);
@@ -150,7 +229,8 @@ const MessagesScreen = (props: any) => {
   }, [props.showingMessagePanel])
 
   useEffect(() => {
-    if (!props?.route?.params?.user || !userInfoRef.current) return;
+    if (!props?.route?.params?.user || !userInfo)
+      return;
     openOrCreateChat(props?.route?.params?.user);
   }, [props?.route?.params?.requestId])
 
@@ -172,9 +252,9 @@ const MessagesScreen = (props: any) => {
         const users = [];
         const user = await getUser(userIdTwo);
         users.push(user);
-        chat = {...chat, users: users, blocked: '', muted: [], notifCount: 0};
+        chat = {...chat, users: users, blocked: '', muted: [], notificationCount: 0};
         props.socket.emit('create_chat', chat);
-        const newChats= [chat, ...chatsRef.current];
+        const newChats= [chat, ...chats];
         props.socket.emit('join_room', chat.id);
         setChats(newChats);
         setCurrentChat(chat);
@@ -184,8 +264,8 @@ const MessagesScreen = (props: any) => {
   };
   
   const openOrCreateChat = (userId: string) => {
-    let chat = chatsRef.current.filter((chat) => {
-      return chat?.users[0]?.id === userId;
+    let chat = chats.filter((chat) => {
+      return chat?.userInfo?.id === userId;
     })
     // Chat exists
     if (chat.length !== 0) {
@@ -193,11 +273,11 @@ const MessagesScreen = (props: any) => {
       updateShowPanel(true);
       return;
     }
-    createChat(userInfoRef.current.id, userId);
+    createChat(userInfo.id, userId);
   };
 
   const deleteNotifications = async () => {
-    const obj = {userId: userInfoRef.current?.id, chatId: currentChatRef.current?.id};
+    const obj = {userId: userInfo.id, chatId: currentChat.id};
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
     return fetch(
@@ -207,186 +287,59 @@ const MessagesScreen = (props: any) => {
       if (res.Error) {
         console.warn("Error: ", res.Error);
       } else {
-        const chats = chatsRef.current.map((chat) => {
-          if (chat.id === currentChatRef.current.id) {
-            let cnt = props.messageCount - chat.notifCount;
+        const delChats = chats.map((chat) => {
+          if (chat.id === currentChat.id) {
+            let cnt = props.messageCount - chat.notificationCount;
             props.setMessageCount(cnt);
-            return {...chat, notifCount: 0};
+            return {...chat, notificationCount: 0};
           }
           return chat;
         });
-        setChats(chats);
+        setChats(delChats);
       }
     });
   };  
   
   const updateTabs = async (data: any) => {
-    if (chatsRef.current.length === 0) return;
+    if (chats.length === 0)
+      return;
+
     const latestMessage = {content: data.content, userId: data.userId};
     let newChat: any;
-    let newChats = chatsRef.current.filter((chat) => {
+    let newChats = chats.filter((chat) => {
       const condition = data.chatId !== chat.id; 
       if (!condition) {
         newChat = chat;
       }
       return condition;
     })
-    newChat = {...newChat, latestMessage: latestMessage};
+    newChat = {...newChat, lastMessage: latestMessage};
     newChats = [newChat, ...newChats];
     setChats(newChats);
   }
 
   function updateBlocked(c: any) {
     if (!c) return;
-    const newChats = chatsRef.current.map((chat) => {
+    const newChats = chats.map((chat) => {
       if (chat.id === c.id) {
         return { ...chat, blocked: c.blocked }
       }
       return chat;
     });
     setChats(newChats);
-    setCurrentChat({...currentChatRef.current, blocked: c.blocked})
+    setCurrentChat({...currentChat, blocked: c.blocked})
   }
 
   function updateMuted(c: any) {
     if (!c) return;
-    const newChats = chatsRef.current.map((chat) => {
+    const newChats = chats.map((chat) => {
       if (chat.id === c.id) {
         return { ...chat, muted: c.muted }
       }
       return chat;
     });
     setChats(newChats);
-    setCurrentChat({...currentChatRef.current, muted: c.muted})
-  }
-
-  const getUserInfo = async () => {
-    const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
-    // join own user room
-    props.socket.emit('join_room', userInfo.id)
-    setUserInfo(userInfo);
-  }
-
-  const getMessage = async (id: string) => {
-    if (!id) return;
-    
-    const tokenHeader = await authTokenHeader();
-    return fetch(
-      `${env.URL}/messages/getMessage?messageId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
-    ).then(async ret => {
-      const res = JSON.parse(await ret.text());
-      if (res) {
-        if (res.Error) {
-          console.warn("Error: ", res.Error);
-          return {content: '', createdAt: '', userId: '',};
-        }
-        else {
-          let message = {
-            content: res.content,
-            createdAt: res.createdAt,
-            userId: res.userId,
-          };
-          return message;
-        }
-      }
-      else {
-        return {content: '', createdAt: '', userId: '',};      }
-    });
-  }
-
-  const getNotifs = async (userId: string, chatId: string) => {
-    if (!userId || !chatId) return;
-    const tokenHeader = await authTokenHeader();
-    return fetch(
-      `${env.URL}/notifications?userId=${userId}&chatId=${chatId}`,
-      {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
-    ).then(async ret => {
-      const res = JSON.parse(await ret.text());
-      if (res.Error) {
-        console.warn("Error: ", res.Error);
-        return 0;
-      } else {
-        return res;
-      }
-    });
-  }
-
-  const getUser = async (id: string) => {
-    const tokenHeader = await authTokenHeader();
-    return fetch(
-      `${env.URL}/users/profile?userId=${id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
-    ).then(async ret => {
-      const res = JSON.parse(await ret.text());
-      if (res.Error) {
-        console.warn("Error: ", res.Error);
-      }
-      else {
-        const user = {
-          first_name: res.first_name,
-          last_name: res.last_name,
-          id: res.id,
-          email: res.email,
-          image: res.image,
-        };
-        return user;
-      }
-    });
-  }
-
-  const connectToChatRooms = async (chats: any) => {
-    if (chats.length === 0) return;
-    const rooms = await chats.map((chat: any) => {
-      return chat.id;
-    })
-    props.socket.emit('join_room', rooms)
-  }
-
-  const getChats = async () => {
-    if (!userInfoRef.current?.id) return;
-    const tokenHeader = await authTokenHeader();
-    fetch(
-      `${env.URL}/chats?userId=${userInfoRef.current?.id}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
-    ).then(async ret => {
-      const res = JSON.parse(await ret.text());
-      if (res.Error) {
-        console.warn("Error: ", res.Error);
-      }
-      else {
-        const chatArray = [];
-        let totalNotifs = 0;
-        for (let i = 0; i < res.length; i++) {
-          const lastMessage = await getMessage(res[i].latestMessage);
-          const notifCount = await getNotifs(userInfoRef.current.id, res[i].id);
-          totalNotifs += notifCount;
-          const users = []
-          for (let j = 0; j < res[i].users.length; j++) {
-            if (res[i].users[j] === userInfoRef.current?.id) {
-              continue;
-            }
-            const user = await getUser(res[i].users[j])
-            users.push(user);
-          }
-          const chat = {
-            chatName: res[i].chatName,
-            createdAt: res[i].createdAt,
-            groupAdmin: res[i].groupAdmin,
-            id: res[i].id,
-            isGroupChat: res[i].isGroupChat,
-            latestMessage: lastMessage,
-            updatedAt: res.updatedAt,
-            users: users,
-            blocked: res[i].blocked,
-            muted: res[i].muted,
-            notifCount: notifCount,
-          };
-          chatArray.push(chat);
-        }
-        connectToChatRooms(chatArray);
-        setChats(chatArray);
-        setChatsHaveLoaded(true);
-        props.setMessageCount(totalNotifs);
-      }
-    });
+    setCurrentChat({...currentChat, muted: c.muted})
   }
 
   const styles = StyleSheet.create({
@@ -476,7 +429,7 @@ const MessagesScreen = (props: any) => {
       <MessagePanel
         showPanel={showPanel}
         socket={props.socket}
-        userInfo={userInfoRef.current}
+        userInfo={userInfo}
         updateShowPanel={updateShowPanel}
         chat={currentChat}
         updateBlocked={updateBlocked}

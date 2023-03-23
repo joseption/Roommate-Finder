@@ -32,10 +32,6 @@ interface Props {
 const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDarkMode}: Props) => {
   const [msgHeight, setMsgHeight] = useState(40);
   const [wasTyping, setWasTyping] = useState(false);
-
-  const randomNum = () => {
-    return (Math.floor(Math.random() * 999999) + 1).toString();
-  }
   
   useEffect(() => {
     setTypingIndicator();
@@ -47,9 +43,6 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
       typingIndicator: true,
       isTyping: isTyping,
       userId: userInfo?.id,
-      // id is temporary for rendering purposes. 
-      // It provides no value otherwise.
-      id: randomNum(),
     }
     socket.emit('send_typing', data);
     setWasTyping(isTyping);
@@ -60,12 +53,14 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
       await prepareTypingIndicatorData(false);
       return;
     };
-    if (wasTyping && newMessage?.length !== 0) return;
+    if (wasTyping && newMessage?.length !== 0)
+      return;
+
     await prepareTypingIndicatorData(newMessage?.length !== 0);
   }
 
   const sendNotification = async () => {
-    const obj = {userId: chat?.users[0].id, chatId: chat.id};
+    const obj = {userId: chat?.userInfo?.id, chatId: chat.id};
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
     const data = {
@@ -93,9 +88,6 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
       chatId: chat.id,
       content: newMessage,
       userId: userInfo.id,
-      // id is temporary for rendering purposes. 
-      // It provides no value otherwise.
-      id: randomNum(),
     }
     setNewMessage('');
     giveMsgHeight(0);

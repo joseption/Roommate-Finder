@@ -331,7 +331,6 @@ const AccountAbout = (props: any) => {
     });
 
     const scrollField = (scrolling: boolean) => {
-        console.log(scrolling);
         setScroll(scrolling);
     }
 

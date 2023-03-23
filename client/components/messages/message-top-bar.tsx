@@ -47,14 +47,14 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
   const navigation = useNavigation<navProp>();
 
   const getUserIcon = () => {
-    if (chat?.users[0]?.image)
-      return {uri: chat.users[0].image};
+    if (chat?.userInfo.image)
+      return {uri: chat.userInfo.image};
     else
       return require('../../assets/images/user.png');
   }
 
   const hasImage = () => {
-    return chat?.users && chat.users.length > 0 && chat.users[0].image;
+    return chat?.userInfo?.image;
   }
 
   const styles = StyleSheet.create({
@@ -146,7 +146,7 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
             onPress={() => {
               updateShowPanel(false);
               setTimeout(() => {
-                navigation.navigate(NavTo.Profile, { profile: chat?.users[0]?.id, fromChat: 'true' } as never);
+                navigation.navigate(NavTo.Profile, { profile: chat?.userInfo?.id, fromChat: 'true' } as never);
               }, 0);
             }}
           >
@@ -164,7 +164,7 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
               numberOfLines={1}
               style={styles.name}
               >
-                {chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}
+                {chat?.userInfo?.first_name + ' ' + chat?.userInfo?.last_name}
               </_Text>
             </View>
           </TouchableHighlight>

@@ -57,7 +57,7 @@ router.post('/', async (req: Request, res: Response) => {
     const payload: payload = req.body[0];
     const userId = payload.userId;
 
-    const UCF_ADDRESS = '4000 Central Florida BlvdOrlando, FL 32816';
+    const UCF_ADDRESS = '4000 Central Florida Blvd, Orlando, FL 32816';
     const {
       name,
       images,

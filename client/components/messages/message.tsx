@@ -14,7 +14,7 @@ interface Props {
 const Message = ({ message, userInfo, isTypingIndicator, isDarkMode, image }: Props) => {
   if (!userInfo) return <></>
   
-  const isMyMessage = () => message.userId === userInfo?.id;
+  const isMyMessage = () => message?.userId === userInfo?.id;
 
   const getUserIcon = () => {
     if (image)
@@ -25,7 +25,7 @@ const Message = ({ message, userInfo, isTypingIndicator, isDarkMode, image }: Pr
 
   const msgStyle = () => {
     let style = [];
-    if (!message.showImg && !isTypingIndicator) {
+    if (!message?.showImg && !isTypingIndicator) {
       style.push({
         marginLeft: 47
       });
@@ -36,12 +36,12 @@ const Message = ({ message, userInfo, isTypingIndicator, isDarkMode, image }: Pr
 
   const msgContainerStyle = () => {
     let style = [];
-    if (message.firstFromInBlock) {
+    if (message?.firstFromInBlock) {
       style.push({
         marginTop: 20
       });
     }
-    if (message.showImg && !message.lastFromMsg) {
+    if (message?.showImg && !message?.lastFromMsg) {
       style.push({
         marginBottom: 20
       });

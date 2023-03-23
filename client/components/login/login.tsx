@@ -82,7 +82,7 @@ const Login = (props: any) => {
   const emailBlur = (e: any) => {
     let emailError = !(validateEmail(email))
     setEmailError(emailError);
-    setEmailErrorMsg(emailError ? ' must be a valid address' : '');
+    setEmailErrorMsg(emailError ? 'must be a valid address' : '');
   }
 
   const goRegister = () => {

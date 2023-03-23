@@ -6,6 +6,7 @@ const router = express.Router();
 import { env } from 'process';
 import { getOAuth } from 'api/users/services';
 import fetch from 'node-fetch';
+import { mutedChat } from 'api/notifications/notificationsHelper';
 
 // router.use(isAuthenticated);
 
@@ -48,7 +49,7 @@ router.post('/web', async (req: Request, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
   try {
     // todo: replace userid in content with user from refresh token
-    const { content, userId, chatId } = req.body;
+    const { content, userId, chatId, sendToId } = req.body;
 
     if (!content || !chatId) {
       return res.status(400).json('missing parameters');
@@ -72,6 +73,19 @@ router.post('/', async (req: Request, res: Response) => {
         latestMessage: newMessage.id as string, // * the content here really doesnt matter I'm just updating it so I can sort by updatedAt later
       },
     });
+    
+    if (sendToId) {
+      const userBlockedChat = await blockedChat(chatId);
+      const userMutedChat = await mutedChat(chatId, sendToId);
+      if (!userBlockedChat && !userMutedChat) {
+        await db.notification.create({
+          data: {
+            userId: sendToId as string,
+            chatId: chatId as string,
+          }
+        });
+      }
+    }
 
     // Send push notification to all chat users as long as chat has not been muted
     const chat = await db.chat.findUnique({

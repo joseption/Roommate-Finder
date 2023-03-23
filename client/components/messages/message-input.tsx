@@ -59,26 +59,27 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
     await prepareTypingIndicatorData(newMessage?.length !== 0);
   }
 
-  const sendNotification = async () => {
-    const obj = {userId: chat?.userInfo?.id, chatId: chat.id};
-    const js = JSON.stringify(obj);
-    const tokenHeader = await authTokenHeader();
-    const data = {
-      userId: obj.userId,
-      chatId: chat.id,
-    };
-    socket.emit('send_notification', data);
-    return fetch(
-      `${env.URL}/notifications`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
-    ).then(async ret => {
-      let res = JSON.parse(await ret.text());
-      if (res.Error) {
-        console.warn("Error: ", res.Error);
-      }
-    });
-  };
+  // const sendNotification = async () => {
+  //   const obj = {userId: chat?.userInfo?.id, chatId: chat.id};
+  //   const js = JSON.stringify(obj);
+  //   const tokenHeader = await authTokenHeader();
+  //   const data = {
+  //     userId: obj.userId,
+  //     chatId: chat.id,
+  //   };
+  //   socket.emit('send_notification', data);
+  //   return fetch(
+  //     `${env.URL}/notifications`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+  //   ).then(async ret => {
+  //     let res = JSON.parse(await ret.text());
+  //     if (res.Error) {
+  //       console.warn("Error: ", res.Error);
+  //     }
+  //   });
+  // };
   
   const sendMessage = async () => {
+    console.log("send message");
     let msg = newMessage.trim();
     if (msg === '') {
       return;
@@ -89,25 +90,42 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
       content: newMessage,
       userId: userInfo.id,
     }
+    let error = false;
     setNewMessage('');
     giveMsgHeight(0);
     await setTypingIndicator(true);
-    await socket.emit('send_message', data);
+    socket.emit('send_message', data);
 
-    const obj = {content: msg, userId: userInfo.id, chatId: chat.id};
+    const obj = {content: msg, userId: userInfo.id, chatId: chat.id, sendToId: chat?.userInfo?.id};
     const js = JSON.stringify(obj);
-    const tokenHeader = await authTokenHeader();
-    return fetch(
-      `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
-    ).then(async ret => {
-      let res = JSON.parse(await ret.text());
-      if (res.Error) {
-        console.warn("Error: ", res.Error);
-      }
-      else {
-        sendNotification();
-      }
-    });
+
+    try {
+      const tokenHeader = await authTokenHeader();
+      await fetch(
+        `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      ).then(async ret => {
+        let res = JSON.parse(await ret.text());
+        if (res.Error) {
+          console.warn("Error: ", res.Error);
+          error = true;
+          console.log("error");
+        }
+        console.log("after no error?");
+      });
+    }
+    catch (e) {
+      error = true;
+    }
+    console.log("before!");
+    if (!error) {
+      console.log("send!");
+      const data = {
+        userId: obj.userId,
+        chatId: chat.id,
+      };
+      console.log(socket.connected);
+      socket.emit('send_notification', data);
+    }
   };
 
   const giveMsgHeight = (height: number) => {

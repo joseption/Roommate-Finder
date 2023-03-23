@@ -97,6 +97,7 @@ export const App = (props: any) => {
     });
 
     socket.on('receive_notification', (data: any) => {
+      console.log("GOT IT!");
       setReceiveNotification(data);
     });
 
@@ -370,7 +371,7 @@ export const App = (props: any) => {
 
   const getChats = async () => {
     const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
-    if (userInfo.id) {
+    if (userInfo?.id) {
       const tokenHeader = await authTokenHeader();
       fetch(
         `${environ.URL}/chats/allChats`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
@@ -407,7 +408,7 @@ export const App = (props: any) => {
     if (receiveNotification) {
       const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
       let chat = (receiveNotification as any);
-      if (chat.userId !== userInfo?.id)
+      if (chat.userId === userInfo?.id)
         return;
 
       const tokenHeader = await authTokenHeader();
@@ -1035,13 +1036,18 @@ export const App = (props: any) => {
                   setShowingMessagePanel={setShowingMessagePanel}
                   openChatFromPush={openChatFromPush}
                   setOpenChatFromPush={setOpenChatFromPush}
-                  receiveMessage={receiveMessage}
-                  receiveTyping={receiveTyping}
                   setAddMessageCount={setAddMessageCount}
                   showingMessagePanel={showingMessagePanel}
                   receiveNotification={receiveNotification}
                   receiveBlock={receiveBlock}
                   receiveChat={receiveChat}
+                  receiveMessage={receiveMessage}
+                  receiveTyping={receiveTyping}
+                  setReceiveNotification={setReceiveNotification}
+                  setReceiveBlock={setReceiveBlock}
+                  setReceiveChat={setReceiveChat}
+                  setReceiveMessage={setReceiveMessage}
+                  setReceiveTyping={setReceiveTyping}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen

@@ -85,47 +85,36 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
       return;
     }
 
-    const data = {
-      chatId: chat.id,
-      content: newMessage,
-      userId: userInfo.id,
-    }
-    let error = false;
-    setNewMessage('');
-    giveMsgHeight(0);
-    await setTypingIndicator(true);
-    socket.emit('send_message', data);
-
     const obj = {content: msg, userId: userInfo.id, chatId: chat.id, sendToId: chat?.userInfo?.id};
     const js = JSON.stringify(obj);
-
+    
     try {
       const tokenHeader = await authTokenHeader();
-      await fetch(
+      fetch(
         `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
       ).then(async ret => {
         let res = JSON.parse(await ret.text());
         if (res.Error) {
           console.warn("Error: ", res.Error);
-          error = true;
-          console.log("error");
         }
-        console.log("after no error?");
       });
+    } catch (e) {
+      console.warn("Error: failed sending message request. ", e);
     }
-    catch (e) {
-      error = true;
+    const dataSend = {
+      chatId: chat.id,
+      content: newMessage,
+      userId: userInfo.id,
     }
-    console.log("before!");
-    if (!error) {
-      console.log("send!");
-      const data = {
-        userId: obj.userId,
-        chatId: chat.id,
-      };
-      console.log(socket.connected);
-      socket.emit('send_notification', data);
-    }
+    socket.emit('send_message', dataSend);
+    const dataNotif = {
+      userId: obj.userId,
+      chatId: chat.id,
+    };
+    socket.emit('send_notification', dataNotif);
+    setNewMessage('');
+    giveMsgHeight(0);
+    await setTypingIndicator(true);
   };
 
   const giveMsgHeight = (height: number) => {

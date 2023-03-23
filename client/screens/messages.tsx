@@ -253,7 +253,7 @@ const MessagesScreen = (props: any) => {
     const obj = {userIdOne: userIdOne, userIdTwo: userIdTwo};
     const js = JSON.stringify(obj);
     const tokenHeader = await authTokenHeader();
-    return fetch(
+    await fetch(
       `${env.URL}/chats`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
     ).then(async ret => {
       let res = JSON.parse(await ret.text());
@@ -265,7 +265,7 @@ const MessagesScreen = (props: any) => {
         const users = [];
         const user = await getUser(userIdTwo);
         users.push(user);
-        chat = {...chat, users: users, blocked: '', muted: [], notificationCount: 0};
+        chat = {...chat, users: users, userInfo: user, blocked: '', muted: [], notificationCount: 0};
         props.socket.emit('create_chat', chat);
         const newChats = [chat, ...chats];
         props.socket.emit('join_room', chat.id);

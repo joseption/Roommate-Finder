@@ -237,7 +237,7 @@ export const SingleChat = ({
                 margin="auto"
               />
             ) : (
-              <div className="flex flex-col overflow-y-scroll">
+              <div className="flex flex-col overflow-auto">
                 <ScrollableChat
                   key={selectedChat.id}
                   messages={messages}

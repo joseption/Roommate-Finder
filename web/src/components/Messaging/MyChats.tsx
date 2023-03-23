@@ -60,7 +60,7 @@ function MyChats({
         w="100%"
         h="100%"
         borderRadius="lg"
-        overflowY="scroll"
+        overflowY="hidden"
         spacing={4}
         alignItems="stretch"
       >

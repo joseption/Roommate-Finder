@@ -97,7 +97,6 @@ export const App = (props: any) => {
     });
 
     socket.on('receive_notification', (data: any) => {
-      console.log("GOT IT!");
       setReceiveNotification(data);
     });
 
@@ -408,7 +407,7 @@ export const App = (props: any) => {
     if (receiveNotification) {
       const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
       let chat = (receiveNotification as any);
-      if (chat.userId === userInfo?.id)
+      if (chat.userId !== userInfo?.id)
         return;
 
       const tokenHeader = await authTokenHeader();

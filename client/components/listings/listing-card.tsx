@@ -1,28 +1,49 @@
 import { Pressable, View, StyleSheet, Image, Text, TouchableHighlight, Platform, BackHandler } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import _Text from '../control/text';
 import _Group from '../control/group';
 import { Color, FontSize, Radius, Style } from '../../style';
+import { authTokenHeader, env, getLocalStorage, Listings_Screen, navProp, NavTo, userId} from "../../helper";
 import _Button from '../control/button';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useEffect, useState } from 'react';
-import { faStar, faMapMarkerAlt, faBed, faBath, faHome, faBuilding, faCity, faUser} from '@fortawesome/free-solid-svg-icons';
+import { faStar, faMapMarkerAlt, faBed, faBath, faHome, faBuilding, faCity, faUser, faHeart } from '@fortawesome/free-solid-svg-icons';
 import _Image from '../control/image';
-import { navProp, NavTo } from '../../helper';
 
 const ListingCard = (props: any) => {
-  const navigation = useNavigation<navProp>();
   const [isFavorite, setIsFavorite] = useState(false);
-
-  useEffect(() => {
-    setIsFavorite(true) //props.item.isFavorite
-  }, [props.item.isFavorite]);
 
   const housingIcons = {
     House: faHome,
     Apartment: faBuilding,
     Condo: faCity,
   };
+
+  useEffect(() => {
+    const checkFavorited = async () => {
+      const tokenHeader = await authTokenHeader();
+      try {
+        const response = await fetch(`${env.URL}/listings/checkFavorited`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: tokenHeader,
+          },
+          body: JSON.stringify({
+            userId: props.userId,
+            listingId: props.item.id,
+          }),
+        });
+  
+        const data = await response.json();
+        setIsFavorite(data.isFavorited);
+      } catch (e) {
+        return;
+      }
+    };
+  
+    checkFavorited();
+  }, [props.userId, props.item.id]);
+  
 
   const styles = StyleSheet.create({
     container: {
@@ -102,7 +123,7 @@ const ListingCard = (props: any) => {
     favorite: {
       position: "absolute",
       top: 5,
-      right: 5,
+      right: 35,
       zIndex: 1,
     },
     userImage: {
@@ -159,14 +180,6 @@ const ListingCard = (props: any) => {
     props.setCurrentListing(props.item);
   };
 
-  const sendFavorite = () => {
-    setIsFavorite(!isFavorite)
-  };
-
-  const favoriteColor = () => {
-    return isFavorite ? Color(props.isDarkMode).gold : Color(props.isDarkMode).actualWhite;
-  }
-
   return (
     <View
     style={styles.card}
@@ -188,11 +201,11 @@ const ListingCard = (props: any) => {
                 />
               </View>
             ) : (
-              null
-              // <Pressable style={styles.favorite} onPress={sendFavorite}>
-              //   <FontAwesomeIcon style={styles.icon} icon={faStar} size={30} color={favoriteColor()} />
-              //   <FontAwesomeIcon style={styles.iconBorder} icon={faStar} size={32} color={Color(props.isDarkMode).actualWhite} />
-              // </Pressable>
+              isFavorite && (
+                <View style={styles.favorite}>
+                  <FontAwesomeIcon style={styles.icon} icon={faHeart} size={30} color="red" />     
+                </View>
+              )
             )
           }
 

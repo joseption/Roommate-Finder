@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleSheet, TouchableHighlight, Platform } from
 import FavoriteListings from '../listings/favorite-listings';
 import CreateListing from '../listings/create-listing';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faSearch, faStar, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faStar, faPlusCircle, faHeart } from '@fortawesome/free-solid-svg-icons';
 import { Color, Radius } from '../../style';
 import { getLocalStorage, Listings_Screen } from '../../helper';
 import _Image from '../control/image';
@@ -167,7 +167,7 @@ const BottomNavbar = (props: any) => {
         >
           <FontAwesomeIcon
           style={styles.icon}
-          icon={faStar} size={12}
+          icon={faHeart} size={12}
           color={props.currentScreen === Listings_Screen.favorites ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text}
           />
         </View>

@@ -57,7 +57,7 @@ router.post('/', async (req: Request, res: Response) => {
     const payload: payload = req.body[0];
     const userId = payload.userId;
 
-    const UCF_ADDRESS = 'University of Central Florida, Orlando, FL';
+    const UCF_ADDRESS = '4000 Central Florida Blvd, Orlando, FL 32816';
     const {
       name,
       images,
@@ -73,6 +73,7 @@ router.post('/', async (req: Request, res: Response) => {
       zipcode,
     } = req.body;
     const uploadImages = [];
+
     const fullAddress = `${address}, ${city}, FL ${zipcode}`;
     if ((await validateAddress(fullAddress)) === false) {
       return res.status(400).json({ Error: 'Invalid address' });
@@ -87,6 +88,7 @@ router.post('/', async (req: Request, res: Response) => {
       }
     );
     const distanceToUcf = Math.round(distanceMatrixResponse.data.distance[1]);
+
     if (!name) {
       return res.status(400).json({ Error: 'Name is required' });
     }
@@ -155,6 +157,8 @@ router.post('/', async (req: Request, res: Response) => {
 // * update a listing
 router.put('/:listingId', async (req: Request, res: Response) => {
   try {
+
+    const UCF_ADDRESS = '4000 Central Florida Blvd, Orlando, FL 32816';
     const {
       name,
       images,
@@ -169,8 +173,22 @@ router.put('/:listingId', async (req: Request, res: Response) => {
       size,
       zipcode,
       deleteImages,
-      distanceToUcf,
     } = req.body;
+
+    const fullAddress = `${address}, ${city}, FL ${zipcode}`;
+    if ((await validateAddress(fullAddress)) === false) {
+      return res.status(400).json({ Error: 'Invalid address' });
+    }
+    const distanceMatrixResponse = await axios.get(
+      `https://www.mapquestapi.com/directions/v2/routematrix?key=${process.env.MAPQUEST_API_KEY}`,
+      {
+        params: {
+          from: UCF_ADDRESS,
+          to: fullAddress,
+        },
+      }
+    );
+    const distanceToUcf = Math.round(distanceMatrixResponse.data.distance[1]);
 
     const listing = await prisma.listings.findFirst({
       where: {

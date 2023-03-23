@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View, Image, TouchableHighlight, Platform, ActivityIndicator, RefreshControl } from "react-native";
+import { ScrollView, StyleSheet, View, Image, TouchableHighlight, Platform, ActivityIndicator, RefreshControl, TouchableOpacity } from "react-native";
 import { Color, FontSize, Radius, Style } from "../../style";
 import { authTokenHeader, env, getLocalStorage, Listings_Screen, navProp, NavTo, userId} from "../../helper";
 import _Button from "../control/button";
@@ -7,7 +7,7 @@ import _Text from "../control/text";
 import { useState, useEffect } from "react";
 import Swiper from "react-native-swiper/src";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faHome, faBuilding, faCity, faBed, faBath, faRuler, faPaw, faMapMarkerAlt} from "@fortawesome/free-solid-svg-icons";
+import { faHome, faBuilding, faCity, faBed, faBath, faRuler, faPaw, faMapMarkerAlt, faHeart} from "@fortawesome/free-solid-svg-icons";
 import { useNavigation } from "@react-navigation/native";
 
 const ListingView = (props: any) => {
@@ -18,6 +18,8 @@ const ListingView = (props: any) => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+
 
   const refresh = () => {
     setRefreshing(true);
@@ -79,11 +81,59 @@ const ListingView = (props: any) => {
     }
   }
 
-  const getSingleListing = async () => {
-    let id = props.currentListing.id;
-    if (id) {
+  const toggleFavorite = async () => {
+    const myId = await userId();
+    const listingId = props.currentListing.id;
+    console.log("listingID:" + listingId)
+    const url = isFavorite ? `${env.URL}/listings/unfavorite/${listingId}` : `${env.URL}/listings/favorite/${listingId}`;
+
+    try {
       const tokenHeader = await authTokenHeader();
-      let res = await fetch(`${env.URL}/listings/${id}`, {
+      await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': tokenHeader,
+        },
+        body: JSON.stringify([{ userId: myId }]),
+      });
+
+      setIsFavorite(!isFavorite);
+    } catch (e) {
+      return;
+    }
+  };
+
+  useEffect(() => {
+    const checkFavorited = async () => {
+      const myId = await userId();
+      const listingId = props.currentListing.id;
+      try {
+        const tokenHeader = await authTokenHeader();
+        const response = await fetch(`${env.URL}/listings/checkFavorited`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'authorization': tokenHeader,
+          },
+          body: JSON.stringify({ userId: myId, listingId }),
+        });
+
+        const data = await response.json();
+        setIsFavorite(data.isFavorited);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    checkFavorited();
+  }, [props.currentListing]);
+
+  const getSingleListing = async () => {
+    let listingId = props.currentListing.id;
+    if (listingId) {
+      const tokenHeader = await authTokenHeader();
+      let res = await fetch(`${env.URL}/listings/${listingId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -416,6 +466,11 @@ const ListingView = (props: any) => {
       borderRadius: Radius.round,
       backgroundColor: Color(props.isDarkMode).gold
     },
+    heartButton: {
+      padding: 10,
+      borderRadius: Radius.round,
+      backgroundColor: Color(props.isDarkMode).white,
+    },
     deleteButton: {
       padding: 10,
       borderRadius: Radius.round,
@@ -503,17 +558,56 @@ const ListingView = (props: any) => {
           ))}
         </Swiper>
 
-        <_Text
-        isDarkMode={props.isDarkMode}
-        style={styles.bigTitle}>
-          {currentListing.name}
-        </_Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flex: 1 }}>
+            <_Text
+              isDarkMode={props.isDarkMode}
+              style={styles.bigTitle}>
+                {currentListing.name}
+            </_Text>
 
-        <_Text
-        isDarkMode={props.isDarkMode}
-        style={styles.price}>
-          ${currentListing.price} / month
-        </_Text>
+            <_Text
+              isDarkMode={props.isDarkMode}
+              style={styles.price}>
+                ${currentListing.price} / month
+            </_Text>
+          </View>
+
+          <View>
+            {!isMe ? (<TouchableHighlight
+              onPress={toggleFavorite}
+              underlayColor={Color(props.isDarkMode).black}
+              style={[
+                styles.heartButton,
+                { backgroundColor: Color(props.isDarkMode).black},
+              ]}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <FontAwesomeIcon
+                  size={20}
+                  color={isFavorite ? 'red' : Color(props.isDarkMode).white}
+                  style={styles.backIcon}
+                  icon={faHeart}
+                >
+                </FontAwesomeIcon>
+                <_Text
+                  style={{
+                    color: isFavorite ? 'red' : Color(props.isDarkMode).white,
+                    marginLeft: 5,
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Favorite
+                </_Text>
+              </View>
+            </TouchableHighlight>
+            ):
+            (null)
+            }    
+          </View>
+
+        </View>
+
 
         <View style={styles.section}>
           <_Text

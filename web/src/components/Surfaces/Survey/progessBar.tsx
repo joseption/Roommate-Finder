@@ -10,29 +10,9 @@ export default function ProgessBar({
   className = "",
   ...rest
 }: Props) {
-  //get the percentage of the progress bar in ratio of 6
-  let Percentage = (QuestionsAnswered / TotalnumberOfquestions) * 100;
-  //round percentage to nearest 10
-  Percentage = Math.round(Percentage / 10) * 10;
-  let ratio = 0;
-  if (Percentage < 10) {
-    ratio = 10;
-  }
-  if (Percentage >= 10 && Percentage < 25) {
-    ratio = 25;
-  }
-  if (Percentage >= 25 && Percentage < 50) {
-    ratio = 50;
-  }
-  if (Percentage >= 50 && Percentage < 75) {
-    ratio = 75;
-  }
-  if (Percentage >= 75 && Percentage < 100) {
-    ratio = 85;
-  }
-  if (Percentage === 100) {
-    ratio = 100;
-  }
+  const Percentage = Math.floor(
+    (QuestionsAnswered / TotalnumberOfquestions) * 100
+  );
 
   return (
     <div
@@ -43,7 +23,7 @@ export default function ProgessBar({
         className={
           "rounded-full bg-yellow-500 p-2 text-center text-sm font-medium leading-none text-white"
         }
-        style={{ width: `${ratio}%` }}
+        style={{ width: `${Percentage}%` }}
       >
         {Percentage}%
       </div>

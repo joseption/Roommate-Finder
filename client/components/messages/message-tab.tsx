@@ -30,10 +30,8 @@ const MessageTab = ({typing, chat, setCurrentChat, showPanel, updateShowPanel, i
     if (id === userInfo.id) {
       return 'You: ';
     }
-    for (let i = 0; i < chat.users.length; i++) {
-      if (chat.users[i].id === id) {
-        return chat.users[i].first_name + ': ';
-      }
+    if (chat?.userInfo?.id === id) {
+      return chat.userInfo.first_name + ': ';
     }
     return '';
   }
@@ -55,15 +53,15 @@ const MessageTab = ({typing, chat, setCurrentChat, showPanel, updateShowPanel, i
   };
 
   const getUserIcon = () => {
-    if (chat?.users[0]?.image)
-      return {uri: chat.users[0].image};
+    if (chat?.userInfo?.image)
+      return {uri: chat.userInfo.image};
     else
       return require('../../assets/images/user.png');
   }
 
   const unreadText = () => {
     let style = [];
-    if (chat && chat.notifCount > 0) {
+    if (chat && chat.notificationCount > 0) {
       style.push(styles.unreadText);
     }
 
@@ -72,7 +70,7 @@ const MessageTab = ({typing, chat, setCurrentChat, showPanel, updateShowPanel, i
 
   const imgStyle = () => {
     let style = [];
-    if (chat?.users[0]?.image) {
+    if (chat?.userInfo?.image) {
       style.push({});
     }
     else {
@@ -187,8 +185,8 @@ const MessageTab = ({typing, chat, setCurrentChat, showPanel, updateShowPanel, i
       <View style={styles.content}>
         <View>
           <_Image
-          height={chat?.users[0]?.image ? 50 : 40}
-          width={chat?.users[0]?.image ? 50 : 40}
+          height={chat?.userInfo?.image ? 50 : 40}
+          width={chat?.userInfo?.image ? 50 : 40}
           style={[styles.image, imgStyle()]}
           containerStyle={styles.imageContainerStyle}
           source={getUserIcon()}
@@ -208,19 +206,19 @@ const MessageTab = ({typing, chat, setCurrentChat, showPanel, updateShowPanel, i
           numberOfLines={1}
           style={[styles.msgText, unreadText()]}
           >
-            {chat?.users[0]?.first_name + ' ' + chat?.users[0]?.last_name}
+            {chat?.userInfo?.first_name + ' ' + chat?.userInfo?.last_name}
           </_Text>
           <_Text
           numberOfLines={1}
           style={[styles.msgText, unreadText()]}
           >
-            {getPrefix(chat.latestMessage?.userId) + getContent(chat.latestMessage?.content)}
+            {getPrefix(chat.lastMessage?.userId) + getContent(chat.lastMessage?.content)}
           </_Text>
         </View>
         <View
         style={styles.notificationContainer}
         >
-          {displayNotification(chat.notifCount)}
+          {displayNotification(chat.notificationCount)}
         </View>
       </View>
     </TouchableHighlight>

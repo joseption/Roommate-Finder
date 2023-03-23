@@ -1,9 +1,6 @@
-import { useEffect, useRef } from "react";
-import { View, StyleSheet, Text, Image, Animated } from "react-native";
-import { isDarkMode } from "../../helper";
+import { View, StyleSheet } from "react-native";
 import { Color, Radius } from "../../style";
 import _Text from "../control/text";
-import { TypingAnimation } from 'react-native-typing-animation';
 import _Image from "../control/image";
 
 interface Props {
@@ -62,13 +59,13 @@ const Message = ({ message, userInfo, isTypingIndicator, isDarkMode, image }: Pr
       backgroundColor: Color(isDarkMode).msgToBG,
       color: Color(isDarkMode).msgToFG,
       alignSelf: 'flex-end',
-      maxWidth: '60%'
+      maxWidth: '80%'
     },
     theirMessage: {
       backgroundColor: Color(isDarkMode).msgFromBG,
       alignSelf: 'flex-start',
       color: Color(isDarkMode).msgFromFG,
-      maxWidth: '60%',
+      maxWidth: '80%',
     },
     theirNoImgLine: {
       marginRight: 43

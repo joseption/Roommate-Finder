@@ -68,6 +68,9 @@ export const App = (props: any) => {
   const [openChatFromPush,setOpenChatFromPush] = useState('');
   const [receiveMessage,setReceiveMessage] = useState(null);
   const [receiveTyping,setReceiveTyping] = useState(null);
+  const [receiveNotification,setReceiveNotification] = useState(null);
+  const [receiveBlock,setReceiveBlock] = useState(null);
+  const [receiveChat,setReceiveChat] = useState(null);
   const appState = useRef(AppState.currentState);
   const [forceUpdateAccount, setForceUpdateAccount] = useState(false);
   const [askPermissions, setAskPermissions] = useState(false);
@@ -77,6 +80,36 @@ export const App = (props: any) => {
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
+
+  useEffect(() => {
+    socket.on("connect_error", () => {
+      socket.connect();
+    });
+
+    // Listen for messages being sent over socket
+    socket.on('receive_message', (data: any) => {
+      setReceiveMessage(data);
+    });
+
+    // Listen for typing indicator socket
+    socket.on('receive_typing', (data: any) => {
+      setReceiveTyping(data);
+    });
+
+    socket.on('receive_notification', (data: any) => {
+      setReceiveNotification(data);
+    });
+
+    socket.on('receive_block', (data: any) => {
+      setReceiveBlock(data);
+    });
+
+    socket.on('receive_chat', (data: any) => {
+      setReceiveChat(data);
+    });
+
+    getChats();
+  }, [socket.connected]);
 
   useEffect(() => {
     if (addMessageCount === 0) {
@@ -281,20 +314,6 @@ export const App = (props: any) => {
   }, []);
 
   useEffect(() => {
-    if (socket === null) return;
-
-    // Listen for messages being sent over socket
-    socket.on('receive_message', (data: any) => {
-      setReceiveMessage(data);
-    });
-
-    // Listen for typing indicator socket
-    socket.on('receive_typing', (data: any) => {
-      setReceiveTyping(data);
-    });
-  }, []);
-
-  useEffect(() => {
     const dimsChanged = Dimensions.addEventListener("change", (e) => setMobile(isMobile()));
     const back = BackHandler.addEventListener('hardwareBackPress', onBackPress);
     return () => {
@@ -347,6 +366,75 @@ export const App = (props: any) => {
     {
       hasError = true;
     }  
+  }
+
+  const getChats = async () => {
+    const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
+    if (userInfo.id) {
+      const tokenHeader = await authTokenHeader();
+      fetch(
+        `${environ.URL}/chats/allChats`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      ).then(async ret => {
+        const res = JSON.parse(await ret.text());
+        if (res.Error) {
+          console.warn("Error: ", res.Error);
+        }
+        else {
+          let totalNotifications = 0;
+          for (let i = 0; i < res.length; i++) {
+            if (res[i]?.Notification) {
+              let count = 0;
+              res[i]?.Notification.map((x: any) => {
+                if (x.userId === userInfo?.id)
+                  count++;
+              })
+              Object.assign(res[i], {notificationCount: count});
+              totalNotifications += count;
+            }
+          }
+          connectToChatRooms(res);
+          setMessageCount(totalNotifications);
+        }
+      });
+    }
+  }
+
+  useEffect(() => {
+    handleNotification();
+  }, [receiveNotification]);
+
+  const handleNotification = async () => {
+    if (receiveNotification) {
+      const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
+      let chat = (receiveNotification as any);
+      if (chat.userId !== userInfo?.id)
+        return;
+
+      const tokenHeader = await authTokenHeader();
+      return fetch(
+        `${environ.URL}/chats/status/${chat.chatId}`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+      ).then(async ret => {
+        const res = JSON.parse(await ret.text());
+        if (res.Error) {
+          console.warn("Error: ", res.Error);
+        }
+        else {
+          let muted = res.muted.find((x: any) => x === userInfo?.id);
+          if (!muted) {
+            setAddMessageCount(1);
+          }
+        }
+      });
+    }
+  }
+
+  const connectToChatRooms = async (chats: any) => {
+    if (chats.length === 0)
+      return;
+    const rooms = await chats.map((chat: any) => {
+      return chat.id;
+    })
+    socket.emit('join_room', rooms)
   }
 
   // Resend all combined unread messages as one to the current user
@@ -951,6 +1039,9 @@ export const App = (props: any) => {
                   receiveTyping={receiveTyping}
                   setAddMessageCount={setAddMessageCount}
                   showingMessagePanel={showingMessagePanel}
+                  receiveNotification={receiveNotification}
+                  receiveBlock={receiveBlock}
+                  receiveChat={receiveChat}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen

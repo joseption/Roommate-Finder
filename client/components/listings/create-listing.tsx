@@ -76,7 +76,6 @@ const CreateListing = (props: any) => {
     rooms: 0,
     size: 0,
     zipcode: '',
-    distanceToUcf: 0,
     images: [],
     deleteImages: []
   });
@@ -276,35 +275,6 @@ const CreateListing = (props: any) => {
     });
   };
 
-  const compareDistances = (UCF_latitude: number, UCF_longitude: number, listing_latitude: number, listing_longitude: number) => {
-    
-    const earth_radius = 3963; 
-    const UCF_latitude_radians = UCF_latitude * Math.PI / 180;
-    const listing_latitude_radians = listing_latitude * Math.PI / 180;
-    const change_in_latitude = (listing_latitude - UCF_latitude) * Math.PI / 180;
-    const change_in_longitude = (listing_longitude - UCF_longitude) * Math.PI / 180;
-
-    /* Used something called Haversine Formula, basically it finds the distance of two points on a sphere */
-    const math = Math.pow(Math.sin(change_in_latitude / 2), 2) +
-      Math.cos(UCF_latitude_radians) * Math.cos(listing_latitude_radians) *
-      Math.pow(Math.sin(change_in_longitude / 2), 2);
-
-    const result = 2 * Math.asin(Math.sqrt(math));
-    const distance = earth_radius * result;
-
-    return distance;
-  }
-
-  const calculateDistance = async (response: any) => {
-    const listingData = response.results[0].locations[0].latLng;
-    const UCF = { lat: 28.602427, lng: -81.200058 };
-    let distUcf = Math.round(compareDistances(UCF.lat, UCF.lng, listingData.lat, listingData.lng));
-      
-    console.log("distance: " + distUcf)
-    formData.distanceToUcf = distUcf;
-    handleChange('distanceToUcf', distUcf);
-  };
-
   const close = () => {
     if (props.isManualNavigate) {
       props.isManualNavigate?.action();
@@ -357,7 +327,7 @@ const CreateListing = (props: any) => {
           });
       
           if (locationsInFlorida.length > 0) {
-            calculateDistance(res);
+            return;
           } else {
             hasError = true;
           }
@@ -373,12 +343,9 @@ const CreateListing = (props: any) => {
   };
 
   const handleSubmitListing = async () => {
-    // Remove all white space and comma separate fields
-    let address = formData.address.trim().replace(/\s/g, '+');
-    let city = formData.city.trim().replace(/\s/g, '+');
-    let zipcode = formData.zipcode.trim().replace(/\s/g, '+');
-    const validAddress = await checkAddressValidity(address + "," + city + "," + zipcode);
-  
+
+    const validAddress = await checkAddressValidity(formData.address + ", " + formData.city + ", FL " + formData.zipcode);
+    
     if (validAddress) {
       createListing();
     } else {

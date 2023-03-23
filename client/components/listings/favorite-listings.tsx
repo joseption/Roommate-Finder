@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
-import { Listings_Screen } from '../../helper';
+import { authTokenHeader, env, Listings_Screen } from '../../helper';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
 import _Text from '../control/text';
@@ -11,6 +11,8 @@ const FavoriteListings = (props: any) => {
   const [favoriteListings, setFavoriteListings] = useState<JSX.Element[]>([]);
   const [refreshing, setRefreshing] = useState(false);  
   const [count, setCount] = useState(0);  
+  const [favoritedListings, setFavoritedListings] = useState([]);
+
 
   const refresh = () => {
     setRefreshing(true);
@@ -20,33 +22,62 @@ const FavoriteListings = (props: any) => {
 
   useEffect(() => {
     generateFavoriteListings();
-  }, [props.allListings]);
+  }, [props.allListings, favoritedListings]);
+
+  useEffect(() => {
+    fetchFavoritedListings();
+  }, []);
+  
+
+  const fetchFavoritedListings = async () => {
+    try {
+      const res = await fetch(`${env.URL}/listings/favorites/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': await authTokenHeader(),
+        },
+      })
+      
+      const data = await res.json();
+      setFavoritedListings(data.favoritedListings); 
+
+    } catch (e) {
+      return;
+    }
+  };
+  
+  
 
   const generateFavoriteListings = () => {
     let cnt = 0;
-    const favorites = props.allListings
+  
+    const createdListings = props.allListings
       .filter((item: any) => {
-        if (item.userId === props.userId)
-          cnt++;
-
+        if (item.userId === props.userId) cnt++;
         return item.userId === props.userId;
-      })
-      .map((item: any, key: any) => (
-        <ListingCard
-          isDarkMode={props.isDarkMode}
-          setCurrentListing={props.setCurrentListing}
-          userId={props.userId}
-          userImage={props.userImage}
-          listingUserId={item.userId}
-          key={key}
-          item={item}
-          mobile={props.mobile}
-        />
-      ));
-    
+      });
+  
+    const favorites = [...createdListings, ...favoritedListings].map((item: any, key: any) => (
+      <ListingCard
+        isDarkMode={props.isDarkMode}
+        setCurrentListing={props.setCurrentListing}
+        userId={props.userId}
+        userImage={props.userImage}
+        listingUserId={item.userId}
+        key={key}
+        item={item}
+        mobile={props.mobile}
+      />
+    ));
+  
+    cnt += favoritedListings.length;
     setCount(cnt);
     setFavoriteListings(favorites);
   };
+  
+  
+  
   
   const containerStyle = () => {
     var container = Color(props.isDarkMode).contentBackground;

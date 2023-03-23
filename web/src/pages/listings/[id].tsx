@@ -1,5 +1,6 @@
 import { Tab } from "@headlessui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { debounce } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -26,6 +27,26 @@ export default function IndividualListingPage() {
   const router = useRouter();
   const { id } = router.query;
   const [isfavorited, setIsfavorited] = useState<boolean>(false);
+  const [tempIsFavorite, setTempIsFavorite] = useState<boolean>();
+
+  const debouncedFavorite = React.useRef(
+    debounce((isFav: boolean) => {
+      if (isFav) {
+        unfavoriteListingMutation();
+      } else {
+        favoriteListingMutation();
+      }
+      setTempIsFavorite(!isFav);
+    }, 500)
+  ).current;
+
+  const handleFavoriteChange = (
+    e: React.MouseEvent<SVGSVGElement, MouseEvent>
+  ) => {
+    setTempIsFavorite(!tempIsFavorite);
+    debouncedFavorite(isfavorited);
+  };
+
   const { data, isLoading } = useQuery({
     queryKey: ["listing", id],
     queryFn: () => GetListing(id as string),
@@ -53,6 +74,7 @@ export default function IndividualListingPage() {
     queryFn: () => CheckFavorited(userData ? userData?.id : "", id as string),
     onSuccess: (data) => {
       setIsfavorited(data.isFavorited);
+      setTempIsFavorite(data.isFavorited);
       console.log(data);
     },
     onError: (err) => {
@@ -75,16 +97,6 @@ export default function IndividualListingPage() {
       deleteListing();
     }
   }
-  const { mutate: validateChat } = useMutation({
-    mutationFn: () =>
-      AccessChat(data?.userId as string, userData?.id as string),
-    onSuccess: () => {
-      void router.push("/messages");
-    },
-    onError: (err: Error) => {
-      toast.error(err.message);
-    },
-  });
 
   const { mutate: favoriteListingMutation } = useMutation({
     mutationFn: () => FavoriteListing(id as string),
@@ -107,16 +119,6 @@ export default function IndividualListingPage() {
       toast.error(err.message);
     },
   });
-
-  function messageOwner() {
-    // access chat with owner
-    const ownerId = data?.userId;
-    if (userData?.id == ownerId) {
-      // cant message yourself
-      return;
-    }
-    validateChat();
-  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -226,25 +228,19 @@ export default function IndividualListingPage() {
 
             <div className="mt-10 flex">
               <button
-                onClick={messageOwner}
+                onClick={() => console.log("no messaging on web")}
                 className="flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-400 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
               >
                 Message Owner
               </button>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                fill={isfavorited ? "#F1BA43" : "none"}
+                fill={tempIsFavorite ? "#F1BA43" : "none"}
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
                 className="my-auto ml-4 h-8 w-8"
-                onClick={() => {
-                  if (isfavorited) {
-                    unfavoriteListingMutation();
-                  } else {
-                    favoriteListingMutation();
-                  }
-                }}
+                onClick={(e) => handleFavoriteChange(e)}
               >
                 <path
                   strokeLinecap="round"

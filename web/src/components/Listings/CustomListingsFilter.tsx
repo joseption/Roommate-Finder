@@ -115,6 +115,7 @@ export default function CustomListingFilterPopover({
                 className="text-primary focus:ring-primary rounded"
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onChange={handleIsFavoritedChange}
+                checked={isFavorited}
               />
               <label htmlFor="favorited" className="ml-4 block">
                 Favorited Only

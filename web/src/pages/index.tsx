@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 
@@ -134,7 +135,7 @@ export default function Example() {
               </div>
               <div className="mt-20">
                 <div>
-                  <a href="#" className="inline-flex space-x-4">
+                  <Link href="#" className="inline-flex space-x-4">
                     <span className="rounded bg-yellow-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-yellow-500">
                       whats news
                     </span>
@@ -154,7 +155,7 @@ export default function Example() {
                         />
                       </svg>
                     </span>
-                  </a>
+                  </Link>
                 </div>
                 <div className="mt-6 sm:max-w-xl">
                   <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
@@ -340,9 +341,12 @@ export default function Example() {
                   ))}
                 </dl>
                 <div className="mt-10">
-                  <a href="#" className="text-base font-medium text-yellow-500">
+                  <Link
+                    href="#"
+                    className="text-base font-medium text-yellow-500"
+                  >
                     Learn more
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -425,25 +429,25 @@ export default function Example() {
           >
             {footerNavigation.main.map((item) => (
               <div key={item.name} className="px-5 py-2">
-                <a
+                <Link
                   href={item.href}
                   className="text-base text-gray-400 hover:text-gray-300"
                 >
                   {item.name}
-                </a>
+                </Link>
               </div>
             ))}
           </nav>
           <div className="mt-8 flex justify-center space-x-6">
             {footerNavigation.social.map((item) => (
-              <a
+              <Link
                 key={item.name}
                 href={item.href}
                 className="text-gray-400 hover:text-gray-300"
               >
                 <span className="sr-only">{item.name}</span>
                 <item.icon className="h-6 w-6" aria-hidden="true" />
-              </a>
+              </Link>
             ))}
           </div>
           <p className="mt-8 text-center text-base text-gray-400">

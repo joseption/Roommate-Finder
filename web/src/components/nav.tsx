@@ -81,7 +81,7 @@ export default function Nav() {
               <div className="flex h-16 justify-between">
                 <div className="flex">
                   <div className="relative flex shrink-0 items-center">
-                    <a href="/">
+                    <Link href="/">
                       <Image
                         className="block h-8 w-auto"
                         src="/RoomFin/Logo/SVG FIles/logo-01.svg"
@@ -89,7 +89,7 @@ export default function Nav() {
                         height={50}
                         alt="Roomfin Logo"
                       ></Image>
-                    </a>
+                    </Link>
                   </div>
                   <div className="flex sm:-my-px sm:ml-10 sm:space-x-8 ">
                     {navigation.map((item) => (

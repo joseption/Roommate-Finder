@@ -18,6 +18,7 @@ const MessagesScreen = (props: any) => {
   const [chatsHaveLoaded, setChatsHaveLoaded] = useState<boolean>(false);
   const navigation = useNavigation<navProp>();
   const [typing, setTyping] = useState<any>([]);
+  const [receiveMsg, setReceiveMsg] = useState(null);
 
   // Initiate by getting the user info
   useEffect(() => {
@@ -50,7 +51,7 @@ const MessagesScreen = (props: any) => {
       else {
         let totalNotifications = 0;
         for (let i = 0; i < res.length; i++) {
-          let muted = res[i].muted.find((x: any) => x === userInfo?.id);
+          let muted = res[i]?.muted.find((x: any) => x === userInfo?.id);
           let count = 0;
           if (!muted) {
             if (res[i]?.Notification) {
@@ -107,14 +108,14 @@ const MessagesScreen = (props: any) => {
   useEffect(() => {
     if (props.receiveTyping) {
       let idx = typing.findIndex((x: any) => {
-        return x.chat === props.receiveTyping.chatId && x.user === props.receiveTyping.userId
+        return x.chat === props.receiveTyping?.chatId && x.user === props.receiveTyping?.userId
       });
 
-      if (props.receiveTyping.isTyping) {
+      if (props.receiveTyping?.isTyping) {
         if (idx < 0) {
           if (props.receiveTyping) {
-            let chat = props.receiveTyping.chatId;
-            let user = props.receiveTyping.userId;
+            let chat = props.receiveTyping?.chatId;
+            let user = props.receiveTyping?.userId;
             if (chat && user) {
               setTyping([...typing, {chat: chat, user: user}]);
             }
@@ -127,6 +128,7 @@ const MessagesScreen = (props: any) => {
         typers.splice(idx, 1)
         setTyping(typers);
       }
+
     }
   }, [props.receiveTyping])
 
@@ -148,21 +150,25 @@ const MessagesScreen = (props: any) => {
       if (newMsg && newMsg.blocked)
         return;
 
+      setReceiveMsg(props.receiveMessage);
       updateTabs(props.receiveMessage);
+      props.setReceiveMessage(null);
     }
   }, [props.receiveMessage])
 
   useEffect(() => {
     if (props.receiveBlock) {
-      updateBlocked(props.receiveBlock.chat);
+      updateBlocked(props.receiveBlock?.chat);
+      props.setReceiveBlock(null);
     }
   }, [props.receiveBlock])
 
   useEffect(() => {
     if (props.receiveChat) {
-      props.socket.emit('join_room', props.receiveChat.id);
+      props.socket.emit('join_room', props.receiveChat?.id);
       const newChats= [props.receiveChat, ...chats];
       setChats(newChats);
+      props.setReceiveChat(null);
     }
   }, [props.receiveChat])
 
@@ -179,13 +185,17 @@ const MessagesScreen = (props: any) => {
   }, [chats, props.openChatFromPush]);
 
   useEffect(() => {
+    console.log('start receive');
     if (props.receiveNotification) {
-      if (props.receiveNotification.userId !== userInfo?.id)
+      console.log(props.receiveNotification);
+      console.log(userInfo?.id);
+      if (props.receiveNotification?.userId === userInfo?.id)
         return;
-
+        console.log('didnt return');
       const rcvChats = chats.map((chat) => {
-        if (chat.id === props.receiveNotification.chatId) {
+        if (chat.id === props.receiveNotification?.chatId) {
           if (currentChat.id === chat.id && showPanel) {
+            console.log('deleting');
             deleteNotifications();
             return chat;
           };
@@ -195,10 +205,13 @@ const MessagesScreen = (props: any) => {
           if (!muted) {
             count = 1;
           }
+          console.log('return 1');
           return {...chat, notificationCount: (chat.notificationCount + count)};
         }
+        console.log('return 2');
         return chat;
       });
+      console.log('setting chats');
       setChats(rcvChats);
     }
   }, [props.receiveNotification]);
@@ -254,7 +267,7 @@ const MessagesScreen = (props: any) => {
         users.push(user);
         chat = {...chat, users: users, blocked: '', muted: [], notificationCount: 0};
         props.socket.emit('create_chat', chat);
-        const newChats= [chat, ...chats];
+        const newChats = [chat, ...chats];
         props.socket.emit('join_room', chat.id);
         setChats(newChats);
         setCurrentChat(chat);
@@ -435,7 +448,7 @@ const MessagesScreen = (props: any) => {
         updateBlocked={updateBlocked}
         updateMuted={updateMuted}
         isDarkMode={props.isDarkMode}
-        receiveMessage={props.receiveMessage}
+        receiveMessage={receiveMsg}
         receiveTyping={props.receiveTyping}
         typing={typing}
       />

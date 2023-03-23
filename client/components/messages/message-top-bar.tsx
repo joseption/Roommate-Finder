@@ -48,7 +48,7 @@ const MessageTopBar = ({isDarkMode, showPanel, userInfo, updateShowPanel, chat, 
 
   const getUserIcon = () => {
     if (chat?.userInfo.image)
-      return {uri: chat.userInfo.image};
+      return {uri: chat?.userInfo?.image};
     else
       return require('../../assets/images/user.png');
   }

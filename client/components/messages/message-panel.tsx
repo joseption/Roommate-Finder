@@ -45,8 +45,8 @@ const MessagePanel = ({ typing, receiveTyping, receiveMessage, isDarkMode, showP
   }, [showPanel, slideAnimation]);
 
   const image = () => {
-    if (chat && chat.users && chat.users.length > 0) {
-      return chat.userInfo.image;
+    if (chat && chat?.users && chat?.users?.length > 0) {
+      return chat?.userInfo?.image;
     }
     return "";
   }

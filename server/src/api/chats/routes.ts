@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 import { isAuthenticated } from '../../middleware';
 import db from '../../utils/db';
 import { Chat } from '@prisma/client';
+import { blockedChat } from 'api/messages/messagesHelper';
+import { mutedChat } from 'api/notifications/notificationsHelper';
 const router = express.Router();
 
 router.use(isAuthenticated);
@@ -313,6 +315,7 @@ router.get('/status/:chatId', async (req: Request, res: Response) => {
         id: chatId as string,
       },
     });
+    
     return res.status(200).json(chatInfo);
   } catch (err) {
     res.status(400).json(err);

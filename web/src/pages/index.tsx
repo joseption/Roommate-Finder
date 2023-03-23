@@ -3,6 +3,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 
+import LandingNav from "../components/landingNav";
 import { SendSMSLink } from "../request/mutate";
 const stats = [
   { label: "Founded", value: "2023" },
@@ -120,341 +121,344 @@ export default function Example() {
   };
 
   return (
-    <div className="bg-white">
-      <main>
-        {/* Hero section */}
-        <div className="overflow-hidden pt-8 sm:pt-12 lg:relative lg:py-48">
-          <div className="mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-2 lg:gap-24 lg:px-8">
-            <div>
+    <>
+      <LandingNav />
+      <div className="bg-white">
+        <main>
+          {/* Hero section */}
+          <div className="overflow-hidden pt-8 sm:pt-12 lg:relative lg:py-48">
+            <div className="mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-2 lg:gap-24 lg:px-8">
               <div>
-                <img
-                  className="h-11 w-auto"
-                  src="/landingPageIcon.jpg"
-                  alt="Workflow"
-                />
-              </div>
-              <div className="mt-20">
                 <div>
-                  <Link href="#" className="inline-flex space-x-4">
-                    <span className="rounded bg-yellow-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-yellow-500">
-                      whats news
-                    </span>
-                    <span className="inline-flex items-center space-x-1 text-sm font-medium text-yellow-500">
-                      <span>Just shipped version 0.1.0</span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="h-5 w-5"
-                        aria-hidden="true"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </span>
-                  </Link>
+                  <img
+                    className="h-11 w-auto"
+                    src="/landingPageIcon.jpg"
+                    alt="Workflow"
+                  />
                 </div>
-                <div className="mt-6 sm:max-w-xl">
-                  <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
-                    The best way to find your next roommate
-                  </h1>
-                  <p className="mt-6 text-xl text-gray-500">
-                    Do everything you need to find your next roommate in one
-                    place. Have us match you with the perfect roommate, or
-                    search for your own. Enter your number below to get sent a
-                    link to download the app. You can also view potential
-                    matches or listings on the web, but to actually message and
-                    interact you&apos;ll need to use our app.
-                  </p>
-                </div>
-                <form
-                  action="#"
-                  className="mt-12 sm:flex sm:w-full sm:max-w-lg"
-                  onSubmit={(e) => handleFormsubmit(e)}
-                >
-                  <div className="min-w-0 flex-1">
-                    <label htmlFor="hero-email" className="sr-only">
-                      phone number
-                    </label>
-                    <input
-                      id="hero-number"
-                      type="number"
-                      className="block w-full rounded-md border border-gray-300 px-5 py-3 text-base text-gray-900 shadow-sm placeholder:text-gray-500 focus:border-yellow-500 focus:ring-yellow-500"
-                      placeholder="Enter your number"
-                      onChange={(e) => handlePhoneChange(e)}
-                    />
+                <div className="mt-20">
+                  <div>
+                    <Link href="#" className="inline-flex space-x-4">
+                      <span className="rounded bg-yellow-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-yellow-500">
+                        whats news
+                      </span>
+                      <span className="inline-flex items-center space-x-1 text-sm font-medium text-yellow-500">
+                        <span>Just shipped version 0.1.0</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="h-5 w-5"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </span>
+                    </Link>
                   </div>
-                  <div className="mt-4 sm:mt-0 sm:ml-3">
-                    <button
-                      type="submit"
-                      className="block w-full rounded-md border border-transparent bg-yellow-500 px-5 py-3 text-base font-medium text-white shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:px-10"
-                    >
-                      Go
-                    </button>
+                  <div className="mt-6 sm:max-w-xl">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+                      The best way to find your next roommate
+                    </h1>
+                    <p className="mt-6 text-xl text-gray-500">
+                      Do everything you need to find your next roommate in one
+                      place. Have us match you with the perfect roommate, or
+                      search for your own. Enter your number below to get sent a
+                      link to download the app. You can also view potential
+                      matches or listings on the web, but to actually message
+                      and interact you&apos;ll need to use our app.
+                    </p>
                   </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <div className="sm:mx-auto sm:max-w-3xl sm:px-6">
-            <div className="py-12 sm:relative sm:mt-12 sm:py-16 lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-              <div className="relative -mr-40 pl-4 sm:mx-auto sm:max-w-3xl sm:px-0 lg:h-full lg:max-w-none lg:pl-12">
-                <img
-                  className="mx-auto w-full rounded-md shadow-xl ring-1 ring-black ring-opacity-5 lg:h-full lg:w-auto lg:max-w-none"
-                  src="/coffee.jpg"
-                  alt="people"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Testimonial/stats section */}
-        <div className="relative mt-20">
-          <div className="lg:mx-auto lg:grid lg:max-w-7xl lg:grid-cols-2 lg:items-start lg:gap-24 lg:px-8">
-            <div className="relative sm:py-16 lg:py-0">
-              <div
-                aria-hidden="true"
-                className="hidden sm:block lg:absolute lg:inset-y-0 lg:right-0 lg:w-screen"
-              >
-                <div className="absolute inset-y-0 right-1/2 w-full rounded-r-3xl bg-gray-50 lg:right-72" />
-                <svg
-                  className="absolute top-8 left-1/2 -ml-3 lg:-right-8 lg:left-auto lg:top-12"
-                  width={404}
-                  height={392}
-                  fill="none"
-                  viewBox="0 0 404 392"
-                >
-                  <defs>
-                    <pattern
-                      id="02f20b47-fd69-4224-a62a-4c9de5c763f7"
-                      x={0}
-                      y={0}
-                      width={20}
-                      height={20}
-                      patternUnits="userSpaceOnUse"
-                    >
-                      <rect
-                        x={0}
-                        y={0}
-                        width={4}
-                        height={4}
-                        className="text-gray-200"
-                        fill="currentColor"
+                  <form
+                    action="#"
+                    className="mt-12 sm:flex sm:w-full sm:max-w-lg"
+                    onSubmit={(e) => handleFormsubmit(e)}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <label htmlFor="hero-email" className="sr-only">
+                        phone number
+                      </label>
+                      <input
+                        id="hero-number"
+                        type="number"
+                        className="block w-full rounded-md border border-gray-300 px-5 py-3 text-base text-gray-900 shadow-sm placeholder:text-gray-500 focus:border-yellow-500 focus:ring-yellow-500"
+                        placeholder="Enter your number"
+                        onChange={(e) => handlePhoneChange(e)}
                       />
-                    </pattern>
-                  </defs>
-                  <rect
+                    </div>
+                    <div className="mt-4 sm:mt-0 sm:ml-3">
+                      <button
+                        type="submit"
+                        className="block w-full rounded-md border border-transparent bg-yellow-500 px-5 py-3 text-base font-medium text-white shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:px-10"
+                      >
+                        Go
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <div className="sm:mx-auto sm:max-w-3xl sm:px-6">
+              <div className="py-12 sm:relative sm:mt-12 sm:py-16 lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+                <div className="relative -mr-40 pl-4 sm:mx-auto sm:max-w-3xl sm:px-0 lg:h-full lg:max-w-none lg:pl-12">
+                  <img
+                    className="mx-auto w-full rounded-md shadow-xl ring-1 ring-black ring-opacity-5 lg:h-full lg:w-auto lg:max-w-none"
+                    src="/coffee.jpg"
+                    alt="people"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Testimonial/stats section */}
+          <div className="relative mt-20">
+            <div className="lg:mx-auto lg:grid lg:max-w-7xl lg:grid-cols-2 lg:items-start lg:gap-24 lg:px-8">
+              <div className="relative sm:py-16 lg:py-0">
+                <div
+                  aria-hidden="true"
+                  className="hidden sm:block lg:absolute lg:inset-y-0 lg:right-0 lg:w-screen"
+                >
+                  <div className="absolute inset-y-0 right-1/2 w-full rounded-r-3xl bg-gray-50 lg:right-72" />
+                  <svg
+                    className="absolute top-8 left-1/2 -ml-3 lg:-right-8 lg:left-auto lg:top-12"
                     width={404}
                     height={392}
-                    fill="url(#02f20b47-fd69-4224-a62a-4c9de5c763f7)"
-                  />
-                </svg>
-              </div>
-              <div className="relative mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:max-w-none lg:px-0 lg:py-20">
-                {/* Testimonial card*/}
-                <div className="relative overflow-hidden rounded-2xl pt-64 pb-10 shadow-xl">
-                  <img
-                    className="absolute inset-0 h-full w-full object-cover"
-                    src="/studentheadphones.jpg"
-                    alt=""
-                  />
-                  <div className="absolute inset-0 bg-yellow-500 mix-blend-multiply" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-yellow-600 via-yellow-600 opacity-90" />
-                  <div className="relative px-8">
-                    <blockquote className="mt-8">
-                      <div className="relative text-lg font-medium text-white md:grow">
-                        <p className="relative">
-                          As someone who spends most of my time in my apartment
-                          working on side projects or classwork, finding a good
-                          roommate who is respectful and considerate is a must.
-                          During my first year at UCF, I had a roommate who was
-                          constantly loud and would play music at all hours of
-                          the night. I was able to find a new roommate through
-                          Roommate Finder and have had a much better experience
-                          since.
-                        </p>
-                      </div>
+                    fill="none"
+                    viewBox="0 0 404 392"
+                  >
+                    <defs>
+                      <pattern
+                        id="02f20b47-fd69-4224-a62a-4c9de5c763f7"
+                        x={0}
+                        y={0}
+                        width={20}
+                        height={20}
+                        patternUnits="userSpaceOnUse"
+                      >
+                        <rect
+                          x={0}
+                          y={0}
+                          width={4}
+                          height={4}
+                          className="text-gray-200"
+                          fill="currentColor"
+                        />
+                      </pattern>
+                    </defs>
+                    <rect
+                      width={404}
+                      height={392}
+                      fill="url(#02f20b47-fd69-4224-a62a-4c9de5c763f7)"
+                    />
+                  </svg>
+                </div>
+                <div className="relative mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:max-w-none lg:px-0 lg:py-20">
+                  {/* Testimonial card*/}
+                  <div className="relative overflow-hidden rounded-2xl pt-64 pb-10 shadow-xl">
+                    <img
+                      className="absolute inset-0 h-full w-full object-cover"
+                      src="/studentheadphones.jpg"
+                      alt=""
+                    />
+                    <div className="absolute inset-0 bg-yellow-500 mix-blend-multiply" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-yellow-600 via-yellow-600 opacity-90" />
+                    <div className="relative px-8">
+                      <blockquote className="mt-8">
+                        <div className="relative text-lg font-medium text-white md:grow">
+                          <p className="relative">
+                            As someone who spends most of my time in my
+                            apartment working on side projects or classwork,
+                            finding a good roommate who is respectful and
+                            considerate is a must. During my first year at UCF,
+                            I had a roommate who was constantly loud and would
+                            play music at all hours of the night. I was able to
+                            find a new roommate through Roommate Finder and have
+                            had a much better experience since.
+                          </p>
+                        </div>
 
-                      <footer className="mt-4">
-                        <p className="text-base font-semibold text-yellow-200">
-                          UCF Student
-                        </p>
-                      </footer>
-                    </blockquote>
+                        <footer className="mt-4">
+                          <p className="text-base font-semibold text-yellow-200">
+                            UCF Student
+                          </p>
+                        </footer>
+                      </blockquote>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:px-0">
+                {/* Content area */}
+                <div className="pt-12 sm:pt-16 lg:pt-20">
+                  <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    How it works
+                  </h2>
+                  <div className="mt-6 space-y-6 text-gray-500">
+                    <p className="text-base leading-7">
+                      UCF students can sign up for an account with our service
+                      using an active @knights.ucf.edu email address. Once you
+                      have an account, you can create a profile and fill out a
+                      short survey indicating your preferences in a roommate.
+                      This will generate your match percentage to other users in
+                      our service. The survey is optional, but we recommend
+                      filling it out to get the best results.
+                    </p>
+                    <p className="text-base leading-7">
+                      Now you can explore different profiles with the ability to
+                      filter on things you care about the most. If you
+                      aren&apos;t looking for a roommate, and just need housing,
+                      you can go straight to the listing portion of our app.
+                    </p>
+                    <p className="text-base leading-7">
+                      Once you&apos;ve found a potential roommate or listing
+                      that might be a good fit, you can directly message them
+                      through our service without having to reveal your personal
+                      phone or email. Then proceed to check out listings with
+                      your new potential roommate.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stats section */}
+                <div className="mt-10">
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-8">
+                    {stats.map((stat) => (
+                      <div
+                        key={stat.label}
+                        className="border-t-2 border-gray-100 pt-6"
+                      >
+                        <dt className="text-base font-medium text-gray-500">
+                          {stat.label}
+                        </dt>
+                        <dd className="text-3xl font-extrabold tracking-tight text-gray-900">
+                          {stat.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <div className="mt-10">
+                    <Link
+                      href="#"
+                      className="text-base font-medium text-yellow-500"
+                    >
+                      Learn more
+                    </Link>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="relative mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:px-0">
-              {/* Content area */}
-              <div className="pt-12 sm:pt-16 lg:pt-20">
-                <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                  How it works
-                </h2>
-                <div className="mt-6 space-y-6 text-gray-500">
-                  <p className="text-base leading-7">
-                    UCF students can sign up for an account with our service
-                    using an active @knights.ucf.edu email address. Once you
-                    have an account, you can create a profile and fill out a
-                    short survey indicating your preferences in a roommate. This
-                    will generate your match percentage to other users in our
-                    service. The survey is optional, but we recommend filling it
-                    out to get the best results.
+          {/* things to do on site */}
+          <div className="mt-32">
+            <div className="mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8">
+              <div className="lg:grid lg:grid-cols-2 lg:items-center lg:gap-24">
+                <div>
+                  <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Set up your profile
+                  </h2>
+                  <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
+                    Fill out your profile with your interests and a bio.
                   </p>
-                  <p className="text-base leading-7">
-                    Now you can explore different profiles with the ability to
-                    filter on things you care about the most. If you aren&apos;t
-                    looking for a roommate, and just need housing, you can go
-                    straight to the listing portion of our app.
+                  <h2 className="my-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Match with people
+                  </h2>
+                  <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
+                    After filling out our survey, you&apos;ll be matched with
+                    people who have similar interests.
                   </p>
-                  <p className="text-base leading-7">
-                    Once you&apos;ve found a potential roommate or listing that
-                    might be a good fit, you can directly message them through
-                    our service without having to reveal your personal phone or
-                    email. Then proceed to check out listings with your new
-                    potential roommate.
+                  <h2 className="my-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Chat with potential roommates
+                  </h2>
+                  <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
+                    If you see a profile or match that might be a good fit,
+                    message them directly and see if you&apos;re a good fit
+                    without having to reveal private information like your phone
+                    number or social media.
+                  </p>
+                  <h2 className="my-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Find your next home
+                  </h2>
+                  <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
+                    Search through potential places to live with options varying
+                    from individual rooms to entire homes.
+                  </p>
+                  <h2 className="my-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Use only what you need
+                  </h2>
+                  <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
+                    All our services aren&apos;t mutually inclusive, so you can
+                    use just the roommate finder or just the housing listings.
+                    We&apos;re here to help you find the best fit for you!
                   </p>
                 </div>
-              </div>
-
-              {/* Stats section */}
-              <div className="mt-10">
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-8">
-                  {stats.map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="border-t-2 border-gray-100 pt-6"
-                    >
-                      <dt className="text-base font-medium text-gray-500">
-                        {stat.label}
-                      </dt>
-                      <dd className="text-3xl font-extrabold tracking-tight text-gray-900">
-                        {stat.value}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-                <div className="mt-10">
-                  <Link
-                    href="#"
-                    className="text-base font-medium text-yellow-500"
+                <div className="relative mt-12 lg:mt-0">
+                  <img
+                    className=""
+                    src={images[currentImageIndex]}
+                    alt="listings"
+                  />
+                  <button
+                    className="absolute top-1/2 left-0 -translate-y-1/2 bg-white px-3 py-2 opacity-70 hover:opacity-100 focus:outline-none"
+                    onClick={handlePrevImage}
                   >
-                    Learn more
+                    &lt;
+                  </button>
+                  <button
+                    className="absolute top-1/2 right-0 -translate-y-1/2 bg-white px-3 py-2 opacity-70 hover:opacity-100 focus:outline-none"
+                    onClick={handleNextImage}
+                  >
+                    &gt;
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Footer section */}
+        <footer className="mt-24 bg-gray-900 sm:mt-12">
+          <div className="mx-auto max-w-md overflow-hidden py-12 px-4 sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8">
+            <nav
+              className="-mx-5 -my-2 flex flex-wrap justify-center"
+              aria-label="Footer"
+            >
+              {footerNavigation.main.map((item) => (
+                <div key={item.name} className="px-5 py-2">
+                  <Link
+                    href={item.href}
+                    className="text-base text-gray-400 hover:text-gray-300"
+                  >
+                    {item.name}
                   </Link>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* things to do on site */}
-        <div className="mt-32">
-          <div className="mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8">
-            <div className="lg:grid lg:grid-cols-2 lg:items-center lg:gap-24">
-              <div>
-                <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                  Set up your profile
-                </h2>
-                <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
-                  Fill out your profile with your interests and a bio.
-                </p>
-                <h2 className="my-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                  Match with people
-                </h2>
-                <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
-                  After filling out our survey, you&apos;ll be matched with
-                  people who have similar interests.
-                </p>
-                <h2 className="my-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                  Chat with potential roommates
-                </h2>
-                <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
-                  If you see a profile or match that might be a good fit,
-                  message them directly and see if you&apos;re a good fit
-                  without having to reveal private information like your phone
-                  number or social media.
-                </p>
-                <h2 className="my-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                  Find your next home
-                </h2>
-                <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
-                  Search through potential places to live with options varying
-                  from individual rooms to entire homes.
-                </p>
-                <h2 className="my-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                  Use only what you need
-                </h2>
-                <p className="mt-6 max-w-3xl text-lg leading-7 text-gray-500">
-                  All our services aren&apos;t mutually inclusive, so you can
-                  use just the roommate finder or just the housing listings.
-                  We&apos;re here to help you find the best fit for you!
-                </p>
-              </div>
-              <div className="relative mt-12 lg:mt-0">
-                <img
-                  className=""
-                  src={images[currentImageIndex]}
-                  alt="listings"
-                />
-                <button
-                  className="absolute top-1/2 left-0 -translate-y-1/2 bg-white px-3 py-2 opacity-70 hover:opacity-100 focus:outline-none"
-                  onClick={handlePrevImage}
-                >
-                  &lt;
-                </button>
-                <button
-                  className="absolute top-1/2 right-0 -translate-y-1/2 bg-white px-3 py-2 opacity-70 hover:opacity-100 focus:outline-none"
-                  onClick={handleNextImage}
-                >
-                  &gt;
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      {/* Footer section */}
-      <footer className="mt-24 bg-gray-900 sm:mt-12">
-        <div className="mx-auto max-w-md overflow-hidden py-12 px-4 sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8">
-          <nav
-            className="-mx-5 -my-2 flex flex-wrap justify-center"
-            aria-label="Footer"
-          >
-            {footerNavigation.main.map((item) => (
-              <div key={item.name} className="px-5 py-2">
+              ))}
+            </nav>
+            <div className="mt-8 flex justify-center space-x-6">
+              {footerNavigation.social.map((item) => (
                 <Link
+                  key={item.name}
                   href={item.href}
-                  className="text-base text-gray-400 hover:text-gray-300"
+                  className="text-gray-400 hover:text-gray-300"
                 >
-                  {item.name}
+                  <span className="sr-only">{item.name}</span>
+                  <item.icon className="h-6 w-6" aria-hidden="true" />
                 </Link>
-              </div>
-            ))}
-          </nav>
-          <div className="mt-8 flex justify-center space-x-6">
-            {footerNavigation.social.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-gray-400 hover:text-gray-300"
-              >
-                <span className="sr-only">{item.name}</span>
-                <item.icon className="h-6 w-6" aria-hidden="true" />
-              </Link>
-            ))}
+              ))}
+            </div>
+            <p className="mt-8 text-center text-base text-gray-400">
+              All rights reserved
+            </p>
           </div>
-          <p className="mt-8 text-center text-base text-gray-400">
-            All rights reserved
-          </p>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </>
   );
 }

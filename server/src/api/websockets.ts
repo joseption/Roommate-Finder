@@ -8,7 +8,7 @@ const SocketServer = require('socket.io').Server;
 export const startSocketIO = (server: Server<typeof IncomingMessage, typeof ServerResponse>) => {
   const io = new SocketServer(server, {
     cors: {
-      origin: [frontendEnv.URL, webfrontendEnv.URL, "https://api.roomfin.xyz"],
+      origin: [frontendEnv.URL, webfrontendEnv.URL, "https://api.roomfin.xyz", "https://roommate-finder-production-b646.up.railway.app", "https://www.roomfin.xyz"],
       pingTimeout: 60000,
     },
   });
@@ -27,15 +27,15 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
       if (!data || data.users.length === 0) return;
       socket.nsp.to(data.users[0].id).emit('receive_chat', data);
     })
-    
+
     socket.on('send_message', (data: any) => {
       socket.nsp.to(data.chatId).emit('receive_message', data);
     });
-    
+
     socket.on('send_typing', (data: any) => {
       socket.to(data.chatId).emit('receive_typing', data);
     });
-    
+
     socket.on('send_block', (data: any) => {
       socket.to(data.chatId).emit('receive_block', data);
     });
@@ -43,7 +43,7 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
     socket.on('send_notification', (data: any) => {
       socket.to(data.chatId).emit('receive_notification', data);
     });
-    
+
     socket.on('join chat', (room: any) => {
       socket.join(room);
       console.log('user joined room', room);

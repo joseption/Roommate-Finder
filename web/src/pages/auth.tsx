@@ -112,11 +112,12 @@ export default function Login() {
             <div className="mx-auto w-full max-w-sm lg:w-96">
               <div>
                 <Image
-                  className="h-12 w-auto"
+                  className="h-12 w-auto cursor-pointer"
                   src="/RoomFin/Logo/SVG FIles/logo-01.svg"
                   width={200}
                   height={200}
                   alt="Logo"
+                  onClick={() => void router.push("/")}
                 ></Image>
 
                 {action === "login" && (

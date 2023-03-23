@@ -15,7 +15,10 @@ const MyApp: AppType = ({ Component, pageProps }) => {
     <>
       <QueryClientProvider client={queryClient}>
         <AuthRedirectWrapper>
-          {!router.pathname.includes("/auth") && <Nav />}
+          {!router.pathname.includes("/auth") && router.pathname !== "/" && (
+            <Nav />
+          )}
+
           <Component {...pageProps} />
           <ReactQueryDevtools initialIsOpen={true} position="bottom-right" />
           <Toaster

@@ -185,17 +185,12 @@ const MessagesScreen = (props: any) => {
   }, [chats, props.openChatFromPush]);
 
   useEffect(() => {
-    console.log('start receive');
     if (props.receiveNotification) {
-      console.log(props.receiveNotification);
-      console.log(userInfo?.id);
-      if (props.receiveNotification?.userId === userInfo?.id)
+      if (props.receiveNotification?.userId !== userInfo?.id)
         return;
-        console.log('didnt return');
       const rcvChats = chats.map((chat) => {
         if (chat.id === props.receiveNotification?.chatId) {
           if (currentChat.id === chat.id && showPanel) {
-            console.log('deleting');
             deleteNotifications();
             return chat;
           };
@@ -205,13 +200,10 @@ const MessagesScreen = (props: any) => {
           if (!muted) {
             count = 1;
           }
-          console.log('return 1');
           return {...chat, notificationCount: (chat.notificationCount + count)};
         }
-        console.log('return 2');
         return chat;
       });
-      console.log('setting chats');
       setChats(rcvChats);
     }
   }, [props.receiveNotification]);

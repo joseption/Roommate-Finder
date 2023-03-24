@@ -141,7 +141,7 @@ const Messages = ({typing, receiveMessage, chat, userInfo, isDarkMode, image}: P
         userInfo={userInfo}
         isTypingIndicator={item?.typingIndicator}
         isDarkMode={isDarkMode}
-        key={item.id}
+        key={item.index}
         image={image}
       />
     )
@@ -236,10 +236,11 @@ const Messages = ({typing, receiveMessage, chat, userInfo, isDarkMode, image}: P
         data={messages}
         renderItem={renderItem}
         initialNumToRender={50}
+        maxToRenderPerBatch={50}
         removeClippedSubviews={true}
         ListHeaderComponent={indicator()}
         inverted
-        style={{padding: 10}}
+        style={{padding: 10, paddingTop: -50}}
       />
     </View>
   );

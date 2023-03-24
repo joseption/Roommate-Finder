@@ -18,12 +18,18 @@ export default function AnswerButtons({
   ResponsesOfUsers,
   onStateChange,
 }: Props) {
-  if (!Responses) return <div></div>;
+  const [selected, setSelected] = useState<response | null | undefined>(null);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [selected, setSelected] = useState(
-    ResponsesOfUsers === -1 ? null : Responses[ResponsesOfUsers]
-  );
+  useEffect(() => {
+    if (ResponsesOfUsers !== -1) {
+      if (Responses && Responses[ResponsesOfUsers])
+        setSelected(Responses[ResponsesOfUsers]);
+    } else {
+      setSelected(null);
+    }
+  }, [Responses, ResponsesOfUsers]);
+
+  if (!Responses) return <div></div>;
 
   const onChange = (res: response) => {
     setSelected(res);

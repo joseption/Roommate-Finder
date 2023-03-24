@@ -27,19 +27,11 @@ export default function QuestionsCard({ className = "" }: Props) {
   const [questionNumber, setQuestionNumber] = useState(0);
   const [SurveyData, setSurveyData] = useState<SurveyInfo[]>([]);
   const [userResponseIndex, setUserResponseIndex] = useState<number>(-1);
-  // const {
-  //   data,
-  //   isLoading: mainDataLoading,
-  //   refetch,
-  // } = useQuery({
-  //   queryKey: ["GetSurveyData"],
-  //   queryFn: () => GetSurveryInfo(),
-  //   refetchOnMount: true,
   const { mutate: GetSurveyData, isLoading: mainDataLoading } = useMutation({
     mutationFn: () => GetSurveryInfo(),
     onSuccess: (data) => {
       setSurveyData(data);
-      GetIndexOfUserResponse(data);
+      // GetIndexOfUserResponse(data);
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -50,10 +42,13 @@ export default function QuestionsCard({ className = "" }: Props) {
     GetSurveyData();
   }, []);
 
+  useEffect(() => {
+    GetIndexOfUserResponse(SurveyData, questionNumber);
+  }, [SurveyData, questionNumber]);
+
   const { mutate: mutateUpdateResponse, isLoading: isUpdating } = useMutation({
     mutationFn: () => UpdateResponse(selected?.question_id, selected?.id),
     onSuccess: (data) => {
-      //console.log(data);
       GetSurveyData();
       if (questionNumber < SurveyData.length - 1)
         setQuestionNumber(questionNumber + 1);
@@ -82,6 +77,7 @@ export default function QuestionsCard({ className = "" }: Props) {
   });
 
   const handleOnClickNext = () => {
+    //check if user has selected an answer
     mutateUpdateResponse();
   };
   const handleOnClickPrevious = () => {
@@ -97,18 +93,21 @@ export default function QuestionsCard({ className = "" }: Props) {
     setSelected(newState);
   };
   //get index of user response for current question
-  const GetIndexOfUserResponse = (data: SurveyInfo[]) => {
-    if (data[questionNumber]?.ResponsesOnUsers) {
-      const index = data[questionNumber]?.response.findIndex(
+  const GetIndexOfUserResponse = (
+    data: SurveyInfo[],
+    currentQuestionNumber: number
+  ) => {
+    if (data[currentQuestionNumber]?.ResponsesOnUsers) {
+      const index = data[currentQuestionNumber]?.response.findIndex(
         (response) =>
-          response.id === data[questionNumber]?.ResponsesOnUsers[0]?.responseId
+          response.id ===
+          data[currentQuestionNumber]?.ResponsesOnUsers[0]?.responseId
       );
-      if (index) {
+      if (index !== undefined) {
         setUserResponseIndex(index);
         const TobeSelected = data[questionNumber]?.response[index];
         if (TobeSelected) setSelected(TobeSelected);
       }
-      //console.log(index);
     }
   };
   return (

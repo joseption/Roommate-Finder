@@ -14,7 +14,7 @@ import SearchScreen from './screens/search';
 import FiltersScreen from './screens/filters';
 import MyProfileScreen from './screens/my-profile';
 import { Color, Content } from './style';
-import { env as environ, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isDarkMode as isDarkModeHelper, authTokenHeader, userId, setLocalAppSettingsPushMessageToken, getPushMessageToken, getCurrentChat, setLocalAppSettingsCurrentChat, socket } from './helper';
+import { env as environ, getLocalStorage, isMobile, linking, NavTo, Page, setLocalStorage, Stack, isDarkMode as isDarkModeHelper, authTokenHeader, userId, setLocalAppSettingsPushMessageToken, getPushMessageToken, getCurrentChat, setLocalAppSettingsCurrentChat, socket, setLocalAppSettingsCurrentRooms, getCurrentRooms } from './helper';
 import LogoutScreen from './screens/logout';
 import LoginScreen from './screens/login';
 import _Text from './components/control/text';
@@ -73,13 +73,93 @@ export const App = (props: any) => {
   const [receiveChat,setReceiveChat] = useState(null);
   const appState = useRef(AppState.currentState);
   const [forceUpdateAccount, setForceUpdateAccount] = useState(false);
-  const [askPermissions, setAskPermissions] = useState(false);
+  const [deleteChatNotifications, setDeleteChatNotifications] = useState("");
+  const [gotChats, setGotChats] = useState(false);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
   });
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const backgroundSubscription =
+      Notifications.addNotificationResponseReceivedListener(async (response: Notifications.NotificationResponse) => {
+        let identifier = response.notification.request.identifier;
+        let data = identifier.split("|");
+        if (data.length > 1) {
+          let chatId = data[1].includes('-') ? data[1] : data[2];
+          if (response.userText) {
+            if (data[0]) {
+              sendMessage(data[0], chatId, response.userText, true);
+              Notifications.dismissNotificationAsync(response.notification.request.identifier);
+            }
+          }
+          else if (response.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER && chatId) {
+            setOpenChatFromPush(chatId);
+          }
+        }
+      });
+  
+      const foregroundSubscription =
+        Notifications.addNotificationReceivedListener(async (notification) => {
+          let info = notification.request.identifier.split("|");
+          let id = '';
+          let fromUserId = '';
+          if (info.length > 1) {
+            fromUserId = info[0];
+            id = info[1].includes('-') ? info[1] : info[2];
+            let data = await getCurrentChat();
+            let rooms = await getCurrentRooms();
+            let myId = await userId();
+            let room;
+            if (rooms) {
+              room = rooms.find((r: any) => r === id);
+            }
+            // Avoid showing notifications if a user is logged into multiple devices and not the current user or isn't in the current chat.
+            if (info[0] === myId || !room || (data && data.id === id && data.is_showing === true && data.current_page === NavTo.Messages)) {
+              await Notifications.dismissNotificationAsync(notification.request.identifier);
+              return;
+            }
+
+            await Notifications.getPresentedNotificationsAsync().then(async (res: Notifications.Notification[]) => {
+              let ids = [];
+              let count = 0;
+              let body = notification.request.content.body + "\n";
+              if (res.length > 0) {
+                for (let i = res.length - 1; i >= 0; i--) {
+                  if (res[i].request.identifier.includes(id) &&
+                      res[i].request.identifier != notification.request.identifier) {
+                    body += res[i].request.content.body;
+                    if (i > 0)
+                      body += "\n";
+                    ids.push(res[i].request.identifier);
+                    count++;
+                  }
+                }
+              }
+
+              if (count > 0) {
+                let identifier = fromUserId + "|" + id + "|" + new Date().getTime();
+                let data = notification.request.content;
+                for (let i = 0; i < ids.length; i++) {
+                  await Notifications.dismissNotificationAsync(ids[i]);
+                }
+
+                await Notifications.dismissNotificationAsync(notification.request.identifier);
+                await updateGroupedPushNotification(data.title, body, identifier)
+              }
+            });
+          }
+      });
+
+      return () => {
+        backgroundSubscription.remove();
+        foregroundSubscription.remove();
+      };
+    }
+  }, []);
 
   useEffect(() => {
     socket.on("connect_error", () => {
@@ -104,20 +184,18 @@ export const App = (props: any) => {
       setReceiveBlock(data);
     });
 
-    socket.on('receive_chat', (data: any) => {
+    socket.on('receive_chat', async (data: any) => {
+      let rooms = await getCurrentRooms();
+      await setLocalAppSettingsCurrentRooms([...rooms, data.id]);
       setReceiveChat(data);
     });
-
-    getChats();
-  }, [socket.connected]);
+  }, []);
 
   useEffect(() => {
     if (addMessageCount === 0) {
       return;
     }
-    if (addMessageCount > 0) {
-      setMessageCount(messageCount + addMessageCount);
-    }
+    setMessageCount(messageCount + addMessageCount);
     setAddMessageCount(0);
   }, [addMessageCount])
 
@@ -130,12 +208,17 @@ export const App = (props: any) => {
   useEffect(() => {
     if (Platform.OS === 'android') {
       const subscription = AppState.addEventListener('change', async (nextAppState) => {
+        // Keep the socket alive
+        if (!socket.connected) {
+          socket.connect();
+        }
+
         if (appState.current === 'active' && nextAppState !== 'active') {
           let data = await getCurrentChat();
           if (data) {
             data.disabled = true;
           }
-          setLocalAppSettingsCurrentChat(data);
+          await setLocalAppSettingsCurrentChat(data);
         }
         else if (nextAppState === 'active') {
           let data = await getCurrentChat();
@@ -148,7 +231,7 @@ export const App = (props: any) => {
               data = null;
             }  
             
-            setLocalAppSettingsCurrentChat(data);
+            await setLocalAppSettingsCurrentChat(data);
           }
         }
       });
@@ -188,8 +271,8 @@ export const App = (props: any) => {
   }, [navSelector]);
 
   // Get device push notification permissions when the app launches
-  useEffect(() => {
-    if (Platform.OS === 'android' && askPermissions) {
+  const getPermissions = () => {
+    if (Platform.OS === 'android') {
       Notifications.setNotificationChannelAsync('Messaging', {
         name: 'Messaging',
         importance: Notifications.AndroidImportance.MAX,
@@ -227,16 +310,16 @@ export const App = (props: any) => {
       .then(() => {
         return Notifications.getDevicePushTokenAsync();
       })
-      .then((response) => {
+      .then(async (response) => {
         const token = response.data;
-        setLocalAppSettingsPushMessageToken(token);
+        await setLocalAppSettingsPushMessageToken(token);
         storePushTokenToUser(token);
       })
       .catch((err) => {
         return null;
       });
     }
-  }, [askPermissions]);
+  };
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -250,70 +333,6 @@ export const App = (props: any) => {
   }, [openChatFromPush, ref.current])
 
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      const backgroundSubscription =
-      Notifications.addNotificationResponseReceivedListener(async (response: Notifications.NotificationResponse) => {
-        let identifier = response.notification.request.identifier;
-        let idx = identifier.lastIndexOf("-");
-        let id = identifier.substring(0, idx);
-
-        if (response.userText) {
-          sendMessage(id, response.userText, true);
-          Notifications.dismissNotificationAsync(response.notification.request.identifier);
-        }
-        else if (response.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER) {
-          setOpenChatFromPush(id);
-        }
-      });
-  
-      const foregroundSubscription =
-        Notifications.addNotificationReceivedListener(async (notification) => {
-          let idx = notification.request.identifier.lastIndexOf("-");
-          let id = notification.request.identifier.substring(0, idx);
-          let data = await getCurrentChat();
-          if (data && data.id === id && data.is_showing === true && data.current_page === NavTo.Messages) {
-            await Notifications.dismissNotificationAsync(notification.request.identifier);
-            return;
-          }
-
-          await Notifications.getPresentedNotificationsAsync().then(async (res: Notifications.Notification[]) => {
-            let ids = [];
-            let count = 0;
-            let body = notification.request.content.body + "\n";
-            if (res.length > 0) {
-              for (let i = res.length - 1; i >= 0; i--) {
-                if (res[i].request.identifier.startsWith(id) &&
-                    res[i].request.identifier != notification.request.identifier) {
-                  body += res[i].request.content.body;
-                  if (i > 0)
-                    body += "\n";
-                  ids.push(res[i].request.identifier);
-                  count++;
-                }
-              }
-            }
-
-            if (count > 0) {
-              let identifier = id + "-" + new Date().getTime();
-              let data = notification.request.content;
-              for (let i = 0; i < ids.length; i++) {
-                await Notifications.dismissNotificationAsync(ids[i]);
-              }
-
-              await Notifications.dismissNotificationAsync(notification.request.identifier);
-              await updateGroupedPushNotification(data.title, body, identifier)
-            }
-          });
-      });
-
-      return () => {
-        backgroundSubscription.remove();
-        foregroundSubscription.remove();
-      };
-    }
-  }, []);
-
-  useEffect(() => {
     const dimsChanged = Dimensions.addEventListener("change", (e) => setMobile(isMobile()));
     const back = BackHandler.addEventListener('hardwareBackPress', onBackPress);
     return () => {
@@ -323,6 +342,15 @@ export const App = (props: any) => {
   });
 
   useEffect(() => {
+    if (isLoggedIn) {
+      getPermissions();
+      if (!socket.connected)
+        socket.connect();
+      getChats();
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
     prepareStyle(); 
   }, [isDarkMode]);
 
@@ -330,11 +358,11 @@ export const App = (props: any) => {
     let rt = getRouteName();
     setRoute(rt);
     if (route != rt &&
-      rt != NavTo.Auth ||
-      rt != NavTo.ConfirmEmail ||
-      rt != NavTo.ResetPassword ||
-      rt != NavTo.UpdatePassword ||
-      rt != NavTo.Logout ||
+      rt != NavTo.Auth &&
+      rt != NavTo.ConfirmEmail &&
+      rt != NavTo.ResetPassword &&
+      rt != NavTo.UpdatePassword &&
+      rt != NavTo.Logout &&
       rt != NavTo.Login) {
       checkLoggedIn();
     }
@@ -382,22 +410,47 @@ export const App = (props: any) => {
         else {
           let totalNotifications = 0;
           for (let i = 0; i < res.length; i++) {
-            if (res[i]?.Notification) {
-              let count = 0;
-              res[i]?.Notification.map((x: any) => {
-                if (x.userId === userInfo?.id)
-                  count++;
-              })
-              Object.assign(res[i], {notificationCount: count});
-              totalNotifications += count;
+            let muted = res[i]?.muted.find((x: any) => x === userInfo?.id);
+            let count = 0;
+            if (!muted) {
+              if (res[i]?.Notification && res[i]?.Notification.length > 0) {
+                res[i]?.Notification.map((x: any) => {
+                  if (x.userId === userInfo?.id)
+                    count++;
+                })
+                if (res[i]?.lastMessage?.userId !== userInfo?.id) {
+                  totalNotifications += count;
+                }
+              }
             }
+            Object.assign(res[i], {notificationCount: count});
           }
           connectToChatRooms(res);
           setMessageCount(totalNotifications);
+          setGotChats(true);
         }
       });
     }
   }
+
+  const deleteNotifications = async (chatId: string, id: string) => {
+    const obj = {userId: id, chatId: chatId};
+    const js = JSON.stringify(obj);
+    const tokenHeader = await authTokenHeader();
+    return fetch(
+      `${environ.URL}/notifications`, {method:'DELETE', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+    ).then(async ret => {
+      let res = JSON.parse(await ret.text());
+      if (res.Error) {
+        console.warn("Error: ", res.Error);
+      } else {
+        if (res.count) {
+          setAddMessageCount(-res.count);
+          setDeleteChatNotifications(chatId);
+        }
+      }
+    });
+  };  
 
   useEffect(() => {
     handleNotification();
@@ -434,6 +487,7 @@ export const App = (props: any) => {
     const rooms = await chats.map((chat: any) => {
       return chat.id;
     })
+    await setLocalAppSettingsCurrentRooms(rooms);
     socket.emit('join_room', rooms)
   }
 
@@ -444,9 +498,9 @@ export const App = (props: any) => {
     {   
       let msgToken = await getPushMessageToken();
       if (!msgToken) {
-        await Notifications.getDevicePushTokenAsync().then((response) => {
+        await Notifications.getDevicePushTokenAsync().then(async (response) => {
           const token = response.data;
-          setLocalAppSettingsPushMessageToken(token);
+          await setLocalAppSettingsPushMessageToken(token);
           storePushTokenToUser(token);
           msgToken = token;
         })
@@ -475,15 +529,18 @@ export const App = (props: any) => {
     return (Math.floor(Math.random() * 100000) + 1).toString();
   }
 
-  async function sendMessage(chatId: string, reply: any, update: boolean) {
+  async function sendMessage(fromId: string, chatId: string, reply: any, update: boolean) {
     let user = await userId();
     let hasError = false;
     if (user) {
+      let obj = {content:reply, userId:user, chatId: chatId, sendToId: fromId};
+      let js = JSON.stringify(obj);
+    
+      if (!socket.connected)
+        await socket.connect();
+
       try
-      {       
-        let id = randomNum();
-        let obj = {content:reply, userId:user, chatId: chatId, id: id};
-        let js = JSON.stringify(obj);
+      { 
         let tokenHeader = await authTokenHeader();
         await fetch(`${environ.URL}/messages`,
             {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
@@ -492,8 +549,8 @@ export const App = (props: any) => {
                 {
                   hasError = true;
                 }
-                else if (update) {
-                  setMessageData(obj);
+                else {
+                    deleteNotifications(chatId, user);
                 }
             });
       }
@@ -501,6 +558,20 @@ export const App = (props: any) => {
       {
         hasError = true;
       }  
+
+      if (update) {
+        const data = {
+          userId: fromId,
+          chatId: chatId,
+        };
+        socket.emit('send_notification', data);
+      }
+      const m_data = {
+        chatId: chatId,
+        content: reply,
+        userId: user,
+      }
+      socket.emit('send_message', m_data);
     }  
   }
 
@@ -508,7 +579,7 @@ export const App = (props: any) => {
     let data = await getCurrentChat();
     if (data) {
       data.current_page = navSelector;
-      setLocalAppSettingsCurrentChat(data);
+      await setLocalAppSettingsCurrentChat(data);
       checkDismissNotifications(data.id);
     }
   }
@@ -518,10 +589,12 @@ export const App = (props: any) => {
       Notifications.getPresentedNotificationsAsync().then(async (res: Notifications.Notification[]) => {
         res.forEach(msg => {
           let identifier = msg.request.identifier;
-          let idx = identifier.lastIndexOf("-");
-          let id = identifier.substring(0, idx);
-          if (id === chatId) {
-            Notifications.dismissNotificationAsync(identifier);
+          let data = identifier.split('|');
+          if (data.length > 1) {
+            let dChatId = data[1].includes('-') ? data[1] : data[2];
+            if (dChatId === chatId) {
+              Notifications.dismissNotificationAsync(identifier);
+            }
           }
         })
       });
@@ -625,7 +698,7 @@ export const App = (props: any) => {
     if (!isLoggingOut) {
       let hasError = false;
       let data = await getLocalStorage();
-      if (data) {
+      if (data && data.refreshToken && data.accessToken) {
         let obj = {refreshToken:data.refreshToken, accessToken: data.accessToken, mobile: true};
         let js = JSON.stringify(obj);
 
@@ -655,6 +728,9 @@ export const App = (props: any) => {
 
                 if (aToken && res)
                   res.accessToken = aToken;
+
+                if (!socket.connected)
+                  socket.connect();
                 await setLocalStorage(res);
                 let l_isSetup = res.user.is_setup == true ? true : false;
                 let l_setupStep = res.user.setup_step != null ? res.user.setup_step : '';
@@ -678,7 +754,11 @@ export const App = (props: any) => {
         if (ref && ref.current) {
           let route = ref.current.getCurrentRoute();
           if (route && route.name !== NavTo.Login) {
+            socket.disconnect();
             await setLocalStorage(null);
+            await setLocalAppSettingsCurrentRooms(null);
+            await setLocalAppSettingsCurrentChat(null);
+            await setLocalAppSettingsPushMessageToken("");
             ref.current.navigate(NavTo.Login, {timeout: 'yes'} as never);
             setIsLoggedIn(false);
             setIsSetup(false);
@@ -914,7 +994,6 @@ export const App = (props: any) => {
                       isDarkMode={isDarkMode}
                       setIsDarkMode={setIsDarkMode}
                       keyboardVisible={keyboardVisible}
-                      setAskPermissions={setAskPermissions}
                       />}
                   </Stack.Screen>
                   <Stack.Screen
@@ -1030,7 +1109,6 @@ export const App = (props: any) => {
                   socket={socket}
                   setMessageCount={setMessageCount}
                   messageCount={messageCount}
-                  messageData={messageData}
                   setCurrentChat={setCurrentChat}
                   setShowingMessagePanel={setShowingMessagePanel}
                   openChatFromPush={openChatFromPush}
@@ -1047,6 +1125,8 @@ export const App = (props: any) => {
                   setReceiveChat={setReceiveChat}
                   setReceiveMessage={setReceiveMessage}
                   setReceiveTyping={setReceiveTyping}
+                  deleteChatNotifications={deleteChatNotifications}
+                  setDeleteChatNotifications={setDeleteChatNotifications}
                   />}
                   </Stack.Screen> 
                   <Stack.Screen
@@ -1060,6 +1140,8 @@ export const App = (props: any) => {
                   setIsSetup={setIsSetup}
                   isDarkMode={isDarkMode}
                   setNavSelector={setNavSelector}
+                  setIsLoggingOut={setIsLoggingOut}
+                  socket={socket}
                   />}
                   </Stack.Screen>
                 </Stack.Navigator>

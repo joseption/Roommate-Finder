@@ -4,7 +4,7 @@ import MessageTab from '../components/messages/message-tab';
 import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
 import _TextInput from '../components/control/text-input';
-import { authTokenHeader, env, getLocalStorage, navProp, NavTo, setLocalAppSettingsCurrentChat } from '../helper';
+import { authTokenHeader, env, getLocalStorage, navProp, NavTo, setLocalAppSettingsCurrentChat, setLocalAppSettingsCurrentRooms } from '../helper';
 import WavingHand from '../assets/images/waving_hand_svg';
 import { Color, FontSize, Style } from '../style';
 import _Text from '../components/control/text';
@@ -19,6 +19,7 @@ const MessagesScreen = (props: any) => {
   const navigation = useNavigation<navProp>();
   const [typing, setTyping] = useState<any>([]);
   const [receiveMsg, setReceiveMsg] = useState(null);
+  const [openingChat, setOpeningChat] = useState('');
 
   // Initiate by getting the user info
   useEffect(() => {
@@ -35,6 +36,21 @@ const MessagesScreen = (props: any) => {
   useEffect(() => {
     getChats();
   }, [userInfo])
+
+  useEffect(() => {
+    if (props.deleteChatNotifications) {
+      if (chats) {
+        const delChats = chats.map((chat) => {
+          if (chat.id === props.deleteChatNotifications) {
+            return {...chat, notificationCount: 0};
+          }
+          return chat;
+        });
+        setChats(delChats);
+      }
+      props.setDeleteChatNotifications("");
+    }
+  }, [props.deleteChatNotifications])
 
   const getChats = async () => {
     if (!userInfo?.id)
@@ -54,14 +70,14 @@ const MessagesScreen = (props: any) => {
           let muted = res[i]?.muted.find((x: any) => x === userInfo?.id);
           let count = 0;
           if (!muted) {
-            if (res[i]?.Notification) {
+            if (res[i]?.Notification && res[i]?.Notification.length > 0) {
               res[i]?.Notification.map((x: any) => {
                 if (x.userId === userInfo?.id)
                   count++;
               })
-
-
-              totalNotifications += count;
+              if (res[i]?.lastMessage?.userId !== userInfo?.id) {
+                totalNotifications += count;
+              }
             }
           }
           Object.assign(res[i], {notificationCount: count});
@@ -102,6 +118,7 @@ const MessagesScreen = (props: any) => {
     const rooms = await chats.map((chat: any) => {
       return chat.id;
     })
+    setLocalAppSettingsCurrentRooms(rooms);
     props.socket.emit('join_room', rooms)
   }
 
@@ -140,9 +157,17 @@ const MessagesScreen = (props: any) => {
 
   useEffect(() => {
     if (props?.route?.params?.user && !chatsHaveLoaded && userInfo) {
-      openOrCreateChat(props?.route?.params?.user);
+      updateShowPanel(true);
+      setOpeningChat(props?.route?.params?.user);
     }
   }, [chats]);
+
+  useEffect(() => {
+    if (openingChat) {
+      openOrCreateChat(openingChat);
+      setOpeningChat('');
+    }
+  }, [openingChat]);
 
   useEffect(() => {
     if (props.receiveMessage) {
@@ -209,10 +234,6 @@ const MessagesScreen = (props: any) => {
   }, [props.receiveNotification]);
 
   useEffect(() => {
-    props.socket.emit('send_message', props.messageData);
-  }, [props.messageData]);
-
-  useEffect(() => {
     let chatId = '';
     if (currentChat) {
       chatId = (currentChat as any).id
@@ -236,11 +257,14 @@ const MessagesScreen = (props: any) => {
   useEffect(() => {
     if (!props?.route?.params?.user || !userInfo)
       return;
-    openOrCreateChat(props?.route?.params?.user);
+
+    updateShowPanel(true);
+    setOpeningChat(props?.route?.params?.user);
   }, [props?.route?.params?.requestId])
 
   const createChat = async (userIdOne: string, userIdTwo: string) => {
-    if (userIdOne === userIdTwo) return;
+    if (userIdOne === userIdTwo)
+      return;
 
     const obj = {userIdOne: userIdOne, userIdTwo: userIdTwo};
     const js = JSON.stringify(obj);
@@ -251,12 +275,15 @@ const MessagesScreen = (props: any) => {
       let res = JSON.parse(await ret.text());
       if (res.Error) {
         console.warn("Error: ", res.Error);
+        updateShowPanel(false);
       }
       else {
         let chat = res;
         const users = [];
         const user = await getUser(userIdTwo);
-        if (!user) return;
+        if (!user)
+          return;
+
         users.push(user);
         chat = {...chat, users: users, userInfo: user, blocked: '', muted: [], notificationCount: 0};
         props.socket.emit('create_chat', chat);
@@ -305,6 +332,16 @@ const MessagesScreen = (props: any) => {
       }
     });
   };  
+  const renderChatTabItem = (item: any) => {
+    return <MessageTab
+    showPanel={showPanel}
+    updateShowPanel={updateShowPanel}
+    chat={item}
+    setCurrentChat={setCurrentChat}
+    isDarkMode={props.isDarkMode}
+    typing={typing}
+  />
+  }
   
   const updateTabs = async (data: any) => {
     if (chats.length === 0)
@@ -420,17 +457,9 @@ const MessagesScreen = (props: any) => {
     <>
       <FlatList
         data={chats}
-        renderItem={({item}) => 
-          <MessageTab
-            showPanel={showPanel}
-            updateShowPanel={updateShowPanel}
-            chat={item}
-            setCurrentChat={setCurrentChat}
-            key={item.id}
-            isDarkMode={props.isDarkMode}
-            typing={typing}
-          />
-        }
+        renderItem={({item}) => renderChatTabItem(item)}
+        keyExtractor={(item, index) => String(index)}
+        style={showPanel ? {display: 'none'} : {display: 'flex'}}
       />
       <MessagePanel
         showPanel={showPanel}

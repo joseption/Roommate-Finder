@@ -317,6 +317,13 @@ const ListingView = (props: any) => {
     props.setCurrentScreen(Listings_Screen.create);
   }
 
+  const favoriteBG = () => {
+    if (isFavorite)
+      return Color(props.isDarkMode).contentHolder;
+    else
+      return Color(props.isDarkMode).contentHolderSecondary;
+  }
+
   const styles = StyleSheet.create({
     container: {
       height: "100%",
@@ -389,10 +396,9 @@ const ListingView = (props: any) => {
     },
     section: {
       marginTop: 10,
-      borderColor: Color(props.isDarkMode).separator,
-      borderWidth: 1,
       borderRadius: Radius.default,
       padding: 10,
+      backgroundColor: Color(props.isDarkMode).contentHolder,
     },
     detailRow: {
       flexDirection: "row",
@@ -501,9 +507,9 @@ const ListingView = (props: any) => {
       backgroundColor: Color(props.isDarkMode).gold
     },
     heartButton: {
-      padding: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 15,
       borderRadius: Radius.round,
-      backgroundColor: Color(props.isDarkMode).white,
     },
     deleteButton: {
       padding: 10,
@@ -611,17 +617,18 @@ const ListingView = (props: any) => {
             {!isMe ? (
               <TouchableOpacity
                 onPress={toggleFavorite}
+                underlayColor={Color(props.isDarkMode).holderUnderlay}
                 activeOpacity={0.7}
                 style={[
                   styles.heartButton,
-                  { backgroundColor: Color(props.isDarkMode).black },
+                  { backgroundColor: favoriteBG() },
                 ]}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                 <Animated.View style={{ transform: [{ scale: heartScale }] }}>
                   <FontAwesomeIcon
                     size={20}
-                    color={isFavorite ? 'red' : Color(props.isDarkMode).white}
+                    color={isFavorite ? Color(props.isDarkMode).danger : Color(props.isDarkMode).textTransparent}
                     style={styles.backIcon}
                     icon={faHeart}
                   ></FontAwesomeIcon>
@@ -630,9 +637,10 @@ const ListingView = (props: any) => {
 
                   <_Text
                     style={{
-                      color: isFavorite ? 'red' : Color(props.isDarkMode).white,
+                      color: Color(props.isDarkMode).text,
                       marginLeft: 5,
                       fontWeight: 'bold',
+                      fontSize: FontSize.default
                     }}
                   >
                     Favorite

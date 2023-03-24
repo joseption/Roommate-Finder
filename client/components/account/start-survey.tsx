@@ -298,9 +298,9 @@ const StartSurvey = (props: any) => {
                                 Find your ideal roommates by taking the survey. Get better matches by answering more questions.
                             </_Text>
                             <_Button
-                            style={[Style(props.isDarkMode).buttonDefault, _styles.surveyButton, _styles.innerGap]}
+                            style={[Style(props.isDarkMode).buttonDefault, _styles.surveyButton]}
                             textStyle={ _styles.surveyButtonText}
-                            containerStyle={_styles.surveyButtonContainer}
+                            containerStyle={[_styles.surveyButtonContainer, _styles.innerGap]}
                             onPress={(e: any) => completeSetup(true)}
                             isDarkMode={props.isDarkMode}
                             >
@@ -322,9 +322,9 @@ const StartSurvey = (props: any) => {
                                 If you decide to answer questions later, you can access the survey from the navigation menu.
                             </_Text>
                             <_Button
-                            style={[Style(props.isDarkMode).buttonGold, _styles.surveyButton, _styles.innerGap]}
+                            style={[Style(props.isDarkMode).buttonGold, _styles.surveyButton]}
                             textStyle={ _styles.surveyButtonText}
-                            containerStyle={_styles.surveyButtonContainer}
+                            containerStyle={[_styles.surveyButtonContainer, _styles.innerGap]}
                             onPress={(e: any) => completeSetup(false)}
                             isDarkMode={props.isDarkMode}
                             >

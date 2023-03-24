@@ -515,6 +515,7 @@ function LightColor() {
     dropdownOption: '#F9F9F9',
     dropdownOptionAlt: '#FFFFFF',
     transparentMask: '#00000040',
+    textTransparent: '#05050526'
   }
 }
 
@@ -1006,6 +1007,7 @@ function DarkColor() {
     dropdownOption: '#202122',
     dropdownOptionAlt: '#242526',
     transparentMask: '#00000040',
+    textTransparent: '#FFFFFF26'
   }
 }
 

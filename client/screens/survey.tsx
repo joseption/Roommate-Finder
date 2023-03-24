@@ -37,6 +37,7 @@ const SurveyScreen = (props: any) => {
     const [reviewMode,setReviewMode] = useState(false);
     const navigation = useNavigation<navProp>();
     const [refreshing, setRefreshing] = useState(false); 
+    const [allQuestions, setAllQuestions] = useState<any>(null); 
     
     useEffect(() => {
         if (!init) {
@@ -142,7 +143,7 @@ const SurveyScreen = (props: any) => {
         else
             setResponseId('');
         setHasLastQuestion(idx != 0);
-        setCanGotoQuestion(question.ResponsesOnUsers.length > 0);
+        setCanGotoQuestion(question.ResponsesOnUsers.length > 0 && question.ResponsesOnUsers[0].responseId != '');
         let next = (idx + 1 == total) ? 'Complete Survey' : 'Next';
         setTotalNumber(total);
         setCurrentNumber(idx + 1);
@@ -161,6 +162,7 @@ const SurveyScreen = (props: any) => {
         else if (refreshing) {
             let idx = res.findIndex((x: any) => x.id == questionId);
             prepareQuestion(res[idx], idx, res.length);
+            setLoading(false);
             return;
         }
         else if (questionId && goto != 0) {
@@ -193,6 +195,7 @@ const SurveyScreen = (props: any) => {
                 setReviewMode(true);
             }
         }
+        setLoading(false);
     }
 
     const getQuestions = async (goto: number, restart: boolean = false, init: boolean = false, refreshing: boolean = false) => {
@@ -215,6 +218,7 @@ const SurveyScreen = (props: any) => {
                         hasError = true;
                     }
                     else {
+                        setAllQuestions(res);
                         setupQuestions(res, goto, restart, init, refreshing);
                     }
                 });
@@ -261,6 +265,7 @@ const SurveyScreen = (props: any) => {
                         setReviewMode(true);
                         setGenerating(false);
                         setComplete(true);
+                        props.setNavSelector(NavTo.Search);
                         navigation.navigate(NavTo.Search, {view: 'matches'} as never);
                     }
                 });
@@ -302,6 +307,15 @@ const SurveyScreen = (props: any) => {
         let hasError = false;
         let obj = {questionId:questionId, responseId:responseId};
         let js = JSON.stringify(obj);
+        let isDone = goto == 1 && totalNumber - currentNumber == 0;
+        if (isDone) {
+            // Will finalize in a second
+            setProgress(100);
+        }
+        else { // User is going forward in the survey, just recycle same questions
+            allQuestions[currentNumber - 1].ResponsesOnUsers = [{responseId:responseId}];
+            setupQuestions(allQuestions, goto);
+        }
 
         if (responseId) {
             try
@@ -321,12 +335,9 @@ const SurveyScreen = (props: any) => {
                             hasError = true;
                         }
                         else {
-                            if (goto == 1 && totalNumber - currentNumber == 0) {
-                                setProgress(100);
+                            if (isDone) {
                                 await generateMatches();
                             }
-                            else
-                                getQuestions(goto);
                         }
                     });
                 }
@@ -340,7 +351,7 @@ const SurveyScreen = (props: any) => {
             } 
         }
         else {
-            getQuestions(goto);
+            setupQuestions(allQuestions, goto);
         }
 
         if (hasError) {
@@ -420,7 +431,7 @@ const SurveyScreen = (props: any) => {
             fontWeight: 'bold'
         },
         questionContainer: {
-            minHeight: 300,
+            minHeight: 400,
             justifyContent: 'flex-start',
         },
         questionCountContainerStyle: {
@@ -567,22 +578,19 @@ const SurveyScreen = (props: any) => {
                 <View
                 style={_styles.btmButtonContainer}
                 >
-                    {hasLastQuestion ?
+                    {canGotoQuestion && reviewMode && nextButton != 'Complete Survey' ?
                     <Pressable
                     style={_styles.arrowContainer}
-                    onPress={(e: any) => submit(-1)}
+                    onPress={(e: any) => {
+                        submit(1);
+                        generateMatches();
+                        }
+                    }
                     >
-                        <FontAwesomeIcon 
-                        size={20} 
-                        color={Color(props.isDarkMode).textSecondary} 
-                        style={_styles.backArrow} 
-                        icon="arrow-left"
-                        >
-                        </FontAwesomeIcon>
                         <_Text
-                        style={Style(props.isDarkMode).textDefaultSecondary}
+                        style={[Style(props.isDarkMode).textDefaultSecondary, {textDecoration: 'underline'}]}
                         >
-                            Go Back
+                            Finish
                         </_Text>
                     </Pressable>
                     :
@@ -591,18 +599,15 @@ const SurveyScreen = (props: any) => {
                     <View
                     style={_styles.buttonContainer}
                     >
-                        {reviewMode && nextButton != 'Complete Survey' ?
+                        {hasLastQuestion ?
                         <_Button
                         isDarkMode={props.isDarkMode}
-                        style={[Style(props.isDarkMode).buttonDefault, _styles.finishButton]}
-                        disabled={!canGotoQuestion}
-                        onPress={(e: any) => {
-                            submit(1);
-                            generateMatches();
-                            }
-                        }
+                        style={Style(props.isDarkMode).buttonInverted}
+                        containerStyle={_styles.finishButton}
+                        textStyle={Style(props.isDarkMode).buttonInvertedText}
+                        onPress={(e: any) => submit(-1)}
                         >
-                            Finish
+                            Back
                         </_Button>
                         : null }
                         <_Button

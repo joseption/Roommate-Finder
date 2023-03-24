@@ -122,8 +122,8 @@ const ListingCard = (props: any) => {
     },
     favorite: {
       position: "absolute",
-      top: 5,
-      right: 35,
+      top: 3,
+      right: 5,
       zIndex: 1,
     },
     userImage: {
@@ -138,7 +138,6 @@ const ListingCard = (props: any) => {
           outlineStyle: "none",
         },
       }),
-      position: "absolute",
     },
     iconBorder: {
       ...Platform.select({
@@ -203,7 +202,7 @@ const ListingCard = (props: any) => {
             ) : (
               isFavorite && (
                 <View style={styles.favorite}>
-                  <FontAwesomeIcon style={styles.icon} icon={faHeart} size={30} color="red" />     
+                  <FontAwesomeIcon style={styles.icon} icon={faHeart} size={30} color={Color(props.isDarkMode).danger} />     
                 </View>
               )
             )

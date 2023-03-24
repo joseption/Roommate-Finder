@@ -99,14 +99,16 @@ const BottomNavbar = (props: any) => {
 
     },
     favContainer: {
+      backgroundColor: props.isDarkMode ? Color(props.isDarkMode).contentBackgroundSecondary : Color(props.isDarkMode).contentBackground,
       borderRadius: Radius.round,
       position: 'absolute',
-      bottom: -1,
-      right: -5,
-      padding: 1,
+      bottom: -3,
+      right: -7,
       justifyContent: 'center',
       alignItems: 'center',
       flexDirection: 'row',
+      height: 17,
+      width: 17,
     }
   });
 
@@ -168,7 +170,7 @@ const BottomNavbar = (props: any) => {
         style={styles.favContainer}
         >
           <FontAwesomeIcon
-          style={styles.icon}
+          style={[styles.icon, {marginTop: 1}]}
           icon={faHeart} size={12}
           color={props.currentScreen === Listings_Screen.favorites ? Color(props.isDarkMode).gold : Color(props.isDarkMode).text}
           />

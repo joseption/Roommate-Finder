@@ -58,48 +58,63 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
 
     await prepareTypingIndicatorData(newMessage?.length !== 0);
   }
+
+  // const sendNotification = async () => {
+  //   const obj = {userId: chat?.userInfo?.id, chatId: chat.id};
+  //   const js = JSON.stringify(obj);
+  //   const tokenHeader = await authTokenHeader();
+  //   const data = {
+  //     userId: obj.userId,
+  //     chatId: chat.id,
+  //   };
+  //   socket.emit('send_notification', data);
+  //   return fetch(
+  //     `${env.URL}/notifications`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
+  //   ).then(async ret => {
+  //     let res = JSON.parse(await ret.text());
+  //     if (res.Error) {
+  //       console.warn("Error: ", res.Error);
+  //     }
+  //   });
+  // };
   
   const sendMessage = async () => {
+    console.log("send message");
     let msg = newMessage.trim();
     if (msg === '') {
       return;
     }
-    let error = false;
-    setNewMessage('');
-    giveMsgHeight(0);
-    await setTypingIndicator(true);
-    const m_data = {
-      chatId: chat.id,
-      content: newMessage,
-      userId: userInfo.id,
-    }
-    socket.emit('send_message', m_data);
 
     const obj = {content: msg, userId: userInfo.id, chatId: chat.id, sendToId: chat?.userInfo?.id};
     const js = JSON.stringify(obj);
-
+    
     try {
       const tokenHeader = await authTokenHeader();
-      await fetch(
+      fetch(
         `${env.URL}/messages`, {method:'POST', body:js, headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
       ).then(async ret => {
         let res = JSON.parse(await ret.text());
         if (res.Error) {
           console.warn("Error: ", res.Error);
-          error = true;
-        }
-        else {
-          const data = {
-            userId: obj.sendToId,
-            chatId: chat.id,
-          };
-          socket.emit('send_notification', data);
         }
       });
+    } catch (e) {
+      console.warn("Error: failed sending message request. ", e);
     }
-    catch (e) {
-      error = true;
+    const dataSend = {
+      chatId: chat.id,
+      content: newMessage,
+      userId: userInfo.id,
     }
+    socket.emit('send_message', dataSend);
+    const dataNotif = {
+      userId: obj.userId,
+      chatId: chat.id,
+    };
+    socket.emit('send_notification', dataNotif);
+    setNewMessage('');
+    giveMsgHeight(0);
+    await setTypingIndicator(true);
   };
 
   const giveMsgHeight = (height: number) => {

@@ -240,7 +240,7 @@ const Messages = ({typing, receiveMessage, chat, userInfo, isDarkMode, image}: P
         removeClippedSubviews={true}
         ListHeaderComponent={indicator()}
         inverted
-        style={{padding: 10}}
+        style={{padding: 10, paddingTop: -50}}
       />
     </View>
   );

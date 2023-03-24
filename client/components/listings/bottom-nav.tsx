@@ -80,7 +80,7 @@ const BottomNavbar = (props: any) => {
         web:{
           outlineStyle: 'none'
         }
-      })
+      }),
     },
     userIcon: {
       height: 30,
@@ -99,12 +99,14 @@ const BottomNavbar = (props: any) => {
 
     },
     favContainer: {
-      backgroundColor: Color(props.isDarkMode).separator,
       borderRadius: Radius.round,
       position: 'absolute',
       bottom: -1,
       right: -5,
-      padding: 2
+      padding: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'row',
     }
   });
 

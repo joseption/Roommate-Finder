@@ -264,6 +264,7 @@ const MessagesScreen = (props: any) => {
         let chat = res;
         const users = [];
         const user = await getUser(userIdTwo);
+        if (!user) return;
         users.push(user);
         chat = {...chat, users: users, userInfo: user, blocked: '', muted: [], notificationCount: 0};
         props.socket.emit('create_chat', chat);

@@ -200,7 +200,7 @@ router.put('/:listingId', async (req: Request, res: Response) => {
     uploadImages.push(...listing.images);
 
     // Check to see if the images already exist, if they weren't passed back then delete them from the DB
-    if (deleteImages.length > 0) {
+    if (deleteImages && deleteImages.length > 0) {
       for (let i = 0; i < deleteImages.length; i++) {
         let cnt = 0;
         uploadImages.find((x: any) => {

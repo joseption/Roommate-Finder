@@ -1,4 +1,4 @@
-import { Box, Button, Stack } from "@chakra-ui/react";
+import { Box, Button, Stack, Text, VStack } from "@chakra-ui/react";
 import React from "react";
 
 import { user } from "../../types/auth.types";
@@ -38,49 +38,50 @@ function MyChats({
       borderWidth="1px"
     >
       <Box
-        pb={3}
-        px={3}
-        fontSize={{ base: "28px", md: "30px" }}
-        fontFamily="Poppins"
-        color="#e0b936"
         display="flex"
-        w="100%"
         justifyContent="space-between"
         alignItems="center"
+        w="100%"
+        pb={3}
+        px={3}
       >
-        My Chats
+        <Text
+          fontSize={{ base: "28px", md: "30px" }}
+          fontFamily="Poppins"
+          color="#e0b936"
+        >
+          My Chats
+        </Text>
       </Box>
 
-      <Box
-        display="flex"
-        flexDir="column"
+      <VStack
         p={3}
         bg="F8F8F8"
         w="100%"
         h="100%"
         borderRadius="lg"
-        overflowY="scroll"
+        overflowY="hidden"
+        spacing={4}
+        alignItems="stretch"
       >
         {chats ? (
-          <Stack overflowY="scroll">
-            {chats.map((chat) => {
-              return (
-                <LeftSideChatBox
-                  chat={chat}
-                  userId={userId}
-                  key={chat.id}
-                  selectedChat={selectedChat}
-                  setSelectedChat={setSelectedChat}
-                  selectedChatUser={selectedChatUser}
-                  setSelectedChatUser={setSelectedChatUser}
-                />
-              );
-            })}
-          </Stack>
+          chats.map((chat) => {
+            return (
+              <LeftSideChatBox
+                chat={chat}
+                userId={userId}
+                key={chat.id}
+                selectedChat={selectedChat}
+                setSelectedChat={setSelectedChat}
+                selectedChatUser={selectedChatUser}
+                setSelectedChatUser={setSelectedChatUser}
+              />
+            );
+          })
         ) : (
-          <div>Loading...</div>
+          <Text>Loading...</Text>
         )}
-      </Box>
+      </VStack>
     </Box>
   );
 }

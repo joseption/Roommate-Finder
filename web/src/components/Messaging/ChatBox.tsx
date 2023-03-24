@@ -13,7 +13,6 @@ interface Props {
   setFetchAgain: Dispatch<SetStateAction<boolean>>;
 }
 
-// className="my-1/2 mx-4 w-full" bg="white"
 export default function ChatBox({
   selectedChat,
   selectedChatUser,
@@ -35,6 +34,7 @@ export default function ChatBox({
       w={{ base: "100%", md: "68%" }}
       borderRadius="lg"
       borderWidth="1px"
+      boxShadow="md"
     >
       <SingleChat
         selectedChat={selectedChat}

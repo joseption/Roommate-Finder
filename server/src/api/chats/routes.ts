@@ -13,8 +13,8 @@ router.use(isAuthenticated);
 // access a chat. searches for chat between 2 users and returns it. Creates it if it doesnt exist
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { userIdOne, userIdTwo } = req.body;
-    
+    const { userIdTwo } = req.body;
+    const userIdOne = req.body[0].userId;
     if (userIdOne === userIdTwo) {
       return res.status(400).json({Error: "Cannot chat with yourself"});
     }

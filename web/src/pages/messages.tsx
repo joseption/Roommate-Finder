@@ -1,4 +1,4 @@
-import { Box, ChakraProvider, Spinner } from "@chakra-ui/react";
+import { Box, ChakraProvider, Flex, Spinner } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { Dispatch, SetStateAction, useState } from "react";
 
@@ -33,13 +33,15 @@ export default function Messages() {
 
   return (
     <ChakraProvider>
-      <div className="relative mx-auto h-full min-h-screen max-w-7xl bg-white">
-        <Box
-          display="flex"
+      <Box
+        as="div"
+        className="relative mx-auto h-full min-h-screen max-w-7xl bg-white"
+      >
+        <Flex
           justifyContent="space-between"
-          w="100%"
-          h="91.5vh"
-          p="10px"
+          width="100%"
+          height="91.5vh"
+          padding="10px"
         >
           {chatsLoading ? (
             <Spinner />
@@ -64,8 +66,8 @@ export default function Messages() {
             fetchAgain={fetchAgain}
             setFetchAgain={setFetchAgain}
           />
-        </Box>
-      </div>
+        </Flex>
+      </Box>
     </ChakraProvider>
   );
 }

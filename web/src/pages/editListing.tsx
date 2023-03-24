@@ -107,6 +107,7 @@ export default function EditListing() {
     return Promise.all<string>(promises);
   };
 
+  console.log(data);
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto flex min-h-screen max-w-4xl flex-col bg-white md:px-8 xl:px-0">
@@ -151,7 +152,8 @@ export default function EditListing() {
                   </label>
                   <div className="mt-1">
                     <textarea
-                      value={data?.description}
+                      // use default value instead of value to make it editable
+                      defaultValue={data?.description ? data?.description : ""}
                       id="about"
                       name="about"
                       rows={3}
@@ -253,7 +255,7 @@ export default function EditListing() {
                       name="housing_type"
                       autoComplete="housing_type"
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      value={data?.housing_type}
+                      defaultValue={data?.housing_type}
                       onChange={(e) => setHousingType(e.target.value)}
                     >
                       <option>Apartment</option>
@@ -274,14 +276,23 @@ export default function EditListing() {
                       id="number-of-rooms"
                       name="number-of-rooms"
                       autoComplete="number-of-rooms"
-                      value={data?.rooms ? data?.rooms : 1}
+                      defaultValue={
+                        data?.rooms && data.rooms >= 10 ? 10 : data?.rooms || 1
+                      }
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       onChange={(e) => setRooms(Number(e.target.value))}
                     >
                       <option>1</option>
                       <option>2</option>
                       <option>3</option>
-                      <option>4+</option>
+                      <option
+                        value={10}
+                        selected={
+                          data?.rooms && data.rooms >= 10 ? true : false
+                        }
+                      >
+                        4+
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -298,13 +309,24 @@ export default function EditListing() {
                       id="num-bathrooms"
                       name="num-bathrooms"
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      value={data?.bathrooms ? data?.bathrooms : 1}
+                      defaultValue={
+                        data?.bathrooms && data.bathrooms >= 10
+                          ? 10
+                          : data?.bathrooms || 1
+                      }
                       onChange={(e) => setBathrooms(Number(e.target.value))}
                     >
                       <option>1</option>
                       <option>2</option>
                       <option>3</option>
-                      <option>4+</option>
+                      <option
+                        value={10}
+                        selected={
+                          data?.bathrooms && data.bathrooms >= 10 ? true : false
+                        }
+                      >
+                        4+
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -398,7 +420,7 @@ export default function EditListing() {
                       id="pets-allowed"
                       name="pets-allowed"
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      value={data?.petsAllowed ? "Yes" : "No"}
+                      defaultValue={data?.petsAllowed ? "Yes" : "No"}
                       onChange={(e) => {
                         setPetsAllowed(e.target.value === "Yes" ? true : false);
                       }}

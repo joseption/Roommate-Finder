@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 import { AiFillEdit } from "react-icons/ai";
 import { FaTrashAlt } from "react-icons/fa";
 
+import Button from "../../components/Inputs/Button";
 import {
   CheckFavorited,
   GetCurrentUserInfo,
@@ -120,6 +121,16 @@ export default function IndividualListingPage() {
     },
   });
 
+  const sendMessage = useMutation({
+    mutationFn: () => AccessChat(data?.userId as string),
+    onSuccess: () => {
+      void router.push("/messages");
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
+    },
+  });
+
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -220,35 +231,42 @@ export default function IndividualListingPage() {
 
               <div
                 className="space-y-6 text-base text-gray-700"
-                dangerouslySetInnerHTML={{
-                  __html: data?.description ? data.description : "Loading...",
-                }}
+                // dangerouslySetInnerHTML={{
+                //   __html: data?.description ? data.description : "Loading...",
+                // }}
               />
+              <p className="whitespace-pre-wrap">
+                {/* add loading bars here */}
+                {data?.description ? data.description : "Loading..."}
+              </p>
             </div>
 
-            <div className="mt-10 flex">
-              <button
-                onClick={() => console.log("no messaging on web")}
-                className="flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-400 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
-              >
-                Message Owner
-              </button>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill={tempIsFavorite ? "#F1BA43" : "none"}
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="my-auto ml-4 h-8 w-8"
-                onClick={(e) => handleFavoriteChange(e)}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-                />
-              </svg>
-            </div>
+            {data?.userId !== userData?.id && (
+              <div className="mt-10 flex">
+                <Button
+                  onClick={() => void sendMessage.mutate()}
+                  loading={sendMessage.isLoading}
+                  className="flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-yellow-400 py-3 px-8 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
+                >
+                  Message Owner
+                </Button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill={tempIsFavorite ? "#F1BA43" : "none"}
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="my-auto ml-4 h-8 w-8 cursor-pointer"
+                  onClick={(e) => handleFavoriteChange(e)}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                  />
+                </svg>
+              </div>
+            )}
 
             <section aria-labelledby="details-heading" className="mt-12">
               <h2 id="details-heading" className="sr-only">
@@ -268,14 +286,16 @@ export default function IndividualListingPage() {
                   </span>
                   {data?.rooms ? (
                     <span className="mr-2 mb-2 inline-block rounded-full bg-gray-300 px-3 py-1 text-sm font-semibold text-gray-700">
-                      {`Bedrooms: ${data?.rooms}`}
+                      {`Bedrooms: ${data?.rooms > 3 ? "4+" : data?.rooms}`}
                     </span>
                   ) : (
                     <></>
                   )}
                   {data?.bathrooms ? (
                     <span className="mr-2 mb-2 inline-block rounded-full bg-gray-300 px-3 py-1 text-sm font-semibold text-gray-700">
-                      {`Bathrooms: ${data?.bathrooms}`}
+                      {`Bathrooms: ${
+                        data?.bathrooms > 3 ? "4+" : data?.bathrooms
+                      }`}
                     </span>
                   ) : (
                     <></>

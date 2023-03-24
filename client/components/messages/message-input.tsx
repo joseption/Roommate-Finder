@@ -79,7 +79,6 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
   // };
   
   const sendMessage = async () => {
-    console.log("send message");
     let msg = newMessage.trim();
     if (msg === '') {
       return;
@@ -108,7 +107,7 @@ const MessageInput = ({chat, userInfo, socket, newMessage, setNewMessage, isDark
     }
     socket.emit('send_message', dataSend);
     const dataNotif = {
-      userId: obj.userId,
+      userId: chat?.userInfo?.id,
       chatId: chat.id,
     };
     socket.emit('send_notification', dataNotif);

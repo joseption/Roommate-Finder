@@ -155,7 +155,6 @@ const Login = (props: any) => {
               }
               else
               {
-                props.setAskPermissions(true);
                 await setLocalStorage(res);
                 setMessage('');
                 navigateToLast(res);

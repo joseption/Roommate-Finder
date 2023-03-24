@@ -391,8 +391,18 @@ export function completeSetupAndSetStep(id:string, setup_step:string){
   });
 }
 
-export function updatePushToken(id:string, push_token: string) {
-  return db.user.update({
+export async function updatePushToken(id:string, push_token: string) {
+  // Clear any account with the current device token, they aren't logged in anymore
+  await db.user.updateMany({
+    where: {
+      push_token
+    },
+    data: {
+      push_token: ''
+    },
+  });
+
+  return await db.user.update({
     where: {
       id,
     },

@@ -1,6 +1,7 @@
-import { ScrollView, StyleSheet, View, Image, TouchableHighlight, Platform, ActivityIndicator, RefreshControl, TouchableOpacity } from "react-native";
+import { Animated, ScrollView, StyleSheet, View, Image, TouchableHighlight, Platform, ActivityIndicator, RefreshControl, TouchableOpacity, Easing } from "react-native";
 import { Color, FontSize, Radius, Style } from "../../style";
 import { authTokenHeader, env, getLocalStorage, Listings_Screen, navProp, NavTo, userId} from "../../helper";
+import { useCallback } from 'react';
 import _Button from "../control/button";
 import _Image from "../control/image";
 import _Text from "../control/text";
@@ -19,7 +20,36 @@ const ListingView = (props: any) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [heartScale] = useState(new Animated.Value(1));
 
+  const animateHeart = () => {
+    if (!isFavorite) {
+      heartScale.setValue(1);
+  
+      Animated.timing(heartScale, {
+        toValue: 0.8,
+        duration: 100,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }).start(() => {
+        Animated.timing(heartScale, {
+          toValue: 1.35,
+          duration: 200,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }).start(() => {
+          Animated.timing(heartScale, {
+            toValue: 1,
+            duration: 200,
+            easing: Easing.linear,
+            useNativeDriver: true,
+          }).start();
+        });
+      });
+    }
+  };
+  
+  
 
   const refresh = () => {
     setRefreshing(true);
@@ -81,12 +111,14 @@ const ListingView = (props: any) => {
     }
   }
 
-  const toggleFavorite = async () => {
+  const toggleFavoriteAsync = async () => {
     const myId = await userId();
     const listingId = props.currentListing.id;
-    console.log("listingID:" + listingId)
-    const url = isFavorite ? `${env.URL}/listings/unfavorite/${listingId}` : `${env.URL}/listings/favorite/${listingId}`;
+    const newIsFavorite = !isFavorite;
+    const url = newIsFavorite ? `${env.URL}/listings/favorite/${listingId}` : `${env.URL}/listings/unfavorite/${listingId}`;
 
+    setIsFavorite(newIsFavorite);
+  
     try {
       const tokenHeader = await authTokenHeader();
       await fetch(url, {
@@ -97,12 +129,16 @@ const ListingView = (props: any) => {
         },
         body: JSON.stringify([{ userId: myId }]),
       });
-
-      setIsFavorite(!isFavorite);
     } catch (e) {
-      return;
+      setIsFavorite(!newIsFavorite);
     }
   };
+  
+  const toggleFavorite = useCallback(() => {
+    animateHeart();
+    toggleFavoriteAsync();
+  }, [isFavorite]);  
+  
 
   useEffect(() => {
     const checkFavorited = async () => {
@@ -144,7 +180,6 @@ const ListingView = (props: any) => {
         if (res.Error) {
           console.warn("Error: ", res.Error);
         } else {
-          console.log(res.petsAllowed);
           props.setCurrentListing(res);
         }
       });
@@ -222,7 +257,6 @@ const ListingView = (props: any) => {
   const getAddressLatLng = async (address: any, city: any, zipcode: any) => {
     const location = `${address}, ${city}, ${zipcode}`;
     const isValidAddress = await checkAddressValidity(location);
-    console.log(isValidAddress)
     const lat = isValidAddress.results[0].locations[0].latLng.lat;
     const lng = isValidAddress.results[0].locations[0].latLng.lng;
     return { latitude: lat, longitude: lng };
@@ -574,36 +608,40 @@ const ListingView = (props: any) => {
           </View>
 
           <View>
-            {!isMe ? (<TouchableHighlight
-              onPress={toggleFavorite}
-              underlayColor={Color(props.isDarkMode).black}
-              style={[
-                styles.heartButton,
-                { backgroundColor: Color(props.isDarkMode).black},
-              ]}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <FontAwesomeIcon
-                  size={20}
-                  color={isFavorite ? 'red' : Color(props.isDarkMode).white}
-                  style={styles.backIcon}
-                  icon={faHeart}
-                >
-                </FontAwesomeIcon>
-                <_Text
-                  style={{
-                    color: isFavorite ? 'red' : Color(props.isDarkMode).white,
-                    marginLeft: 5,
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Favorite
-                </_Text>
-              </View>
-            </TouchableHighlight>
-            ):
-            (null)
-            }    
+            {!isMe ? (
+              <TouchableOpacity
+                onPress={toggleFavorite}
+                activeOpacity={0.7}
+                style={[
+                  styles.heartButton,
+                  { backgroundColor: Color(props.isDarkMode).black },
+                ]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                  <FontAwesomeIcon
+                    size={20}
+                    color={isFavorite ? 'red' : Color(props.isDarkMode).white}
+                    style={styles.backIcon}
+                    icon={faHeart}
+                  ></FontAwesomeIcon>
+                </Animated.View>
+
+
+                  <_Text
+                    style={{
+                      color: isFavorite ? 'red' : Color(props.isDarkMode).white,
+                      marginLeft: 5,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Favorite
+                  </_Text>
+                </View>
+              </TouchableOpacity>
+            ) : (
+              null
+            )}
           </View>
 
         </View>

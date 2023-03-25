@@ -327,8 +327,6 @@ const CreateListing = (props: any) => {
           const minQualityCode = 'P1AAA';
           return location.adminArea3 === 'FL' && location.geocodeQuality.startsWith(minQuality) && location.geocodeQualityCode.startsWith(minQualityCode);
         });
-  
-        console.log(res);
     
         if (locationsInFlorida.length > 0) {
           return;

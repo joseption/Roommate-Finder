@@ -51,6 +51,7 @@ export default function CustomListingFilterPopover({
     setPetsAllowed("all");
     setDistanceToUcf(100000);
     setIsFavorited(false);
+    queryClient.clear();
   };
 
   const debouncedPrice = React.useRef(

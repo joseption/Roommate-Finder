@@ -43,7 +43,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
     // if chat already exists just return it
     if (chatExists) {
-      return res.status(200).json(chatExists);
+      return res.status(200).json({chat: chatExists});
     }
     const chat = await db.chat.create({
       data: {
@@ -53,6 +53,7 @@ router.post('/', async (req: Request, res: Response) => {
         latestMessage: '',
       },
     });
+    console.log({chat: chat});
     res.status(200).json(chat);
   } catch (err) {
     res.status(400).json(err);

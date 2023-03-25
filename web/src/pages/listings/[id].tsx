@@ -20,6 +20,7 @@ import {
   FavoriteListing,
   UnfavoriteListing,
 } from "../../request/mutate";
+import { chat } from "../../types/chat.types";
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
@@ -29,7 +30,6 @@ export default function IndividualListingPage() {
   const { id } = router.query;
   const [isfavorited, setIsfavorited] = useState<boolean>(false);
   const [tempIsFavorite, setTempIsFavorite] = useState<boolean>();
-
   const debouncedFavorite = React.useRef(
     debounce((isFav: boolean) => {
       if (isFav) {
@@ -123,8 +123,8 @@ export default function IndividualListingPage() {
 
   const sendMessage = useMutation({
     mutationFn: () => AccessChat(data?.userId as string),
-    onSuccess: () => {
-      void router.push("/messages");
+    onSuccess: (data) => {
+      void router.push(`/messages?chat=${data.chat.id}`);
     },
     onError: (err: Error) => {
       toast.error(err.message);

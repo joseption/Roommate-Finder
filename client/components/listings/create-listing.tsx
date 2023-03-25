@@ -317,21 +317,25 @@ const CreateListing = (props: any) => {
       {method:'POST',body:js,headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}).then(async ret => {
       let res = JSON.parse(await ret.text());
       if (res.Error)
-        {
+      {
+        hasError = true;
+      }
+      else
+      {
+        const locationsInFlorida = res.results[0].locations.filter((location: { adminArea3: string; geocodeQuality: string; geocodeQualityCode: string; }) => {
+          const minQuality = 'ADDRESS';
+          const minQualityCode = 'P1AAA';
+          return location.adminArea3 === 'FL' && location.geocodeQuality.startsWith(minQuality) && location.geocodeQualityCode.startsWith(minQualityCode);
+        });
+  
+        console.log(res);
+    
+        if (locationsInFlorida.length > 0) {
+          return;
+        } else {
           hasError = true;
         }
-        else
-        {
-          const locationsInFlorida = res.results[0].locations.filter((location: { adminArea3: string; }) => {
-            return location.adminArea3 === 'FL';
-          });
-      
-          if (locationsInFlorida.length > 0) {
-            return;
-          } else {
-            hasError = true;
-          }
-        }
+      }
       });
     }
     catch(e)
@@ -341,6 +345,7 @@ const CreateListing = (props: any) => {
     setIsLoading(false);
     return !hasError;
   };
+  
 
   const handleSubmitListing = async () => {
 

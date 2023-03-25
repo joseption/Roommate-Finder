@@ -104,6 +104,7 @@ router.post('/', async (req: Request, res: Response) => {
       select: {
         first_name: true,
         last_name: true,
+        id: true
       }
     });
 
@@ -148,11 +149,12 @@ router.post('/', async (req: Request, res: Response) => {
                       android: {
                         data: {
                           experienceId: '@roomfin37/roomfin-37',
+                          scopeKey: '@roomfin37/roomfin-37',
                           title: name,
                           message: content,
                           channelId: 'Messaging',
                           categoryId: 'New Message',
-                          tag: chatId + "-" + new Date().getTime(), // Unique tag with DT
+                          tag: fromUser.id + "|" + chatId + "|" + new Date().getTime(), // Unique tag with DT
                         },
                       },
                     }

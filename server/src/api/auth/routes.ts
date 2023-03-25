@@ -28,6 +28,38 @@ import { GetSurveyQuestionsAndResponses } from 'api/survey/services';
 
 const router = express.Router()
 
+router.post('/registerFast', async (req:Request, res:Response, next:NextFunction) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(422).json({error: "You must provide an email"});
+    }
+
+    const existingUser = await findUserByEmail(email);
+
+    if (existingUser && existingUser.is_verified) {
+      return res.status(400).json({error: "A user with that email already exists"});
+    }
+    
+    const user = await createUserByEmail(email);
+    const userId = user.id;
+    const jti = v4();
+    // const { accessToken, refreshToken } = generateTokens(user, jti);
+    // await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
+    const confirmEmailKey = generateEmailToken(user, jti);
+    sendVerifyEmail(email, confirmEmailKey);
+
+    return res.status(200).json({
+      // accessToken,
+      // refreshToken,
+      userId,
+      user
+    });
+  } catch (err) {
+    return res.status(500).json({"Error": "An unexpected error occurred while registering your account. Please try again."});
+  }
+});
+
 router.post('/register', async (req:Request, res:Response, next:NextFunction) => {
   try {
 
@@ -49,38 +81,6 @@ router.post('/register', async (req:Request, res:Response, next:NextFunction) =>
     await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
     const ConfrimEmailKey = generateEmailToken(user, jti);
     sendVerifyEmail(email, ConfrimEmailKey);
-    return res.status(200).json({
-      accessToken,
-      refreshToken,
-      userId,
-      user
-    });
-  } catch (err) {
-    return res.status(500).json({"Error": "An unexpected error occurred while registering your account. Please try again."});
-  }
-});
-
-router.post('/registerFast', async (req:Request, res:Response, next:NextFunction) => {
-  try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(422).json({error: "You must provide an email"});
-    }
-
-    const existingUser = await findUserByEmail(email);
-
-    if (existingUser && existingUser.is_verified) {
-      return res.status(400).json({error: "A user with that email already exists"});
-    }
-    
-    const user = await createUserByEmail(email);
-    const userId = user.id;
-    const jti = v4();
-    const { accessToken, refreshToken } = generateTokens(user, jti);
-    await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
-    const confirmEmailKey = generateEmailToken(user, jti);
-    sendVerifyEmail(email, confirmEmailKey);
-
     return res.status(200).json({
       accessToken,
       refreshToken,

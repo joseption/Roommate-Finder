@@ -37,7 +37,7 @@ const MessageTab = ({typing, chat, setCurrentChat, showPanel, updateShowPanel, i
   }
 
   const getContent = (content: string) => {
-    if (!content) return '';
+    if (!content) return 'Start a conversation...';
     return content;
   }
 
@@ -210,7 +210,7 @@ const MessageTab = ({typing, chat, setCurrentChat, showPanel, updateShowPanel, i
           </_Text>
           <_Text
           numberOfLines={1}
-          style={[styles.msgText, unreadText()]}
+          style={[styles.msgText, unreadText(), !chat?.lastMessage?.content ? {fontStyle: 'italic', color: Color(isDarkMode).textTertiary} : null ]}
           >
             {getPrefix(chat.lastMessage?.userId) + getContent(chat.lastMessage?.content)}
           </_Text>

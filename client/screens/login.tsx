@@ -474,7 +474,6 @@ const LoginScreen = (props:any) => {
                 isDarkMode={props.isDarkMode}
                 setIsDarkMode={props.setIsDarkMode}
                 keyboardVisible={props.keyboardVisible}
-                setAskPermissions={props.setAskPermissions}
               />
               <ForgotPassword
                 btnStyle={btnStyle}

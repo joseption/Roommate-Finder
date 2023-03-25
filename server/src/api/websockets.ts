@@ -62,5 +62,8 @@ export const startSocketIO = (server: Server<typeof IncomingMessage, typeof Serv
       console.log('unblock received');
       socket.emit('unblock received', chatId);
     });
+    socket.on('online', ()=>{
+      // Keep alive
+    })
   });
 };

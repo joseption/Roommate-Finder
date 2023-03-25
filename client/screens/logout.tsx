@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
-import { env, getLocalStorage, navProp, NavTo, setLocalStorage } from '../helper';
+import { env, getCurrentRooms, getLocalStorage, navProp, NavTo, setLocalAppSettingsCurrentChat, setLocalAppSettingsCurrentRooms, setLocalAppSettingsOpenPushChat, setLocalAppSettingsPushMessageToken, setLocalStorage } from '../helper';
 import { Color } from '../style';
 
 const LogoutScreen = (props: any) => {
@@ -37,7 +37,13 @@ const LogoutScreen = (props: any) => {
                 else
                 {
                     setMessage('Redirecting...');
-                    user = await setLocalStorage(null);
+                    props.socket.disconnect();
+                    await setLocalStorage(null);
+                    await setLocalAppSettingsCurrentRooms(null);
+                    await setLocalAppSettingsCurrentChat(null);
+                    await setLocalAppSettingsPushMessageToken("");
+                    nav();
+                    return;
                 }
             });
         }
@@ -45,22 +51,18 @@ const LogoutScreen = (props: any) => {
         {
             error = true;
         } 
+    }
 
-        if (!error || !user) {
-            navigation.navigate(NavTo.Login);
-            navigation.reset({
-                index: 0,
-                routes: [{name: NavTo.Login}],
-            });
-
-            // Set delay so rendering occurs properly to hide navigation
-            setTimeout(() => {
-                props.setIsLoggedIn(false);
-                props.setIsSetup(false);
-            }, 50);
-        }
-        else
-            setMessage("An error occurred while logging out, please reload the page and try again.");
+    const nav = () => {
+        // Set delay so rendering occurs properly to hide navigation
+        props.setIsLoggingOut(true);
+        props.setIsLoggedIn(false);
+        props.setIsSetup(false);
+        navigation.navigate(NavTo.Login);
+        navigation.reset({
+            index: 0,
+            routes: [{name: NavTo.Login}],
+        });
     }
 
     const styles = StyleSheet.create({

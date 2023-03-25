@@ -295,6 +295,43 @@ export const getPushMessageToken = async () => {
   }
 }
 
+// Set current rooms
+export const setLocalAppSettingsCurrentRooms = async (data: Object | null) => {
+  try {
+    let allData = await getLocalAppSettings();
+    if (allData) {
+      allData.currentRooms = data;
+      const jsonValue = JSON.stringify(allData);
+      await AsyncStorage.setItem('@app_data', jsonValue);
+    }
+    else {
+      const jsonValue = !data ? '' : JSON.stringify({currentRooms: data});
+      await AsyncStorage.setItem('@app_data', jsonValue);
+    }
+
+    return true;
+  }
+  catch {
+    return false;
+  }
+}
+
+export const getCurrentRooms = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@app_data');
+    const data = jsonValue != null ? JSON.parse(jsonValue) : null;
+    if (data) {
+      return data.currentRooms;
+    }
+    else {
+      return [];
+    }
+  }
+  catch {
+    return [];
+  }
+}
+
 // Set current open chat id
 export const setLocalAppSettingsCurrentChat = async (data: Object | null) => {
   try {

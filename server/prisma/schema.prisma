@@ -168,4 +168,5 @@ model Notification {
   receiver        User   @relation(fields: [userId], references: [id])
 
   @@index([userId, chatId])
+  
 }

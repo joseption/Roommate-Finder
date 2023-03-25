@@ -34,12 +34,11 @@ async function validateAddress(address: string) {
         },
       }
     );
-
     const locations = geocodingResponse.data.results[0].locations;
-
     if (locations && locations.length > 0) {
       const location = locations[0];
-      return location.geocodeQualityCode.startsWith('P1');
+      // Check for an exact point address match
+      return location.geocodeQualityCode === 'P1AAA';
     }
 
     return false;
@@ -157,7 +156,6 @@ router.post('/', async (req: Request, res: Response) => {
 // * update a listing
 router.put('/:listingId', async (req: Request, res: Response) => {
   try {
-
     const UCF_ADDRESS = '4000 Central Florida Blvd, Orlando, FL 32816';
     const {
       name,

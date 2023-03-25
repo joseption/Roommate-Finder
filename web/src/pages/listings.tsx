@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -7,15 +8,42 @@ import CustomListingFilterPopover from "../components/Listings/CustomListingsFil
 import ListingContent from "../components/listingsContent";
 import { transitionVariants } from "../styles/motion-definitions";
 
+export interface Filters {
+  price?: number;
+  housingType?: string;
+  bedrooms?: string;
+  bathrooms?: string;
+  petsAllowed?: string;
+  distanceToUCF?: number;
+  isFavorited?: boolean;
+}
+
 export default function Listings() {
-  const [price, setPrice] = useState<number>(100000);
-  const [housingType, setHousingType] = useState<string>("all");
-  const [bedrooms, setBedrooms] = useState<string>("all");
-  const [bathrooms, setBathrooms] = useState<string>("all");
-  const [petsAllowed, setPetsAllowed] = useState<string>("all");
-  const [distanceToUCF, setDistanceToUCF] = useState<number>(100000);
-  const [isFavorited, setIsFavorited] = useState(false);
+  const queryClient = useQueryClient();
+  const savedFilters: Filters =
+    queryClient.getQueryData<Filters>(["filters"]) || {};
+
+  const [price, setPrice] = useState<number>(savedFilters.price || 100000);
+  const [housingType, setHousingType] = useState<string>(
+    savedFilters.housingType || "all"
+  );
+  const [bedrooms, setBedrooms] = useState<string>(
+    savedFilters.bedrooms || "all"
+  );
+  const [bathrooms, setBathrooms] = useState<string>(
+    savedFilters.bathrooms || "all"
+  );
+  const [petsAllowed, setPetsAllowed] = useState<string>(
+    savedFilters.petsAllowed || "all"
+  );
+  const [distanceToUCF, setDistanceToUCF] = useState<number>(
+    savedFilters.distanceToUCF || 100000
+  );
+  const [isFavorited, setIsFavorited] = useState(
+    savedFilters.isFavorited || false
+  );
   const router = useRouter();
+
   const handleCreateListingClick = () => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     router.push("/createListing");
@@ -55,6 +83,8 @@ export default function Listings() {
                 setDistanceToUcf={setDistanceToUCF}
                 isFavorited={isFavorited}
                 setIsFavorited={setIsFavorited}
+                savedFilters={savedFilters}
+                queryClient={queryClient}
               />
             </div>
             <ListingContent

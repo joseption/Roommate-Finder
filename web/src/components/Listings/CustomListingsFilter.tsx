@@ -1,10 +1,11 @@
 import { FunnelIcon } from "@heroicons/react/24/outline";
+import { QueryClient } from "@tanstack/react-query";
 import { debounce } from "lodash";
 import React, { ChangeEvent } from "react";
 
+import { Filters } from "../../pages/listings";
 import Button from "../Inputs/Button";
 import CustomPopover from "../Inputs/CustomPopover";
-
 interface props {
   price: number;
   setPrice: (value: number) => void;
@@ -20,6 +21,8 @@ interface props {
   setDistanceToUcf: (value: number) => void;
   isFavorited: boolean;
   setIsFavorited: (value: boolean) => void;
+  savedFilters: Filters;
+  queryClient: QueryClient;
 }
 
 export default function CustomListingFilterPopover({
@@ -37,6 +40,8 @@ export default function CustomListingFilterPopover({
   setDistanceToUcf,
   isFavorited,
   setIsFavorited,
+  savedFilters,
+  queryClient,
 }: props) {
   const clearFilters = () => {
     setPrice(100000);
@@ -51,6 +56,10 @@ export default function CustomListingFilterPopover({
   const debouncedPrice = React.useRef(
     debounce((e: React.ChangeEvent<HTMLInputElement>) => {
       setPrice(Number(e.target.value));
+      queryClient.setQueryData<Filters>(["filters"], {
+        ...savedFilters,
+        price: Number(e.target.value),
+      });
     }, 600)
   ).current;
 
@@ -59,27 +68,51 @@ export default function CustomListingFilterPopover({
   };
   const handleHousingTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setHousingType(event.target.value);
+    queryClient.setQueryData<Filters>(["filters"], {
+      ...savedFilters,
+      housingType: event.target.value,
+    });
   };
 
   const handleDistanceToCampusChange = (
     event: ChangeEvent<HTMLSelectElement>
   ) => {
     setDistanceToUcf(Number(event.target.value));
+    queryClient.setQueryData<Filters>(["filters"], {
+      ...savedFilters,
+      distanceToUCF: Number(event.target.value),
+    });
   };
 
   const handleRoomsChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setNumberRooms(event.target.value);
+    queryClient.setQueryData<Filters>(["filters"], {
+      ...savedFilters,
+      bedrooms: event.target.value,
+    });
   };
 
   const handleBathroomsChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setNumberBathrooms(event.target.value);
+    queryClient.setQueryData<Filters>(["filters"], {
+      ...savedFilters,
+      bathrooms: event.target.value,
+    });
   };
 
   const handlePetPreferenceChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setPetsAllowed(event.target.value);
+    queryClient.setQueryData<Filters>(["filters"], {
+      ...savedFilters,
+      petsAllowed: event.target.value,
+    });
   };
 
   const handleIsFavoritedChange = (event: ChangeEvent<HTMLInputElement>) => {
+    queryClient.setQueryData<Filters>(["filters"], {
+      ...savedFilters,
+      isFavorited: !isFavorited,
+    });
     setIsFavorited(!isFavorited);
   };
 

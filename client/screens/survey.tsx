@@ -386,7 +386,7 @@ const SurveyScreen = (props: any) => {
             margin: 20,
         },
         reviewButton: {
-            marginLeft: 8,
+            marginLeft: 5,
         },
         reviewButtonContainer: {
             display: 'flex',
@@ -716,7 +716,8 @@ const SurveyScreen = (props: any) => {
                 </_Button>
                 <_Button
                         isDarkMode={props.isDarkMode}
-                        style={[Style(props.isDarkMode).buttonGold, _styles.reviewButton]}
+                        style={Style(props.isDarkMode).buttonGold}
+                        containerStyle={_styles.reviewButton}
                         onPress={(e: any) => getQuestions(0, true)}
                         >
                             Review Answers

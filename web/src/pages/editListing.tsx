@@ -9,17 +9,21 @@ import { UpdateListing } from "../request/mutate";
 
 export default function EditListing() {
   const router = useRouter();
-  const { listingId } = router.query;
+  const { listingId, numrooms, numbathrooms, housingType } = router.query;
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [images, setImages] = useState<string[]>([]);
   const [price, setPrice] = useState<number>(0);
   const [city, setCity] = useState<string>("");
-  const [housing_type, setHousingType] = useState<string>("Apartment");
-  const [rooms, setRooms] = useState<number>(1);
+  const [housing_type, setHousingType] = useState<string>(
+    !housingType || Array.isArray(housingType) ? "Apartment" : housingType
+  );
+  const [rooms, setRooms] = useState<number>(Number(numrooms ? numrooms : 1));
   const [size, setSize] = useState<number>(0);
-  const [bathrooms, setBathrooms] = useState<number>(1);
-  const [street, setStreet] = useState<string>("");
+  const [bathrooms, setBathrooms] = useState<number>(
+    Number(numbathrooms ? numbathrooms : 1)
+  );
+  const [address, setAddress] = useState<string>("");
   const [zipcode, setZipcode] = useState<string>("");
   const [petsAllowed, setPetsAllowed] = useState<boolean>(true);
   const [files, setFiles] = useState<string[] | undefined>([]);
@@ -27,7 +31,13 @@ export default function EditListing() {
   const { data, isLoading } = useQuery(["ListingToEdit", listingId], {
     queryFn: () => GetListing(listingId as string),
     onSuccess: (data) => {
-      console.log(data, "hit listing correctly");
+      setName(data?.name);
+      setDescription(data?.description);
+      setPrice(data?.price);
+      setCity(data?.city);
+      setZipcode(data?.zipcode);
+      setAddress(data?.address);
+      setSize(data?.size);
     },
     onError: (err) => {
       console.log(err);
@@ -38,7 +48,7 @@ export default function EditListing() {
   });
 
   const { mutate: updateListing, isLoading: updatingData } = useMutation({
-    mutationFn: (fullAddress: string) =>
+    mutationFn: () =>
       UpdateListing(
         name,
         description,
@@ -49,9 +59,10 @@ export default function EditListing() {
         rooms,
         bathrooms,
         size,
-        fullAddress,
+        address,
         petsAllowed,
-        listingId as string
+        listingId as string,
+        zipcode
       ),
     onSuccess: () => {
       void router.push("/listings");
@@ -64,18 +75,7 @@ export default function EditListing() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!images) {
-      setImages(files as string[]);
-    }
-    const streetAddress = document.getElementById(
-      "street-address"
-    ) as HTMLInputElement;
-    const city = document.getElementById("city") as HTMLInputElement;
-    const state = document.getElementById("state") as HTMLInputElement;
-    const zip = document.getElementById("zip") as HTMLInputElement;
-    setZipcode(zip.value);
-    const fullAddress = `${streetAddress.value}, ${city.value}, ${state.value} ${zip.value}`;
-    updateListing(fullAddress);
+    updateListing();
   };
 
   const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +107,6 @@ export default function EditListing() {
     return Promise.all<string>(promises);
   };
 
-  console.log(data);
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto flex min-h-screen max-w-4xl flex-col bg-white md:px-8 xl:px-0">
@@ -255,7 +254,7 @@ export default function EditListing() {
                       name="housing_type"
                       autoComplete="housing_type"
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      defaultValue={data?.housing_type}
+                      defaultValue={housing_type}
                       onChange={(e) => setHousingType(e.target.value)}
                     >
                       <option>Apartment</option>
@@ -276,9 +275,7 @@ export default function EditListing() {
                       id="number-of-rooms"
                       name="number-of-rooms"
                       autoComplete="number-of-rooms"
-                      defaultValue={
-                        data?.rooms && data.rooms >= 10 ? 10 : data?.rooms || 1
-                      }
+                      defaultValue={rooms}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       onChange={(e) => setRooms(Number(e.target.value))}
                     >
@@ -309,24 +306,13 @@ export default function EditListing() {
                       id="num-bathrooms"
                       name="num-bathrooms"
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      defaultValue={
-                        data?.bathrooms && data.bathrooms >= 10
-                          ? 10
-                          : data?.bathrooms || 1
-                      }
+                      defaultValue={bathrooms}
                       onChange={(e) => setBathrooms(Number(e.target.value))}
                     >
                       <option>1</option>
                       <option>2</option>
                       <option>3</option>
-                      <option
-                        value={10}
-                        selected={
-                          data?.bathrooms && data.bathrooms >= 10 ? true : false
-                        }
-                      >
-                        4+
-                      </option>
+                      <option value={10}>4+</option>
                     </select>
                   </div>
                 </div>
@@ -345,6 +331,7 @@ export default function EditListing() {
                       id="street-address"
                       autoComplete="street-address"
                       defaultValue={data?.address}
+                      onChange={(e) => setAddress(e.target.value)}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     />
                   </div>
@@ -403,6 +390,7 @@ export default function EditListing() {
                       id="zip"
                       autoComplete="postal-code"
                       defaultValue={data?.zipcode}
+                      onChange={(e) => setZipcode(e.target.value)}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     />
                   </div>

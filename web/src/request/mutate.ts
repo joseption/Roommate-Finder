@@ -296,9 +296,9 @@ export async function UpdateListing(
   size: number | undefined,
   address: string | undefined,
   petsAllowed: boolean,
-  listingId: string
+  listingId: string,
+  zipcode: string
 ) {
-  // console.log(listingId);
   return await doRequest<ListingInfo>(
     `${backend_api}/listings/${listingId}`,
     {
@@ -313,6 +313,7 @@ export async function UpdateListing(
       size,
       address,
       petsAllowed,
+      zipcode,
     },
     "PUT",
     true

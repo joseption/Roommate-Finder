@@ -207,6 +207,10 @@ export default function IndividualListingPage() {
                   href={`../editListing?listingId=${
                     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                     Array.isArray(id) ? id.join(",") : id
+                  }&numrooms=${data?.rooms ? data.rooms : 1}&numbathrooms=${
+                    data?.bathrooms ? data.bathrooms : 1
+                  }&housingType=${
+                    data?.housing_type ? data.housing_type : "Apartment"
                   }`}
                 >
                   <AiFillEdit className="" size={42} />

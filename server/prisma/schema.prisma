@@ -35,15 +35,15 @@ model User {
   updatedAt         DateTime           @updatedAt
   bio               String?
   push_token        String?
-  Listings          Listings[]         @relation("ListingCreator")
-  matches           Matches[]          @relation("User")
-  matches2          Matches[]          @relation("User2")
+  Listings          Listings[]         @relation(name: "ListingCreator")
+  matches           Matches[]          @relation(name: "User")
+  matches2          Matches[]          @relation(name: "User2")
   Message           Message[]
   Notification      Notification[]
   refreshTokens     RefreshToken[]
   ResponsesOnUsers  ResponsesOnUsers[]
   tags              tags[]
-  favoritedListings Listings[]         @relation("ListingsFavorited")
+  favoritedListings Listings[]         @relation(name: "ListingsFavorited")
 }
 
 model RefreshToken {
@@ -116,12 +116,12 @@ model Listings {
   userId        String
   address       String
   bathrooms     Int
-  distanceToUcf Int
   rooms         Int
   size          Int
   zipcode       String
-  user          User     @relation("ListingCreator", fields: [userId], references: [id])
-  favoritedBy   User[]   @relation("ListingsFavorited")
+  distanceToUcf Int
+  user          User     @relation(name: "ListingCreator", fields: [userId], references: [id])
+  favoritedBy   User[]   @relation(name: "ListingsFavorited")
 }
 
 model Chat {
@@ -141,21 +141,21 @@ model Chat {
 
 model Message {
   id              String   @id @default(uuid())
-  userId          String
   content         String
   chatId          String
   createdAt       DateTime @default(now())
+  userId          String
   chatItBelongsTo Chat     @relation(fields: [chatId], references: [id])
   sender          User     @relation(fields: [userId], references: [id])
 }
 
 model Matches {
+  id              String @id @default(uuid())
   userOneId       String
   userTwoId       String
   matchPercentage Float
-  id              String @id @default(uuid())
-  User            User   @relation("User", fields: [userOneId], references: [id])
-  User2           User   @relation("User2", fields: [userTwoId], references: [id])
+  User            User   @relation(fields: [userOneId], references: [id], name: "User")
+  User2           User   @relation(fields: [userTwoId], references: [id], name: "User2")
 
   @@unique([userOneId, userTwoId])
 }

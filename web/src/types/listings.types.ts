@@ -7,13 +7,13 @@ export interface ListingInfo {
   price: number;
   petsAllowed: boolean;
   userId: string;
-  address?: string;
-  bathrooms?: number;
-  rooms?: number;
-  size?: number;
+  address: string;
+  bathrooms: number;
+  rooms: number;
+  size: number;
   description: string;
-  distanceToUcf?: number;
-  zipcode?: number;
+  distanceToUcf: number;
+  zipcode: string;
 }
 export interface ListingRequest {
   housing_type: string | undefined;

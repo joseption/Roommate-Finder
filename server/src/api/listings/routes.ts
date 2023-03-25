@@ -174,6 +174,7 @@ router.put('/:listingId', async (req: Request, res: Response) => {
       zipcode,
       deleteImages,
     } = req.body;
+    console.log(req.body);
 
     const fullAddress = `${address}, ${city}, FL ${zipcode}`;
     if ((await validateAddress(fullAddress)) === false) {

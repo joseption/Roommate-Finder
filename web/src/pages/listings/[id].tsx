@@ -86,7 +86,7 @@ export default function IndividualListingPage() {
   const { mutate: deleteListing } = useMutation({
     mutationFn: () => DeleteListing(id as string),
     onSuccess: () => {
-      void router.push("/listings");
+      void router.push("/mylistings");
     },
     onError: (err: Error) => {
       toast.error(err.message);

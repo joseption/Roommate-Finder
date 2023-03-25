@@ -343,7 +343,6 @@ const CreateListing = (props: any) => {
     setIsLoading(false);
     return !hasError;
   };
-  
 
   const handleSubmitListing = async () => {
 

@@ -394,6 +394,7 @@ return (
         setUpdatedListing={setUpdatedListing}
         setRefreshListing={setRefreshListing}
         mobile={props.mobile}
+        setPromptShowing={props.setPromptShowing}
       />
     )}
   </View>

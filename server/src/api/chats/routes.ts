@@ -53,8 +53,7 @@ router.post('/', async (req: Request, res: Response) => {
         latestMessage: '',
       },
     });
-    console.log({chat: chat});
-    res.status(200).json(chat);
+    res.status(200).json({chat: chat});
   } catch (err) {
     res.status(400).json(err);
   }

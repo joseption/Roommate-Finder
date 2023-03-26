@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
-import { Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { BackHandler, Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
 import _Text from '../control/text';

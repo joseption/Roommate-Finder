@@ -1,6 +1,6 @@
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Platform, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
 import _Button from '../components/control/button';
 import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
@@ -41,6 +41,25 @@ const SearchScreen = ({ route, isDarkMode, mobile, isMatches, setIsMatches, setN
   const [sorting, setSorting] = useState(false);
   const [forceGetProfiles, setForceGetProfiles] = useState(false);
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const back = BackHandler.addEventListener('hardwareBackPress', backPress);
+    return () => {
+      back.remove();
+    }
+  });
+
+  const backPress = () => {
+    let routes = navigation.getState()?.routes;
+    if (routes && routes[routes.length - 2]?.name && navigation.canGoBack()) {
+      setNavSelector(routes[routes.length - 2]?.name);
+      navigation.goBack();
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
 
   useEffect(() => {
     if (!hasFilters() && noResults) {

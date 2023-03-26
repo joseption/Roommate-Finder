@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, FlatList, StyleSheet, Text, ActivityIndicator } from 'react-native';
+import { View, FlatList, StyleSheet, Text, ActivityIndicator, BackHandler } from 'react-native';
 import MessageTab from '../components/messages/message-tab';
 import MessagePanel from '../components/messages/message-panel';
 import _Button from '../components/control/button';
@@ -25,6 +25,57 @@ const MessagesScreen = (props: any) => {
   useEffect(() => {
     getUserInfo();
   }, [])
+
+  useEffect(() => {
+    const back = BackHandler.addEventListener('hardwareBackPress', backPress);
+    return () => {
+      back.remove();
+    }
+  });
+
+  const backPress = () => {
+    return goBack();
+  }
+
+  const goBack = () => {
+    let rt = route();
+    props.setShowingMessagePanel(false);
+    if (rt && rt.params && rt.name && rt.name == NavTo.Messages && rt.params['from']) {
+      if (rt.params['from'] === NavTo.Profile) {
+        props.setNavSelector(NavTo.Search);
+        navigation.navigate(NavTo.Profile, {profile: rt.params['user']} as never);
+        return true;
+      }
+      else if (rt.params['from'] === NavTo.Listings) {
+        props.setNavSelector(NavTo.Listings);
+        navigation.navigate(NavTo.Listings);
+        return true;
+      }
+    }
+    else if (showPanel) {
+      updateShowPanel(false);
+      return true;
+    }
+
+    let routes = navigation.getState()?.routes;
+    if (routes && routes[routes.length - 2]?.name && navigation.canGoBack()) {
+      props.setNavSelector(routes[routes.length - 2]?.name);
+      navigation.goBack();
+      return true;
+    }
+    else
+      return false;
+  }
+
+  const route = () => {
+    if (navigation) {
+      let state = navigation.getState();
+      if (state && state.routes) {
+        return state.routes[state.index];
+      }
+    }
+    return null;
+  };
 
   const getUserInfo = async () => {
     const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});

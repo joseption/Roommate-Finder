@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TouchableHighlight } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TouchableHighlight, BackHandler } from 'react-native';
 import _Button from '../components/control/button';
 import _Group from '../components/control/group';
 import _Text from '../components/control/text';
@@ -41,6 +41,23 @@ const FiltersScreen = (props: any) => {
     const genderOptions = ["Male", "Female", "Other"];
     const locationOptions = ["On Campus", "Oviedo", "Union Park", "Orlando", "Lake Nona"];
     const sharingPrefOptions = ["Never", "Sometimes", "Always"];
+
+    useEffect(() => {
+        const back = BackHandler.addEventListener('hardwareBackPress', backPress);
+        return () => {
+          back.remove();
+        }
+      });
+    
+      const backPress = () => {
+        if (navigation.canGoBack()) {
+            navigation.goBack();
+            return true;
+        }
+        else {
+            return false;
+        }
+      }
 
     useEffect(() => {
         let rt = route();

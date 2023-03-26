@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
-import { Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { BackHandler, Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { authTokenHeader, env, Listings_Screen } from '../../helper';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
@@ -12,7 +12,6 @@ const FavoriteListings = (props: any) => {
   const [refreshing, setRefreshing] = useState(false);  
   const [count, setCount] = useState(0);  
   const [favoritedListings, setFavoritedListings] = useState([]);
-
 
   const refresh = () => {
     setRefreshing(true);

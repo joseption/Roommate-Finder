@@ -101,9 +101,11 @@ const Navigation = (props: any) => {
     };
 
     const navigate = (nav: never, params: any = {}) => {
-        setNavigation(nav);
-        setShowMenu(false);
-        navigation.navigate(nav, params as never);
+        if (!props.promptShowing) {
+            setNavigation(nav);
+            setShowMenu(false);
+            navigation.navigate(nav, params as never);
+        }
     };
 
     const toggleMenu = () => {
@@ -482,6 +484,11 @@ const Navigation = (props: any) => {
                     count={props.messageCount}
                     isDarkMode={props.isDarkMode}
                     />
+                    {props.promptShowing ?
+                    <View
+                    style={{width: '100%', backgroundColor: Color(props.isDarkMode).promptMaskMobile, height: '100%', position: 'absolute'}}
+                    />
+                    : null }
                 </View>
                 :
                 null }

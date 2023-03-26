@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import _Button from '../components/control/button';
 import _Image from '../components/control/image';
 import _Progress from '../components/control/progress';
@@ -38,6 +38,31 @@ const SurveyScreen = (props: any) => {
     const navigation = useNavigation<navProp>();
     const [refreshing, setRefreshing] = useState(false); 
     const [allQuestions, setAllQuestions] = useState<any>(null); 
+
+    useEffect(() => {
+        const back = BackHandler.addEventListener('hardwareBackPress', backPress);
+        return () => {
+          back.remove();
+        }
+      });
+    
+      const backPress = () => {
+        if (complete || currentNumber - 1 <= 0) {
+            let routes = navigation.getState()?.routes;
+            console.log(routes);
+            if (routes && routes[routes.length - 2]?.name && navigation.canGoBack()) {
+                props.setNavSelector(routes[routes.length - 2]?.name);
+                navigation.goBack();
+                return true;
+            }
+            else
+                return false;
+        }
+        else {
+            submit(-1);
+            return true;
+        }
+      }
     
     useEffect(() => {
         if (!init) {

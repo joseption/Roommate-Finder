@@ -117,16 +117,18 @@ const BottomNavbar = (props: any) => {
     <View style={[styles.container, container()]}>
       <TouchableHighlight 
         onPress={() => {
-          let action = function() {
-            if (props.currentScreen !== Listings_Screen.all)
-              props.refresh();
-            onSearch();
-          }
-          if (props.currentScreen === Listings_Screen.create) {
-            props.setIsManualNavigate({action});
-          }
-          else {
-            action();
+          if (!props.isLocationNotFound) {
+            let action = function() {
+              if (props.currentScreen !== Listings_Screen.all)
+                props.refresh();
+              onSearch();
+            }
+            if (props.currentScreen === Listings_Screen.create) {
+              props.setIsManualNavigate({action});
+            }
+            else {
+              action();
+            }
           }
         }} 
         underlayColor={Color(props.isDarkMode).contentDialogBackground}
@@ -144,16 +146,18 @@ const BottomNavbar = (props: any) => {
       <TouchableHighlight
         underlayColor={Color(props.isDarkMode).contentDialogBackground}
         onPress={() => {
-          let action = function() {
-            if (props.currentScreen !== Listings_Screen.favorites)
-              props.refresh();
-            onFavorite();
-          }
-          if (props.currentScreen === Listings_Screen.create) {
-            props.setIsManualNavigate({action});
-          }
-          else {
-            action();
+          if (!props.isLocationNotFound) {
+            let action = function() {
+              if (props.currentScreen !== Listings_Screen.favorites)
+                props.refresh();
+              onFavorite();
+            }
+            if (props.currentScreen === Listings_Screen.create) {
+              props.setIsManualNavigate({action});
+            }
+            else {
+              action();
+            }
           }
         }}
         style={styles.button}

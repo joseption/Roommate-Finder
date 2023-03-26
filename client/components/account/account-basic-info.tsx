@@ -649,7 +649,7 @@ const AccountInfo = (props: any) => {
     }
 
     const goBack = () => {
-        navigation.goBack();
+        navigation.navigate(NavTo.MyProfile);
     }
 
     return (

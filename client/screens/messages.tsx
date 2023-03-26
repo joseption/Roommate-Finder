@@ -80,7 +80,7 @@ const MessagesScreen = (props: any) => {
   const getUserInfo = async () => {
     const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
     // join own user room
-    props.socket.emit('join_room', userInfo.id)
+    props.socket.emit('join_room', userInfo.id);
     setUserInfo(userInfo);
   }
   
@@ -329,20 +329,22 @@ const MessagesScreen = (props: any) => {
         updateShowPanel(false);
       }
       else {
-        let chat = res;
-        const users = [];
-        const user = await getUser(userIdTwo);
-        if (!user)
-          return;
-
-        users.push(user);
-        chat = {...chat, users: users, userInfo: user, blocked: '', muted: [], notificationCount: 0};
-        props.socket.emit('create_chat', chat);
-        const newChats = [chat, ...chats];
-        props.socket.emit('join_room', chat.id);
-        setChats(newChats);
-        setCurrentChat(chat);
-        updateShowPanel(true);
+        let chat = res['chat'];
+        if (chat) {
+          const users = [];
+          const user = await getUser(userIdTwo);
+          if (!user)
+            return;
+          users.push(user);
+          chat = {...chat, users: users, userInfo: user, blocked: '', muted: [], notificationCount: 0};
+          props.socket.emit('create_chat', chat);
+          const newChats = [chat, ...chats];
+          if (chat && chat.id)
+            props.socket.emit('join_room', chat.id);
+          setChats(newChats);
+          setCurrentChat(chat);
+          updateShowPanel(true);
+        }
       }
     });
   };

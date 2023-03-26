@@ -6,6 +6,7 @@ import _Text from '../components/control/text';
 import _TextInput from '../components/control/text-input';
 import { env, getCurrentRooms, getLocalStorage, navProp, NavTo, setLocalAppSettingsCurrentChat, setLocalAppSettingsCurrentRooms, setLocalAppSettingsOpenPushChat, setLocalAppSettingsPushMessageToken, setLocalStorage } from '../helper';
 import { Color } from '../style';
+import * as Notifications from 'expo-notifications';
 
 const LogoutScreen = (props: any) => {
     /*
@@ -41,7 +42,7 @@ const LogoutScreen = (props: any) => {
                     await setLocalAppSettingsCurrentRooms(null);
                     await setLocalAppSettingsCurrentChat(null);
                     await setLocalAppSettingsPushMessageToken("");
-                    nav();
+                    await nav();
                     return;
                 }
             });
@@ -52,8 +53,9 @@ const LogoutScreen = (props: any) => {
         } 
     }
 
-    const nav = () => {
+    const nav = async () => {
         // Set delay so rendering occurs properly to hide navigation
+        await Notifications.dismissAllNotificationsAsync();
         props.setIsLoggingOut(true);
         props.setIsLoggedIn(false);
         props.setIsSetup(false);

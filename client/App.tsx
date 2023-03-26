@@ -36,53 +36,6 @@ Notifications.setNotificationHandler({
 export const ThemeContext = React.createContext(null);
 
 export const App = (props: any) => {
-  const [navHeight,setNavHeight] = useState(0);
-  const [navWidth,setNavWidth] = useState(0);
-  const [containerStyle,setContainerStyle] = useState({});
-  const [mobile,setMobile] = useState(false);
-  const [adjustedPos,setAdjustedPos] = useState(0);
-  const [accountView,setAccountView] = useState();
-  const [isMatches,setIsMatches] = useState(false);
-  const [ref,setRef] = useState(React.createRef<NavigationContainerRef<Page>>());
-  const [isLoggedIn,setIsLoggedIn] = useState(false);
-  const [isLoggingOut,setIsLoggingOut] = useState(false);
-  const [accountAction,setAccountAction] = useState(false);
-  const [isSetup,setIsSetup] = useState(false);
-  const [isLoaded,setIsLoaded] = useState(false);
-  const [prompt,setPrompt] = useState(false);
-  const [setupStep,setSetupStep] = useState('');
-  const [scrollY,setScrollY] = useState(0);
-  const [navSelector,setNavSelector] = useState('');
-  const [route,setRoute] = useState('');
-  const [isDarkMode,setIsDarkMode] = useState(false);
-  const [keyboardVisible,setKeyboardVisible] = useState(false);
-  const [updatePicture,setUpdatePicture] = useState('');
-  const [backCount,setBackCount] = useState(0);
-  const [backTimer,setBackTimer] = useState(0);
-  const [loginViewChanged,setLoginViewChanged] = useState('');
-  const [messageCount,setMessageCount] = useState(0);
-  const [addMessageCount,setAddMessageCount] = useState(0);
-  const [messageData,setMessageData] = useState({});
-  const [currentChat,setCurrentChat] = useState('');
-  const [showingMessagePanel,setShowingMessagePanel] = useState(false);
-  const [openChatFromPush,setOpenChatFromPush] = useState('');
-  const [receiveMessage,setReceiveMessage] = useState(null);
-  const [receiveTyping,setReceiveTyping] = useState(null);
-  const [receiveNotification,setReceiveNotification] = useState(null);
-  const [receiveBlock,setReceiveBlock] = useState(null);
-  const [receiveChat,setReceiveChat] = useState(null);
-  const appState = useRef(AppState.currentState);
-  const [forceUpdateAccount, setForceUpdateAccount] = useState(false);
-  const [deleteChatNotifications, setDeleteChatNotifications] = useState("");
-  const [gotChats, setGotChats] = useState(false);
-  const [promptShowing, setPromptShowing] = useState(false);
-  const [loaded] = useFonts({
-    'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
-    'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
-    'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
-    'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
-  });
-
   useEffect(() => {
     if (Platform.OS === 'android') {
       const backgroundSubscription =
@@ -162,6 +115,53 @@ export const App = (props: any) => {
     }
   }, []);
 
+  const [navHeight,setNavHeight] = useState(0);
+  const [navWidth,setNavWidth] = useState(0);
+  const [containerStyle,setContainerStyle] = useState({});
+  const [mobile,setMobile] = useState(false);
+  const [adjustedPos,setAdjustedPos] = useState(0);
+  const [accountView,setAccountView] = useState();
+  const [isMatches,setIsMatches] = useState(false);
+  const [ref,setRef] = useState(React.createRef<NavigationContainerRef<Page>>());
+  const [isLoggedIn,setIsLoggedIn] = useState(false);
+  const [isLoggingOut,setIsLoggingOut] = useState(false);
+  const [accountAction,setAccountAction] = useState(false);
+  const [isSetup,setIsSetup] = useState(false);
+  const [isLoaded,setIsLoaded] = useState(false);
+  const [prompt,setPrompt] = useState(false);
+  const [setupStep,setSetupStep] = useState('');
+  const [scrollY,setScrollY] = useState(0);
+  const [navSelector,setNavSelector] = useState('');
+  const [route,setRoute] = useState('');
+  const [isDarkMode,setIsDarkMode] = useState(false);
+  const [keyboardVisible,setKeyboardVisible] = useState(false);
+  const [updatePicture,setUpdatePicture] = useState('');
+  const [backCount,setBackCount] = useState(0);
+  const [backTimer,setBackTimer] = useState(0);
+  const [loginViewChanged,setLoginViewChanged] = useState('');
+  const [messageCount,setMessageCount] = useState(0);
+  const [addMessageCount,setAddMessageCount] = useState(0);
+  const [messageData,setMessageData] = useState({});
+  const [currentChat,setCurrentChat] = useState('');
+  const [showingMessagePanel,setShowingMessagePanel] = useState(false);
+  const [openChatFromPush,setOpenChatFromPush] = useState('');
+  const [receiveMessage,setReceiveMessage] = useState(null);
+  const [receiveTyping,setReceiveTyping] = useState(null);
+  const [receiveNotification,setReceiveNotification] = useState(null);
+  const [receiveBlock,setReceiveBlock] = useState(null);
+  const [receiveChat,setReceiveChat] = useState(null);
+  const appState = useRef(AppState.currentState);
+  const [forceUpdateAccount, setForceUpdateAccount] = useState(false);
+  const [deleteChatNotifications, setDeleteChatNotifications] = useState("");
+  const [gotChats, setGotChats] = useState(false);
+  const [promptShowing, setPromptShowing] = useState(false);
+  const [loaded] = useFonts({
+    'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
+    'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
+    'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
+    'Inter-Thin': require('./assets/fonts/Inter-Thin.ttf'),
+  });
+
   useEffect(() => {
     socket.on("connect_error", async () => {
       let user = await userId();
@@ -179,6 +179,10 @@ export const App = (props: any) => {
 
     socket.on("connect", async () => {
       setupSocketListeners();
+      let user = await userId();
+      if (user) {
+        socket.emit('join_room', user);
+      }
     });
 
     setupSocketListeners();
@@ -211,7 +215,13 @@ export const App = (props: any) => {
 
     socket.on('receive_chat', async (data: any) => {
       let rooms = await getCurrentRooms();
-      await setLocalAppSettingsCurrentRooms([...rooms, data.id]);
+      if (rooms) {
+        await setLocalAppSettingsCurrentRooms([...rooms, data.id]);
+      }
+      else {
+        await setLocalAppSettingsCurrentRooms([data.id]);
+      }
+      socket.emit('join_room', data.id);
       setReceiveChat(data);
     });
   }
@@ -424,6 +434,7 @@ export const App = (props: any) => {
   const getChats = async () => {
     const userInfo = await getLocalStorage().then((res) => {return (res && res.user ? res.user : null)});
     if (userInfo?.id) {
+      socket.emit('join_room', userInfo?.id);
       const tokenHeader = await authTokenHeader();
       fetch(
         `${environ.URL}/chats/allChats`, {method:'GET',headers:{'Content-Type': 'application/json', 'authorization': tokenHeader}}
@@ -784,6 +795,7 @@ export const App = (props: any) => {
         if (ref && ref.current) {
           let route = ref.current.getCurrentRoute();
           if (route && route.name !== NavTo.Login) {
+            await Notifications.dismissAllNotificationsAsync();
             await setLocalStorage(null);
             await setLocalAppSettingsCurrentRooms(null);
             await setLocalAppSettingsCurrentChat(null);

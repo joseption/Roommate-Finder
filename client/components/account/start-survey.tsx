@@ -103,9 +103,11 @@ const StartSurvey = (props: any) => {
                 else {
                     props.setIsSetup(true);
                     if (gotoSurvey) {
+                        props.setNavSelector(NavTo.Survey);
                         navigation.navigate(NavTo.Survey);
                     }
                     else {
+                        props.setNavSelector(NavTo.Search);
                         navigation.navigate(NavTo.Search);
                     }
                 }

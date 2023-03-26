@@ -143,6 +143,7 @@ const AccountScreen = (props: any) => {
                 setIsSetup={props.setIsSetup}
                 unauthorized={unauthorized}
                 isDarkMode={props.isDarkMode}
+                setNavSelector={props.setNavSelector}
                 />
                 : null }
             </View>

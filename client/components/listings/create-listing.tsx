@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Alert, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList, Pressable} from 'react-native';
+import { View, Alert, StyleSheet, TextInput, TouchableOpacity, Platform, FlatList, Pressable, BackHandler} from 'react-native';
 import _Text from '../control/text';
 import { Color, FontSize, Radius, Style } from '../../style';
 import { env, Listings_Screen } from '../../helper';
@@ -24,7 +24,7 @@ const CreateListing = (props: any) => {
   const [isDone, setIsDone] = useState(false);
   const [error, setError] = useState('');
   const [prompt, setPrompt] = useState(false);
-  const [dirty, setDirty] = useState(false);
+
   const [deleteImageURLs, setDeleteImageURLs] = useState<string[]>([]);
   
   useEffect(() => {
@@ -33,9 +33,17 @@ const CreateListing = (props: any) => {
 
   useEffect(() => {
     if (props.isManualNavigate) {
-      cancel();
+      cancel(props.dirty);
     }
   }, [props.isManualNavigate])
+
+  useEffect(() => {
+    props.setOnLeave({onLeave});
+  }, []);
+
+  const onLeave = (dirty: boolean) => {
+    cancel(dirty);
+  }
 
   useEffect(() => {
     if (props.currentScreen === Listings_Screen.create && props.currentListing) {
@@ -54,9 +62,7 @@ const CreateListing = (props: any) => {
         setImageUriArray(props.currentListing.images);
       }
 
-      setTimeout(() => {
-        setDirty(false);
-      }, 0);
+      setDirty(false);
     }
   }, [props.currentScreen])
 
@@ -80,6 +86,10 @@ const CreateListing = (props: any) => {
     deleteImages: []
   });
 
+  const setDirty = (dirty: boolean) => {
+    props.setDirty(dirty);
+  }
+
   
   const handleImage = (res: ImagePickerResponse) => {
     setError('');
@@ -91,7 +101,7 @@ const CreateListing = (props: any) => {
         if (Platform.OS === 'web') {
           if (asset.uri) {
             UriImages.push(asset.uri);
-            setDirty(true);
+            setDirty(true)
           } else {
             setImageError("Photo could not be attached");
           }
@@ -135,11 +145,11 @@ const CreateListing = (props: any) => {
   };
 
   const handleChange = (key: string, value: any) => {
-    setDirty(true);
     setFormData({
       ...formData,
       [key]: value,
     });
+    setDirty(true);
   };
 
   const containerStyle = () => {
@@ -276,6 +286,8 @@ const CreateListing = (props: any) => {
   };
 
   const close = () => {
+    props.setPromptShowing(false);
+    setDirty(false);
     if (props.isManualNavigate) {
       props.isManualNavigate?.action();
       props.setIsManualNavigate(null);
@@ -352,18 +364,19 @@ const CreateListing = (props: any) => {
       createListing();
     } else {
       setIsLoading(false);
+      props.setPromptShowing(true)
       setIsLocationNotFound(true);
     }
   };
 
   const dialogStyle = () => {
     let style = [];
-    style.push({backgroundColor: !props.isDarkMode ? Color(props.isDarkMode).holderMask : Color(props.isDarkMode).promptMaskMobile});
+    style.push({backgroundColor: Color(props.isDarkMode).promptMaskMobile});
     return style;
   }
 
   const disabled = () => {
-    if (props.currentListing && !dirty) {
+    if (props.currentListing && !props.dirty) {
       return true;
     }
     if (isDone) {
@@ -392,9 +405,10 @@ const CreateListing = (props: any) => {
     return style;
   }
 
-  const cancel = () => {
+  const cancel = (dirty: boolean) => {
     if (dirty) {
       setPrompt(true);
+      props.setPromptShowing(true);
     }
     else {
       props.setIsManualNavigate(null);
@@ -404,6 +418,7 @@ const CreateListing = (props: any) => {
 
   const cancelPrompt = () => {
     setPrompt(false);
+    props.setPromptShowing(false);
     if (props.isManualNavigate) {
       props.setIsManualNavigate(null);
     }    
@@ -630,7 +645,10 @@ const CreateListing = (props: any) => {
             <_Text isDarkMode={props.isDarkMode} style={styles.modalTitle}>Location not found</_Text>
             <_Text isDarkMode={props.isDarkMode} style={styles.modalMessage}>Please enter a valid location for your listing.</_Text>
             <_Button
-            onPress={() => setIsLocationNotFound(false)}
+            onPress={() => {
+              props.setPromptShowing(false);
+              setIsLocationNotFound(false);
+            }}
             style={Style(props.isDarkMode).buttonDanger}
             isDarkMode={props.isDarkMode}
             containerStyle={styles.closeBtn}
@@ -891,7 +909,7 @@ const CreateListing = (props: any) => {
                     isDarkMode={props.isDarkMode}
                     containerStyle={{marginRight: 5, flex: 1}}
                     style={[Style(props.isDarkMode).buttonDanger]}
-                    onPress={() => cancel()}
+                    onPress={() => cancel(props.dirty)}
                   >
                     {'Cancel'}
                   </_Button>

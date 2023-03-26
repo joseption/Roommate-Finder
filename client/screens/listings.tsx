@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Platform, TouchableHighlight, ActivityIndicator, BackHandler } from 'react-native';
 import AllListingsView from '../components/listings/all-listings';
-import { authTokenHeader, env, Listings_Screen, getLocalStorage } from '../helper';
+import { authTokenHeader, env, Listings_Screen, getLocalStorage, NavTo, navProp } from '../helper';
 import BottomNavbar from '../components/listings/bottom-nav';
 import FavoriteListings from '../components/listings/favorite-listings';
 import CreateListing from '../components/listings/create-listing';
-import { useLinkProps } from '@react-navigation/native';
+import { useLinkProps, useNavigation } from '@react-navigation/native';
 import _Dropdown from '../components/control/dropdown';
 import ListingView from '../components/listings/listing';
 import _Text from '../components/control/text';
@@ -29,6 +29,9 @@ const ListingsScreen = (props: any) => {
   const [isManualNavigate, setIsManualNavigate] = useState(null);
   const [refreshListing, setRefreshListing] = useState(null);
   const [image, setImage] = useState<any>(null);
+  const [onLeave, setOnLeave] = useState<any>(null);
+  const [dirty, setDirty] = useState(false);
+  const navigation = useNavigation<navProp>();
 
   useEffect(() => {
     const back = BackHandler.addEventListener('hardwareBackPress', backPress);
@@ -38,12 +41,37 @@ const ListingsScreen = (props: any) => {
   });
 
   const backPress = () => {
-    if (currentListing) {
-      setCurrentListing(null);
+    if (showFilter) {
+      setShowFilter(false);
       return true;
     }
-    else
-      false;
+    if (currentListing) {
+      if (currentScreen !== Listings_Screen.create) {
+        setCurrentListing(null);
+      }
+      else {
+        onLeave?.onLeave(dirty);
+      }
+      props.setNavSelector(NavTo.Listings);
+      return true;
+    }
+    else if (currentScreen === Listings_Screen.create) {
+      onLeave?.onLeave(dirty);
+      props.setNavSelector(NavTo.Listings);
+      return true;
+    }
+    else {
+      if (navigation.canGoBack()) {
+        let routes = navigation.getState()?.routes;
+        if (routes && routes[routes.length - 2]?.name) {
+          props.setNavSelector(routes[routes.length - 2]?.name);
+          navigation.goBack();
+          return true;
+        }
+      }
+      else
+        return false;
+    }
   }
 
   useEffect(() => {
@@ -297,6 +325,8 @@ return (
           filters={filters}
           showFilter={showFilter}
           mobile={props.mobile}
+          setCurrentScreen={setCurrentScreen}
+          currentScreen={currentScreen}
           />
         </View>
       </View>
@@ -316,6 +346,7 @@ return (
             userImage={image}
             refresh={refresh}
             setCurrentScreen={setCurrentScreen}
+            currentScreen={currentScreen}
             mobile={props.mobile}
           />
           }
@@ -340,6 +371,10 @@ return (
             setCurrentListing={setCurrentListing}
             refreshListing={refreshListing}
             mobile={props.mobile}
+            setOnLeave={setOnLeave}
+            dirty={dirty}
+            setDirty={setDirty}
+            setPromptShowing={props.setPromptShowing}
           />
           {bottomBarNav()}
         </View>
@@ -353,6 +388,7 @@ return (
         currentListing={currentListing}
         refresh={refresh}
         setNavSelector={props.setNavSelector}
+        currentScreen={currentScreen}
         setCurrentScreen={setCurrentScreen}
         updatedListing={updatedListing}
         setUpdatedListing={setUpdatedListing}

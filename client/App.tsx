@@ -75,6 +75,7 @@ export const App = (props: any) => {
   const [forceUpdateAccount, setForceUpdateAccount] = useState(false);
   const [deleteChatNotifications, setDeleteChatNotifications] = useState("");
   const [gotChats, setGotChats] = useState(false);
+  const [promptShowing, setPromptShowing] = useState(false);
   const [loaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
@@ -606,6 +607,11 @@ export const App = (props: any) => {
   }
 
   const onBackPress = () => {
+    if (promptShowing) {
+      // A prompt is showing somewhere, don't do anything
+      return true;
+    }
+
     setShowingMessagePanel(false);
     let current = getRouteName();
     let name = getPreviousRouteName();
@@ -826,6 +832,8 @@ export const App = (props: any) => {
     if (Platform.OS !== 'web')
       return <Navigation
       {...props}
+      setPromptShowing={setPromptShowing}
+      promptShowing={promptShowing}
       screen={props.options.title} 
       setAccountView={setAccountView}
       height={navHeight}
@@ -1016,6 +1024,7 @@ export const App = (props: any) => {
                   setNavSelector={setNavSelector}
                   setUpdatePicture={setUpdatePicture}
                   setForceUpdateAccount={setForceUpdateAccount}
+                  setPromptShowing={setPromptShowing}
                   />}
                   </Stack.Screen>
                   <Stack.Screen
@@ -1094,6 +1103,7 @@ export const App = (props: any) => {
                   isDarkMode={isDarkMode}
                   setNavSelector={setNavSelector}
                   updatePicture={updatePicture}
+                  setPromptShowing={setPromptShowing}
                   />}
                   </Stack.Screen>
                   <Stack.Screen
@@ -1151,6 +1161,8 @@ export const App = (props: any) => {
         </KeyboardAvoidingView>
             {Platform.OS === 'web' ?
             <Navigation
+            setPromptShowing={setPromptShowing}
+            promptShowing={promptShowing}
             setAccountView={setAccountView}
             height={navHeight}
             setHeight={setNavHeight}

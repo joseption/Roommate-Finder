@@ -74,6 +74,7 @@ const BottomNavbar = (props: any) => {
       padding: 5,
       borderRadius: Radius.default,
       width: '33%',
+      height: '100%'
     },
     icon: {
       ...Platform.select({

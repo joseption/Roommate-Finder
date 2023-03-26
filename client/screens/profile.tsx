@@ -11,6 +11,7 @@ import {
   Platform,
   TouchableHighlight,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -338,23 +339,43 @@ const ProfileScreen = (props: any) => {
     }
   }
 
-  const goBack = () => {
-    let rt = route();
-    if (rt && rt.params && rt.name && rt.name == NavTo.Profile &&
-      rt.params['fromChat'] && rt.params['fromChat'] === 'true' && rt.params['profile']) {
-      props.setShowingMessagePanel(true);
-      navigation.navigate(NavTo.Messages, {user: rt.params['profile'], requestId: generateRequestId()} as never);
+  useEffect(() => {
+    const back = BackHandler.addEventListener('hardwareBackPress', backPress);
+    return () => {
+      back.remove();
     }
-    else {
+  });
+
+  const backPress = () => {
+    return goBack();
+  }
+
+  const goBack = () => {
+    // let rt = route();
+    // if (rt && rt.params && rt.name && rt.name == NavTo.Profile &&
+    //   rt.params['fromChat'] && rt.params['fromChat'] === 'true' && rt.params['profile']) {
+    //   props.setShowingMessagePanel(true);
+    //   props.setNavSelector(NavTo.Messages);
+    //   navigation.navigate(NavTo.Messages, {user: rt.params['profile'], requestId: generateRequestId()} as never);
+    //   return true;
+    // }
+    // else {
       let routes = navigation.getState()?.routes;
       if (routes && routes[routes.length - 2]?.name === NavTo.Listings) {
         props.setNavSelector(NavTo.Listings);
       }
-      else {
+      else if (routes && routes[routes.length - 2]?.name === NavTo.Search) {
         props.setNavSelector(NavTo.Search);
       }
-      navigation.goBack();
-    }
+
+      if (routes && routes[routes.length - 2]?.name && navigation.canGoBack()) {
+        props.setNavSelector(routes[routes.length - 2]?.name);
+        navigation.goBack();
+        return true;
+      }
+    //}
+
+    return false;
   }
 
   if (!profile.id) {
@@ -457,7 +478,7 @@ const ProfileScreen = (props: any) => {
                   style={styles.msgButton}
                   onPress={() => {
                     props.setNavSelector(NavTo.Messages);
-                    navigation.navigate(NavTo.Messages, {user: profile.id, requestId: generateRequestId()} as never);
+                    navigation.navigate(NavTo.Messages, {user: profile.id, requestId: generateRequestId(), from: NavTo.Profile} as never);
                   }}
                   >
                     <FontAwesomeIcon 

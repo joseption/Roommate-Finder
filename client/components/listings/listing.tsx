@@ -279,18 +279,18 @@ const ListingView = (props: any) => {
             Are you sure you want to delete this listing?
           </_Text>
           <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+          <_Button
+              onPress={deleteListing}
+              style={Style(props.isDarkMode).buttonDanger}
+              containerStyle={{ marginRight: 5 }}
+            >
+              Delete
+            </_Button>
             <_Button
               onPress={() => setShowDeleteConfirmation(false)}
-              containerStyle={{ marginRight: 5 }}
               style={Style(props.isDarkMode).buttonDefault}
             >
               Cancel
-            </_Button>
-            <_Button
-              onPress={deleteListing}
-              style={Style(props.isDarkMode).buttonDanger}
-            >
-              Delete
             </_Button>
           </View>
         </View>
@@ -762,30 +762,8 @@ const ListingView = (props: any) => {
                 style={[styles.info, styles.myInfo]}
                 >
                   <TouchableHighlight
-                  underlayColor={Color(props.isDarkMode).defaultUnderlay}
-                  style={[styles.msgButton, {marginRight: 5}]}
-                  onPress={() => editListing()}
-                  >
-                    <View
-                    style={styles.customButton}
-                    >
-                      <FontAwesomeIcon 
-                      size={20} 
-                      color={Color(props.isDarkMode).actualWhite} 
-                      style={styles.backIcon} 
-                      icon="pencil"
-                      >
-                      </FontAwesomeIcon>
-                      <_Text
-                      style={{color: Color(props.isDarkMode).actualWhite, marginLeft: 5}}
-                      >
-                        Edit
-                      </_Text>
-                    </View>
-                  </TouchableHighlight>
-                  <TouchableHighlight
                   underlayColor={Color(props.isDarkMode).dangerUnderlay}
-                  style={styles.deleteButton}
+                  style={[styles.deleteButton, {marginRight: 5}]}
                   onPress={() => setShowDeleteConfirmation(true)}
                   >
                     <View
@@ -802,6 +780,28 @@ const ListingView = (props: any) => {
                       style={{color: Color(props.isDarkMode).actualWhite, marginLeft: 5}}
                       >
                         Delete
+                      </_Text>
+                    </View>
+                  </TouchableHighlight>
+                  <TouchableHighlight
+                  underlayColor={Color(props.isDarkMode).defaultUnderlay}
+                  style={styles.msgButton}
+                  onPress={() => editListing()}
+                  >
+                    <View
+                    style={styles.customButton}
+                    >
+                      <FontAwesomeIcon 
+                      size={20} 
+                      color={Color(props.isDarkMode).actualWhite} 
+                      style={styles.backIcon} 
+                      icon="pencil"
+                      >
+                      </FontAwesomeIcon>
+                      <_Text
+                      style={{color: Color(props.isDarkMode).actualWhite, marginLeft: 5}}
+                      >
+                        Edit
                       </_Text>
                     </View>
                   </TouchableHighlight>
@@ -860,7 +860,7 @@ const ListingView = (props: any) => {
                   style={styles.msgButton}
                   onPress={() => {
                     props.setNavSelector(NavTo.Messages);
-                    navigation.navigate(NavTo.Messages, {user: creator.id, requestId: generateRequestId()} as never);
+                    navigation.navigate(NavTo.Messages, {user: creator.id, requestId: generateRequestId(), from: NavTo.Listings} as never);
                   }}
                   >
                     <View

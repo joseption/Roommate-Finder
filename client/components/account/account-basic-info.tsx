@@ -210,6 +210,7 @@ const AccountInfo = (props: any) => {
     const triggerPrompt = () => {
         props.setPrompt(true);
         setPromptPassword(true);
+        props.setPromptShowing(true);
     }
 
     const closePasswordPrompt = () => {
@@ -217,11 +218,12 @@ const AccountInfo = (props: any) => {
         setPasswordEmailSent(false);
         setPasswordEmailError(false);
         props.setPrompt(false);
+        props.setPromptShowing(false);
     }
 
     const passwordContainerStyle = () => {
         let style = [];
-        style.push({backgroundColor: !props.isDarkMode ? Color(props.isDarkMode).holderMask : Color(props.isDarkMode).promptMaskMobile});
+        style.push({backgroundColor: Color(props.isDarkMode).promptMaskMobile});
         style.push(_styles.passwordPromptContainer);
         if (props.mobile) {
             style.push(_styles.passwordPromptContainerMobile);

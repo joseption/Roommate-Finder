@@ -116,6 +116,7 @@ const AccountScreen = (props: any) => {
         setIsDarkMode={props.setIsDarkMode}
         setUpdatePicture={props.setUpdatePicture}
         setForceUpdateAccount={props.setForceUpdateAccount}
+        setPromptShowing={props.setPromptShowing}
         />
         :
         <View>

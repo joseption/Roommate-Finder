@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Platform, TouchableHighlight} from 'react-native';
+import { View, StyleSheet, Platform, TouchableHighlight, BackHandler} from 'react-native';
 import _Text from '../control/text';
 import { Color, FontSize, Radius, Style } from '../../style';
 import _Button from '../control/button';
@@ -72,7 +72,7 @@ const Filter = (props: any) => {
   };
 
   const onClose = () => {
-    props.setShowFilter(false)
+    props.setShowFilter(false);
   };
 
   const handlePetsAllowedChange = (text: string) => {

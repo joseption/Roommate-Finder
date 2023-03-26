@@ -63,8 +63,12 @@ export default function ProfileDialog({
 
   const sendMessage = useMutation({
     mutationFn: () => AccessChat(id),
-    onSuccess: (data) => {
-      void router.push(`/messages?chatId=${data.chat.id}`);
+    onSuccess: async (data) => {
+      if (data?.chat?.id) {
+        await router.push(`/messages?chatId=${data.chat.id}`);
+      } else {
+        toast.error("Error accessing chat, try again");
+      }
     },
     onError: (err: Error) => {
       toast.error(err.message);

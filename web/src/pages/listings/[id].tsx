@@ -76,7 +76,6 @@ export default function IndividualListingPage() {
     onSuccess: (data) => {
       setIsfavorited(data.isFavorited);
       setTempIsFavorite(data.isFavorited);
-      console.log(data);
     },
     onError: (err) => {
       console.log(err);
@@ -102,7 +101,6 @@ export default function IndividualListingPage() {
   const { mutate: favoriteListingMutation } = useMutation({
     mutationFn: () => FavoriteListing(id as string),
     onSuccess: () => {
-      console.log("favorited");
       setIsfavorited(true);
     },
     onError: (err: Error) => {
@@ -113,7 +111,6 @@ export default function IndividualListingPage() {
   const { mutate: unfavoriteListingMutation } = useMutation({
     mutationFn: () => UnfavoriteListing(id as string),
     onSuccess: () => {
-      console.log("unfavorited");
       setIsfavorited(false);
     },
     onError: (err: Error) => {
@@ -123,8 +120,12 @@ export default function IndividualListingPage() {
 
   const sendMessage = useMutation({
     mutationFn: () => AccessChat(data?.userId as string),
-    onSuccess: (data) => {
-      void router.push(`/messages?chatId=${data.chat.id}`);
+    onSuccess: async (data) => {
+      if (data?.chat?.id) {
+        await router.push(`/messages?chatId=${data.chat.id}`);
+      } else {
+        toast.error("Error accessing chat, try again");
+      }
     },
     onError: (err: Error) => {
       toast.error(err.message);

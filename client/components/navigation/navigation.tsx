@@ -89,6 +89,13 @@ const Navigation = (props: any) => {
         return null;
     }
 
+    useEffect(() => {
+        if (props.navSelector == NavTo.Account)
+            props.setNavSelector(NavTo.MyProfile);
+        else if (props.navSelector == NavTo.Filters || props.navSelector == NavTo.Profile)
+            props.setNavSelector(NavTo.Search);
+    }, [props.navSelector]);
+
     const setNavigation = (nav: any) => {
         if (nav == NavTo.Account)
             nav = NavTo.MyProfile

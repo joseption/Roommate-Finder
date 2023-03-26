@@ -19,7 +19,6 @@ const CreateListing = (props: any) => {
   const [imageURLArray, setImageURLArray] = useState<string[]>([]);
   const [imageUriArray, setImageUriArray] = useState<string[]>([]);
   const [imageError, setImageError] = useState('');
-  const [isLocationNotFound, setIsLocationNotFound] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [error, setError] = useState('');
@@ -209,7 +208,7 @@ const CreateListing = (props: any) => {
     setError('');
     setIsLoading(true);
     let hasError = false;
-    setIsLocationNotFound(false);
+    props.setIsLocationNotFound(false);
     formData.images = getCleanURIList() as never;
     let listing = "";
     let method = "POST";
@@ -367,7 +366,7 @@ const CreateListing = (props: any) => {
     } else {
       setIsLoading(false);
       props.setPromptShowing(true)
-      setIsLocationNotFound(true);
+      props.setIsLocationNotFound(true);
     }
   };
 
@@ -384,7 +383,7 @@ const CreateListing = (props: any) => {
     if (isDone) {
       return true;
     }
-    let formDataFilled = formData.address && formData.bathrooms && formData.city && formData.description && formData.housing_type && (imageUriArray.length > 0 || imageURLArray.length > 0) && formData.name && formData.petsAllowed != undefined && formData.price && formData.rooms && formData.zipcode;
+    let formDataFilled = formData.address && formData.bathrooms && formData.city && formData.description && formData.housing_type && (imageUriArray.length > 0 || imageURLArray.length > 0) && formData.name && formData.petsAllowed != undefined && formData.price && formData.rooms && formData.zipcode && formData.size;
     return !formDataFilled;
   }
 
@@ -641,7 +640,7 @@ const CreateListing = (props: any) => {
 
   return (
     <View style={styles.container}>
-      {isLocationNotFound && (
+      {props.isLocationNotFound && (
         <View style={[styles.modalOverlay, dialogStyle()]}>
           <View style={styles.modalBox}>
             <_Text isDarkMode={props.isDarkMode} style={styles.modalTitle}>Location not found</_Text>
@@ -649,7 +648,7 @@ const CreateListing = (props: any) => {
             <_Button
             onPress={() => {
               props.setPromptShowing(false);
-              setIsLocationNotFound(false);
+              props.setIsLocationNotFound(false);
             }}
             style={Style(props.isDarkMode).buttonDanger}
             isDarkMode={props.isDarkMode}
@@ -865,6 +864,7 @@ const CreateListing = (props: any) => {
                 value={formData.size ? String(formData.size) : '0'}
                 keyboardType="numeric"
                 label="Square Feet"
+                required={true}
                 isDarkMode={props.isDarkMode} />
 
                 <_Dropdown

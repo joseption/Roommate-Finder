@@ -31,6 +31,7 @@ const ListingsScreen = (props: any) => {
   const [image, setImage] = useState<any>(null);
   const [onLeave, setOnLeave] = useState<any>(null);
   const [dirty, setDirty] = useState(false);
+  const [isLocationNotFound, setIsLocationNotFound] = useState(false);
   const navigation = useNavigation<navProp>();
 
   useEffect(() => {
@@ -41,6 +42,10 @@ const ListingsScreen = (props: any) => {
   });
 
   const backPress = () => {
+    if (isLocationNotFound) {
+      // User must handle other dialog first
+      return true;
+    }
     if (showFilter) {
       setShowFilter(false);
       return true;
@@ -156,6 +161,7 @@ const ListingsScreen = (props: any) => {
     setIsManualNavigate={setIsManualNavigate}
     userImage={image}
     mobile={props.mobile}
+    isLocationNotFound={isLocationNotFound}
   />
   }
 
@@ -375,6 +381,8 @@ return (
             dirty={dirty}
             setDirty={setDirty}
             setPromptShowing={props.setPromptShowing}
+            isLocationNotFound={isLocationNotFound}
+            setIsLocationNotFound={setIsLocationNotFound}
           />
           {bottomBarNav()}
         </View>

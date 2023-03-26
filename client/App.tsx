@@ -611,7 +611,7 @@ export const App = (props: any) => {
       // A prompt is showing somewhere, don't do anything
       return true;
     }
-
+    
     setShowingMessagePanel(false);
     let current = getRouteName();
     let name = getPreviousRouteName();

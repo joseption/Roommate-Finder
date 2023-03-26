@@ -2,6 +2,7 @@
  * Functions to mutate/change data on the API
  */
 import type { AuthSession } from "../types/auth.types";
+import { chat } from "../types/chat.types";
 import { ListingInfo } from "../types/listings.types";
 import { message } from "../types/message.types";
 import { getAuthSession } from "../utils/storage";
@@ -349,7 +350,7 @@ export async function UnblockChat(chatId: string, userId: string) {
 
 // if chat doesn't exist create one otherwise just show them it
 export async function AccessChat(userIdTwo: string) {
-  return await doRequest<{ message: string }>(
+  return await doRequest<{ chat: chat }>(
     `${backend_api}/chats`,
     { userIdTwo },
     "POST",

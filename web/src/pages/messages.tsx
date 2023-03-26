@@ -1,17 +1,17 @@
 import { Box, ChakraProvider, Flex, Spinner } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 import ChatBox from "../components/Messaging/ChatBox";
 import MyChats from "../components/Messaging/MyChats";
-import { GetChats, GetCurrentUserInfo } from "../request/fetch";
+import { GetChats, GetCurrentUserInfo, GetUserInfo } from "../request/fetch";
 import { user } from "../types/auth.types";
 import { chat } from "../types/chat.types";
+
 export default function Messages() {
-  const [selectedChat, setSelectedChat] = useState<chat | null>(null);
-  const [userId, setUserId] = useState("");
-  const [selectedChatUser, setSelectedChatUser] = useState<user>({} as user);
-  const [fetchAgain, setFetchAgain] = useState(false);
+  const router = useRouter();
+  const { chatId } = router.query;
   const { data: userData, isLoading: userLoading } = useQuery(["UserInfo"], {
     queryFn: () => GetCurrentUserInfo(),
     onSuccess: (data) => {
@@ -30,6 +30,29 @@ export default function Messages() {
       console.log(err);
     },
   });
+
+  const [selectedChat, setSelectedChat] = useState<chat | null>(null);
+  const [userId, setUserId] = useState("");
+  const [selectedChatUser, setSelectedChatUser] = useState<user>({} as user);
+  const [fetchAgain, setFetchAgain] = useState(false);
+
+  useEffect(() => {
+    if (myChats && chatId) {
+      const foundChat = myChats.find((ch: chat) => ch.id === chatId);
+      if (foundChat) {
+        setSelectedChat(foundChat);
+        const otherUserId = foundChat.users.find((id: string) => id !== userId);
+        if (otherUserId) {
+          // Fetch the other user object using the otherUserId
+          GetUserInfo(otherUserId)
+            .then((otherUser) => {
+              setSelectedChatUser(otherUser);
+            })
+            .catch((err) => console.log(err));
+        }
+      }
+    }
+  }, [myChats, chatId, userId]);
 
   return (
     <ChakraProvider>

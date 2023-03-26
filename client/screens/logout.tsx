@@ -37,7 +37,6 @@ const LogoutScreen = (props: any) => {
                 else
                 {
                     setMessage('Redirecting...');
-                    props.socket.disconnect();
                     await setLocalStorage(null);
                     await setLocalAppSettingsCurrentRooms(null);
                     await setLocalAppSettingsCurrentChat(null);
@@ -58,6 +57,7 @@ const LogoutScreen = (props: any) => {
         props.setIsLoggingOut(true);
         props.setIsLoggedIn(false);
         props.setIsSetup(false);
+        props.socket.disconnect();
         navigation.navigate(NavTo.Login);
         navigation.reset({
             index: 0,

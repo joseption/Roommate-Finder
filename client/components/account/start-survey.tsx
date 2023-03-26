@@ -57,7 +57,7 @@ const StartSurvey = (props: any) => {
             borderColor: borderColor,
             borderWidth: borderWidth,
             marginTop: marginTop,
-            backgroundColor: container
+            backgroundColor: container,
         }
     }
 
@@ -127,6 +127,7 @@ const StartSurvey = (props: any) => {
 
     const _styles = StyleSheet.create({
         innerGroup: {
+            justifyContent: 'center',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -167,16 +168,16 @@ const StartSurvey = (props: any) => {
             display: 'flex',
             justifyContent: 'center',
             flexDirection: 'column',
-            alignItems: 'center'
+            alignItems: 'center',
         },
         surveyButton: {
-            fontSize: FontSize.large,
             width: 200,
         },
         surveyButtonContainer: {
             justifyContent: 'center',
             display: 'flex',
-            flexDirection: 'row'
+            flexDirection: 'row',
+            marginTop: 5
         },
         surveyButtonText: {
             fontSize: FontSize.huge,
@@ -195,15 +196,18 @@ const StartSurvey = (props: any) => {
             justifyContent: 'center'
         },
         innerGap: {
-            marginBottom: 80
+            marginTop: 10
         },
         tipText: {
-            color: Color(props.isDarkMode).textSecondary,
+            color: Color(props.isDarkMode).textTertiary,
+            fontStyle: 'italic',
             textAlign: 'center',
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'center',
-            width: '100%'
+            width: '100%',
+            marginTop: 150,
+            fontSize: FontSize.small
         },
         formGap: {
             marginBottom: 20
@@ -256,6 +260,20 @@ const StartSurvey = (props: any) => {
                 }
             })
         },
+        mainIcon: {
+            ...Platform.select({
+                web: {
+                outlineStyle: 'none'
+                }
+            }),
+        },
+        mainIconContainer: {
+            marginBottom: 20,
+            justifyContent: 'center',
+            width: '100%',
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
     });
 
     return (
@@ -292,15 +310,26 @@ const StartSurvey = (props: any) => {
                         <View
                         style={_styles.innerContainer}
                         >
+                            <View
+                            style={_styles.mainIconContainer}
+                            >
+                            <FontAwesomeIcon 
+                            size={100} 
+                            color={Color(props.isDarkMode).gold} 
+                            style={_styles.mainIcon} 
+                            icon="clipboard-check"
+                            >
+                            </FontAwesomeIcon>
+                            </View>
                             <_Text
                             style={[_styles.surveyText, _styles.innerGap]}
                             >
-                                Find your ideal roommates by taking the survey. Get better matches by answering more questions.
+                                Click the button below to get started
                             </_Text>
                             <_Button
-                            style={[Style(props.isDarkMode).buttonDefault, _styles.surveyButton]}
-                            textStyle={ _styles.surveyButtonText}
-                            containerStyle={[_styles.surveyButtonContainer, _styles.innerGap]}
+                            style={[Style(props.isDarkMode).buttonInverted, _styles.surveyButton]}
+                            textStyle={[Style(props.isDarkMode).buttonInvertedText, {fontSize: FontSize.large}]}
+                            containerStyle={[_styles.surveyButtonContainer]}
                             onPress={(e: any) => completeSetup(true)}
                             isDarkMode={props.isDarkMode}
                             >
@@ -309,22 +338,33 @@ const StartSurvey = (props: any) => {
                             <_Text
                             style={_styles.tipText}
                             >
-                                Tip: If you need a break from the survey, you can always come back to it later.
+                                Access the survey any time from the top menu
                             </_Text>
                         </View>
                         :
                         <View
                         style={_styles.innerContainer}
                         >
+                            <View
+                            style={_styles.mainIconContainer}
+                            >
+                            <FontAwesomeIcon 
+                            size={100} 
+                            color={Color(props.isDarkMode).gold} 
+                            style={_styles.mainIcon} 
+                            icon="magnifying-glass"
+                            >
+                            </FontAwesomeIcon>
+                            </View>
                             <_Text
                             style={[_styles.surveyText, _styles.innerGap]}
                             >
-                                If you decide to answer questions later, you can access the survey from the navigation menu.
+                                Start exploring now, take the survey later
                             </_Text>
                             <_Button
-                            style={[Style(props.isDarkMode).buttonGold, _styles.surveyButton]}
-                            textStyle={ _styles.surveyButtonText}
-                            containerStyle={[_styles.surveyButtonContainer, _styles.innerGap]}
+                            style={[Style(props.isDarkMode).buttonInverted, _styles.surveyButton]}
+                            textStyle={[Style(props.isDarkMode).buttonInvertedText, {fontSize: FontSize.large}]}
+                            containerStyle={[_styles.surveyButtonContainer]}
                             onPress={(e: any) => completeSetup(false)}
                             isDarkMode={props.isDarkMode}
                             >
@@ -333,7 +373,7 @@ const StartSurvey = (props: any) => {
                             <_Text
                             style={_styles.tipText}
                             >
-                                Tip: Use the search filters to narrow down potential roommates.
+                                Use filters to narrow down your ideal roommates
                             </_Text>
                         </View>
                         }
@@ -363,7 +403,7 @@ const StartSurvey = (props: any) => {
                         onPress={(e: any) => setIsSearch(true)}
                         style={_styles.searchToggle}
                         >
-                            Let me find my own roommates
+                            Explore instead
                         </_Text>
                         :
                         <_Text

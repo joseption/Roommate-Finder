@@ -402,7 +402,7 @@ const AccountAbout = (props: any) => {
                 </_Text>
                 <_TextInput
                 multiline={true}
-                height={250}
+                height={200}
                 label="Bio"
                 required={true}
                 containerStyle={_styles.formGap}

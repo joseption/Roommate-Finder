@@ -74,7 +74,7 @@ const BottomNavbar = (props: any) => {
       padding: 5,
       borderRadius: Radius.default,
       width: '33%',
-      height: '100%'
+      justifyContent: 'center',
     },
     icon: {
       ...Platform.select({
@@ -168,8 +168,8 @@ const BottomNavbar = (props: any) => {
         <_Image
         style={styles.userIcon}
         source={image}
-        height={30}
-        width={30}
+        height={28}
+        width={28}
         />
         <View
         style={styles.favContainer}

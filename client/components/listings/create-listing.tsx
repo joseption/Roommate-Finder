@@ -62,7 +62,9 @@ const CreateListing = (props: any) => {
         setImageUriArray(props.currentListing.images);
       }
 
-      setDirty(false);
+      setTimeout(() => {
+        setDirty(false);
+      }, 0);
     }
   }, [props.currentScreen])
 

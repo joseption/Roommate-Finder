@@ -49,7 +49,6 @@ const SurveyScreen = (props: any) => {
       const backPress = () => {
         if (complete || currentNumber - 1 <= 0) {
             let routes = navigation.getState()?.routes;
-            console.log(routes);
             if (routes && routes[routes.length - 2]?.name && navigation.canGoBack()) {
                 props.setNavSelector(routes[routes.length - 2]?.name);
                 navigation.goBack();

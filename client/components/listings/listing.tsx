@@ -228,6 +228,7 @@ const ListingView = (props: any) => {
   
       if (response.status === 200)
       {
+        props.setPromptShowing(false);
         props.refresh();
         onClose();
       }
@@ -238,6 +239,7 @@ const ListingView = (props: any) => {
     } catch (err) {
       console.error("Error deleting listing:", err);
     }
+    props.setPromptShowing(false);
   };
 
   const checkAddressValidity = async (address: string) => {
@@ -287,7 +289,10 @@ const ListingView = (props: any) => {
               Delete
             </_Button>
             <_Button
-              onPress={() => setShowDeleteConfirmation(false)}
+              onPress={() => {
+                props.setPromptShowing(false);
+                setShowDeleteConfirmation(false);
+              }}
               style={Style(props.isDarkMode).buttonDefault}
             >
               Cancel
@@ -764,7 +769,10 @@ const ListingView = (props: any) => {
                   <TouchableHighlight
                   underlayColor={Color(props.isDarkMode).dangerUnderlay}
                   style={[styles.deleteButton, {marginRight: 5}]}
-                  onPress={() => setShowDeleteConfirmation(true)}
+                  onPress={() => {
+                    props.setPromptShowing(true);
+                    setShowDeleteConfirmation(true);
+                  }}
                   >
                     <View
                     style={styles.customButton}

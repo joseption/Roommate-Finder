@@ -57,11 +57,13 @@ const Messages = ({typing, receiveMessage, chat, userInfo, isDarkMode, image}: P
       else {
         receiveMessage.firstFromInBlock = false;
       }
-      if (receiveMessage.userId != id) {
+      if (receiveMessage?.userId != id) {
         receiveMessage.showImg = true;
         receiveMessage.lastFromMsg = true;
-        messages[0].showImg = false;
-        messages[0].lastFromMsg = false;
+        if (messages[0]) {
+          messages[0].showImg = false;
+          messages[0].lastFromMsg = false;
+        }
       }
       else {
         receiveMessage.showImg = false;

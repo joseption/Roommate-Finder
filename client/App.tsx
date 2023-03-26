@@ -163,9 +163,33 @@ export const App = (props: any) => {
   }, []);
 
   useEffect(() => {
-    socket.on("connect_error", () => {
-      socket.connect();
+    socket.on("connect_error", async () => {
+      let user = await userId();
+      if (user) {
+        socket.connect();
+      }
     });
+
+    socket.on("disconnect", async () => {
+      let user = await userId();
+      if (user) {
+        socket.connect();
+      }
+    });
+
+    socket.on("connect", async () => {
+      setupSocketListeners();
+    });
+
+    setupSocketListeners();
+  }, []);
+
+  const setupSocketListeners = () => {
+    socket.removeListener('receive_message');
+    socket.removeListener('receive_typing');
+    socket.removeListener('receive_notification');
+    socket.removeListener('receive_block');
+    socket.removeListener('receive_chat');
 
     // Listen for messages being sent over socket
     socket.on('receive_message', (data: any) => {
@@ -190,7 +214,7 @@ export const App = (props: any) => {
       await setLocalAppSettingsCurrentRooms([...rooms, data.id]);
       setReceiveChat(data);
     });
-  }, []);
+  }
 
   useEffect(() => {
     if (addMessageCount === 0) {
@@ -760,7 +784,6 @@ export const App = (props: any) => {
         if (ref && ref.current) {
           let route = ref.current.getCurrentRoute();
           if (route && route.name !== NavTo.Login) {
-            socket.disconnect();
             await setLocalStorage(null);
             await setLocalAppSettingsCurrentRooms(null);
             await setLocalAppSettingsCurrentChat(null);
@@ -776,6 +799,7 @@ export const App = (props: any) => {
               }
             if (isLoggedIn)
               setIsLoggedIn(false);
+            socket.disconnect();
           }
         }
       }

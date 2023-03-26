@@ -607,7 +607,7 @@ const AccountInfo = (props: any) => {
             }),
         },
         darkModeCheck: {
-            marginTop: 10
+            marginTop: 20
         },
         modalTitle: {
             fontSize: FontSize.large,

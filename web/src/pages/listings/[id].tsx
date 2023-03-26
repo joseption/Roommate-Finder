@@ -124,7 +124,7 @@ export default function IndividualListingPage() {
   const sendMessage = useMutation({
     mutationFn: () => AccessChat(data?.userId as string),
     onSuccess: (data) => {
-      void router.push(`/messages?chat=${data.chat.id}`);
+      void router.push(`/messages?chatId=${data.chat.id}`);
     },
     onError: (err: Error) => {
       toast.error(err.message);

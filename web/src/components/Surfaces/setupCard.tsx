@@ -67,7 +67,7 @@ export default function QuestionsCard({ isLoading, className = "" }: Props) {
     //check if selected styles is not greater than 5
     if (selectedStyles.length <= 5) mutateUpdateBioAndTags();
     else toast.error("You can only select up to 5 styles");
-    if (wordCount > 175) toast.error("Bio can only be 175 characters long");
+    if (wordCount >= 1000) toast.error("Bio can only be 1000 characters long");
   };
   return (
     <Card className={`p-4 ${className}`}>
@@ -87,7 +87,7 @@ export default function QuestionsCard({ isLoading, className = "" }: Props) {
           <div className="mx-auto flex-row pt-5 lg:w-4/5">
             <div className="flex justify-between">
               <p className="">Bio</p>
-              <p className="text-sm">{wordCount}/175</p>
+              <p className="text-sm">{wordCount}/1000</p>
             </div>
             <div className="flex w-full">
               <TextField

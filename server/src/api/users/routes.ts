@@ -29,6 +29,7 @@ import db from '../../utils/db';
 import { uploadImage } from 'utils/uploadImage';
 import { env } from 'process';
 import { JWT } from 'google-auth-library';
+import { Matches, tags } from '@prisma/client';
 const router = express.Router();
 
 router.use(isAuthenticated); // ! Do this instead of adding isAuthenticated to every function
@@ -132,6 +133,18 @@ router.get('/profileByEmail', async (req: Request, res: Response) => {
   }
 });
 
+type UserType = {
+  id: string;
+  bio: string;
+  first_name: string;
+  last_name: string;
+  birthday: string;
+  tags: tags[];
+  image: string;
+  matches: Matches[];
+  gender: string;
+};
+
 // * added profile search functionality so people could search on partial text
 router.get('/profileSearchV2', async (req, res) => {
   try {
@@ -161,6 +174,7 @@ router.get('/profileSearchV2', async (req, res) => {
       id: true,
       bio: true,
       first_name: true,
+      gender: true,
       last_name: true,
       birthday: true,
       tags: true,
@@ -173,6 +187,76 @@ router.get('/profileSearchV2', async (req, res) => {
     };
 
     const genderFilter = gender ? { gender } : {};
+    // console.log(gender ? true : false,"gender", gender)
+    const genderFilterMatches = gender
+      ? {
+        OR: [
+          {
+            AND: [
+              {
+                User: {
+                  gender: gender,
+                },
+              },
+              {
+                User2: {
+                  id: userId,
+                },
+              },
+            ],
+          },
+          {
+            AND: [
+              {
+                User2: {
+                  gender: gender,
+                },
+              },
+              {
+                User: {
+                  id: userId,
+                },
+              },
+            ],
+          },
+        ],
+      }
+      : {};
+
+
+
+    const smokingFilterMatches = smokingPreference
+      ? {
+        OR: [
+          {
+            User: {
+              ResponsesOnUsers: {
+                some: {
+                  questionId: '47193d33-b38e-40c6-8273-19b6b53cb097',
+                  responseId:
+                    smokingPreference === 'yes'
+                      ? '91496c71-970e-4e75-9ed8-d0eb3e7eb1af'
+                      : 'ad6ce5ba-ba1c-4993-a767-92a443f2eac2',
+                },
+              },
+            },
+          },
+          {
+            User2: {
+              ResponsesOnUsers: {
+                some: {
+                  questionId: '47193d33-b38e-40c6-8273-19b6b53cb097',
+                  responseId:
+                    smokingPreference === 'yes'
+                      ? '91496c71-970e-4e75-9ed8-d0eb3e7eb1af'
+                      : 'ad6ce5ba-ba1c-4993-a767-92a443f2eac2',
+                },
+              },
+            },
+          },
+        ],
+      }
+      : {};
 
     // Add smoking filter
     const smokingFilter = smokingPreference
@@ -203,13 +287,62 @@ router.get('/profileSearchV2', async (req, res) => {
       }
       : {};
 
+    const petFilterMatches = petPreference
+      ? {
+        OR: [
+          {
+            User: {
+              ResponsesOnUsers: {
+                some: {
+                  questionId: '66f23dd3-d2ec-44ea-847a-3e206d43f4b4',
+                  responseId:
+                    petPreference === 'yes'
+                      ? { in: ['069d4ede-17e3-497e-af4e-7feb17cde1f8', '79670971-c4f5-47d0-b9d4-803173b718f7'] }
+                      : 'bbf42a06-2aac-4cbb-9d44-d341474144ea',
+                },
+              },
+            },
+          },
+          {
+            User2: {
+              ResponsesOnUsers: {
+                some: {
+                  questionId: '66f23dd3-d2ec-44ea-847a-3e206d43f4b4',
+                  responseId:
+                    petPreference === 'yes'
+                      ? { in: ['069d4ede-17e3-497e-af4e-7feb17cde1f8', '79670971-c4f5-47d0-b9d4-803173b718f7'] }
+                      : 'bbf42a06-2aac-4cbb-9d44-d341474144ea',
+                },
+              },
+            },
+          },
+        ],
+      }
+      : {};
+
+    console.log(sortByMatchPercentage, 'sortByMatchPercentage');
     const matches = sortByMatchPercentage
       ? await db.matches
         .findMany({
           where: {
             OR: [
-              { userOneId: userId, User: { ...genderFilter, ...smokingFilter, ...petFilter, is_setup: true } },
-              { userTwoId: userId, User2: { ...genderFilter, ...smokingFilter, ...petFilter, is_setup: true } },
+              { userOneId: userId },
+              { userTwoId: userId },
+            ],
+            AND: [
+              { ...genderFilterMatches },
+              { ...smokingFilterMatches },
+              { ...petFilterMatches },
+              {
+                User: {
+                  is_setup: true,
+                },
+              },
+              {
+                User2: {
+                  is_setup: true,
+                },
+              },
             ],
           },
           ...paginationParams,
@@ -219,15 +352,31 @@ router.get('/profileSearchV2', async (req, res) => {
             User2: { select: userSelect },
           },
         })
-        .then((matches) =>
-          matches.map((match) => (match.User.id === userId ? match.User2 : match.User))
-        )
+        .then((matches) => {
+          console.log(matches, 'matches'
+          )
+          // THERES AN ISSUE WITH THE MATCHES QUERY WHERE IT RETURNS DUPLICATES
+          // SO WE HAVE TO DO THIS TO REMOVE THEM
+          // BUT THIS KILLS PAGINATION
+          const usersSet = new Set();
+          const users: UserType[] = [];
+          matches.forEach((match) => {
+            const currentUser = match.User.id === userId ? match.User2 : match.User;
+            if (!usersSet.has(currentUser.id)) {
+              usersSet.add(currentUser.id);
+              users.push(currentUser);
+            }
+          });
+          return users;
+        })
       : await db.user.findMany({
         where: {
-          ...genderFilter,
-          ...smokingFilter,
-          ...petFilter,
-          is_setup: true,
+          AND: [
+            { ...genderFilter },
+            { ...smokingFilter },
+            { ...petFilter },
+            { is_setup: true },
+          ],
         },
         ...paginationParams,
         select: userSelect,

@@ -145,7 +145,6 @@ export async function ProfileSearch({
     ? { smokingPreference: smokingFilter }
     : undefined;
   const petPreference = petFilter ? { petPreference: petFilter } : undefined;
-  console.log(gender);
   const params = new URLSearchParams({
     search,
     limit: limit.toString(),
@@ -155,7 +154,7 @@ export async function ProfileSearch({
     ...petPreference,
     ...gender,
   });
-  console.log(genderType, "genderType fetch");
+  console.log(params.toString(), "params fetch");
   return await doRequest<{ users: user[]; nextCursorId: string }>(
     `${backend_api}/users/profileSearchV2?${params.toString()}`,
     null,

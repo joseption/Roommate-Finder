@@ -16,6 +16,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { MdAccountCircle } from "react-icons/md";
 
+import { useProfile } from "../context/ProfileContext";
 import { clearAuthSession, getUserImage } from "../utils/storage";
 import LinearProgress from "./Feedback/LinearProgress";
 import Button from "./Inputs/Button";
@@ -61,12 +62,7 @@ export default function Nav() {
   //#endregion
 
   const router = useRouter();
-  const [userAvatar, setUserAvatar] = useState<string | null>(null);
-
-  useEffect(() => {
-    const imageData = localStorage.getItem("image") ?? null;
-    setUserAvatar(imageData);
-  }, []);
+  const { profilePicture } = useProfile();
 
   return (
     <div className="min-h-full">
@@ -117,9 +113,9 @@ export default function Nav() {
                   <CustomMenu
                     popoverPlacement={"bottom-end"}
                     button={
-                      userAvatar ? (
+                      profilePicture ? (
                         <CustomImage
-                          src={userAvatar}
+                          src={profilePicture}
                           alt="User Avatar"
                           fill
                           priority

@@ -27,18 +27,18 @@ export default function ProfilePicture({
             <ProfileImage
               isSelf={true}
               image={Value}
-              isLoading={false}
+              isLoading={isLoading}
               onImageChange={onImageChange}
             />
           </div>
         </span>
         <span className="ml-4 flex shrink-0 items-start space-x-4">
-          <button
+          {/* <button
             type="button"
             className="rounded-md bg-white font-medium text-black hover:text-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
           >
             Remove
-          </button>
+          </button> */}
         </span>
       </dd>
     </div>

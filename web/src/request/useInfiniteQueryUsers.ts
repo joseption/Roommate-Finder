@@ -24,7 +24,8 @@ interface Params {
 export default function useInfiniteQueryUsers({
   key,
   searchValue,
-  limit = 32,
+  //show all users... Endpoint is not working
+  limit = 62,
   sortByMatchPercentage,
   genderType,
   queryOptions,

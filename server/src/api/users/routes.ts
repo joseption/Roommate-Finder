@@ -352,12 +352,11 @@ router.get('/profileSearchV2', async (req, res) => {
             User2: { select: userSelect },
           },
         })
+        // THERES AN ISSUE WITH THE MATCHES QUERY WHERE IT RETURNS DUPLICATES
+        // SO WE HAVE TO DO THIS TO REMOVE THEM
+        // BUT THIS KILLS PAGINATION
         .then((matches) => {
-          console.log(matches, 'matches'
-          )
-          // THERES AN ISSUE WITH THE MATCHES QUERY WHERE IT RETURNS DUPLICATES
-          // SO WE HAVE TO DO THIS TO REMOVE THEM
-          // BUT THIS KILLS PAGINATION
+          // console.log(matches, 'matches')
           const usersSet = new Set();
           const users: UserType[] = [];
           matches.forEach((match) => {
@@ -367,7 +366,14 @@ router.get('/profileSearchV2', async (req, res) => {
               users.push(currentUser);
             }
           });
-          return users;
+
+          // Remove users without a matches property
+          const usersWithMatches = users.filter((user) => user.matches !== undefined && user.matches.length > 0);
+
+          // Sort users array by matchPercentage in descending order
+          usersWithMatches.sort((a, b) => b.matches[0].matchPercentage - a.matches[0].matchPercentage);
+
+          return usersWithMatches;
         })
       : await db.user.findMany({
         where: {

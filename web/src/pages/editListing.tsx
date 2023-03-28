@@ -440,7 +440,7 @@ export default function EditListing() {
               </div>
             </div>
 
-            <div className="pt-8">
+            {/* <div className="pt-8">
               <div>
                 <h3 className="text-lg font-medium leading-6 text-gray-900">
                   Notifications
@@ -492,7 +492,7 @@ export default function EditListing() {
                   </div>
                 </fieldset>
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className="pt-5">

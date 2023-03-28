@@ -45,7 +45,7 @@ app.post('/sms', async (req: Request, res: Response) => {
   await client.messages
     .create({
       body: 'Here is the link to Roomfin: https://play.google.com/store/apps/details?id=com.roomfin&hl=en&gl=US',
-      from: 'process.env.TWILIO_PHONE_NUMBER',
+      from: process.env.TWILIO_PHONE_NUMBER,
       to: req.body.phoneNumber,
     })
     .then((message: any) => {

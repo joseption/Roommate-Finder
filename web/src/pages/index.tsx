@@ -8,8 +8,8 @@ import { SendSMSLink } from "../request/mutate";
 const stats = [
   { label: "Founded", value: "2023" },
   { label: "Team size", value: "6" },
-  { label: "Beta Users", value: "521" },
-  { label: "Raised", value: "$25M" },
+  { label: "Beta Users", value: "25" },
+  { label: "Raised", value: "$0" },
 ];
 const footerNavigation = {
   main: [
@@ -168,9 +168,7 @@ export default function Example() {
                       Do everything you need to find your next roommate in one
                       place. Have us match you with the perfect roommate, or
                       search for your own. Enter your number below to get sent a
-                      link to download the app. You can also view potential
-                      matches or listings on the web, but to actually message
-                      and interact you&apos;ll need to use our app.
+                      link to download the app.
                     </p>
                   </div>
                   <form

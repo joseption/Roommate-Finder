@@ -30,8 +30,8 @@ interface Props {
   setFetchAgain: Dispatch<SetStateAction<boolean>>;
 }
 
-const ENDPOINT = "https://api.roomfin.xyz";
-// const ENDPOINT = "http://localhost:8080";
+// const ENDPOINT = "https://api.roomfin.xyz";
+const ENDPOINT = "http://localhost:8080";
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>,
   selectedChatCompare: chat;
 export const SingleChat = ({
@@ -48,8 +48,6 @@ export const SingleChat = ({
   const [blocked, setBlocked] = useState(
     selectedChat.blocked === null ? false : true
   );
-  const router = useRouter();
-  const queryClient = useQueryClient();
   const queryKey = ["messages", selectedChat.id];
   const { data, isLoading } = useQuery(queryKey, {
     // add chat id
@@ -105,12 +103,10 @@ export const SingleChat = ({
       console.log("block received");
       setBlocked(true);
       selectedChat.blocked = userId;
-      socket.disconnect();
-      // ! chose to not disconnect because it makes it more responsive to block then unblock. However is already on the connection they'll be able to msg you
+      // socket.disconnect();
     };
 
     socket.on("block received", handleBlockReceived);
-
     return () => {
       socket.off("block received", handleBlockReceived);
     };
@@ -123,9 +119,7 @@ export const SingleChat = ({
       setBlocked(false);
       selectedChat.blocked = null;
     };
-
     socket.on("unblock received", handleUnblockReceived);
-
     return () => {
       socket.off("unblock received", handleUnblockReceived);
     };
@@ -253,7 +247,6 @@ export const SingleChat = ({
                 placeholder="Enter a message"
                 onChange={typingHandler}
                 value={newMessage}
-                isDisabled={blocked}
               />
             </FormControl>
           </Box>

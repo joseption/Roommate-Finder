@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 
+import { useProfile } from "../context/ProfileContext";
 import path from "../data/path";
 import { authenticateUser } from "../request/mutate";
 import { ErrorResponse } from "../types/error.type";
@@ -9,6 +10,7 @@ import { clearAuthSession, storeAuthSession } from "../utils/storage";
 
 export default function UseAuthRedirect() {
   const router = useRouter();
+  const { setProfilePicture } = useProfile();
 
   const { refetch } = useQuery({
     queryKey: ["refreshToken", "accessToken", "userId"],
@@ -16,6 +18,8 @@ export default function UseAuthRedirect() {
     refetchOnMount: true,
     onSuccess: (data) => {
       storeAuthSession(data);
+      console.log(data.user?.image);
+      setProfilePicture(data.user?.image || null); // Save the profile link to the context
       if (data.user && !data.user.is_verified) {
         if (!router.pathname.startsWith(path.auth)) {
           void router.push({

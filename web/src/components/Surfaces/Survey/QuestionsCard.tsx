@@ -110,10 +110,20 @@ export default function QuestionsCard({ className = "" }: Props) {
       }
     }
   };
+
   return (
     <Card className={`p-4 ${className}`}>
       <div className={"flex items-center justify-between"}>
         <h1 className={"text-xl"}>Survey Q&A</h1>
+        <Button
+          onClick={() => {
+            mutateComplete();
+          }}
+          loading={isFinshing}
+          disabled={isFinshing}
+        >
+          Skip
+        </Button>
       </div>
       {mainDataLoading ? (
         <CircularProgress className={"mx-auto my-12 scale-[200%]"} />

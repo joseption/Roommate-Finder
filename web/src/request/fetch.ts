@@ -9,8 +9,8 @@ import { message } from "../types/message.types";
 import { SurveyInfo } from "../types/survey.types";
 import { BioAndTags } from "../types/tags.types";
 import doRequest from "./request";
-// const backend_api = "http://localhost:8080";
-const backend_api = "https://api.roomfin.xyz";
+const backend_api = "http://localhost:8080";
+// const backend_api = "https://api.roomfin.xyz";
 
 export async function GetCurrentUserInfo() {
   return await doRequest<user>(`${backend_api}/users/me`, null, "GET", true);
@@ -145,7 +145,6 @@ export async function ProfileSearch({
     ? { smokingPreference: smokingFilter }
     : undefined;
   const petPreference = petFilter ? { petPreference: petFilter } : undefined;
-  console.log(gender);
   const params = new URLSearchParams({
     search,
     limit: limit.toString(),
@@ -155,7 +154,7 @@ export async function ProfileSearch({
     ...petPreference,
     ...gender,
   });
-  console.log(genderType, "genderType fetch");
+  console.log(params.toString(), "params fetch");
   return await doRequest<{ users: user[]; nextCursorId: string }>(
     `${backend_api}/users/profileSearchV2?${params.toString()}`,
     null,

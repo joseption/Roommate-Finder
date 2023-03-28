@@ -31,7 +31,6 @@ export default function SettingsCard({ className = "" }: Props) {
         <div className="w-full px-4 py-5">
           <div className="flex flex-col items-center pb-10 pt-5">
             <ProfileImage image={null} isSelf={true} isLoading={false} />
-            @faiz
           </div>
           <div className="mx-auto py-2 lg:w-3/5">
             <TextField

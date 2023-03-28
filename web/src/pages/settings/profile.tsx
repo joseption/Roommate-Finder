@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import CircularProgress from "../../components/Feedback/CircularProgress";
 import ProfilePicture from "../../components/Settings/ProfilePicture";
 import SettingsSection from "../../components/Settings/rows";
+import { useProfile } from "../../context/ProfileContext";
 import { GetCurrentUserInfo } from "../../request/fetch";
 import {
   UpdateBirthday,
@@ -31,6 +32,7 @@ export default function Settings() {
       toast.error(err.message);
     },
   });
+  const { setProfilePicture, profilePicture } = useProfile();
 
   const { mutate: mutateUpdateFirstName } = useMutation({
     mutationFn: (Firstname: string) => UpdateFirstName(Firstname),
@@ -119,7 +121,7 @@ export default function Settings() {
     mutationFn: UpdateProfilePicture,
     onSuccess: (data) => {
       toast.success("Profile updated");
-      localStorage.setItem("image", data.message ?? "");
+      setProfilePicture(data?.message);
       void UserData();
     },
     onError: (err: Error) => {
@@ -183,7 +185,7 @@ export default function Settings() {
                           <dl className="divide-y divide-gray-200">
                             <ProfilePicture
                               Name="Profile Picture"
-                              Value={data?.image}
+                              Value={profilePicture}
                               onImageChange={handleUpdateImage}
                               isLoading={isUpdatingProfile}
                             />

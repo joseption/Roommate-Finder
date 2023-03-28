@@ -30,8 +30,8 @@ interface Props {
   setFetchAgain: Dispatch<SetStateAction<boolean>>;
 }
 
-// const ENDPOINT = "https://api.roomfin.xyz";
-const ENDPOINT = "http://localhost:8080";
+const ENDPOINT = "https://api.roomfin.xyz";
+// const ENDPOINT = "http://localhost:8080";
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>,
   selectedChatCompare: chat;
 export const SingleChat = ({
@@ -48,6 +48,7 @@ export const SingleChat = ({
   const [blocked, setBlocked] = useState(
     selectedChat.blocked === null ? false : true
   );
+
   const queryKey = ["messages", selectedChat.id];
   const { data, isLoading } = useQuery(queryKey, {
     // add chat id
@@ -86,7 +87,7 @@ export const SingleChat = ({
     const handleMessageReceived = (newMessageReceived: message) => {
       if (selectedChat.id !== newMessageReceived.chatId) {
         // * Give notification
-      } else {
+      } else if (selectedChat.blocked === null) {
         setMessages([...messages, newMessageReceived]);
       }
     };
@@ -103,10 +104,10 @@ export const SingleChat = ({
       console.log("block received");
       setBlocked(true);
       selectedChat.blocked = userId;
-      // socket.disconnect();
     };
 
     socket.on("block received", handleBlockReceived);
+
     return () => {
       socket.off("block received", handleBlockReceived);
     };
@@ -119,7 +120,9 @@ export const SingleChat = ({
       setBlocked(false);
       selectedChat.blocked = null;
     };
+
     socket.on("unblock received", handleUnblockReceived);
+
     return () => {
       socket.off("unblock received", handleUnblockReceived);
     };
@@ -140,7 +143,6 @@ export const SingleChat = ({
   const sendMessage = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" && newMessage) {
       try {
-        console.log(selectedChat.blocked, "blocked");
         if (selectedChat.blocked === null) {
           sendMessageMutation(newMessage);
           socket.emit("new message", {
@@ -153,7 +155,9 @@ export const SingleChat = ({
             { content: newMessage, chatId: selectedChat.id, userId: userId },
           ]);
         } else {
+          // show error message to the user
           setNewMessage("");
+          toast.error("You cannot send messages to a blocked user.");
         }
       } catch (err) {
         console.log(err, "error");

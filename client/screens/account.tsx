@@ -117,6 +117,7 @@ const AccountScreen = (props: any) => {
         setUpdatePicture={props.setUpdatePicture}
         setForceUpdateAccount={props.setForceUpdateAccount}
         setPromptShowing={props.setPromptShowing}
+        promptShowing={props.promptShowing}
         />
         :
         <View>

@@ -45,7 +45,14 @@ const AccountInfo = (props: any) => {
     const zipRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
     const cityRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
     const stateRef = React.useRef<React.ElementRef<typeof TextInput> | null>(null);
-    const [refreshing, setRefreshing] = useState(false);  
+    const [refreshing, setRefreshing] = useState(false); 
+    const monthsArray = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    
+    useEffect(() => {
+        if (!props.promptShowing)
+        closePasswordPrompt();
+    }, [props.promptShowing]);
+    
     useEffect(() => {
         if (!init) {
             onLoad();
@@ -168,7 +175,7 @@ const AccountInfo = (props: any) => {
 
     const getYearOptions = () => {
         var years = [];
-        var year = new Date().getFullYear() - 15; // Age bumper, no kids
+        var year = new Date().getFullYear() - 18; // Age bumper, no kids
         for (var i = 0; i < 100; i++) {
             years.push({key:year, value:year.toString()});
             year--;
@@ -177,7 +184,17 @@ const AccountInfo = (props: any) => {
     }
 
     const getMonthOptions = () => {
-        return [{key:1, value:'January'},{key:2, value:'February'},{key:3, value:'March'},{key:4, value:'April'},{key:5, value:'May'},{key:6, value:'June'},{key:7, value:'July'},{key:8, value:'August'},{key:9, value:'September'},{key:10, value:'October'},{key:11, value:'November'},{key:12, value:'December'}]
+        var months = [];
+        if (year === (new Date().getFullYear() - 18).toString())
+            var m = new Date().getMonth() + 1;
+        else
+            var m = 12;
+
+        for (var i = 0; i < m; i++) {
+            months.push({key: i + 1, value: monthsArray[i]});
+        }
+
+        return months;
     }
 
     const getStateOptions = () => {
@@ -186,7 +203,7 @@ const AccountInfo = (props: any) => {
     }
 
     const setGenderOptions = () => {
-        return [{key:'Male', value: 'Male'}, {key:'Female', value: 'Female'}, {key:'Other', value: 'Other'}];
+        return [{key:'Male', value: 'Male'}, {key:'Female', value: 'Female'}, {key:'Non-Binary', value: 'Non-Binary'}];
     }
 
     const getDayOptions = () => {
@@ -194,13 +211,16 @@ const AccountInfo = (props: any) => {
         if (year && month) {
             let m = getMonthOptions().find(x => x.value == month);
             if (m) {
+                let today = new Date();
                 var count = new Date(parseInt(year), parseInt(m.key.toString()), 0).getDate();
                 for (var i = 1; i <= count; i++) {
+                    if (year === (today.getFullYear() - 18).toString() && today.getMonth() + 1 === m.key && i < today.getDate()) {
+                        continue;
+                    }
                     days.push({key:i, value:i.toString()});
                 }
                 if (day && parseInt(day) > count) {
                     setDay('');
-
                 }
             }
         }

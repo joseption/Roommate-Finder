@@ -49,7 +49,11 @@ const ListingView = (props: any) => {
     }
   };
   
-  
+  useEffect(() => {
+    if (!props.promptShowing) {
+      setShowDeleteConfirmation(false);
+    }
+  }, [props.promptShowing]);
 
   const refresh = () => {
     setRefreshing(true);
@@ -266,7 +270,7 @@ const ListingView = (props: any) => {
 
   const dialogStyle = () => {
     let style = [];
-    style.push({backgroundColor: !props.isDarkMode ? Color(props.isDarkMode).holderMask : Color(props.isDarkMode).promptMaskMobile});
+    style.push({backgroundColor: Color(props.isDarkMode).promptMaskMobile});
     return style;
   }
 

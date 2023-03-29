@@ -42,19 +42,21 @@ const _Dropdown = (props: any, {navigation}:any) => {
             let l_options = options;
             if (l_options.length == 0)
                 l_options = mappedItems(props.value);
-            l_options.forEach(x => {
-                if (x && x['props']) {
-                    let prop = x['props'];
-                    if (prop['item']) {
-                        let item = prop['item'];
-                        if (props.value === item['value']) {
-                            setDataInit(true);
-                            select(item);
-                            return;
+            if (l_options && l_options.length > 0) {
+                l_options.forEach(x => {
+                    if (x && x['props']) {
+                        let prop = x['props'];
+                        if (prop['item']) {
+                            let item = prop['item'];
+                            if (props.value === item['value']) {
+                                setDataInit(true);
+                                select(item);
+                                return;
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
         if (!init) {
             mappedItems(props.value);

@@ -25,6 +25,13 @@ const CreateListing = (props: any) => {
   const [prompt, setPrompt] = useState(false);
 
   const [deleteImageURLs, setDeleteImageURLs] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!props.promptShowing) {
+      cancelPrompt();
+      props.setIsLocationNotFound(false);
+    }
+  }, [props.promptShowing]);
   
   useEffect(() => {
     getUserInfo();
@@ -358,7 +365,6 @@ const CreateListing = (props: any) => {
   };
 
   const handleSubmitListing = async () => {
-
     const validAddress = await checkAddressValidity(formData.address + ", " + formData.city + ", FL " + formData.zipcode);
     
     if (validAddress) {

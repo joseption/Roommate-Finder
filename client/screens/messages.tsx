@@ -225,7 +225,6 @@ const MessagesScreen = (props: any) => {
       const newMsg = chats.find(chat => chat.id === props.receiveMessage?.chatId);
       if (newMsg && newMsg.blocked)
         return;
-
       setReceiveMsg(props.receiveMessage);
       updateTabs(props.receiveMessage);
       props.setReceiveMessage(null);
@@ -253,6 +252,8 @@ const MessagesScreen = (props: any) => {
     if (chats && props.openChatFromPush) {
       let chat = chats.find(chat => chat.id === props.openChatFromPush);
       if (chat) {
+        let data = {id: props.openChatFromPush, is_showing: showPanel, disabled: false, current_page: NavTo.Messages};
+        setLocalAppSettingsCurrentChat(data);
         setCurrentChat(chat);
         updateShowPanel(true);
         props.setOpenChatFromPush('');

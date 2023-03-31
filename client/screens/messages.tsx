@@ -242,7 +242,7 @@ const MessagesScreen = (props: any) => {
   useEffect(() => {
     if (props.receiveChat) {
       props.socket.emit('join_room', props.receiveChat?.id);
-      const newChats= [props.receiveChat, ...chats];
+      const newChats = [props.receiveChat, ...chats];
       setChats(newChats);
       props.setReceiveChat(null);
     }
@@ -331,13 +331,21 @@ const MessagesScreen = (props: any) => {
       else {
         let chat = res['chat'];
         if (chat) {
-          const users = [];
           const user = await getUser(userIdTwo);
           if (!user)
             return;
-          users.push(user);
+
+          // Send new chat info to other user.
+          // Here we use userTwo's info for the users array so that we know which room to send the new chat to.
+          const usersForUserTwo = [user];
+          const chatForUserTwo = {...chat, users: usersForUserTwo, userInfo: userInfo, blocked: '', muted: [], notificationCount: 0};
+          console.log('chatForUserTwo: ', chatForUserTwo);
+          props.socket.emit('create_chat', chatForUserTwo);
+
+          // Set up new chat info for current user
+          const users = [user];
           chat = {...chat, users: users, userInfo: user, blocked: '', muted: [], notificationCount: 0};
-          props.socket.emit('create_chat', chat);
+          console.log('chat: ', chat);
           const newChats = [chat, ...chats];
           if (chat && chat.id)
             props.socket.emit('join_room', chat.id);

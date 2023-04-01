@@ -44,7 +44,6 @@ const AccountAbout = (props: any) => {
         "🏛 History",
         "🌸 Anime",
         "🛍 Shopping",
-        "🍻 Alcohol",
       ];
 
     useEffect(() => {

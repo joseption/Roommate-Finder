@@ -381,6 +381,7 @@ return (
             dirty={dirty}
             setDirty={setDirty}
             setPromptShowing={props.setPromptShowing}
+            promptShowing={props.promptShowing}
             isLocationNotFound={isLocationNotFound}
             setIsLocationNotFound={setIsLocationNotFound}
           />
@@ -403,6 +404,7 @@ return (
         setRefreshListing={setRefreshListing}
         mobile={props.mobile}
         setPromptShowing={props.setPromptShowing}
+        promptShowing={props.promptShowing}
       />
     )}
   </View>

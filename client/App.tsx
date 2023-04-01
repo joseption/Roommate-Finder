@@ -249,6 +249,7 @@ export const App = (props: any) => {
         }
 
         if (appState.current === 'active' && nextAppState !== 'active') {
+          setPromptShowing(false);
           let data = await getCurrentChat();
           if (data) {
             data.disabled = true;
@@ -261,6 +262,8 @@ export const App = (props: any) => {
             data.disabled = false;
             if (data.id && data.is_showing) {
               checkDismissNotifications(data.id);
+              // Update the notification count only when you are in a chat
+              getChats();
             }
             else {
               data = null;
@@ -1061,6 +1064,7 @@ export const App = (props: any) => {
                   setUpdatePicture={setUpdatePicture}
                   setForceUpdateAccount={setForceUpdateAccount}
                   setPromptShowing={setPromptShowing}
+                  promptShowing={promptShowing}
                   />}
                   </Stack.Screen>
                   <Stack.Screen
@@ -1140,6 +1144,7 @@ export const App = (props: any) => {
                   setNavSelector={setNavSelector}
                   updatePicture={updatePicture}
                   setPromptShowing={setPromptShowing}
+                  promptShowing={promptShowing}
                   />}
                   </Stack.Screen>
                   <Stack.Screen

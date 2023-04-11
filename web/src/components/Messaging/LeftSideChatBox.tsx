@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { GetUserInfo } from "../../request/fetch";
 import { user } from "../../types/auth.types";
 import { chat } from "../../types/chat.types";
+import CustomImage from "../Surfaces/CustomImage";
 interface Props {
   chat: chat;
   userId: string;
@@ -35,7 +36,8 @@ export const LeftSideChatBox = ({
         console.log(err);
       },
       onSuccess: (data) => {
-        setSenderName(data.email);
+        const senderName = `${data.first_name} ${data.last_name}`;
+        setSenderName(senderName);
       },
     }
   );
@@ -44,18 +46,33 @@ export const LeftSideChatBox = ({
     setSelectedChat(chat);
     setSelectedChatUser(senderInfo as user);
   }
+
   return (
-    <Box
+    <div
+      className={`cursor-pointer rounded-lg px-3 py-2
+        ${selectedChat?.id !== chat.id ? "hover:bg-gray-200" : ""}
+        ${selectedChat?.id === chat.id ? "text-white" : "text-black"}
+        ${selectedChat?.id === chat.id ? "bg-mintYellow" : "bg-white"}
+      `}
       onClick={handleClick}
-      cursor="pointer"
-      bg={selectedChat?.id === chat.id ? "#e0b936" : "E8E8E8"}
-      color={selectedChat?.id === chat.id ? "white" : "black"}
-      px={3}
-      py={2}
-      borderRadius="lg"
       key={chat.id}
     >
-      <Text>{senderName}</Text>
-    </Box>
+      <div className="flex items-center">
+        <CustomImage
+          src={senderInfo?.image as string}
+          alt="User Avatar"
+          fill
+          priority
+          sizes={"2.5rem"}
+          draggable={false}
+          containerClassName={"relative h-10 w-10 rounded-full"}
+          className={"absolute h-full w-full rounded-full object-cover"}
+          isAvatar={true}
+        />
+        <div className="ml-2 flex flex-col">
+          <Text>{senderName}</Text>
+        </div>
+      </div>
+    </div>
   );
 };

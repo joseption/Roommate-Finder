@@ -21,9 +21,9 @@ export const ScrollableChat = ({
       {messages &&
         messages.map((m, i) => {
           return (
-            <div style={{ display: "flex" }} key={i}>
-              {(isSameSender(messages, m, i, userId) ||
-                isLastMessage(messages, i, userId)) && (
+            <div className="flex items-start" key={i}>
+              {isSameSender(messages, m, i, userId) ||
+              isLastMessage(messages, i, userId) ? (
                 <Tooltip
                   label={selectedChatUser?.email}
                   placement="bottom-start"
@@ -38,19 +38,21 @@ export const ScrollableChat = ({
                     src={selectedChatUser?.image ?? undefined}
                   />
                 </Tooltip>
+              ) : (
+                <div className="w-9" />
               )}
-              <span
+              <div
+                className={`mt-1 rounded-lg px-3 py-2
+                  ${m.userId !== userId ? "bg-white" : "bg-mintYellow"}
+                  ${m.userId !== userId ? "text-black" : "text-white"}
+                  ${m.userId === userId ? "ml-auto" : ""}
+                `}
                 style={{
-                  backgroundColor: `${m.userId != userId ? "gold" : "white"}`,
-                  borderRadius: "20px",
-                  padding: "5px 15px",
                   maxWidth: "75%",
-                  marginLeft: isSameSenderMargin(messages, m, i, userId),
-                  marginTop: isSameUser(messages, m, i) ? 3 : 10,
                 }}
               >
                 {m.content}
-              </span>
+              </div>
             </div>
           );
         })}

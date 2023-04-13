@@ -1,5 +1,6 @@
 import { ArrowBackIcon, NotAllowedIcon } from "@chakra-ui/icons";
 import {
+  Avatar,
   Box,
   FormControl,
   IconButton,
@@ -186,29 +187,41 @@ export const SingleChat = ({
               socket={socket}
             />
           )}
-          <div className="flex">
+          <div className="flex w-full py-2">
             <IconButton
               aria-label="back button"
               display={{ base: "flex", md: "none" }}
+              backgroundColor="transparent"
+              rounded="full"
               icon={<ArrowBackIcon />}
               onClick={() => setSelectedChat?.({} as chat)}
             />
-            <Text
-              fontSize={{ base: "28px", md: "30px" }}
-              pb={3}
-              px={2}
-              w="100%"
-              fontFamily="Work sans"
-              display="flex"
-              justifyContent={{ base: "space-between" }}
-              alignItems="center"
-            >
-              {selectedChatUser?.first_name}
-            </Text>
+            <div className="ml-2 flex w-full items-center">
+              <Avatar
+                name={selectedChatUser?.first_name}
+                src={selectedChatUser?.image as string}
+                size="sm"
+              />
+              <Text
+                fontSize={{ base: "28px", md: "20px" }}
+                fontWeight="semibold"
+                px={2}
+                w="100%"
+                display="flex"
+                justifyContent={{ base: "space-between" }}
+                alignItems="center"
+              >
+                {`${selectedChatUser?.first_name as string} ${
+                  selectedChatUser?.last_name as string
+                }`}
+              </Text>
+            </div>
             <IconButton
               aria-label="block button"
               icon={<NotAllowedIcon />}
+              backgroundColor="transparent"
               onClick={blockChat}
+              rounded="full"
               hidden={
                 selectedChat.blocked !== null &&
                 selectedChat?.blocked !== userId

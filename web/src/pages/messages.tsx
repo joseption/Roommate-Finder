@@ -60,12 +60,7 @@ export default function Messages() {
         as="div"
         className="relative mx-auto h-full min-h-screen max-w-7xl bg-white"
       >
-        <Flex
-          justifyContent="space-between"
-          width="100%"
-          height="91.5vh"
-          padding="10px"
-        >
+        <Flex width="100%" height="91.5vh" padding="10px">
           {chatsLoading ? (
             <Spinner />
           ) : (

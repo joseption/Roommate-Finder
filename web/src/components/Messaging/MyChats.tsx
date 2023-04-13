@@ -37,31 +37,13 @@ function MyChats({
       borderRadius="lg"
       borderWidth="1px"
     >
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        w="100%"
-        pb={3}
-        px={3}
-      >
-        <Text
-          fontSize={{ base: "28px", md: "30px" }}
-          fontFamily="Poppins"
-          color="#e0b936"
-        >
-          My Chats
-        </Text>
-      </Box>
-
       <VStack
-        p={3}
         bg="F8F8F8"
         w="100%"
         h="100%"
         borderRadius="lg"
         overflowY="hidden"
-        spacing={4}
+        spacing={2}
         alignItems="stretch"
       >
         {chats ? (

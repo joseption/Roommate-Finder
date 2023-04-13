@@ -36,7 +36,10 @@ export const LeftSideChatBox = ({
         console.log(err);
       },
       onSuccess: (data) => {
-        const senderName = `${data.first_name} ${data.last_name}`;
+        const senderName =
+          data?.first_name && data?.last_name
+            ? `${data.first_name} ${data.last_name}`
+            : data?.email;
         setSenderName(senderName);
       },
     }
@@ -58,17 +61,19 @@ export const LeftSideChatBox = ({
       key={chat.id}
     >
       <div className="flex items-center">
-        <CustomImage
-          src={senderInfo?.image as string}
-          alt="User Avatar"
-          fill
-          priority
-          sizes={"2.5rem"}
-          draggable={false}
-          containerClassName={"relative h-10 w-10 rounded-full"}
-          className={"absolute h-full w-full rounded-full object-cover"}
-          isAvatar={true}
-        />
+        {senderInfo?.image && (
+          <CustomImage
+            src={senderInfo?.image}
+            alt="User Avatar"
+            fill
+            priority
+            sizes={"2.5rem"}
+            draggable={false}
+            containerClassName={"relative h-10 w-10 rounded-full"}
+            className={"absolute h-full w-full rounded-full object-cover"}
+            isAvatar={true}
+          />
+        )}
         <div className="ml-2 flex flex-col">
           <Text>{senderName}</Text>
         </div>

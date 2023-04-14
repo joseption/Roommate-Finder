@@ -32,7 +32,7 @@ router.post('/create', async (req: Request, res: Response) => {
   try {
     //const { loggedInUserId } = req.body; why????
     const payload: payload = req.body[0];
-    const loggedInUserId = payload.userId;
+    let loggedInUserId = payload.userId;
 
     // Mark the survey as complete
     if (loggedInUserId) {
@@ -74,7 +74,7 @@ router.post('/create', async (req: Request, res: Response) => {
       mySet.add(loggedInResponses[response]['responseId']);
     }
 
-    for (const user in groupedResponses) {
+    for (let user in groupedResponses) {
       if (user !== loggedInUserId) {
         // calculate the percentage of responses that match
         let matchScore = 1.0;
@@ -85,6 +85,11 @@ router.post('/create', async (req: Request, res: Response) => {
           }
         }
         matchScore = (numberInCommon / totalQuestions) * 100;
+        if (loggedInUserId > user) {
+          let temp = loggedInUserId;
+          loggedInUserId = user;
+          user = temp;
+        }
         const upsertMatchScore = await db.matches.upsert({
           where: {
             userOneId_userTwoId: {

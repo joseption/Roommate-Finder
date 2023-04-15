@@ -30,7 +30,7 @@ router.get('/all', async (req: Request, res: Response) => {
 // create all the matches for a user thats completed the quiz
 router.post('/create', async (req: Request, res: Response) => {
   try {
-    //const { loggedInUserId } = req.body; why????
+    console.log("update matches");
     const payload: payload = req.body[0];
     let loggedInUserId = payload.userId;
 
@@ -65,7 +65,7 @@ router.post('/create', async (req: Request, res: Response) => {
       acc[response.userId].push(response);
       return acc;
     }, {});
-
+    console.log(groupedResponses, 'groupedResponses');
     const userIds = Object.keys(groupedResponses);
     const totalQuestions = await db.question.count();
 
@@ -85,32 +85,36 @@ router.post('/create', async (req: Request, res: Response) => {
           }
         }
         matchScore = (numberInCommon / totalQuestions) * 100;
-        if (loggedInUserId > user) {
-          let temp = loggedInUserId;
-          loggedInUserId = user;
-          user = temp;
+    
+        let userOne = loggedInUserId;
+        let userTwo = user;
+        if (userOne > userTwo) {
+          [userOne, userTwo] = [userTwo, userOne];
         }
+    
         const upsertMatchScore = await db.matches.upsert({
           where: {
             userOneId_userTwoId: {
-              userOneId: loggedInUserId,
-              userTwoId: user,
+              userOneId: userOne,
+              userTwoId: userTwo,
             },
           },
           update: {
             matchPercentage: matchScore,
           },
           create: {
-            userOneId: loggedInUserId,
-            userTwoId: user,
+            userOneId: userOne,
+            userTwoId: userTwo,
             matchPercentage: matchScore,
           },
         });
       }
     }
+    
     res.status(200).json({ message: 'Matches created' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
+
 export default router;

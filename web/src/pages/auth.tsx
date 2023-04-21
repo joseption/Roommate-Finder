@@ -17,6 +17,7 @@ export default function Login() {
   const [name, setName] = useState("");
   const [lastName, setLastName] = useState("");
   const [error, setError] = useState("");
+  const [birthdate, setBirthdate] = useState("");
   const isDisabled = false;
 
   const emailInvalid = email.trim() === "" || !email.includes("@");
@@ -51,7 +52,7 @@ export default function Login() {
   });
 
   const { mutate: mutateRegister, isLoading: isRegistering } = useMutation({
-    mutationFn: () => register(email, password, name, lastName),
+    mutationFn: () => register(email, password, name, lastName, birthdate),
     onSuccess: (data) => {
       storeAuthSession(data);
       void router.push({
@@ -86,7 +87,29 @@ export default function Login() {
       }
     }
     if (action === "register") {
-      if (!emailInvalid && !passwordInvalid && !confirmPasswordInvalid) {
+      let birthdayInvalid = false;
+      if (!birthdate) {
+        toast.error("Please enter your birthdate");
+        birthdayInvalid = true;
+      } else {
+        const date = new Date(birthdate);
+        const today = new Date();
+        let age = today.getFullYear() - date.getFullYear();
+        const m = today.getMonth() - date.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
+          age--;
+        }
+        if (age < 18) {
+          toast.error("You must be 18 years or older");
+          birthdayInvalid = true;
+        }
+      }
+      if (
+        !emailInvalid &&
+        !passwordInvalid &&
+        !confirmPasswordInvalid &&
+        !birthdayInvalid
+      ) {
         mutateRegister();
       }
       if (confirmPasswordInvalid) {
@@ -96,6 +119,7 @@ export default function Login() {
         toast.error(emailHelperText);
       }
       if (passwordInvalid) toast.error(passwordHelperText);
+      //check if birthdate is valid and greater than 18
     }
     if (action === "reset") {
       if (!emailInvalid) {
@@ -282,6 +306,28 @@ export default function Login() {
                             className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 sm:text-sm"
                             onChange={(e) =>
                               setConfirmPassword(e.target.value.trim())
+                            }
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {action === "register" && (
+                      <div className="space-y-1">
+                        <label
+                          htmlFor="confirm-password"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Birthday
+                        </label>
+                        <div className="mt-1">
+                          <input
+                            id="birthdate"
+                            name="birthdate"
+                            type="date"
+                            required
+                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm placeholder:text-gray-400 focus:border-yellow-500 focus:outline-none focus:ring-yellow-500 sm:text-sm"
+                            onChange={(e) =>
+                              setBirthdate(e.target.value.trim())
                             }
                           />
                         </div>

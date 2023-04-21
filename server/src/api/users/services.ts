@@ -14,7 +14,7 @@ export function findUserByEmail(email: any) {
   });
 }
 
-export function createUserByEmailAndPassword(email:string, password:string, first_name: string, last_name: string) {
+export function createUserByEmailAndPassword(email: string, password: string, first_name: string, last_name: string, birthday: string) {
   const hashed = bcrypt.hashSync(password, 12);
   return db.user.create({
     data: {
@@ -22,11 +22,12 @@ export function createUserByEmailAndPassword(email:string, password:string, firs
       password: hashed,
       first_name,
       last_name,
+      birthday,
     },
   });
 }
 
-export function createUserByEmail(email:string) {
+export function createUserByEmail(email: string) {
   // Generate some random password for now, they will change it later when they activate their account.
   var password = new Date().getTime() + uuid();
   const hashed = bcrypt.hashSync(password, 12);
@@ -38,7 +39,7 @@ export function createUserByEmail(email:string) {
   });
 }
 
-export function UpdatePassword(password:string, id:string) {
+export function UpdatePassword(password: string, id: string) {
   const hashed = bcrypt.hashSync(password, 12);
   return db.user.update({
     where: {
@@ -79,7 +80,7 @@ export function findUserById(id: any) {
   });
 }
 
-export function updateFirstName(id:string, first_name: string) {
+export function updateFirstName(id: string, first_name: string) {
   return db.user.update({
     where: {
       id,
@@ -90,7 +91,7 @@ export function updateFirstName(id:string, first_name: string) {
   });
 }
 
-export function updateLastName(id:string, last_name: string) {
+export function updateLastName(id: string, last_name: string) {
   return db.user.update({
     where: {
       id,
@@ -103,7 +104,7 @@ export function updateLastName(id:string, last_name: string) {
 
 //update phone number
 
-export function updatePhoneNumber(id:string, phone_number: string) {
+export function updatePhoneNumber(id: string, phone_number: string) {
   return db.user.update({
     where: {
       id,
@@ -116,7 +117,7 @@ export function updatePhoneNumber(id:string, phone_number: string) {
 
 //update gender
 
-export function updateGender(id:string, gender:string){
+export function updateGender(id: string, gender: string) {
   return db.user.update({
     where: {
       id,
@@ -127,7 +128,7 @@ export function updateGender(id:string, gender:string){
   });
 }
 
-export function updateZip(id:string, zip_code:string){
+export function updateZip(id: string, zip_code: string) {
   return db.user.update({
     where: {
       id,
@@ -138,7 +139,7 @@ export function updateZip(id:string, zip_code:string){
   });
 }
 
-export function updateCity(id:string, city:string){
+export function updateCity(id: string, city: string) {
   return db.user.update({
     where: {
       id,
@@ -149,7 +150,7 @@ export function updateCity(id:string, city:string){
   });
 }
 
-export function updateImage(id:string, image:string){
+export function updateImage(id: string, image: string) {
   return db.user.update({
     where: {
       id,
@@ -160,7 +161,7 @@ export function updateImage(id:string, image:string){
   });
 }
 
-export function updateState(id:string, state:string){
+export function updateState(id: string, state: string) {
   return db.user.update({
     where: {
       id,
@@ -171,7 +172,7 @@ export function updateState(id:string, state:string){
   });
 }
 
-export function updateProfilePicture(id:string, image:string){
+export function updateProfilePicture(id: string, image: string) {
   return db.user.update({
     where: {
       id,
@@ -196,7 +197,7 @@ export function updateProfilePicture(id:string, image:string){
 
 //actually easier way just delete all tags 
 // and add new tags... 
-export async function UpdateTagsandBio(tags:string[], user_id:string, bio:string){
+export async function UpdateTagsandBio(tags: string[], user_id: string, bio: string) {
   // delete all tags of user 
   try {
     tags = tags.filter(tag => tagsStyles.includes(tag));
@@ -232,7 +233,7 @@ export async function UpdateTagsandBio(tags:string[], user_id:string, bio:string
 
 //get tags and bio of user!! 
 
-export function GetTagsandBio(id:string){
+export function GetTagsandBio(id: string) {
   return db.user.findMany({
     where: {
       id,
@@ -322,7 +323,7 @@ export async function GetUsersBySharingPref(sharingPref: string) {
   if (sharingPref == 'undefined' || sharingPref == '') {
     return [];
   }
-  
+
   const userIdObjList = await db.responsesOnUsers.findMany({
     where: {
       response: {
@@ -357,18 +358,18 @@ export async function GetMatches(mainUserId: string, userIds: string[]) {
   });
 }
 
-export function updateBday(id:string, birthday:string){
-    return db.user.update({
-      where: {
-        id,
-      },
-      data: {
-        birthday,
-      },
-    });
+export function updateBday(id: string, birthday: string) {
+  return db.user.update({
+    where: {
+      id,
+    },
+    data: {
+      birthday,
+    },
+  });
 }
 
-export function updateSetupStep(id:string, setup_step:string){
+export function updateSetupStep(id: string, setup_step: string) {
   return db.user.update({
     where: {
       id,
@@ -379,7 +380,7 @@ export function updateSetupStep(id:string, setup_step:string){
   });
 }
 
-export function completeSetupAndSetStep(id:string, setup_step:string){
+export function completeSetupAndSetStep(id: string, setup_step: string) {
   return db.user.update({
     where: {
       id,
@@ -391,7 +392,7 @@ export function completeSetupAndSetStep(id:string, setup_step:string){
   });
 }
 
-export async function updatePushToken(id:string, push_token: string) {
+export async function updatePushToken(id: string, push_token: string) {
   // Clear any account with the current device token, they aren't logged in anymore
   await db.user.updateMany({
     where: {

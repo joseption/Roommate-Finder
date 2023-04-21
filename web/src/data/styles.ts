@@ -18,5 +18,5 @@ export const imageStyles = [
   "🏛 History",
   "🌸 Anime",
   "🛍 Shopping",
-  "🍻 Alcohol",
+  // "🍻 Alcohol",
 ];

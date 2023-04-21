@@ -93,7 +93,7 @@ export default function CustomExploreFilterPopover({
                 <option value="">All</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
-                <option value="Others">Others</option>
+                <option value="Non-Binary">Non-Binary</option>
               </select>
             </div>
             <div>

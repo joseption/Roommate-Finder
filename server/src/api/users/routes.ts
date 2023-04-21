@@ -638,9 +638,9 @@ router.post('/updateGender', async (req: Request, res: Response, next: NextFunct
     const payload: payload = req.body[0];
     const userId = payload.userId;
     //check for valid
-    if (gender != 'Male' && gender != 'Female' && gender != 'Other') {
+    if (gender != 'Male' && gender != 'Female' && gender != 'Non-Binary') {
       return res.status(400).json({
-        Error: 'Gender should be Male, Female, or Other',
+        Error: 'Gender should be Male, Female, or Non-Binary',
       });
     }
     const user = await findUserById(userId);

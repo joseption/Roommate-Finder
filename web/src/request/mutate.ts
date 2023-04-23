@@ -27,7 +27,8 @@ export async function register(
   email: string,
   password: string,
   name: string,
-  LastName: string
+  LastName: string,
+  birthday: string
 ) {
   return await doRequest<AuthSession>(
     `${backend_api}/auth/register`,
@@ -36,6 +37,7 @@ export async function register(
       LastName,
       email,
       password,
+      birthday,
     },
     "POST",
     false

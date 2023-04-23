@@ -1,15 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 
 import LandingNav from "../components/landingNav";
 import { SendSMSLink } from "../request/mutate";
 const stats = [
-  { label: "Founded", value: "2023" },
-  { label: "Team size", value: "6" },
-  { label: "Beta Users", value: "25" },
-  { label: "Raised", value: "$0" },
+  { label: "% of UCF Students that are not in-state", value: "7%" },
+  { label: "Last Freshman class size", value: "7000+" },
+  // { label: "Beta Users", value: "25" },
+  // { label: "Raised", value: "$0" },
 ];
 const footerNavigation = {
   main: [
@@ -86,10 +87,9 @@ const footerNavigation = {
 };
 
 const images = ["/splash1.png", "/splash3.png", "/splash4.png", "/splash6.png"];
-
 export default function Example() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  const router = useRouter();
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
@@ -167,36 +167,22 @@ export default function Example() {
                     <p className="mt-6 text-xl text-gray-500">
                       Do everything you need to find your next roommate in one
                       place. Have us match you with the perfect roommate, or
-                      search for your own. Enter your number below to get sent a
-                      link to download the app.
+                      search for your own.
                     </p>
                   </div>
-                  <form
-                    action="#"
-                    className="mt-12 sm:flex sm:w-full sm:max-w-lg"
-                    onSubmit={(e) => handleFormsubmit(e)}
-                  >
-                    <div className="min-w-0 flex-1">
-                      <label htmlFor="hero-email" className="sr-only">
-                        phone number
-                      </label>
-                      <input
-                        id="hero-number"
-                        type="number"
-                        className="block w-full rounded-md border border-gray-300 px-5 py-3 text-base text-gray-900 shadow-sm placeholder:text-gray-500 focus:border-yellow-500 focus:ring-yellow-500"
-                        placeholder="Enter your number"
-                        onChange={(e) => handlePhoneChange(e)}
-                      />
-                    </div>
-                    <div className="mt-4 sm:mt-0 sm:ml-3">
-                      <button
-                        type="submit"
-                        className="block w-full rounded-md border border-transparent bg-yellow-500 px-5 py-3 text-base font-medium text-white shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:px-10"
-                      >
-                        Go
-                      </button>
-                    </div>
-                  </form>
+
+                  <div className="mt-4 sm:mt-0 sm:ml-3">
+                    <button
+                      className="mt-8 block w-full rounded-md border border-transparent bg-yellow-500 px-5 py-3 text-base font-medium text-white shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:px-10"
+                      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                      onClick={async (event) => {
+                        event.preventDefault();
+                        await router.push("/auth");
+                      }}
+                    >
+                      Sign up
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -320,6 +306,20 @@ export default function Example() {
                       through our service without having to reveal your personal
                       phone or email. Then proceed to check out listings with
                       your new potential roommate.
+                    </p>
+                  </div>
+                  <h2 className="mt-6 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Why it matters
+                  </h2>
+                  <div className="mt-6 space-y-6 text-gray-500">
+                    <p className="text-base leading-7">
+                      UCF is one of the largest universities in the country,
+                      with a student population of over 60,000. Finding a good
+                      roommate can be difficult, especially if you&apos;re not
+                      familiar with the area. Our service aims to make the
+                      process of finding a roommate easier and more efficient,
+                      especiallly for antisocial people / people who are new to
+                      the area.
                     </p>
                   </div>
                 </div>

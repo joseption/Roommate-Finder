@@ -118,11 +118,11 @@ function Privacy() {
           <p className="mb-4">
             <strong>Website</strong> refers to Roomfin, accessible from{" "}
             <a
-              href="https://www.roomfin.xyz"
+              href="https://www.roomfin.com"
               rel="external nofollow noopener noreferrer"
               target="_blank"
             >
-              https://www.roomfin.xyz
+              https://www.roomfin.com
             </a>
           </p>
         </li>

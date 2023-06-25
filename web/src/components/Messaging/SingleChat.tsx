@@ -31,7 +31,7 @@ interface Props {
   setFetchAgain: Dispatch<SetStateAction<boolean>>;
 }
 
-const ENDPOINT = "https://api.roomfin.xyz";
+const ENDPOINT = "https://api.roomfin.com";
 // const ENDPOINT = "http://localhost:8080";
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>,
   selectedChatCompare: chat;

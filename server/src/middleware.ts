@@ -2,8 +2,8 @@ import jwt from 'jsonwebtoken';
 import{ Request, Response, NextFunction } from 'express';
 
 const prod = {
-  URL: "https://www.roomfin.xyz",
-  clientURL: "https://www.roomfin.xyz",
+  URL: "https://www.roomfin.com",
+  clientURL: "https://www.roomfin.com",
 };
 
 const dev = {

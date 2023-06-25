@@ -49,7 +49,7 @@ export function sendVerifyEmail(to: string, token: string) {
     const email = getConfirmEmailTemplate(to, `${env.clientURL}/auth/confirmEmail?token=${token}&email=${to}`);
     const msg = {
         to,
-        from: 'support@roomfin.xyz', 
+        from: 'support@roomfin.com', 
         subject: email.subject,
         text: email.text,
         html: email.html,      
@@ -65,7 +65,7 @@ export function sendResetPasswordEmail(to: string, token: string) {
     const email = getPasswordResetEmailTemplate(to, `${env.clientURL}/auth/reset?token=${token}`);
     const msg = {
       to,
-      from: 'support@roomfin.xyz', 
+      from: 'support@roomfin.com', 
       subject: email.subject,
       text: email.text,
       html: email.html,
@@ -81,7 +81,7 @@ export function sendUpdatePasswordEmail(to: string, token: string) {
   const email = getPasswordUpdateEmailTemplate(to, `${env.clientURL}/auth/update?token=${token}`);
   const msg = {
       to,
-      from: 'support@roomfin.xyz', 
+      from: 'support@roomfin.com', 
       subject: email.subject,
       text: email.text,
       html: email.html,

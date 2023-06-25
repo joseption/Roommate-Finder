@@ -583,7 +583,7 @@ function Privacy() {
         If you have any questions about this Privacy Policy, You can contact us:
       </p>
       <ul>
-        <li>By email: aaronelharo@gmail.com</li>
+        <li>By email: support@roomfin.com</li>
       </ul>
     </div>
   );

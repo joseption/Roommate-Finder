@@ -355,11 +355,11 @@ router.get('/profileSearchV2', async (req, res) => {
         // THERES AN ISSUE WITH THE MATCHES QUERY WHERE IT RETURNS DUPLICATES
         // SO WE HAVE TO DO THIS TO REMOVE THEM
         // BUT THIS KILLS PAGINATION
-        .then((matches) => {
+        .then((matches: any) => {
           // console.log(matches, 'matches')
           const usersSet = new Set();
           const users: UserType[] = [];
-          matches.forEach((match) => {
+          matches.forEach((match: any) => {
             const currentUser = match.User.id === userId ? match.User2 : match.User;
             if (!usersSet.has(currentUser.id)) {
               usersSet.add(currentUser.id);
@@ -388,7 +388,7 @@ router.get('/profileSearchV2', async (req, res) => {
         select: userSelect,
       });
     //remove the user from the search results
-    const filteredMatches = matches.filter((match) => match.id !== userId);
+    const filteredMatches = matches.filter((match: any) => match.id !== userId);
     res.status(200).json({
       users: filteredMatches,
       nextCursorId: filteredMatches.length > 0 ? filteredMatches[filteredMatches.length - 1].id : null,
@@ -527,15 +527,15 @@ router.post('/profilesByTags', async (req: Request, res: Response) => {
       });
     }
 
-    const userIds = users.map((x) => x.id);
+    const userIds = users.map((x: any) => x.id);
     const matches = await GetMatches(mainUserId as string, userIds);
 
     const userMap: { [id: string]: any } = {};
-    users.forEach((user) => {
+    users.forEach((user: any) => {
       userMap[user.id] = user;
     });
 
-    matches.forEach((match) => {
+    matches.forEach((match: any) => {
       const user = userMap[match.userTwoId];
       if (user) {
         user.matchPercentage = match.matchPercentage;

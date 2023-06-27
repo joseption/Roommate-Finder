@@ -258,7 +258,7 @@ export async function GetUsersByTags(filters: string[]) {
     }
   });
 
-  const userTags: { [key: string]: string[] } = allTags.reduce((acc, current) => {
+  const userTags: { [key: string]: string[] } = allTags.reduce((acc: any, current: any) => {
     acc[current.user_id] = acc[current.user_id] || [];
     acc[current.user_id].push(current.tag);
     return acc;
@@ -289,7 +289,7 @@ export async function GetUsersByGender(gender: string) {
     }
   });
 
-  const userIds = userIdObjList.map(x => x.userId);
+  const userIds = userIdObjList.map((x: any) => x.userId);
   return userIds;
 }
 
@@ -310,7 +310,7 @@ export async function GetUsersByLocation(location: string) {
     }
   });
 
-  const userIds = userIdObjList.map(x => x.userId);
+  const userIds = userIdObjList.map((x: any) => x.userId);
   return userIds;
 }
 
@@ -342,7 +342,7 @@ export async function GetUsersBySharingPref(sharingPref: string) {
     }
   });
 
-  const userIds = userIdObjList.map(x => x.userId);
+  const userIds = userIdObjList.map((x: any) => x.userId);
   return userIds;
 }
 

@@ -58,7 +58,7 @@ router.post('/create', async (req: Request, res: Response) => {
         },
       },
     });
-    const groupedResponses = everyoneElseResponses.reduce((acc: any, response) => {
+    const groupedResponses = everyoneElseResponses.reduce((acc: any, response: any) => {
       if (!acc[response.userId]) {
         acc[response.userId] = [];
       }

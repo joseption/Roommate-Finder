@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 
 app.get('/', (req: Request, res: Response) => {
   // res.set("Access-Control-Allow-Origin", "*");
-  res.json({ BRUH: 'IP ADDRESS LOGGED AND REPORTED TO ADMIN' });
+  res.json({ Get: 'Success!' });
 });
 
 // middleware

@@ -248,7 +248,7 @@ router.put('/removeFromGroup', async (req: Request, res: Response) => {
     });
 
     const { users } = getUsers;
-    const newUsers = users.filter((user) => {
+    const newUsers = users.filter((user: any) => {
       if (!usersToRemove.includes(user)) {
         return true;
       }
@@ -420,7 +420,7 @@ router.put('/unmute', async (req: Request, res: Response) => {
       }
     });
     if (chat.muted.length > 0) {
-      chat.muted = chat.muted.filter((user) => user !== userId);
+      chat.muted = chat.muted.filter((user: any) => user !== userId);
       chat = await db.chat.update({
         data: {
           muted: chat.muted,

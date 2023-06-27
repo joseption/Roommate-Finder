@@ -1,15 +1,15 @@
 //This uses the sendgrid api to send emails. 
-
-import sgMail from '@sendgrid/mail';
+var postmark = require("postmark");
+//import sgMail from '@sendgrid/mail';
 import { env } from 'middleware';
 import {
   registerEmail,
   resetEmail, updateEmail
 } from '../email/email'
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-const logoURL = 'https://sbleaping.s3.us-east-1.amazonaws.com/logo.png';
+//sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const client = new postmark.ServerClient(process.env.SENDGRID_API_KEY);
+const logoURL = 'http://res.cloudinary.com/dwzvl5unp/image/upload/v1687904976/gnnlsztjyvrsj9z75ora.png';
 
 export function getConfirmEmailTemplate(userName: string, confirmUrl: string) {
   let confirmUrlTrim = confirmUrl.substring(0,50);
@@ -48,47 +48,50 @@ export function sendVerifyEmail(to: string, token: string) {
     //not sure what the front end link is going to be.
     const email = getConfirmEmailTemplate(to, `${env.clientURL}/auth/confirmEmail?token=${token}&email=${to}`);
     const msg = {
-        to,
-        from: 'support@roomfin.com', 
-        subject: email.subject,
-        text: email.text,
-        html: email.html,      
+        To: to,
+        From: 'support@roomfin.com', 
+        Subject: email.subject,
+        TextBody: email.text,
+        HtmlBody: email.html,      
       }
-      sgMail.send(msg).then((res) => {
-        console.log(res[0].statusCode)
-        console.log(res[0].headers)
-        }).catch((err) => {
-        console.log(err)});
+      client.sendEmail(msg);
+      // sgMail.send(msg).then((res) => {
+      //   console.log(res[0].statusCode)
+      //   console.log(res[0].headers)
+      //   }).catch((err) => {
+      //   console.log(err)});
 }
 
 export function sendResetPasswordEmail(to: string, token: string) {
     const email = getPasswordResetEmailTemplate(to, `${env.clientURL}/auth/reset?token=${token}`);
     const msg = {
-      to,
-      from: 'support@roomfin.com', 
-      subject: email.subject,
-      text: email.text,
-      html: email.html,
-    }      
-    sgMail.send(msg).then((res) => {
-        console.log(res[0].statusCode)
-        console.log(res[0].headers)
-        }).catch((err) => {
-        console.log(err)});
+      To: to,
+      From: 'support@roomfin.com', 
+      Subject: email.subject,
+      TextBody: email.text,
+      HtmlBody: email.html, 
+    } 
+    client.sendEmail(msg);     
+    // sgMail.send(msg).then((res) => {
+    //     console.log(res[0].statusCode)
+    //     console.log(res[0].headers)
+    //     }).catch((err) => {
+    //     console.log(err)});
 }
 
 export function sendUpdatePasswordEmail(to: string, token: string) {
   const email = getPasswordUpdateEmailTemplate(to, `${env.clientURL}/auth/update?token=${token}`);
   const msg = {
-      to,
-      from: 'support@roomfin.com', 
-      subject: email.subject,
-      text: email.text,
-      html: email.html,
+      To: to,
+      From: 'support@roomfin.com', 
+      Subject: email.subject,
+      TextBody: email.text,
+      HtmlBody: email.html, 
     }
-    sgMail.send(msg).then((res) => {
-      console.log(res[0].statusCode)
-      console.log(res[0].headers)
-      }).catch((err) => {
-      console.log(err)});
+    client.sendEmail(msg); 
+    // sgMail.send(msg).then((res) => {
+    //   console.log(res[0].statusCode)
+    //   console.log(res[0].headers)
+    //   }).catch((err) => {
+    //   console.log(err)});
 }
